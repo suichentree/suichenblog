@@ -1,0 +1,8 @@
+# 忽略node_modules 依赖包
+node_modules/
+# 忽略依赖包管理文件
+package-lock.json
+# 忽略打包后的文件-根目录下的public目录
+/public/
+# 不忽略.vuepress目录中的文件
+!/.vuepress/
