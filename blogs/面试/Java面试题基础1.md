@@ -40,7 +40,7 @@ tags:
 Java8中基本数据类型
 > char short int long double float boolean byte
 
-字节是存储容量的基本单位。字符是数字，字母，汉子以及其他语言的各种符号。
+字节是存储容量的基本单位。字符是数字，字母，汉字以及其他语言的各种符号。
 <font color="red">1字节=8个二进制单位</font>
 
 一个二进制单位可以表现0,1两种状态。
