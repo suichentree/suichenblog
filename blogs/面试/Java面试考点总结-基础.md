@@ -242,11 +242,11 @@ static变量也称作静态变量，静态变量和非静态变量的区别是�
 
 匿名内部类就是没有名字的内部类，日常开发中使用的比较多。
 
-# 异常类
+# 异常
 
 ![20221102172655.png](../blog_img/20221102172655.png)
 
-Throwable 是 Java 语言中所有错误与异常的超类。其有两个重要的子类。Exception（异常） 和 Error（错误）
+Throwable 是 Java 语言中所有错误与异常的父类。其有两个重要的子类。Exception（异常） 和 Error（错误）
 
 Error（错误）:是程序无法处理的错误，表示运行应用程序中较严重问题。大多数错误与代码编写者执行的操作无关，而表示代码运行时 JVM（Java 虚拟机）出现的问题。
 
@@ -417,7 +417,7 @@ StringBuffer对方法加了同步锁或者对调用的方法加了同步锁，�
 
 > 性能
 
-StirngBuilder > StirngBuilder > String
+StirngBuilder > StringBuffer > String
 
 ## 包装类相关
 
@@ -451,13 +451,15 @@ Map接口和Collection接口是所有集合框架的父接口：
 ![20221102145854.png](../blog_img/20221102145854.png)
 ![20221102145918.png](../blog_img/20221102145918.png)
 
-Java 容器分为 Collection 和 Map 两大类，Collection集合的子接口有Set、 List、Queue三种子接口。比较常用的是Set、List，Map接口不是 collection的子接口。
+Java 容器分为 Collection 和 Map 两大类，Collection集合的子接口有Set、 List、Queue三种子接口。比较常用的是Set、List。Map接口不是 collection的子接口。
 
 Collection集合主要有List和Set两大接口
 * List：一个有序（元素存入集合的顺序和取出的顺序一致）容器，元素可以重复，可以插入多个null元素，元素都有索引。常用的实现类有 ArrayList、LinkedList 和 Vector。
 * Set：一个无序（存入和取出顺序有可能不一致）容器，不可以存储重复元素， 只允许存入一个null元素，必须保证元素唯一性。Set 接口常用实现类是 HashSet、 LinkedHashSet 以及TreeSet。
 
-Map是一个键值对集合，存储键、值和之间的映射。 Key无序，唯一；value 不要求有序，允许重复。Map没有继承于Collection接口，从Map集合中检索元素时，只要给出键对象，就会返回对应的值对象。Map 的常用实现类：HashMap、TreeMap、HashTable、LinkedHashMap、 ConcurrentHashMap。
+Map是一个键值对集合，存储键、值和之间的映射。 Key无序，唯一；value 不要求有序，允许重复。
+
+Map没有继承于Collection接口，从Map集合中检索元素时，只要给出键对象，就会返回对应的值对象。Map 的常用实现类：HashMap、TreeMap、HashTable、LinkedHashMap、 ConcurrentHashMap。
 
 ## 各个集合容器的底层数据结构
 
@@ -601,6 +603,10 @@ HashMap的初始容量为16
 
 1. ConcurrentHashMap对整个桶数组进行了分割分段(Segment)，然后在每一个分段上都用lock锁进行保护，而HashMap没有锁机制，不是线程安全的。（JDK1.8之后ConcurrentHashMap启了一种全新的方式实现,利用CAS算法。）
 2. HashMap的键值对允许有null，但是ConCurrentHashMap都不允许。
+
+
+
+
 
 
 
