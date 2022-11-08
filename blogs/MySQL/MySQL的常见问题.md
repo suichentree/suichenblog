@@ -8,6 +8,7 @@ tags:
  - MySql
 ---
 
+[toc]
 
 ## MySQL的常见问题
 
