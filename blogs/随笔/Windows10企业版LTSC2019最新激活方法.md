@@ -1,6 +1,6 @@
 ---
 title: Windows10企业版LTSC2019最新激活方法
-date: 2020.12.24
+date: 2020-12-24
 sidebar: 'auto'
 categories: 
  - 系统
