@@ -69,12 +69,12 @@ module.exports = {
         "items": [
           {
             "text": "GitHub",
-            "link": "https://github.com/SuichenTree",
+            "link": "https://github.com/suichentree",
             "icon": "reco-github"
           },
           {
             "text": "码云",
-            "link": "https://gitee.com/suichenTree",
+            "link": "https://gitee.com/suichentree",
             "icon": "reco-mayun"
           },
           {
