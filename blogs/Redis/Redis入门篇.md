@@ -164,7 +164,8 @@ vi /etc/systemd/system/redis.service
 ```
 
 redis.service内容如下：
-```conf
+
+```
 [Unit]
 Description=redis-server
 After=network.target
