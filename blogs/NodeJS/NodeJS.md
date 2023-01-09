@@ -12,22 +12,41 @@ tags:
 
 # NodeJs基础
 
-Node.js 是一个JavaScript运行环境，基于Google的V8引擎，V8引擎执行Javascript的速度非常快，性能非常好。
+## 前言
 
-类似与java语言的运行环境jvm。
+> 为什么JavaScript可以在浏览器上运行？
+
+因为浏览器中包含JavaScript引擎，JavaScript引擎专门用于解析JavaScript代码并执行。
+
+不同的浏览器使用的JavaScript引擎不同。例如Chrome浏览器使用的JavaScript引擎是V8引擎。V8引擎在众多JavaScript引擎中性能非常好。
+
+> 为什么JavaScript能操作浏览器中的DOM,BOM?
+ 
+因为每个浏览器都内置了操作DOM,BOM的api函数。js代码通过调用这些api函数来操作浏览器中的DOM,BOM。
+
+> 什么是Node.js?
+
+Node.js是一个JavaScript运行环境，其内置了V8引擎。因此Node.js可以解析JavaScript代码并执行。
+
+![20230104115819.png](../blog_img/20230104115819.png)
+
+node.js中没有内置DOM,BOM的api函数。因此node.js无法操作DOM,BOM。
+
 
 ## 1.安装Node.js
 
-1. 下载Node.js:
+1. 下载Node.js安装包:
 [Node.js中文网](http://nodejs.cn/)
+下载node.js安装包，一路默认即可
 
 2. 安装node.js：
-<font color="red">在Windows上安装时务必选择全部组件，包括勾选Add to Path</font>
+在Windows上安装时务必选择全部组件，包括勾选Add to Path
 
 3. 执行语句：
-在Windows环境下，打开命令提示符，然后输入node -v，出现版本号，表示安装正常。
+Windows环境下，在cmd中输入node -v，出现版本号，表示安装正常。
+
 ```
-C:\Users\IEUser>node -v
+>node -v
 v8.11.1
 ```
 
@@ -59,7 +78,7 @@ C:\Users\Administrator\AppData\Roaming\npm-cache
 
 ### 1.认识NPM：
 
-Node.js内置了npm包管理工具
+Node.js内置了npm包管理工具。安装了node.js就安装了npm
 
 ```
 npm其实是Node.js的包管理工具（node.js package manager）。
@@ -89,11 +108,19 @@ C:\>npm -v
 ```js
 //通过npm下载包
 npm install 包名
+
+
+
+
 ```
 
 <font color="red">
 下载的第三方包就放在了工程目录下的node_modules目录中，之后在代码中只需要通过`require('包名')`的方式就可以引用，无需指定三方包路径。
 </font>
+
+
+
+
 
 
 ## 3.命令行运行node程序：
@@ -216,7 +243,7 @@ module.exports = function () {    //模块默认导出对象被替换为一个�
 通过命令行参数传递给NodeJS以启动程序的模块被称为主模块。主模块负责调度组成整个程序的其它模块完成工作。
 ```
 
-## 7.包：
+## 7.包
 
 模块的基本单位是单个JS文件，但复杂些的模块往往由多个子模块组成。为了便于管理和使用，可以把由多个子模块组成的大模块称做包，并把所有子模块放在同一个目录里。
 
@@ -266,9 +293,10 @@ require('/home/user/lib/cat/main')
     README.md                       # 说明文件
 ```
 
-## 9. global全局对象，process进程对象：
+## 9. global全局对象，全局变量，process进程对象：
 
-①：global全局对象:
+### global全局对象
+
 在Node.js环境中，也有唯一的全局对象，叫global，这个对象的属性和方法和浏览器环境的window不同。进入Node.js交互环境，可以直接输入：
 
 ```
@@ -287,7 +315,79 @@ Console {
 
 ```
 
-②：process进程对象:
+### 全局变量
+
+Node.js 中的全局对象是global，global对象的属性就是全局变量。
+
+在 Node.js可以直接访问到global全局对象的属性，因此无需直接引入全局对象global。 
+
+1. 全局变量 __filename，__dirname
+
+```js
+// __filename 表示当前正在执行的脚本的文件绝对路径。
+console.log( __filename );
+// __dirname 表示当前执行脚本所在的目录。
+console.log( __dirname );
+```
+
+2. 全局函数setTimeout(cb, ms); 只执行一次的定时器。作用是在指定的毫秒(ms)数后执行指定函数(cb)。
+
+```js
+function printHello(){
+   console.log( "Hello, World!");
+}
+// 两秒后执行以上函数
+var t = setTimeout(printHello, 2000);  //t代表该定时器本身
+
+// 运行结果：
+// `Hello, World!`
+```
+
+
+3. 全局函数：clearTimeout(t);
+
+用于停止setTimeout()函数创建的定时器。 参数 t 是通过 setTimeout() 函数创建的定时器的返回值，代表该定时器本身。
+
+```JS
+function printHello(){
+   console.log( "Hello, World!");
+}
+// 两秒后执行以上函数
+var t = setTimeout(printHello, 2000);
+// 通过定时器的返回值t，来清除定时器t
+clearTimeout(t);   
+```
+
+4. 全局函数：setInterval(cb, ms); 执行多次的定时器
+
+作用是在指定的毫秒(ms)数后执行指定函数(cb)。返回一个代表定时器的句柄值。
+etInterval() 方法会不停地调用函数，直到使用clearInterval()函数来清除或窗口被关闭。
+
+```js
+function printHello(){
+   console.log( "Hello, World!");
+}
+// 每隔两秒执行以上函数,会永久执行下去，直到你按下 ctrl + c 按钮。
+setInterval(printHello, 2000);
+```
+
+
+6. 全局函数 console  用于提供控制台标准输出.
+
+```js
+console.log("xxxxxxx")
+console.info("xxxxxxx")
+console.error("xxxxxxx")
+console.warn("xxxxxxx")
+```
+![13-png](../blog_img/Node_js_img_13.png)
+![14-png](../blog_img/Node_js_img_14.png)
+
+
+
+
+### process进程对象
+
 process也是Node.js提供的一个对象，它代表当前Node.js进程。通过process对象可以拿到许多有用信息：
 
 ```
@@ -308,7 +408,6 @@ undefined
 ```
 
 ## 10. Node.js提供的官方模块
-
 
 ### fs模块---文件系统模块
 
@@ -640,77 +739,3 @@ function execute(someFunction, value) {
 execute(function(word){ console.log(word) }, "Hello");
 ```
 
-## 12.全局变量
-
-Node.js 中的全局对象是 global，全局变量是 global 对象的属性。
-
-在 Node.js可以直接访问到 global的属性，而不需要引入它。 
-
-### 1. 全局变量 __filename，__dirname
-
-```js
-// __filename 表示当前正在执行的脚本的文件绝对路径。
-console.log( __filename );
-// __dirname 表示当前执行脚本所在的目录。
-console.log( __dirname );
-```
-
-### 2. 全局函数setTimeout(cb, ms); 只执行一次的定时器
-
-作用是在指定的毫秒(ms)数后执行指定函数(cb)。
-
-```js
-function printHello(){
-   console.log( "Hello, World!");
-}
-// 两秒后执行以上函数
-var t = setTimeout(printHello, 2000);  //t代表该定时器本身
-```
-
-运行结果：
-`Hello, World!`
-
-### 3. 全局函数：clearTimeout(t);
-
-用于停止setTimeout()函数创建的定时器。 参数 t 是通过 setTimeout() 函数创建的定时器的返回值，代表该定时器本身。
-
-```JS
-function printHello(){
-   console.log( "Hello, World!");
-}
-// 两秒后执行以上函数
-var t = setTimeout(printHello, 2000);
-// 通过定时器的返回值t，来清除定时器t
-clearTimeout(t);   
-```
-
-### 5.全局函数：setInterval(cb, ms); 执行多次的定时器
-
-作用是在指定的毫秒(ms)数后执行指定函数(cb)。返回一个代表定时器的句柄值。
-etInterval() 方法会不停地调用函数，直到使用clearInterval()函数来清除或窗口被关闭。
-
-```js
-function printHello(){
-   console.log( "Hello, World!");
-}
-// 每隔两秒执行以上函数,
-setInterval(printHello, 2000);
-```
-
-<font color="red">
-以上程序每隔两秒就会输出一次"Hello, World!"，且会永久执行下去，直到你按下 ctrl + c 按钮。
-</font>
-
-### 6. 全局函数 console 控制台输出
-
-console 用于提供控制台标准输出.
-
-```js
-console.log("xxxxxxx")
-console.info("xxxxxxx")
-console.error("xxxxxxx")
-console.warn("xxxxxxx")
-```
-
-![13-png](../blog_img/Node_js_img_13.png)
-![14-png](../blog_img/Node_js_img_14.png)
