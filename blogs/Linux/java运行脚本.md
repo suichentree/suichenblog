@@ -12,7 +12,9 @@ tags:
 
 # java运行shell脚本
 
-使用场景：用shell脚本，快速运行，停止，重启jar包。注意修改脚本中的配置信息。
+使用场景：
+* 用shell脚本，快速运行，停止，重启jar包。
+* 用shell脚本，快速查询当天的日志。
 
 ```shell
 #!/bin/sh   
@@ -129,10 +131,15 @@ restart() {
   start
 }
 
+# 展示当天的日志
+showlog() {
+  today=$(date -d "now" +"%Y-%m-%d")
+  tail -100f "elec-prcs-log.${today}.0.log"
+}
 
 # 帮助说明，用于提示输入参数信息
 usage() {
-    echo "用法: sh xxx.sh [ status | start | stop | restart ]"
+    echo "用法: sh xxx.sh [ status | start | stop | restart | showlog ]"
     exit 1
 }
 
@@ -154,6 +161,9 @@ restart
 ;;
 'status')
 status
+;;
+'showlog')
+showlog
 ;;
 *)
 usage
