@@ -1,6 +1,6 @@
 ---
-title: NodeJs基础
-date: 2018-08-12
+title: NodeJs笔记
+date: 2023-01-12
 sidebar: 'auto'
 categories: 
  - 前端
@@ -10,27 +10,24 @@ tags:
 
 [toc]
 
-# NodeJs基础
-
 ## 前言
 
-> 为什么JavaScript可以在浏览器上运行？
+1. 为什么JavaScript可以在浏览器上运行？
 
 因为浏览器中包含JavaScript引擎，JavaScript引擎专门用于解析JavaScript代码并执行。
-
 不同的浏览器使用的JavaScript引擎不同。例如Chrome浏览器使用的JavaScript引擎是V8引擎。V8引擎在众多JavaScript引擎中性能非常好。
 
-> 为什么JavaScript能操作浏览器中的DOM,BOM?
- 
+2. 为什么JavaScript能操作浏览器中的DOM,BOM?
+
 因为每个浏览器都内置了操作DOM,BOM的api函数。js代码通过调用这些api函数来操作浏览器中的DOM,BOM。
 
-> 什么是Node.js?
+3. 什么是Node.js?
 
 Node.js是一个JavaScript运行环境，其内置了V8引擎。因此Node.js可以解析JavaScript代码并执行。
 
 ![20230104115819.png](../blog_img/20230104115819.png)
 
-node.js中没有内置DOM,BOM的api函数。因此node.js无法操作DOM,BOM。
+node.js中没有内置浏览器的DOM,BOM的api函数。因此node.js无法操作DOM,BOM。
 
 
 ## 1.安装Node.js
@@ -38,12 +35,10 @@ node.js中没有内置DOM,BOM的api函数。因此node.js无法操作DOM,BOM。
 1. 下载Node.js安装包:
 [Node.js中文网](http://nodejs.cn/)
 下载node.js安装包，一路默认即可
-
 2. 安装node.js：
 在Windows上安装时务必选择全部组件，包括勾选Add to Path
-
 3. 执行语句：
-Windows环境下，在cmd中输入node -v，出现版本号，表示安装正常。
+Windows系统中，打开cmd,输入node -v，出现版本号，表示安装正常。
 
 ```
 >node -v
@@ -78,7 +73,7 @@ C:\Users\Administrator\AppData\Roaming\npm-cache
 
 ### 1.认识NPM：
 
-Node.js内置了npm包管理工具。安装了node.js就安装了npm
+<font color="red">Node.js内置了npm包管理工具。安装了node.js就安装了npm。</font>
 
 ```
 npm其实是Node.js的包管理工具（node.js package manager）。
@@ -94,36 +89,80 @@ npm其实是Node.js的包管理工具（node.js package manager）。
 ```
 
 
-查看npm的版本
+查看npm包管理工具的版本
 ```
 C:\>npm -v
 5.6.0
 ```
 
-### 2.使用NPM：
+### 2.常用NPM命令：
 
 [NPM官网https://www.npmjs.com/](https://www.npmjs.com/)
 
+命令参数：
 
 ```js
-//通过npm下载包
-npm install 包名
-
-
-
+-g： 为 --global 的缩写，表示安装到全局目录里
+-S： 为 --save 的缩写，表示安装的包将写入package.json里面的dependencies
+-D： 为 --save-dev 的缩写，表示将安装的包将写入packege.json里面的devDependencies
+i： 为install的缩写，表示安装
 
 ```
 
-<font color="red">
-下载的第三方包就放在了工程目录下的node_modules目录中，之后在代码中只需要通过`require('包名')`的方式就可以引用，无需指定三方包路径。
-</font>
+常用命令：
+```js
+npm -v  //查看npm的版本
+
+//安装包，默认会安装最新的版本，安装到项目node_modules目录中
+//之后在代码中只需要通过`require('包名')`的方式就可以引用，无需指定三方包路径。
+npm install <package>   　　　
+npm install <package>@<version>      //安装指定版本
+npm install <package> -g 或 npm install <package> --global  //全局安装包
+npm install <package> --save 或 npm install <package> -S  //安装包并将安装包信息将加入到dependencies（生产阶段的依赖）
+npm install <package> --save-dev 或 npm install <package> -D //安装包并将安装包信息将加入到devDependencies（开发阶段的依赖），所以开发阶段一般使用它
+
+npm uninstall <package> --save-dev 或 npm uninstall <package> -D       //卸载开发版本的模块
+npm uninstall <package> --save 或 npm uninstall <package> -S 　　　　　 //卸载生产版本的模块
+npm uninstall <package> --save-optional 或 npm uninstall <package> -O  //卸载可选依赖版本的模块
+
+npm update              //更新包，将包更新到最新版本
+npm update <package>    //更新指定包
+npm update -g           //更新全局包
+npm update -g <package> //更新指定的全局包
+npm outdated [-g]       //列出所有已经过时的包，可以及时进行包的更新
 
 
+//获取当前npm的镜像仓库
+npm config get registry
+//设置全局的npm淘宝镜像
+npm config set registry https://registry.npm.taobao.org
+//设置默认全局镜像
+npm config set registry https://registry.npmjs.org
+
+//清除npm的缓存
+npm cache clean
+
+```
 
 
+### 3. -g 和 --save 和 --save-dev 的区别
+
+```js
+//全局安装包
+npm install <package> -g 或 npm install <package> --global 
+//安装包并将安装包信息将加入到dependencies（生产阶段的依赖）
+npm install <package> --save 或 npm install <package> -S  
+//安装包并将安装包信息将加入到devDependencies（开发阶段的依赖），所以开发阶段一般使用它
+npm install <package> --save-dev 或 npm install <package> -D 
+```
+1. -g 全局安装的意思是把模块包安装到电脑的操作系统上，一般会安装到AppData\Roaming\npm目录下。在操作系统的任何一个目录下都可以通过命令行使用该模块包
+
+2. --save 的意思是把模块包安装到项目node_modules目录下。然后把模块依赖写入项目的dependencies节点。当npm install 初始化项目时，会将该模块下载到项目目录下。dependencies节点下的模块包是开发和生产都需要的。例如axios
+
+3. --save-dev 的意思是安装模块包到项目node_modules目录下。把模块依赖写入到项目的devDependencies节点。当npm install 初始化项目时，会将该模块下载到项目目录下。devDependencies节点下的模块包是在开发时需要用的（例如压缩css、js的模块包），但是生产时是不需要的。
 
 
-## 3.命令行运行node程序：
+## 3.用nodejs执行js代码：
 
 1. 编写hello.js文件：
 ```js
@@ -131,15 +170,17 @@ npm install 包名
 console.log('Hello, world');
 ```
 
-2. 命令行运行该js文件：
-```
+2. 打开命令行,运行该js文件：
+```js
+// node js文件路径
 C:\nodejs>node hello.js
 Hello, world
 ```
 
-## 4.严格模式
+### 什么是严格模式 use strict
 
-**严格模式通过在脚本或函数的头部添加 "use strict"; 表达式来声明。**
+```
+严格模式通过在脚本或函数的头部添加 "use strict"; 表达式来声明。
 
 为什么使用严格模式:
 1. 消除Javascript语法的一些不合理、不严谨之处，减少一些怪异行为;
@@ -147,89 +188,79 @@ Hello, world
 3. 提高编译器效率，增加运行速度；
 4. 为未来新版本的Javascript做好铺垫。
 
-使用严格模式：
+如何使用严格模式：
 1. 如果在JavaScript文件开头写上'use strict';，那么Node在执行该JavaScript时将使用严格模式。
-
-## 5. Node.js开发环境
-
-一般Node.js开发环境可以选择Visual Studio Code。  
-Visual Studio Code 需要安装 Code Runner插件。  
+```
 
 ## 6.模块
-在Node环境中，一个.js文件就称之为一个模块（module）。
 
-<font color="red">在编写每个模块时，都有require、exports、module三个预先定义好的变量可供使用。</font>
+根据模块来源进行分类：
+* 内置模块：nodejs内置的，由nodejs官方提供的模块。例如http,fs模块等。
+* 第三方模块：非官方提供的模块，由第三方开发出来的模块。
+* 自定义模块：用户自己创建的每一个js文件，都可以称为自定义模块。
 
-> 编写模块的好处：
-> ①：当一个模块编写完毕，就可以被其他地方引用。我们在编写程序的时候，也经常引用其他模块，包括Node内置的模块和来自第三方的模块。
-> ②：使用模块还可以避免函数名和变量名冲突。相同名字的函数和变量完全可以分别存在不同的模块中，因此，我们自己在编写模块时，不必考虑名字会与其他模块冲突。
+```
+模块的好处：
+1 当一个模块编写完毕，就可以被其他地方引用。我们在编写程序的时候，也经常引用其他模块，包括NodeJs内置的模块和来自第三方的模块。
+2 模块中定义的变量,方法，只能在当前模块中使用。相同名字的函数和变量完全可以分别存在不同的模块中。不必考虑名字会与其他模块冲突。
+```
 
+<font color="red">每个模块中都内置有require、exports、module三个对象可供使用。</font>
 
-例子：
+### module 当前模块对象
 
-①：编写hello.js模块
+module对象存储了当前模块的一些相关信息。
+
 ```js
-'use strict';
-var s = 'Hello';
-console.info(s);
-function greet(name) {
-    console.log(s + ', ' + name + '!');
+console.log(module);
+
+//下面是module对象中的属性
+Module {
+  id: '.',
+  path: '',
+  exports: {},   //exports就是module的一个属性。
+  parent: null,
+  filename: '',
+  loaded: false,
+  children: [],
+  paths: [
+  ]
 }
-module.exports = greet; //将greet方法暴露出去
 ```
 
-② 编写main.js模块，并调用hello.js模块：
+### exports 导出模块
+
+exports对象用于导出模块（js文件）中的公有方法和属性。
+
+注意：module.exports 与 exports 两个写法具有相同功能。因为exports就是module的属性。
+
 ```js
-'use strict';
-// 引入hello模块:
-var greet = require('./hello');   
-var s = 'Michael';
-greet(s); // Hello, Michael!
+//编写hello.js文件
+var str = 'Hello';
+function greet(name) {
+    console.log(str + ', ' + name + '!');
+}
+
+//module.exports 与 exports 两个写法具有相同功能
+exports=str;              //导出一个变量
+module.exports = greet;   //导出一个函数
 ```
 
-### 1.require变量的用法
+### require 加载模块
 
->1 加载模块（js文件）
-require函数用于在当前模块中加载别的模块，传入一个模块名，返回一个模块导出对象。模块名可使用相对路径（以./开头），或者是绝对路径（以/或C:之类的盘符开头）。
-另外，模块名中的.js扩展名可以省略。
+require对象用于加载某个模块。加载模块得到的值就是该模块的exports对象。
+
+```js
+//加载hello模块:
+var greet = require('./hello');   
+var str = 'Michael';
+greet(str); // Hello, Michael!
+```
 
 ```js
 var he1 = require('./hello');
-var he2 = require('./hello.js');
-```
-
->2 加载json文件：
-可以在js文件中加载json文件
-`var jsonstr = require('./data.json');`
-
-### 2. exports变量的用法
-
-exports对象用于导出模块（js文件）中的公有方法和属性。别的模块通过require函数使用当前模块时得到的就是当前模块的exports对象。
-
-<font color="red">module.exports 与 exports 具有相同功能。因为exports是module的属性之一。</font>
-
-```js
-function greet(name) {
-    console.log(s + ', ' + name + '!');
-}
-module.exports = greet;   //导出一个函数
-
-exports.hello = function () {     //导出一个匿名函数
-    console.log('Hello World!');
-};
-
-var a="sss";
-exports=a;      //导出一个变量
-```
-
-### 3.module变量的用法
-
-通过module对象可以访问到当前模块的一些相关信息，但最多的用途是替换当前模块的导出对象。
-
-```js
-module.exports = function () {    //模块默认导出对象被替换为一个函数。
-    console.log('Hello World!');
-};
+var he2 = require('./hello.js'); //模块名中的.js扩展名可以省略。
+var jsonstr = require('./data.json'); //require也可以加载json文件
 ```
 
 
@@ -413,13 +444,22 @@ undefined
 
 fs模块是 Node.js官方提供的，用来操作文件的模块(读取/写入)。它提供了一些属性和方法，用来满足用户对文件的操作。
 
-#### 1.读取文件数据
+> 1.读取文件内容
+
+readFile方法语法格式：
+```
+fs.readFile(path[,options],callback)
+
+参数path：必选参数，表示文件的路径
+参数options：可选参数，表示什么编码格式来去读文件
+参数callback：必选参数，文件读取完成后，通过回调函数拿到读取的结果
+```
 
 ```js
-//加载fs模块
+//获取fs模块
 var fs = require("fs"); 
 // 异步读取
-fs.readFile('1.txt', function (err, data) {
+fs.readFile('1.txt','utf8',function (err, data) {
    if (err) {
        return console.error(err);
    }
@@ -427,24 +467,24 @@ fs.readFile('1.txt', function (err, data) {
 });
 
 
-// 同步读取
+// readFile方法的同步版本,即同步读取
 var data = fs.readFileSync('1.txt');
 console.log("同步读取: " + data.toString());
 console.log("程序执行完毕。");
 ```
 
-③：运行结果：
+运行结果：
 ![1-png](../blog_img/Node_js_img_1.png)
 
 
-#### 2.获取文件属性
+> 2.获取文件属性
 
 ```
 获取文件信息的语法格式：
 fs.stat(path, callback);
 
-path: 文件路径。
-callback ：回调函数。带有两个参数如：(err, stats), stats 是 fs.Stats 对象。
+path参数: 文件路径。
+callback参数：回调函数。带有两个参数如：(err, stats)。
 ```
 
 ```js
@@ -466,24 +506,20 @@ fs.stat('./1.txt', function (err, stats) {
 ![5-png](../blog_img/Node_js_img_5.png)
 
 
-#### 3.写入数据到文件中
+> 3.写入文件内容
 
 ```
-写入文件的语法格式([...]表示参数可有可无)：
-fs.writeFile(filename, data, [options], [callback(err)])
+写入文件的语法格式([...]表示参数为可选参数)：
+fs.writeFile(file, data[,options],callback)
 
-参数名称解析：
-filename - (String) - 文件名称
-data    - (String | Buffer) -  将要写入的内容，可以使字符串 或 buffer数据。
-options  - (Object) -  option数组对象，包含：
-----encoding - (string)  - 可选值，默认 ‘utf8′，当data使buffer时，该值应该为 ignored。
-----mode  - (Number) - 文件读写权限，默认值 438
-----flag - (String) - 默认值 ‘w'
-callback -  {Function} - 回调，传递一个异常参数err。
+参数file：必选参数，需要指定一个文件路径的字符串，表示文件的存放路径
+参数data：必选参数，表示要写入的内容
+参数options：可选参数，该参数是一个对象，包含 {encoding, mode, flag}。默认编码为 utf8, 模式为 0666 ， flag 为 'w'
+参数callback：必选参数，文件写入完成后的回调函数
 ```
 ![3-png](../blog_img/Node_js_img_3.png)
 
-**writeFile 直接写入文件默认是 w 模式，所以如果文件存在，该方法写入的内容会覆盖旧的文件内容。**
+**writeFile 直接写入文件默认是 w 模式，即如果文件存在，该方法写入的内容会覆盖旧的文件内容。**
 
 例子：
 ```js
@@ -505,14 +541,10 @@ fs.writeFile('./1.txt', '我是通过fs.writeFile 写入文件的内容',  funct
 });
 ```
 
-<font color="red">
-ps:这里的写入文件数据是把之前的数据删除，在重新写入数据。因为options参数的flag的属性的默认值为 "w",如果文件存在，该方法写入的内容会覆盖旧的文件内容。
-</font>
-
 运行结果：
 ![2-png](../blog_img/Node_js_img_2.png)
 
-#### 4. 删除文件
+> 4. 删除文件
 
 ```
 以下为删除文件的语法格式：
@@ -536,7 +568,7 @@ fs.unlink('./1.txt', function(err) {
 
 ![6-png](../blog_img/Node_js_img_6.png)
 
-#### 5.创建目录
+> 5.创建目录
 
 ```
 以下为创建目录的语法格式：
@@ -562,7 +594,7 @@ fs.mkdir("./testA/testB/",function(err){
 ![7-png](../blog_img/Node_js_img_7.png)
 
 
-#### 6.读取目录信息
+> 6.读取目录信息
 
 ```
 以下为读取目录的语法格式：
@@ -588,7 +620,7 @@ fs.readdir("./test/",function(err, files){
 
 ![8-png](../blog_img/Node_js_img_8.png)
 
-#### 7.删除空目录
+> 7.删除空目录
 
 ```
 以下为删除空目录的语法格式：
@@ -615,9 +647,34 @@ fs.rmdir("./test",function(err){      //删除当前目录下的test文件夹
 ![9-png](../blog_img/Node_js_img_9.png)
 
 
+### http模块---提供处理web请求的模块
+
+```js
+// 1. 导入 http 模块
+const http = require('http')
+// 2. 创建 web 服务
+const server = http.createServer()
+// 3. 为web服务实例绑定 request 事件，监听客户端的请求
+//只要客户端请求服务端，就会触发on方法
+server.on('request', function (req, res) {
+  console.log('Someone visit our web server.',req, res)
+  const url = req.url
+  const method = req.method
+
+  // 设置 Content-Type 响应头，解决中文乱码的问题
+  res.setHeader('Content-Type', 'text/html; charset=utf-8')
+  //res.end() 方法，向客户端响应一些内容,并结束这次请求的处理过程
+  res.end("this is a response content")
+})
+// 4. 启动web服务并监听服务端的8080端口
+server.listen(8080, function () {  
+  console.log('server running at http://127.0.0.1:8080')
+})
+```
+
 ### util模块---提供常用函数的集合：
 
-#### 1.util.inspect 返回对象的字符串形式
+> 1.util.inspect 返回对象的字符串形式
 
 ```
 语法：
@@ -646,7 +703,7 @@ console.log("输出更多信息："+util.inspect(obj, true));   //这里的showH
 
 ![15-png](../blog_img/Node_js_img_15.png)
 
-#### 2.util.isArray(object);
+> 2.util.isArray(object);
 
 如果参数 "object" 是一个数组返回true，否则返回false。
 
@@ -661,7 +718,7 @@ util.isArray({});
 ```
 
 
-#### 3.util.isRegExp(object);
+> 3.util.isRegExp(object);
 
 如果参数 "object" 是一个正则表达式返回true，否则返回false。
 ```js
@@ -675,7 +732,7 @@ util.isRegExp({});
 ```
 
 
-#### 4.util.isDate(object)
+> 4.util.isDate(object)
 
 如果参数 "object" 是一个日期返回true，否则返回false。
 ```js
@@ -686,7 +743,7 @@ util.isDate({})
   // false
 ```
 
-#### 5.util.isError(object);
+> 5.util.isError(object);
 
 如果给定的参数 "object" 是一个错误对象返回true，否则返回false。
 
