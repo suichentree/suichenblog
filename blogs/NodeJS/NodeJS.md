@@ -161,6 +161,26 @@ npm install <package> --save-dev 或 npm install <package> -D
 
 3. --save-dev 的意思是安装模块包到项目node_modules目录下。把模块依赖写入到项目的devDependencies节点。当npm install 初始化项目时，会将该模块下载到项目目录下。devDependencies节点下的模块包是在开发时需要用的（例如压缩css、js的模块包），但是生产时是不需要的。
 
+### 4. node_modules目录和package-lock.json配置文件等
+
+node_modules目录：用来存放所有已安装到项目的包。require()方法会从该目录下查找包并加载包。
+
+package-lock.json文件：记录node_modules目录中包的各种信息。例如包的名字，版本等
+
+### 5. 包管理配置文件package.json
+
+
+```
+package.json文件： 用来记录与项目有关的配置文件。
+例如：
+1. 项目名称，版本号，描述等
+2. 项目中使用的包等
+
+若项目的根目录没有package.json文件
+npm提供了一个快速创建package.json的命令
+npm init -y
+```
+
 
 ## 3.用nodejs执行js代码：
 
@@ -205,9 +225,9 @@ Hello, world
 2 模块中定义的变量,方法，只能在当前模块中使用。相同名字的函数和变量完全可以分别存在不同的模块中。不必考虑名字会与其他模块冲突。
 ```
 
-<font color="red">每个模块中都内置有require、exports、module三个对象可供使用。</font>
+<font color="red">每个模块中都内置有require、exports、module可供使用。</font>
 
-### module 当前模块对象
+### module对象 用来表示当前模块对象
 
 module对象存储了当前模块的一些相关信息。
 
@@ -228,11 +248,13 @@ Module {
 }
 ```
 
-### exports 导出模块
+### exports对象 用于导出模块
 
-exports对象用于导出模块（js文件）中的公有方法和属性。
+exports对象用于导出模块（js文件）中的公有方法和属性。注意在同一个模块中module.exports和 exports 不要一起用。
 
-注意：module.exports 与 exports 两个写法具有相同功能。因为exports就是module的属性。
+注意
+1. module.exports 与 exports 两个写法具有相同功能。因为exports就是module的属性。
+2. 当一个模块中有多个module.exports导出对象，新的对象会覆盖旧的对象，以最新的module.exports对象为准。
 
 ```js
 //编写hello.js文件
@@ -246,9 +268,9 @@ exports=str;              //导出一个变量
 module.exports = greet;   //导出一个函数
 ```
 
-### require 加载模块
+### require方法 用于加载模块
 
-require对象用于加载某个模块。加载模块得到的值就是该模块的exports对象。
+require方法用于加载某个模块。加载模块得到的值就是该模块的module.exports对象。
 
 ```js
 //加载hello模块:
@@ -266,17 +288,15 @@ var jsonstr = require('./data.json'); //require也可以加载json文件
 
 ### 4.小结：
 
-```
-模块初始化:
-一个模块中的JS代码仅在模块第一次被使用时执行一次，并在执行过程中初始化模块的导出对象。之后，缓存起来的导出对象被重复利用。
-
-主模块:
-通过命令行参数传递给NodeJS以启动程序的模块被称为主模块。主模块负责调度组成整个程序的其它模块完成工作。
-```
+1. 每个模块内部，module对象代码当前模块。
+2. module对象中的exports属性，是模块对外的接口
+3. require方法加载某个模块，就是加载该模块的module.exports属性。
 
 ## 7.包
 
 模块的基本单位是单个JS文件，但复杂些的模块往往由多个子模块组成。为了便于管理和使用，可以把由多个子模块组成的大模块称做包，并把所有子模块放在同一个目录里。
+
+世界上最大的包共享平台NPM：[官网https://www.npmjs.com/](https://www.npmjs.com/)
 
 <font color="red">在组成一个包的所有子模块中，需要有一个入口模块，入口模块的导出对象被作为包的导出对象。</font>
 
