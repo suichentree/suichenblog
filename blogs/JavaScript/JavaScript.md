@@ -5,10 +5,10 @@ sidebar: 'auto'
 categories: 
  - 前端
 tags:
- - HTML/CSS/JS
+ - JavaScript
 ---
 
-# JavaScript基础
+## JavaScript基础
 
 ## 概述：
 JavaScript是世界上最流行的脚本语言，因为你在电脑、手机、平板上浏览的所有的网页，以及无数基于HTML5的手机App，交互逻辑都是由JavaScript驱动的。<font color="red">简单地说，JavaScript是一种运行在浏览器中的解释型的编程语言。</font>

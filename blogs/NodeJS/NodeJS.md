@@ -102,7 +102,10 @@ C:\>npm -v
 命令参数：
 
 ```js
--g： 为 --global 的缩写，表示安装到全局目录里
+-g： 为 --global 的缩写，表示安装到全局目录里。
+
+全局目录：C:\Users\用户名\AppData\Roaming\npm\node_modules目录中
+
 -S： 为 --save 的缩写，表示安装的包将写入package.json里面的dependencies
 -D： 为 --save-dev 的缩写，表示将安装的包将写入packege.json里面的devDependencies
 i： 为install的缩写，表示安装
@@ -121,6 +124,7 @@ npm install <package> -g 或 npm install <package> --global  //全局安装包
 npm install <package> --save 或 npm install <package> -S  //安装包并将安装包信息将加入到dependencies（生产阶段的依赖）
 npm install <package> --save-dev 或 npm install <package> -D //安装包并将安装包信息将加入到devDependencies（开发阶段的依赖），所以开发阶段一般使用它
 
+npm uninstall <package> -g //卸载全局安装的包
 npm uninstall <package> --save-dev 或 npm uninstall <package> -D       //卸载开发版本的模块
 npm uninstall <package> --save 或 npm uninstall <package> -S 　　　　　 //卸载生产版本的模块
 npm uninstall <package> --save-optional 或 npm uninstall <package> -O  //卸载可选依赖版本的模块
@@ -132,13 +136,12 @@ npm update -g <package> //更新指定的全局包
 npm outdated [-g]       //列出所有已经过时的包，可以及时进行包的更新
 
 
-//获取当前npm的镜像仓库
+//查看当前npm的镜像仓库
 npm config get registry
-//设置全局的npm淘宝镜像
+//设置淘宝镜像
 npm config set registry https://registry.npm.taobao.org
-//设置默认全局镜像
+//设置默认镜像
 npm config set registry https://registry.npmjs.org
-
 //清除npm的缓存
 npm cache clean
 
@@ -154,6 +157,7 @@ npm install <package> -g 或 npm install <package> --global
 npm install <package> --save 或 npm install <package> -S  
 //安装包并将安装包信息将加入到devDependencies（开发阶段的依赖），所以开发阶段一般使用它
 npm install <package> --save-dev 或 npm install <package> -D 
+
 ```
 1. -g 全局安装的意思是把模块包安装到电脑的操作系统上，一般会安装到AppData\Roaming\npm目录下。在操作系统的任何一个目录下都可以通过命令行使用该模块包
 
@@ -169,17 +173,27 @@ package-lock.json文件：记录node_modules目录中包的各种信息。例如
 
 ### 5. 包管理配置文件package.json
 
-
 ```
 package.json文件： 用来记录与项目有关的配置文件。
-例如：
-1. 项目名称，版本号，描述等
-2. 项目中使用的包等
+例如：项目名称，版本号，描述,包等
 
 若项目的根目录没有package.json文件
 npm提供了一个快速创建package.json的命令
 npm init -y
 ```
+
+```
+package.json文件中的节点
+
+dependencies节点：记录在开发和上线阶段都需要使用的包。
+devDependencies节点：记录只在开发阶段用到的包，项目上线后用不到的包。
+
+
+
+
+```
+
+
 
 
 ## 3.用nodejs执行js代码：
@@ -272,19 +286,36 @@ module.exports = greet;   //导出一个函数
 
 require方法用于加载某个模块。加载模块得到的值就是该模块的module.exports对象。
 
-```js
-//加载hello模块:
-var greet = require('./hello');   
-var str = 'Michael';
-greet(str); // Hello, Michael!
-```
+注意：模块在第一次加载后会被缓存。即多次使用require方法加载模块不会导致模块中的代码执行多次。
 
 ```js
-var he1 = require('./hello');
+//加载hello自定义模块:
+var he1 = require('./hello');   
+var str = 'Michael';
+he1(str); // Hello, Michael!
+
 var he2 = require('./hello.js'); //模块名中的.js扩展名可以省略。
 var jsonstr = require('./data.json'); //require也可以加载json文件
 ```
 
+#### require方法加载机制
+
+```
+当require加载内置模块时的加载机制:
+1. 内置模块是由nodejs官方提供的模块，具有最高的加载优先级。当其他模块与内置模块同名时，优先加载内置模块。
+var he1 = require('fs');  //加载内置模块
+
+当require加载包（第三方模块）时的加载机制:
+1. 首先在包的根目录查找package.json文件，并寻找文件中的main属性。作为require方法的加载入口
+2. 若没有package.json文件，或者main入口解析错误，则会加载根目录中的index.js文件
+3. 若上面两个文件都没有，则会打印错误日志信息。Error: Cannot find module 'xxx'。
+var he1 = require('hello');  //加载hello第三方模块
+
+
+当require加载自定义模块时的加载机制:
+1. require方法加载自定义模块，需要添加./或../等路径符号。否则node会将其作为内置模块或者第三方模块进行加载。
+var he1 = require('./hello');  //加载自定义模块
+```
 
 ### 4.小结：
 
@@ -298,35 +329,19 @@ var jsonstr = require('./data.json'); //require也可以加载json文件
 
 世界上最大的包共享平台NPM：[官网https://www.npmjs.com/](https://www.npmjs.com/)
 
-<font color="red">在组成一个包的所有子模块中，需要有一个入口模块，入口模块的导出对象被作为包的导出对象。</font>
+> 规范的包结构
 
-例如有以下目录结构(lib目录下有cat目录，该文件里有三个模块):
-```
-- /home/user/lib/
-    - cat/
-        head.js
-        body.js
-        main.js
-```
-
-main.js作为入口模块，其内容如下：
+一个规范的包结构，必须符合下面3个要求
+1. 包是以单独的目录存在。即一个目录代表一个包。
+2. 包的根目录下必须包含一个package.json包管理配置文件。
+3. package.json文件中必须包含name,version,main三个属性。分别代码包的名字，版本和入口文件。
 
 ```js
-var head = require('./head');     //导入head模块
-var body = require('./body');     //导入body模块
-exports.create = function (name) {    //把main模块的暴露出去
-    return {
-        name: name,
-        head: head.create(),
-        body: body.create()
-    };
-};
+//导入axiso包
+var a = require('axios'); 
+//当使用require方法导入包时，实际上是导入该包package.json文件中的main属性指向的文件。
 ```
 
-其他js文件中导入cat模块的入口main.js文件：
-```js
-require('/home/user/lib/cat/main')
-```
 
 ## 8.标准工程目录：
 一个标准的工程目录都看起来像下边这样:
