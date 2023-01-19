@@ -229,8 +229,8 @@ Hello, world
 ## 6.模块
 
 根据模块来源进行分类：
-* 内置模块：nodejs内置的，由nodejs官方提供的模块。例如http,fs模块等。
-* 第三方模块：非官方提供的模块，由第三方开发出来的模块。
+* 内置模块（官方包）：nodejs内置的，由nodejs官方提供的模块。例如http,fs模块等。
+* 第三方模块（第三方包）：非官方提供的模块，由第三方开发出来的模块。
 * 自定义模块：用户自己创建的每一个js文件，都可以称为自定义模块。
 
 ```
@@ -289,37 +289,47 @@ require方法用于加载某个模块。加载模块得到的值就是该模块�
 注意：模块在第一次加载后会被缓存。即多次使用require方法加载模块不会导致模块中的代码执行多次。
 
 ```js
-//加载hello自定义模块:
+//加载hello自定义模块（同目录下的hello.js文件）
 var he1 = require('./hello');   
-var str = 'Michael';
-he1(str); // Hello, Michael!
 
-var he2 = require('./hello.js'); //模块名中的.js扩展名可以省略。
-var jsonstr = require('./data.json'); //require也可以加载json文件
+//------------------
+require方法加载自定义模块(自定义js文件)时，如果省略了文件的扩展名。则会按照以下顺序加载：
+1 按照确定的文件名加载
+2 补全.js扩展名，再次加载
+3 补全.json扩展名，再次加载
+4 补全.node扩展名，再次加载
+5 以上都找不到，则加载失败，终端报错。
 ```
 
-#### require方法加载机制
+
+#### require方法的加载模块机制
 
 ```
-当require加载内置模块时的加载机制:
+当require加载内置模块（js文件）时的机制:
 1. 内置模块是由nodejs官方提供的模块，具有最高的加载优先级。当其他模块与内置模块同名时，优先加载内置模块。
-var he1 = require('fs');  //加载内置模块
+var he1 = require('fs');  //若第三方模块与内置模块都叫fs,优先加载内置模块fs
 
-当require加载包（第三方模块）时的加载机制:
-1. 首先在包的根目录查找package.json文件，并寻找文件中的main属性。作为require方法的加载入口
+当require加载普通目录时的机制:
+1. 在目录的根目录下查找package.json文件，并寻找文件中的main属性。作为require方法的加载入口
 2. 若没有package.json文件，或者main入口解析错误，则会加载根目录中的index.js文件
 3. 若上面两个文件都没有，则会打印错误日志信息。Error: Cannot find module 'xxx'。
-var he1 = require('hello');  //加载hello第三方模块
-
+var test1 = require('./test');  //加载test目录
 
 当require加载自定义模块时的加载机制:
 1. require方法加载自定义模块，需要添加./或../等路径符号。否则node会将其作为内置模块或者第三方模块进行加载。
-var he1 = require('./hello');  //加载自定义模块
+var he1 = require('./hello');  //加载自定义模块hello.js文件
+
+当require加载包（第三方模块）时的机制:
+0. 首先会从node_modules目录下根据名字加载包（第三方模块）。
+1. 如果没找到，则移动到上一层父目录中，再次在node_modules目录中查找，直接文件系统的根目录中。
+
+var he1 = require('axios');  //加载第三方模块axios
+
 ```
 
 ### 4.小结：
 
-1. 每个模块内部，module对象代码当前模块。
+1. 每个模块内部，module对象表示当前模块。
 2. module对象中的exports属性，是模块对外的接口
 3. require方法加载某个模块，就是加载该模块的module.exports属性。
 
@@ -474,6 +484,8 @@ undefined
 ```
 
 ## 10. Node.js提供的官方模块
+
+只举例几个官方模块,其他自行查找。
 
 ### fs模块---文件系统模块
 
