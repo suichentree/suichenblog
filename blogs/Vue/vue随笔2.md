@@ -6,9 +6,9 @@ categories:
  - 随笔
 ---
 
+[toc]
 
-
-## vue项目直接点击dist文件夹下面的index.html文件使项目在浏览器显示。不通过nginx部署的方式？
+## vue项目直接点击dist文件夹下面的index.html文件使项目在浏览器显示。不通过nginx部署的方式
 
 vue项目直接点击dist文件夹下面的index.html文件使项目在浏览器显示，需修改两个文件：
 

@@ -1,5 +1,5 @@
 ---
-title: Nginx负载均衡配置
+title: Nginx负载均衡配置-upstream模块
 date: 2023-02-13
 sidebar: 'auto'
 categories: 
