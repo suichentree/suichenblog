@@ -1,5 +1,5 @@
 ---
-title: SpringCloudAlibaba笔记
+title: Spring Cloud Alibaba 笔记
 date: 2022-07-26
 sidebar: 'auto'
 categories: 
@@ -81,3 +81,98 @@ tags:
 </dependencyManagement>
 ```
 
+## 4. 创建spring-cloud-alibaba 父子工程
+
+目前三者之间推荐的版本搭配
+
+|  Spring Cloud Alibaba Version   | Spring Cloud Version | 	Spring Boot Version  |
+|  ----  | ----  | ----  |
+| 2.2.8.RELEASE  | Spring Cloud Hoxton.SR12 | 2.3.12.RELEASE |
+
+### 1. 新建一个maven项目，作为父工程
+
+![20230216105257.png](../blog_img/20230216105257.png)
+
+删除不必要的文件目录,最终保留文件目录。
+
+1. .idea目录是idea用来管理项目的目录，不需要强制删除。不用理会。
+2. .iml文件是idea用来管理项目的文件，不需要强制删除。不用理会。
+3. 父工程主要保留pom.xml文件即可。
+
+![20230216105411.png](../blog_img/20230216105411.png)
+
+### 2. 修改父工程的pom.xml
+
+注意修改父工程的打包方式为pom
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.example</groupId>
+    <artifactId>spring-cloud-alibaba-parent</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <!--修改打包方式为pom-->
+    <packaging>pom</packaging>
+
+    <properties>
+        <!-- java版本 -->
+        <java.version>1.8</java.version>
+        <!-- SpringBoot 版本 -->
+        <spring.boot.version>2.3.12.RELEASE</spring.boot.version>
+        <!-- Spring Cloud Alibaba 版本 -->
+        <spring.cloud.alibaba>2.2.8.RELEASE</spring.cloud.alibaba>
+        <!-- Spring Cloud 版本 -->
+        <spring.cloud>Hoxton.SR12</spring.cloud>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <!-- 版本依赖统一管理 -->
+    <dependencyManagement>
+        <dependencies>
+            <!-- SpringBoot 版本 -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-parent</artifactId>
+                <version>${spring.boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- Spring Cloud Alibaba 版本 -->
+            <dependency>
+                <groupId>com.alibaba.cloud</groupId>
+                <artifactId>spring-cloud-alibaba-dependencies</artifactId>
+                <version>${spring.cloud.alibaba}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- Spring Cloud 版本 -->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring.cloud}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+</project>
+```
