@@ -4,8 +4,8 @@
   "author": "reco_luan",
   "scripts": {
     "dev": "vuepress dev . --open --host \"localhost\"",
-    "serve": "vuepress dev . --open --host \"localhost\"",
-    "build": "vuepress build ."
+    "serve": "SET NODE_OPTIONS=--openssl-legacy-provider && vuepress dev . --open --host \"localhost\"",
+    "build": "SET NODE_OPTIONS=--openssl-legacy-provider && vuepress build ."
   },
   "devDependencies": {
     "@vuepress-reco/vuepress-plugin-kan-ban-niang": "^1.0.5",
