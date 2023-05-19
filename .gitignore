@@ -6,3 +6,5 @@ package-lock.json
 /public/
 # 不忽略.vuepress目录中的文件
 !/.vuepress/
+# 忽略.idea目录
+.idea
