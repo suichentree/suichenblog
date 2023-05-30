@@ -16,6 +16,7 @@ tags:
 
 ![20221103095331.png](../blog_img/20221103095331.png)
 
+
 JVM包含两个子系统和两个组件：
 * 两个子系统为Class loader(类装载子系统)、 Execution engine(执行引擎)；
 * 两个组件为Runtime data area(运行时数据区)、Native Interface(本地接口)。

@@ -1,6 +1,6 @@
 module.exports = {
   "port":"9099",
-  "title": "suichenTree BLOG",
+  "title": "suichentree's blog",
   "description": "(;-_-)ᴇᴍᴍᴍ",
   "dest": "public",
   "head": [
@@ -154,12 +154,12 @@ module.exports = {
         "link": "https://vuepress-theme-reco.recoluan.com"
       }
     ],
-    "logo": "/user.jpg",
+    "logo": "/user2.png",
     "search": true,
     "searchMaxSuggestions": 10,
     "lastUpdated": "Last Updated",
-    "author": "suichenTree",
-    "authorAvatar": "/user.jpg",
+    "author": "suichentree",
+    "authorAvatar": "/user2.png",
     "record": "xxxx",
     "startYear": "2017"
   },
@@ -167,8 +167,7 @@ module.exports = {
     "lineNumbers": true
   },
   "plugins": [
-    [
-      "@vuepress-reco/vuepress-plugin-kan-ban-niang",
+    ["@vuepress-reco/vuepress-plugin-kan-ban-niang",
       {
         "theme": ["wanko"],
         "clean": false,
@@ -179,6 +178,25 @@ module.exports = {
           "close": '再见哦'
         }
       }
+    ],
+    //副标题-打字机效果的插件
+    ['typed',{
+      // 首页副标题对应的标签选择器
+      selector: '.home-blog .hero .description',
+      // 打字内容
+      strings: [
+        "态度是心的面具。 ——《蛊真人》",
+        "我们既然意识到自己的渺小，那就更应该变得强大。我们本来就是渺小的，只是从无知变得有知。你感到痛苦，是因为你在成长。 ——《蛊真人》", 
+        "海里的咸鱼 (;-_-)ᴇᴍᴍᴍ ——suichentree",
+        "路漫漫其修远兮，吾将上下而求索 ——屈原"
+      ],
+      typeSpeed: 150, // 打字速度
+      backSpeed: 100, // 回退速度
+      showCursor: true, //是否显示光标
+      startDelay: 1000,    //延迟开始打字
+      backDelay: 2000,  //延迟多少时间开始回退
+      }
     ]
   ]
+  
 }

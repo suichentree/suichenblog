@@ -9,11 +9,12 @@
   },
   "devDependencies": {
     "@vuepress-reco/vuepress-plugin-kan-ban-niang": "^1.0.5",
-    "vuepress": "1.5.4",
-    "vuepress-theme-reco": "1.5.7"
+    "vuepress": "^1.9.9",
+    "vuepress-theme-reco": "^1.6.17"
   },
   "dependencies": {
-    "vue-class-component": "^7.2.3"
+    "vue-class-component": "^7.2.3",
+    "vuepress-plugin-typed": "^1.0.5"
   },
   "description": "this is suichen blog"
 }

@@ -10,7 +10,7 @@ tags:
 
 [toc]
 
-## Java笔记
+# Java笔记
 
 java语言是一门面向对象程序设计语言，本篇只是介绍java的基础知识。
 
@@ -21,7 +21,7 @@ java语言是一门面向对象程序设计语言，本篇只是介绍java的基
 注意：IDE工具：专门用于编写java程序的软件。下面所有示例主要用STS 运行java代码。
 </font>
 
-## 1. 初识第一个java程序 ---helloworld ：
+## 1. 初识第一个java程序"helloworld"
 
 ### 1. 使用命令行运行程序：
 
