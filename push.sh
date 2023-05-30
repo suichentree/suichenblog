@@ -27,4 +27,4 @@ else
 fi
 
 # 本地分支推送最新文件到远程分支
-git push -u origin main
+git push -u origin master
