@@ -1,5 +1,6 @@
 # 自动上传代码到博客源代码仓库 https://github.com/suichentree/suichenblog.git
 # 注意1: 在git终端中运行脚本。
+# 运行脚本命令 bash push.sh
 
 # 定义提交方法
 function commit() {
