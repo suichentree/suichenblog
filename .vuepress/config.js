@@ -167,6 +167,7 @@ module.exports = {
     "lineNumbers": true
   },
   "plugins": [
+    //看板娘插件
     ["@vuepress-reco/vuepress-plugin-kan-ban-niang",
       {
         "theme": ["wanko"],
