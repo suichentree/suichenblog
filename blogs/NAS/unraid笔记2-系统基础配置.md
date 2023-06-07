@@ -1,5 +1,5 @@
 ---
-title: unraid系统基础配置
+title: unraid笔记2-系统基础配置
 date: 2023-05-31
 sidebar: 'auto'
 categories: 
@@ -10,9 +10,9 @@ tags:
 
 [toc]
 
-# unraid系统基础配置
+# unraid笔记2-系统基础配置
 
-## 安装插件
+## 安装加速插件
 
 由于unraid系统的插件和docker有很多都在github等国外网站上。因此在unraid服务器无法科学上网的情况下。安装插件和docker经常会失败。
 

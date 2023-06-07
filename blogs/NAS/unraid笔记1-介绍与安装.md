@@ -1,5 +1,5 @@
 ---
-title: unraid介绍与安装
+title: unraid笔记1-介绍与安装
 date: 2023-05-31
 sidebar: 'auto'
 categories: 
@@ -10,7 +10,7 @@ tags:
 
 [toc]
 
-# unraid介绍与安装
+# unraid笔记1-介绍与安装
 
 ## unraid介绍
 
@@ -41,6 +41,8 @@ unraid系统本身是需要付费的，试用版也只能免费使用30天。于
 
 目前最新的unraid系统版本是6.11.5
 
+### unraid开心版6.11.5安装过程
+
 1. 下载unraid开心版6.11.5
 
 [俄罗斯softroom网站](https://softoroom.org/topic89043.html)
@@ -70,11 +72,19 @@ export UNRAID_VERSION=Pro
 不要点注册按钮。
 ![unraid_20230531200735.png](../blog_img/unraid_20230531200735.png)
 
-9. 将u盘插入电脑上，bois中设置u盘启动。之后unraid系统会自动开始安装，等到显示器中出现ip地址。在浏览器输入ip地址，设置密码，就可以进入到unraid的操作界面了。
+9. 将u盘插入电脑上，bois中设置u盘启动。重启电脑后，unraid系统会自动开始安装。
+10. 可以在显示屏上看到unraid系统的安装过程
+
+![unraid_202306062137.png](../blog_img/unraid_202306062137.png)
+![unraid_202306062138.png](../blog_img/unraid_202306062138.png)
+
+12. 等到显示器中出现ip地址。在浏览器输入ip地址，设置密码，就可以进入到unraid的操作界面了。
 
 ![unraid_20230531203430.png](../blog_img/unraid_20230531203430.png)
 
-<font color="red">目前unraid6.11.5开心版已备份到个人电脑中.用来以后重装unraid系统使用。</font>
+<font color="red">目前unraid6.11.5开心版的文本已备份到个人电脑的个人文件目录中了,用来以后重装unraid系统使用。</font>
 
 ## unraid的其他知识点
 
+* 基本上所有的系统设置都可以通过 Unraid 网页端的界面来进行，是不需要外接显示器的。
+* 注意 Unraid 通过U盘引导，所以引导U盘不能随意拔出来。

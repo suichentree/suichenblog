@@ -1,5 +1,5 @@
 ---
-title: unraid插件与docker容器
+title: unraid笔记3-插件与docker容器
 date: 2023-05-31
 sidebar: 'auto'
 categories: 
@@ -10,9 +10,32 @@ tags:
 
 [toc]
 
-# unraid插件与docker容器
+# unraid笔记3-插件与docker容器
 
 unraid有丰富的插件和docker容器可供选择，下面是我用到的一些插件。
+
+## unraid modify插件
+
+unraid modify插件可以修改unraid系统的hosts文件来加快Docker，应用市场的加载速度。
+
+插件地址：`http://plg.unraid.site:8/plg/UNRAID_Modify.plg`
+
+>如何安装插件？
+插件界面->安装插件-》输入插件地址-》点击安装按钮
+
+## Community Applications 插件   
+
+你只有安装了应用市场插件,才能下载其余的插件.
+
+插件地址：`https://raw.githubusercontent.com/Squidly271/community.applications/master/plugins/community.applications.plg`
+
+## 简体中文插件
+
+1. 当安装好应用市场插件后,在应用界面搜索简体中文插件安装.
+2. 插件安装成功后，设置界面->显示设置->语言选择简体中文即可.
+3. 浏览器刷新页面,就会显示中文界面了.
+
+![unraid_20230531224932.png](../blog_img/unraid_20230531224932.png)
 
 ## 安装Zerotier docker容器
 
