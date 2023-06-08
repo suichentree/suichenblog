@@ -1,5 +1,5 @@
 ---
-title: unraid笔记3-插件与docker容器
+title: unraid笔记3-应用
 date: 2023-05-31
 sidebar: 'auto'
 categories: 
@@ -10,11 +10,11 @@ tags:
 
 [toc]
 
-# unraid笔记3-插件与docker容器
+# unraid笔记3-应用
 
-unraid有丰富的插件和docker容器可供选择，下面是我用到的一些插件。
+unraid提供丰富的插件和docker容器作为应用可供选择，下面是我用到的一些。
 
-## unraid modify插件
+## 网络加速：unraid modify插件
 
 unraid modify插件可以修改unraid系统的hosts文件来加快Docker，应用市场的加载速度。
 
@@ -23,7 +23,7 @@ unraid modify插件可以修改unraid系统的hosts文件来加快Docker，应�
 >如何安装插件？
 插件界面->安装插件-》输入插件地址-》点击安装按钮
 
-## Community Applications 插件   
+## 应用市场：Community Applications 插件   
 
 你只有安装了应用市场插件,才能下载其余的插件.
 
@@ -37,7 +37,39 @@ unraid modify插件可以修改unraid系统的hosts文件来加快Docker，应�
 
 ![unraid_20230531224932.png](../blog_img/unraid_20230531224932.png)
 
-## 安装Zerotier docker容器
+## 文件管理：Dynamix File Manager 插件
+
+Unraid 默认并没有带文件管理器，而是以插件的形式提供给用户来安装，可以在 Unraid 的应用中心搜索 Dynamix File Manager 进行安装。
+
+安装之后，会在 Unraid 的右上角多出一个文件管理器图标。
+![unraid_20230609002156.png](../blog_img/unraid_20230609002156.png)
+
+点击之后，就可以进入文件管理界面了。
+![unraid_20230609002309.png](../blog_img/unraid_20230609002309.png)
+
+
+基本的文件管理功能都有，可以满足绝大部分需求。
+
+## 文件管理：FileBrowser docker容器
+
+如果Dynamix File Manager插件不够好用，或者不够好看。那么可以试试这款简洁轻量易用的第三方管理器 - FileBrowser。
+
+1. 在应用市场搜索FileBrowser。找到下载量多的那个安装。
+2. 容器配置
+    1. HostPath1配置修改为/mnt/user，共享文件夹基本上都存放在这个目录中。
+    2. 把webui界面的IP地址修改为固定ip。
+    3. HostPath2和其余配置默认。
+
+![unraid_202306082032.png](../blog_img/unraid_202306082032.png)
+
+3. 安装好后，在docker界面点击FileBrowser容器图标，进入到webui管理界面。
+
+![unraid_20230608213647.png](../blog_img\unraid_20230608213647.png)
+
+4. 在FileBrowser的设置选项中，可以设置简体中文。
+5. 然后就可以进行文件管理了。
+
+## 内网穿透：安装Zerotier docker容器
 
 1. 直接在应用市场中搜索Zerotier
 2. 安装Zerotier docker容器
