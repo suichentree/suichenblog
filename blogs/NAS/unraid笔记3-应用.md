@@ -64,7 +64,7 @@ Unraid 默认并没有带文件管理器，而是以插件的形式提供给用�
 
 3. 安装好后，在docker界面点击FileBrowser容器图标，进入到webui管理界面。
 
-![unraid_20230608213647.png](../blog_img\unraid_20230608213647.png)
+![unraid_20230608213647.png](../blog_img/unraid_20230608213647.png)
 
 4. 在FileBrowser的设置选项中，可以设置简体中文。
 5. 然后就可以进行文件管理了。
@@ -80,7 +80,7 @@ Unraid 默认并没有带文件管理器，而是以插件的形式提供给用�
 注意设置自动启动
 ![unraid_20230531234841.png](../blog_img/unraid_20230531234841.png)
 
-## 安装 Unassigned Devices 插件
+## 未分配硬盘管理：Unassigned Devices 插件
 
 直接在应用市场中搜索Unassigned Devices，点击安装即可。
 
@@ -89,4 +89,72 @@ Unraid 默认并没有带文件管理器，而是以插件的形式提供给用�
 2. 在主界面中可以添加局域网中的其他smb，nfs分享。
 
 ![unraid_20230602003620.png](../blog_img/unraid_20230602003620.png)
+
+
+## 包管理工具：NerdTools 插件
+
+Unraid 是基于 Slackware Linux 发行版进行定制的。Slackware Linux 不提供类似 apt 或者 yum 的包管理工具，当需要安装一些软件工具包时候就相对比较麻烦。
+
+NerdTools插件可以简单的理解为一个比较粗糙的 Unraid 包管理工具。它可以帮你预编译好了相关软件包，只需要下载即可使用。
+
+1. 在应用市场中搜索NerdTools
+2. 选择 设置-》NerdTools。就能进入到NerdTools管理界面
+3. 选择你要下载的工具包，点击下载即可使用。
+
+![unraid_20230609122342.png](../blog_img/unraid_20230609122342.png)
+
+## 显示主板、CPU传感器温度：Dynamix System Temperature插件
+
+这个插件需要先安装perl工具包才能使用，但是6.11.x版本的unraid系统已经集成了perl工具包。所以直接在应用市场下载该插件即可。
+
+1. 在应用市场下载该插件
+1. 选择 设置-》System Temperature。就能进入到System Temperature管理界面
+2. 点击检测驱动，保存，加载驱动
+3. 选择处理器和主板的温度传感器。
+4. 最后就可以在仪表板上看到cpu和主板的显示温度了。
+
+![unraid_20230609124542.png](../blog_img/unraid_20230609124542.png)
+
+## 显示磁盘利用率和关键系统资源：Dynamix System Stats插件
+
+1. 在应用市场下载该插件
+2. 下载完后，刷新页面，可以看到出现了一个stats界面
+3. stats界面会显示磁盘利用率和关键系统资源等信息
+
+![unraid_20230609130233.png](../blog_img/unraid_20230609130233.png)
+
+## 家庭影音服务器： jellyfin  docker容器
+
+1. 在应用市场下载jellyfin
+2. 安装linuxserver's Repository的jellyfin（纯净版）
+3. 编辑jellyfin配置,把硬盘上的媒体数据映射到docker容器中。添加核心设备，用于硬解码。
+4. 点击应用
+![unraid_20230609132113.png](../blog_img/unraid_20230609132113.png)
+
+5. 进入webui界面，设置密码，添加媒体库。之后就可以在jellyfin上观看影音了。
+
+### unraid开启核显 renderD128 驱动
+
+1. 点击右上角终端。输入以下代码：`modprobe i915`
+2. 检测是否开启核显：
+   输入以下代码：`ls /dev/dri` 如果出现了 renderD128 表示开启核显成功。
+3. 设置开机启动项，让每次开机就会自动加载核显驱动。
+
+```
+# 进入到该目录
+cd /boot/config
+# 编辑go配置文件 
+vi go
+# 添加核显到文件中
+modprobe i915
+# 退出并保存文件即可。
+```
+
+### 设置 Jellyfin 硬件加速
+
+硬件加速功能需要unraid系统先开启核显驱动。
+
+选择控制台-》播放-》按图中进行设置开启硬件加速功能。
+
+![unraid_20230609134427.png](../blog_img/unraid_20230609134427.png)
 
