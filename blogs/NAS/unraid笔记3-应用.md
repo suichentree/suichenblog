@@ -115,13 +115,15 @@ NerdTools插件可以简单的理解为一个比较粗糙的 Unraid 包管理工
 
 ![unraid_20230609124542.png](../blog_img/unraid_20230609124542.png)
 
-## 显示磁盘利用率和关键系统资源：Dynamix System Stats插件
+## 显示磁盘空间，读写速度和系统信息：Dynamix System Stats插件
 
 1. 在应用市场下载该插件
 2. 下载完后，刷新页面，可以看到出现了一个stats界面
-3. stats界面会显示磁盘利用率和关键系统资源等信息
+3. stats界面会显示磁盘利用率和一些系统等信息
 
 ![unraid_20230609130233.png](../blog_img/unraid_20230609130233.png)
+
+![unraid_20230610191612.png](../blog_img/unraid_20230610191612.png)
 
 ## 家庭影音服务器： jellyfin  docker容器
 
