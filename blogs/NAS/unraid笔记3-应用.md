@@ -160,3 +160,12 @@ modprobe i915
 
 ![unraid_20230609134427.png](../blog_img/unraid_20230609134427.png)
 
+
+## BT下载工具：qBittorrent docker容器
+
+qbittorrent是一款基于linux的标准BT下载工具。
+
+1. 在应用市场搜索qBittorrent，选择linuxserver的qBittorrent容器下载
+2. 在容器配置页面修改一下webui的端口8082（默认为8080）
+3. 设置下载路径
+4. 点击应用，创建容器。
