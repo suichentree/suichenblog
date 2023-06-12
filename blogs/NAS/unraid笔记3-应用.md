@@ -169,3 +169,49 @@ qbittorrent是一款基于linux的标准BT下载工具。
 2. 在容器配置页面修改一下webui的端口8082（默认为8080）
 3. 设置下载路径
 4. 点击应用，创建容器。
+
+## 影音信息刮削器：tinyMediaManager docker容器
+
+tinyMediaManager能帮助我们下载电影电视剧的元数据到本地。例如电影的封面，字幕，剧情介绍等。
+
+1. 在unraid应用市场搜索tinyMediaManager。
+2. 安装官方版本的。
+3. 进行docker配置。主要配置如图.
+
+![unraid_20230612202948.png](../blog_img/unraid_20230612202948.png)
+
+![unraid_20230612203014.png](../blog_img/unraid_20230612203014.png)
+
+4. 运行容器。
+5. 浏览器搜索网址，输入密码进入设置界面
+6. 刚开始的电影电视剧文件夹的路径和元数据平台先不选。一路点击next
+7. 点击设置-》语言选择为中文。然后重启容器
+![unraid_20230612204845.png](../blog_img/unraid_20230612204845.png)
+8. 设置-》电影-》媒体库。添加电影路径
+9. 刮削器平台，主要选择TMDB。它支持中文比较好。
+10. 刮削器选项：首先语言选择中文
+11. 元数据默认设置：看情况选择。
+![unraid_20230612212533.png](../blog_img/unraid_20230612212533.png)
+12. 设置好后，点击更新媒体库。就可以看到刮削的结果了。
+![unraid_20230612214850.png](../blog_img/unraid_20230612214850.png)
+13. 其余用法自行查询。
+
+
+## 配置文件编辑器：CA Config Editor 插件
+
+CA Config Editor是一款可以编辑配置文件的编辑器插件，最常用的就是编辑U盘中的go文件，可以不需要命令行编辑。
+
+
+
+## 显示GPU仪表盘：GPU Statistics 插件
+
+这个插件可以显示GPU信息在仪表盘。
+
+1. 先装 Intel-GPU-TOP 这个插件，目的就是开启 GPU，不用再输入脚本开启，什么都不用打开，然后再装 GPU Statistics插件。
+![unraid_20230613004927.png](../blog_img/unraid_20230613004927.png)
+
+2. 对GPU Statistics插件进行设置，Intel-GPU-TOP 插件不需要进行设置。
+3. 主要设置这两项。
+![unraid_20230613005059.png](../blog_img/unraid_20230613005059.png)
+4. 设置好后，刷新仪表盘页面，就可以看到GPU信息了。
+![unraid_20230613005159.png](../blog_img/unraid_20230613005159.png)
