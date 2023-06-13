@@ -165,10 +165,22 @@ modprobe i915
 
 qbittorrent是一款基于linux的标准BT下载工具。
 
-1. 在应用市场搜索qBittorrent，选择linuxserver的qBittorrent容器下载
-2. 在容器配置页面修改一下webui的端口8082（默认为8080）
-3. 设置下载路径
-4. 点击应用，创建容器。
+1. 在应用市场搜索qBittorrent，选择linuxserver源的qBittorrent容器下载
+2. 在容器配置页面配置端口，下载路径,网络类型选择host。之前选择bridge会导致qb界面无法访问。
+![unraid_20230613143858.png](../blog_img/unraid_20230613143858.png)
+3. 访问qb界面，默认账户密码（admin/adminadmin）。
+![unraid_20230613144144.png](../blog_img/unraid_20230613144144.png)
+4. 具体用法自行百度
+
+### qBittorrent设置中文
+
+设置-》webui->语言选择中文
+
+### qBittorrent 添加 trackers 优化下载速度
+
+在 GitHub 中搜索 trackers list 获取列表，添加到 qBittorrent 中。trackers 是用来优化下载速度的，多多益善。
+
+设置-》bitTorrent-》添加tracker。
 
 ## 影音信息刮削器：tinyMediaManager docker容器
 
@@ -215,3 +227,29 @@ CA Config Editor是一款可以编辑配置文件的编辑器插件，最常用�
 ![unraid_20230613005059.png](../blog_img/unraid_20230613005059.png)
 4. 设置好后，刷新仪表盘页面，就可以看到GPU信息了。
 ![unraid_20230613005159.png](../blog_img/unraid_20230613005159.png)
+
+
+## 定时运行脚本：User Scripts脚本 插件
+
+User Scripts插件可以自动运行一下脚本命令，比如emby的打开核显，定时开启某个docker应用或者虚拟机，又或者定时使用rsync进行数据备份。
+
+1. 在应用市场搜索User Scripts并安装
+   ![unraid_20230613125805.png](../blog_img/unraid_20230613125805.png)
+2. 在插件界面中找到User Scripts插件并点击，进入User Scripts页面。
+3. 在页面中可以新建，删除，编辑，运行，后台运行脚本等功能
+   ![unraid_20230613131653.png](../blog_img/unraid_20230613131653.png)
+   ![unraid_202306131320.png](../blog_img/unraid_202306131320.png)
+    自定义时间规则：分 时 天 月 周。例如: 50 11 * * 1 就是每周一11:50执行
+
+4. 其他具体用法自行百度
+
+### 开机添加DNS数据到hosts脚本中
+
+由于UNRAID重启之后修改的host文件会被清空。因此使用User Scripts插件创建脚本每次开机自动运行添加dns数据到hosts中。
+
+1. 创建脚本，脚本代码如下：
+```bash
+#!/bin/bash
+echo "185.199.108.133 raw.github.com" >> /etc/hosts
+```
+2. 选择后台允许。运行规则选择：At First Array Start Only（第一次阵列启动时，就是每次重启系统时运行）
