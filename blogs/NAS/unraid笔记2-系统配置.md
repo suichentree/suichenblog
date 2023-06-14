@@ -75,6 +75,11 @@ Unraid 默认自动获取 IP 地址，由路由器自动分配，这个 IP 地�
 
 设置-》日期和时间-》时区选择 (UTC +8:00)beijing时区
 
+NTP服务器推荐如下：
+- ntp1.aliyun.com 阿里云NTP
+- time.apple.com 苹果NTP
+
+
 ## 开机自动启动阵列
 
 SETTINGS -> Disk Setting -> Enable auto start 选中Yes，点击下方Apply保存设置。这样就不用每次重启点一下启动阵列。
