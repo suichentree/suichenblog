@@ -303,22 +303,6 @@ echo "185.199.108.133 raw.github.com" >> /etc/hosts
 1. 登录后，就可以在ui界面上对库表进行增删改查等操作。
 ![unraid_20230613223550.png](../blog_img/unraid_20230613223550.png)
 
-## 个人网盘：可道云 docker容器
-
-可道云的docker镜像：kodcloud/kodbox
-镜像地址：[https://hub.docker.com/r/kodcloud/kodbox](https://hub.docker.com/r/kodcloud/kodbox)
-
-
-1. 因为应用市场没有可道云，所以直接创建docker容器安装。
-2. 由于不是插件，因此需要手动添加映射端口和数据目录，并把webui的地址也填上。
-![unraid_20230613225729.png](../blog_img/unraid_20230613225729.png)
-3. 输入webui网址。进行在线配置。
-![unraid_20230613231328.png](../blog_img/unraid_20230613231328.png)
-4. 可以使用自带的SQLite轻量数据库，自带的性能和稳定性都会差一点。也可以使用其他的数据库。注意：使用其他数据库需要先把kodbox数据库创建好。系统缓存使用自带的就行。
-![unraid_20230613231558.png](../blog_img/unraid_20230613231558.png)
-5. 设置账户密码。然后登录。
-![unraid_20230613232411.png](../blog_img/unraid_20230613232411.png)
-
 ## 音乐播放器：navidrome docker容器
 
 Navidrome 是一开源的音乐服务器，可以用来自建云端音乐播放器，让你在任何地方通过浏览器或者手机来收听自己的音乐。
@@ -330,3 +314,46 @@ Navidrome 是一开源的音乐服务器，可以用来自建云端音乐播放�
 3. 安装运行后，访问网址，设置好账户密码。
 4. 下图是navidrome界面，在设置中可以设置为中文。
 ![unraid_20230614162615.png](../blog_img/unraid_20230614162615.png)
+
+## ★★★神器 个人网盘：可道云 docker容器
+
+可道云的docker镜像：kodcloud/kodbox
+镜像地址：[https://hub.docker.com/r/kodcloud/kodbox](https://hub.docker.com/r/kodcloud/kodbox)
+
+1. 因为应用市场没有可道云，所以直接创建docker容器安装。
+2. 由于不是插件，因此需要手动添加映射端口和数据目录，图中可以把webui的地址也填上。
+![unraid_20230613225729.png](../blog_img/unraid_20230613225729.png)
+3. 输入webui网址。进行在线配置。
+![unraid_20230613231328.png](../blog_img/unraid_20230613231328.png)
+4. 可以使用自带的SQLite轻量数据库，自带的性能和稳定性都会差一点。也可以使用其他的数据库。
+   - 个人使用的话，数据库和系统缓存直接默认自带的即可。企业使用才需要特别配置。
+   - 使用mysql数据库需要先在mysql中把kodbox数据库创建好。
+![unraid_20230615161215.png](../blog_img/unraid_20230615161215.png)
+![unraid_20230613231558.png](../blog_img/unraid_20230613231558.png)
+
+
+1. 设置账户密码。然后登录。
+![unraid_20230613232411.png](../blog_img/unraid_20230613232411.png)
+
+### 通过可道云进行文件管理
+
+由于unraid的文件管理很垃圾，我们也可以通过可道云来帮助我们进行文件管理。
+
+可道云功能如下：
+- 可以直接通过拖拽的方式来上传下载文件。
+- 可以直接播放音乐，视频。
+- 可以直接打开word文档等文件
+
+1. 编辑可道云docker配置，新增一个路径映射。
+
+主机路径：/mnt/user。 /mnt/user是unraid系统中所有共享文件夹的父目录。
+
+容器路径：/myData。随便起个名字。
+
+![unraid_20230615154102.png](../blog_img/unraid_20230615154102.png)
+
+2. 重启docker容器。输入网页登录。可以看到刚刚映射的目录。
+![unraid_20230615154601.png](../blog_img/unraid_20230615154601.png)
+3. 进入目录，可以看到unraid系统的所有共享文件夹。
+![unraid_20230615154656.png](../blog_img/unraid_20230615154656.png)
+4. 我们可以直接上传下载文件到某个共享文件夹中，也可以直接播放音乐视频，也可以在线编辑文本文档等。

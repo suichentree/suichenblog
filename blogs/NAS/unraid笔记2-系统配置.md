@@ -12,6 +12,10 @@ tags:
 
 # unraid笔记2-系统配置
 
+## 修改服务器名称
+
+![unraid_20230615144241.png](../blog_img/unraid_20230615144241.png)
+
 ## 安装基础插件
 
 由于unraid系统的插件和docker有很多都在github等国外网站上。因此在unraid服务器无法科学上网的情况下。安装插件和docker经常会失败。
