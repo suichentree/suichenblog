@@ -1,6 +1,6 @@
 ---
 title: Java基础
-date: 2022-06-10
+date: 2020-06-10
 sidebar: 'auto'
 categories: 
  - 后端
@@ -371,7 +371,7 @@ java中访问权限修饰符有四种,按从大到小：public > protected > def
 
 √ 可访问
 x 不可访问
-访问的意思是无法看到，无法使用。
+访问的意思是无法看到，无法调用。
 
 #### 1. 私有 private
 
