@@ -1,5 +1,5 @@
 ---
-title: Java学习笔记1-语法
+title: Java学习笔记1-基础语法
 date: 2023-06-16
 sidebar: 'auto'
 categories: 
@@ -8,7 +8,7 @@ categories:
 
 [toc]
 
-# Java学习笔记1-语法
+# Java学习笔记1-基础语法
 
 这篇文章主要是对自己的java语言知识的梳理。也是对自己以前写的java笔记的梳理。
 
@@ -268,7 +268,6 @@ for( String name : names ) {
 ### break 关键字,continue 关键字:
 
 >break 主要用在循环语句或者 switch 语句中，用来跳出最里层的循环语句。
-
 >continue 作用是让程序立刻跳转到下一次循环。
 >1. 在 for 循环中，continue 语句使程序立即跳转到更新语句。
 >2. 在 while 或者 do…while 循环中，continue 语句使程序立即跳转到布尔表达式的判断语句。
@@ -296,79 +295,56 @@ for(int x : numbers ) {
 
 ## 数组
 
-### 声明数组
+### 定义数组
 
 ```java
-int[]  myList;         //首选的方法
-int  myList2[];        //效果相同，但不是首选方法
+int[]  myList;         //推荐的定义方式
+int  myList2[];        //C/C++ 语言风格的定义方式。不推荐使用
+
+//定义数组myList3并初始化数组myList3
+int[] myList3 = new int[10];
 ```
 
->注意: 建议使用 int[]  myList; 的方式来声明数组变量。 
->int  myList[];  风格是来自 C/C++ 语言 ，在Java中采用是为了让 C/C++ 程序员能够快速理解java语言。
+注意: 推荐使用`int[] myList;`的方式来数组变量。 
 
-### 创建数组：
-
-```java
-//Java语言使用new操作符来创建数组
-int[] myList = new int[size];
-
-/*
-1. 使用 int[size] 创建了一个数组。
-2. 把新创建的数组的引用赋值给数组变量myList。
-*/
-```
+### 使用数组
 
 ```java
-//这个例子是数组作为函数的参数，函数的返回值
-public class test1 {
-    public static void main(String[] args) {
-        int[] a=new int[10];  //创建数组a
-        for(int i=0;i<10;i++) {
-            a[i]=i;
-        }
-        printArray(a);   //数组作为函数参数
-        int[] b=reverse(a);    //数组作为函数返回值
+//打印数组内容，数组作为函数参数
+public static void printArray(int[] a) {
+    //增强for循环
+    for(int x:a) {
+        System.out.println("数组值"+x);
     }
-    public static void printArray(int[] a) {
-        //增强for循环
-        for(int x:a) {
-            System.out.println("数组值"+x);
-        }
+}
+
+//逆序输出数组，数组作为函数返回值
+public static int[] reverse(int[] a) {
+    int[] result = new int[a.length];    //创建一个与a数组等长的数组result
+    for (int i = 0, j = result.length - 1; i < a.length; i++, j--) {   //把a数组的逆序赋值到result数组上
+    result[j] = a[i];
     }
-    public static int[] reverse(int[] a) {
-        int[] result = new int[a.length];    //创建一个与a数组等长的数组result
-        
-        for (int i = 0, j = result.length - 1; i < a.length; i++, j--) {   //把a数组的逆序赋值到result数组上
-        result[j] = a[i];
-        }
-        return result;
-    }
+    return result;
 }
 ```
 
 ### 多维数组
 
-多维数组可以看成是数组的数组，比如二维数组就是一个特殊的一维数组，其每一行元素都是一个一维数组。
-
-二维数组的定义：
+多维数组可以看成是数组中的每一个元素也是数组，例如二维数组就是一个特殊的一维数组，其每一行元素都是一个一维数组。
 
 ```java
+//二维数组的定义
 int[][] a = new int[2][3]; //创建一个2行3列的二维数组
+int[][] b = new int[3][];  //这样创建的方式，只是数组中每个元素的长度不确定
 
-int[][] b = new int[3][];  //这样创建的方式，只是每个元素的长度不确定
+//二维数组 a 可以看成每一行都是一个一维数组，相当于两个一维数组叠加在一起。其中每一个一维数组都有3个元素
+
+//特别的二维数组定义并初始化
+int[][] c = {{5,7,9},{12,14,16},{9,9,9},{2,2}}
 ```
 
-**二维数组 a 可以看成每一行都是一个一维数组，相当于两个一维数组叠加在一起。每一个一维数组都有3列**
-
-
-
->第三种方式：
-
-![54](../blog_img/java_img_54.png)
-
-② 二维数组的赋值与遍历
-
 ```java
+//例子：二维数组的赋值与遍历
 public class test1 {
 	  public static void main(String[] args) {
 		  int[][] a=new int[3][3];  //创建数组a
@@ -387,3 +363,95 @@ public class test1 {
 }
 
 ```
+
+
+## 方法（函数）
+
+方法又名函数，是语句的集合，是实现一种功能而组成的代码组合。方法创建于类中，可以在其他地方被引用。
+
+### 方法定义
+
+```java
+//语法
+修饰符 返回值类型 方法名(参数类型 参数名){
+    ...
+    方法体
+    ...
+    return 返回值;
+}
+
+/*
+1. 修饰符：定义了该方法的访问类型。
+2. 返回值类型 ：方法中返回值的数据类型。若无返回值可以写成void
+3. 方法名：方法的名称
+4. 参数类型：当方法被调用时，传递值给参数。这个值被称为实参或变量。参数是可选的，方法可以不包含任何参数。
+5. 方法体：方法体包含具体的语句代码。
+*/
+
+public static int max(int num1, int num2) {
+   int result;
+   if (num1 > num2)
+      result = num1;
+   else
+      result = num2;
+   return result; //返回值
+}
+```
+
+### 方法调用
+
+1. 当方法有返回值的时候，方法调用通常被当做一个值。例如：
+int larger = max(30, 40);
+2. 如果方法返回值类型是void（无返回值）,方法调用一定是一条语句。例如：
+System.out.println("欢迎访问菜鸟教程！");
+
+### 方法的重载
+
+1. 创建两个有相同名字但参数不同的方法，这叫做方法重载。
+
+```java
+//下面的两个max方法有相同名字但参数不同：
+public static int max(int num1, int num2) {
+   int result;
+   if (num1 > num2)
+      result = num1;
+   else
+      result = num2;
+   return result; //返回值
+}
+public static double max(double num1, double num2) {
+  if (num1 > num2)
+    return num1;
+  else
+    return num2;
+}
+```
+
+### 构造方法
+
+构造方法的作用是初始化类的，可以在构造方法中对一个类的成员变量赋初值，或者在构造方法中执行其它必要的步骤来创建一个完整的对象。
+
+构造方法是没有返回值。
+
+```java
+// 一个简单的构造函数
+class MyClass {
+  int x;
+  // 以下是构造方法,构造方法没有返回值，对x成员变量进行初始化。
+  MyClass() {
+    x = 10;
+  }
+}
+//-------
+public class ConsDemo {
+   public static void main(String args[]) {
+      MyClass t1 = new MyClass();    //实例化类对象
+      System.out.println(t1.x);   //t1.x的值为10
+   }
+}
+```
+
+>所有的类都有构造方法，因为Java自动提供了一个默认构造方法.
+>类为 public，构造函数也为 public；类改为 private，构造函数也改为 private
+>一旦你定义了自己的构造方法，默认构造方法就会失效。
+
