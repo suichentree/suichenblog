@@ -174,6 +174,18 @@ modprobe i915
 
 ![unraid_20230609134427.png](../blog_img/unraid_20230609134427.png)
 
+### 解决中文字幕显示为方块的问题
+
+问题：在播放视频的时候字幕中的汉字全是方块。
+
+解决方式：为字幕添加中文备用字体。
+
+1. 在Jellyfin容器挂载的config目录中，新建一个文件夹fonts。
+2. 从网上下载Noto Sans SC woff2 字体包。从中找到NotoSansCJKsc-Medium.woff2 这个字体文件，复制到 fonts 目录中。
+3. 在jellyfin 控制台-播放中设置启用备用字体。
+4. 然后点击保存，保存该设置。
+
+![unraid_20230619230956.png](../blog_img/unraid_20230619230956.png)
 
 ## BT下载工具：qBittorrent docker容器
 

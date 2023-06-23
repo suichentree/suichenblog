@@ -17,7 +17,51 @@ unraid提供丰富的虚拟机模板可供创建。
 ![unraid_20230614001912.png](../blog_img/unraid_20230614001912.png)
 
 
-## 安装win10虚拟机
+## win10虚拟机
+
+### 准备
+
+[msdn我告诉你](https://msdn.itellyou.cn/)
+
+1. 先在msdn我告诉你网站上下载win10镜像。所选win10镜像：cn_windows_10_enterprise_ltsc_2019_x64_dvd.iso
+2. 把镜像上传到isos目录中。
+3. 在unraid虚拟机管理器中下载win10虚拟总线驱动程序。会自动下载到isos目录中。
+![unraid_20230622232715.png](../blog_img/unraid_20230622232715.png)
+
+### 开始安装
+
+1. 进入到unraid 的虚拟机界面，点击创建虚拟机。
+2. 选择win10虚拟机模板
+3. 虚拟机配置如图，内存4g以上，图片中的两个iso路径分别对应win10镜像和win10虚拟总线驱动。
+![unraid_20230622210425.png](../blog_img/unraid_20230622210425.png)
+4. 创建虚拟机后进入 VNC 查看显示画面。
+![unraid_20230622233547.png](../blog_img/unraid_20230622233547.png)
+5. 一路点击下一步。选择自定义安装。选择系统安装的位置。
+![unraid_20230622233632.png](../blog_img/unraid_20230622233632.png)
+![unraid_20230622233721.png](../blog_img/unraid_20230622233721.png)
+6. 等待安装完成。然后开始进行账户密码等设置。
+7. 登录win10
+![unraid_20230622234056.png](../blog_img/unraid_20230622234056.png)
+8. 此时的win10系统有些驱动都没有，无法连接网络等。需要安装驱动。
+![unraid_20230622234346.png](../blog_img/unraid_20230622234346.png)
+9. 在此处双击之前导入的win10虚拟总线驱动程序。运行该驱动程序，安装驱动。
+![unraid_20230622234301.png](../blog_img/unraid_20230622234301.png)
+![unraid_20230622234557.png](../blog_img/unraid_20230622234557.png)
+10. 重启虚拟机，开始使用win10把。
+
+### 虚拟机win10访问UNRAID共享文件夹，及其他网络共享
+
+虚拟机win10需要设置一下，才能访问访问UNRAID共享文件夹。
+
+1. 按window+R键打开运行 - > 在运行中输入“gpedit.msc”来启动本地组策略编辑器。
+2. 计算机配置->管理模板->网络->Lanman工作站->启用不安全的来宾登录->已启用。
+![unraid_20230623193855.png](../blog_img/unraid_20230623193855.png)
+
+3. 然后再访问UNRAID共享文件夹即可。
+![unraid_20230623194750.png](../blog_img/unraid_20230623194750.png)
+
+
+## win10虚拟机-荒野无灯版
 
 为什么创建win10虚拟机？
 1. 用于没有windows环境时执行一些轻量级的应用，比如在NAS和Linux服务器上运行QQ等
@@ -94,3 +138,40 @@ win10.qcow2镜像：
 11.  手动上传DSM_DS920+_42962.pat文件。该文件可以在群晖官网上下载。上传后点击下一步。
 12.  之后格式化硬盘，自动安装，等待即可。
 ![unraid_202306102051.png](../blog_img/unraid_202306102051.png)
+
+
+## ubuntu虚拟机
+
+1. 先把ubuntu的iso镜像文件上传到isos共享文件夹中。
+2. 进入到虚拟机界面，创建虚拟机。
+3. 选择ubuntu虚拟机模板
+4. 虚拟机配置如图所示。其余配置默认即可。注意：硬盘类型要选择raw，硬盘容量30g左右。
+![unraid_20230620210946.png](../blog_img/unraid_20230620210946.png)
+5. 虚拟机启动后，选择VNC远程操控。可以看到系统安装界面。一路点击下一步即可。
+![unraid_20230620202713.png](../blog_img/unraid_20230620202713.png)
+
+### ubuntu挂载unraid共享文件夹
+
+共享文件夹是smb文件协议的。
+
+1. ubuntu安装smb客户端工具
+
+```
+apt install smbclient
+```
+
+2. 查看要访问的ip地址下的共享目录。
+
+```
+语法：smbclient -L [IP地址] -U [用户名]
+
+smbclient -L 192.168.1.167 -U rootadmin
+```
+
+3. 使用mount挂载共享文件夹，就能像访问本地文件一样访问
+
+```
+语法：mount -o username=[账号],password=[密码] //[服务器IP]/[共享目录] /[挂载点]
+
+mount -o username=rootadmin,password=****** //192.168.1.167/download /home/unraidshare/download
+```
