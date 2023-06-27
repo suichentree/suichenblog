@@ -57,7 +57,7 @@ PS: 需要提前在群晖系统中安装docker套件
 ![20230102160326.png](../blog_img/20230102160326.png)
 
 
-## 青龙面板的使用（待续）
+## 青龙面板的使用
 
 ### 1 依赖包说明
 
@@ -141,3 +141,9 @@ ql repo https://github.com/shufflewzc/faker2.git "jd_|jx_|gua_|jddj_|getJDCookie
 
 JDcookie环境变量的格式为：pt_key=XXXX;pt_pin=XXXX;
 
+
+## 自己写的青龙脚本
+
+参考了网上其他大神写的青龙脚本，按照自己的想法稍微修改了一下。
+
+github仓库链接：https://github.com/suichentree/shu_script.git

@@ -371,3 +371,54 @@ Navidrome 是一开源的音乐服务器，可以用来自建云端音乐播放�
 3. 进入目录，可以看到unraid系统的所有共享文件夹。
 ![unraid_20230615154656.png](../blog_img/unraid_20230615154656.png)
 4. 我们可以直接上传下载文件到某个共享文件夹中，也可以直接播放音乐视频，也可以在线编辑文本文档等。
+
+
+## 定时任务脚本：青龙面板 docker容器
+
+青龙面板是定时任务脚本管理工具，可以通过青龙面板管理定时任务脚本。
+
+1. 应用市场搜索qinglong,安装青龙面板
+2. docker配置默认即可。
+3. 安装后，根据端口访问青龙面板页面
+
+<font color="red">
+后续青龙面板用法参考《群晖docker安装青龙面板》这篇文章。
+</font>
+
+## 照片管理工具：PhotoPrism docker容器
+
+PhotoPrism 是一个开源的照片管理工具，是一款 AI 驱动的应用程序，用于浏览、组织和分享您的照片集。
+
+1. 在应用市场搜索PhotoPrism,安装PhotoPrism
+2. docker配置如图，设置相册映射路径和密码，其他配置默认即可。
+![unraid_20230624140742.png](../blog_img/unraid_20230624140742.png)
+![unraid_20230624140827.png](../blog_img/unraid_20230624140827.png)
+
+3. 安装后，访问相册页面。账户默认是admin,密码是之前设置的。
+![unraid_20230624140742.png](../blog_img/unraid_20230624141046.png)
+4. 登录后，可以在设置中将语言改为简体中文。
+5. 然后再资料库中进行扫描，就可以看到照片了。
+
+
+## 文件同步：Resilio Sync docker容器
+
+[Resilio Sync官网](https://www.resilio.com/)
+
+Resilio Sync是由Resilio推出的全平台文件同步产品。其有手机端，电脑端，NAS端应用。可以在多个设备之间互相同步文件数据。
+
+1. 在应用市场搜索resilio sync ,安装resilio-sync 
+![unraid_20230627132506.png](../blog_img/unraid_20230627132506.png)
+
+2. docker配置如图,主要配置缓存目录和同步目录的路径
+![unraid_20230627132941.png](../blog_img/unraid_20230627132941.png)
+
+3. 安装后，访问Resilio Sync 页面。设置一个账户密码。
+![unraid_20230627133718.png](../blog_img/unraid_20230627133718.png)
+4. 选中sync-home 家用版本
+![unraid_20230627133810.png](../blog_img/unraid_20230627133810.png)
+5. 然后给当前的设备取个名字。
+![unraid_20230627133928.png](../blog_img/unraid_20230627133928.png)
+6. 之后就可以进入到主页面了
+![unraid_20230627134041.png](../blog_img/unraid_20230627134041.png)
+
+具体的使用方法自行百度。
