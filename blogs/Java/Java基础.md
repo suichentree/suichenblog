@@ -607,7 +607,6 @@ public synchronized void aaaa(){
 
 > 4.逻辑运算符：
 
-![20](../blog_img/java_img_20.png)
 
 > 5.赋值运算符：
 

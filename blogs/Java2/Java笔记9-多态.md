@@ -241,3 +241,296 @@ public class MathClass implements IMath {
 ```
 
 在实现类中，所有的方法都使用了 public 访问修饰符声明。无论何时实现一个由接口定义的方法，它都必须实现为 public，因为接口中的所有成员都显式声明为 public。
+
+## 内部类
+
+在类内部除了定义成员变量和方法之外，还可以在类内部也可以定义另一个类。如果在类 A 的内部再定义一个类 B，此时类 B 就称为内部类（或称为嵌套类），而类 A 则称为外部类（或称为宿主类）。
+
+内部类也可以分为多种，与变量非常类似。
+![java_20230628134219.png](../blog_img/java_20230628134219.png)
+
+内部类的特点如下：
+* 内部类仍然是一个独立的类，在编译之后内部类会被编译成独立的.class文件，但是前面冠以外部类的类名和$符号。
+* 内部类不能用普通的方式访问。内部类是外部类的一个成员，因此内部类可以自由地访问外部类的成员变量，无论是否为private的。
+* 内部类声明成静态的，就不能随便访问外部类的成员变量，只能访问外部类的静态成员变量。
+
+```java
+//例子
+public class Test {
+    public class InnerClass {
+        public int getSum(int x,int y) {
+            return x + y;
+        }
+    }
+    public static void main(String[] args) {
+      
+        Test.InnerClass ti = new Test().new InnerClass();
+        int i = ti.getSum(2,3);
+        System.out.println(i);    // 输出5
+    }
+}
+```
+
+内部类的注意点：
+* 在外部类中可以直接通过内部类的类名访问内部类。
+* 在外部类以外的其他类中则需要通过内部类的完整类名访问内部类。
+
+```java
+//外部类访问内部类
+InnerClass ic = new InnerClass();    // InnerClass为内部类的类名
+
+//其他类通过外部类访问内部类
+Test.InnerClass ti = new Test().new InnerClass();    // Test.innerClass是内部类的完整类名
+```
+
+<font color="red">提示：内部类的很多访问规则可以参考变量和方法。另外使用内部类可以使程序结构变得紧凑，但是却在一定程度上破坏了 Java 面向对象的思想。</font>
+
+
+### 实例内部类
+
+实例内部类是指没有用 static 修饰的内部类，就是普通的内部类。
+
+```java
+public class Outer {
+    class Inner {
+        // 实例内部类Inner
+    }
+}
+```
+
+实例内部类有如下特点:
+1. 在其他类中，必须通过外部类的实例来创建内部类的实例，从而访问内部类。
+```java
+public class Outer {
+    class Inner1 {
+    }
+}
+class OtherClass {
+    Outer.Inner i = new Outer().new Inner(); // 需要创建外部类实例
+}
+```
+
+
+2. 实例内部类中，可以访问外部类的所有成员。包括静态和非静态的。（本身非静态能访问静态的，静态的不能访问非静态的）
+```java
+public class Outer {
+    public int a = 100;
+    static int b = 100;
+    final int c = 100;
+    private int d = 100;
+
+    public String method1() {
+        return "实例方法1";
+    }
+
+    public static String method2() {
+        return "静态方法2";
+    }
+
+    class Inner {
+        int a2 = a + 1; // 访问public的a
+        int b2 = b + 1; // 访问static的b
+        int c2 = c + 1; // 访问final的c
+        int d2 = d + 1; // 访问private的d
+        String str1 = method1(); // 访问实例方法method1
+        String str2 = method2(); // 访问静态方法method2
+    }
+}
+```
+
+3. 如果一个外部类中有多层嵌套的内部类，那么在外部类中不能直接访问最里面的内部类的成员，而必须通过与其相近的内部类的实例去访问。例如类 A 包含内部类 B，类 B 中包含内部类 C，则在类 A 中不能直接访问类 C，而应该通过类 B 的实例去访问类 C。
+4. 在实例内部类中不能定义 static 成员，除非同时使用 final 和 static 修饰。
+
+
+### 静态内部类
+
+静态内部类是指使用 static 修饰的内部类。
+
+```java
+public class Outer {
+    static class Inner {
+        // 静态内部类Inner
+    }
+}
+```
+
+静态内部类有如下特点:
+
+1. 在创建静态内部类的实例时，不需要创建外部类的实例对象。因为静态内部类是属于类成员
+
+```java
+public class Outer {
+    static class Inner {
+    }
+}
+class OtherClass {
+    //不需要创建外部类实例对象来访问内部类。因为静态内部类是属于类成员
+    Outer.Inner oi = new Outer.Inner();
+}
+```
+
+
+2. 静态内部类中可以定义静态成员和实例成员。外部类以外的其他类需要通过完整的类名访问静态内部类中的静态成员，如果要访问静态内部类中的实例成员，则需要通过静态内部类的实例。
+
+```java
+public class Outer {
+    static class Inner {
+        int a = 0;    // 实例变量a
+        static int b = 0;    // 静态变量 b
+    }
+}
+class OtherClass {
+    Outer.Inner oi = new Outer.Inner();
+    int a2 = oi.a;    // 访问实例成员
+    int b2 = Outer.Inner.b;    // 访问静态成员
+}
+```
+
+3. 静态内部类可以直接访问外部类的静态成员，如果要访问外部类的实例成员，则需要通过外部类的实例去访问。
+
+```java
+public class Outer {
+    int a = 0;    // 实例变量
+    static int b = 0;    // 静态变量
+    static class Inner {
+        Outer o = new Outer;
+        int a2 = o.a;    // 访问实例变量
+        int b2 = b;    // 访问静态变量
+    }
+}
+```
+
+### 局部内部类
+
+局部内部类是指在一个方法中定义的内部类。
+
+```java
+public class Test {
+    public void method() {
+        class Inner {
+            // 局部内部类
+        }
+    }
+}
+``` 
+
+局部内部类有如下特点:
+
+1. 局部内部类与局部变量一样，不能使用访问控制修饰符（public、private 和 protected）和 static 修饰符修饰。
+
+2. 局部内部类只在当前方法中有效。
+
+```java
+public class Test {
+    public void method() {
+        class Inner{
+        }
+        Inner i = new Inner();
+    }
+}
+```
+
+3. 局部内部类中不能定义 static 成员。
+4. 局部内部类中还可以包含内部类，但是这些内部类也不能使用访问控制修饰符（public、private 和 protected）和 static 修饰符修饰。
+5. 在局部内部类中可以访问外部类的所有成员。
+6. 在局部内部类中只可以访问当前方法中 final 类型的参数与变量。如果方法中的成员与外部类中的成员同名，则可以使用 `<OuterClassName>.this.<MemberName>` 的形式访问外部类中的成员。
+
+```java
+public class Test {
+    int a = 0;
+    int d = 0;
+    public void method() {
+        int b = 0;
+        final int c = 0;
+        final int d = 10;
+        class Inner {
+            int a2 = a;    // 访问外部类中的成员
+            // int b2 = b;    // 编译出错
+            int c2 = c;    // 访问方法中的成员
+            int d2 = d;    // 访问方法中的成员
+            int d3 = Test.this.d;    //访问外部类中的成员
+        }
+        Inner i = new Inner();
+        System.out.println(i.d2);    // 输出10
+        System.out.println(i.d3);    // 输出0
+    }
+}
+```
+
+
+### 匿名内部类
+
+匿名类是指没有类名的内部类，必须在创建时使用 new 语句来声明类。
+
+```java
+new <类或接口>() {
+    // 类的主体
+};
+```
+
+匿名类有两种实现方式：
+* 继承一个类，重写其方法。
+* 实现一个接口（可以是多个），实现其方法。
+
+```java
+public class Out {
+    void show() {
+        System.out.println("调用 Out 类的 show() 方法");
+    }
+}
+public class TestAnonymousInterClass {
+    // 在这个方法中构造一个匿名内部类
+    private void show() {
+        Out anonyInter = new Out() {
+            // 匿名内部类重写了show方法。
+            void show() {
+                System.out.println("调用匿名类中的 show() 方法");
+            }
+        };
+        anonyInter.show();
+    }
+    public static void main(String[] args) {
+        TestAnonymousInterClass test = new TestAnonymousInterClass();
+        test.show();
+    }
+}
+```
+
+程序的输出结果如下：
+```
+调用匿名类中的 show() 方法
+```
+
+匿名类有如下特点：
+
+1. 匿名类和局部内部类一样，可以访问外部类的所有成员。如果匿名类位于一个方法中，则匿名类只能访问方法中 final 类型的局部变量和参数。
+
+```java
+public static void main(String[] args) {
+    int a = 10;
+    final int b = 10;
+    Out anonyInter = new Out() {
+        void show() {
+            // System.out.println("调用了匿名类的 show() 方法"+a);    // 编译出错
+            System.out.println("调用了匿名类的 show() 方法"+b);    // 编译通过
+        }
+    };
+    anonyInter.show();
+}
+```
+
+2. 匿名类中允许使用非静态代码块进行成员初始化操作。
+
+```java
+Out anonyInter = new Out() {
+    int i; 
+    {    // 非静态代码块
+        i = 10;    //成员初始化
+    }
+    public void show() {
+        System.out.println("调用了匿名类的 show() 方法"+i);
+    }
+};
+```
+
+3. 匿名类的非静态代码块会在父类的构造方法之后被执行。
