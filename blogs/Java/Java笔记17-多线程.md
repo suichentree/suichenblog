@@ -1,31 +1,44 @@
 ---
-title: Java多线程
-date: 2020-06-10
+title: Java笔记17-多线程
+date: 2023-06-16
 sidebar: 'auto'
 categories: 
- - 后端
-tags:
  - Java
 ---
 
 [toc]
 
-## Java多线程
+# Java笔记17-多线程
 
-### 1.基本概述：
+## 1.基本概述：
 
 >进程：每一个独立运行的程序称为进程,其包含一个或多个线程。
 >线程：一个进程中可以存在多个执行单元同时运行，其中每一个执行单元叫做线程，**其中每个进程中至少存在一个线程**。
 
-<h4>1.线程的创建</h4>
+## 2.创建线程
 
->Java 提供了三种创建线程的方法：
-①通过继承 Thread 类本身,重写该类的run方法。
-②通过实现 Runnable 接口
+Java 提供了2种创建线程的方法：
+方式①：通过继承 Thread 类本身,重写该类的run方法。
+方式②：通过实现 Runnable 接口
+
+
+### 方式1
+
+1. 若想要一个类A可以多线程运行，则需要类A继承Thread类本身,并重写Thread类的run方法。
+2. 然后创建类A的实例化对象，调用类A从Thread类继承过来的start方法即可。
+3. start方法内部会创建一个新线程，这个新线程会运行类A重写的run方法。
+
 
 ```java
-//①通过继承 Thread 类,重写该类的run方法:
-//通过调用start()方法来启动线程的run方法
+//创建Mythread类，该类继承 Thread 类,重写Thread类的run方法:
+class Mythread extends Thread{
+	public void run() {
+		for(int i=0;i<1000;i++) {
+			System.out.println("run方法正在执行中...");
+		}
+	}
+}
+//创建Mythread类的实例化对象，并通过调用start()方法来创建一个新线程，该线程会运行Mythread类的run方法
 public class human {
 	public static void main(String[] args) {
 		Mythread mythread=new Mythread();
@@ -34,35 +47,24 @@ public class human {
 			System.out.println("main方法正在执行中...");
 		}
 	}
-	
 }
-class Mythread extends Thread{
-	public void run() {
-		for(int i=0;i<1000;i++) {
-			System.out.println("run方法正在执行中...");
-		}
-	}
-}
+
 ```
 
 ![31](../blog_img/java_img_31.png)
 ![32](../blog_img/java_img_32.png)
 
-<font color="red">由于java只支持单继承，所以当A类已经继承B类，则A类就无法继承Thread 类，实现不了多线程操作。所以建议用Runnable 接口实现多线程。</font>
+### 方式2
+
+<font color="red">由于java只支持单继承，所以当A类已经继承B类，则A类就无法继承Thread 类，实现不了多线程操作。因此出现了方式2。所以建议用Runnable 接口实现多线程。</font>
+
+1. 创建一个新类Demo,该类实现Runnable接口，并重写接口的run方法
+2. 创建Demo类的实例化对象。
+3. 调用Thread类的有参构造函数，Demo类对象作为参数传入构造方法中。
+4. 执行Thread类对象的start方法，会创建一个新的线程来执行Demo类对象重写的run方法。
 
 ```java
-//②通过实现 Runnable 接口
-public class human {
-	public static void main(String[] args) {
-		  RunnableDemo R1 = new RunnableDemo();   //实例化对象
-	      Thread th1=new Thread(R1,"窗口1");  //把实例化对象作为参数，传入Thread的有参构造方法中
-	      Thread th2=new Thread(R1,"窗口2"); 
-	      th1.start();  //开启线程1
-	      th2.start();  //开启线程2
-	}
-	
-}
-class RunnableDemo implements Runnable {
+class Demo implements Runnable {
 	   //重写run方法
 	   public void run() {
 		   String tname=Thread.currentThread().getName();   //获取当前线程的名字
@@ -71,11 +73,23 @@ class RunnableDemo implements Runnable {
 		   } 
 	   }
 }
+
+public class human {
+	public static void main(String[] args) {
+		  Demo R1 = new Demo();   //实例化对象
+	      Thread th1=new Thread(R1,"窗口1");  //把实例化对象作为参数，传入Thread的有参构造方法中
+	      Thread th2=new Thread(R1,"窗口2"); 
+	      th1.start();  //开启线程1
+	      th2.start();  //开启线程2
+	}
+	
+}
+
 ```
 ![33](../blog_img/java_img_33.png)
 
 
-### 2.线程的生命周期：
+## 2.线程的生命周期：
 
 ![30](../blog_img/java_img_30.png)
 
@@ -99,7 +113,7 @@ class RunnableDemo implements Runnable {
 换到终止状态。
 
 
-### 3.线程的调度
+## 3.线程的调度
 
 线程调度是指系统为线程分派CPU处理器使用权的过程。
 线程调度的方式：协同式线程调度，抢占式线程调度。
@@ -112,10 +126,10 @@ class RunnableDemo implements Runnable {
 > 抢占式线程调度
 > 每个线程将由系统来分配执行时间，线程的切换不由线程本身来决定。好处：抢占式线程调度方式下，线程的执行时间是系统可控的，不会出现一个线程的阻塞从而导致整个进程甚至整个系统阻塞的问题。可以通过调整线程的优先级来给线程多分配一些执行时间。
 
-### 4.线程的同步
+## 4.线程的同步
 
 未完待续
 
-### 5.线程的通信
+## 5.线程的通信
 
 未完待续

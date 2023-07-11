@@ -1,5 +1,5 @@
 ---
-title: Java学习笔记6-面向对象
+title: Java学习笔记6-类与对象
 date: 2023-06-16
 sidebar: 'auto'
 categories: 
@@ -8,7 +8,7 @@ categories:
 
 [toc]
 
-# Java学习笔记6-面向对象
+# Java学习笔记6-类与对象
 
 ## 面向对象的三大特性
 
@@ -101,14 +101,22 @@ Java 类名的命名规则：
 3. 编写类的方法。类的方法描述了类所具有的行为，是类的方法成员。
 
 ```java
-public class Person {
-    private String name;    // 姓名
-    private int age;    // 年龄
-
-	// 定义说话的方法
-    public void tell() {   
-        System.out.println(name+"今年"+age+"岁！");
-    }
+public class human {
+	  String name;    //姓名
+	  int age;   		//年龄
+	  String sex;		//性别		
+	  Date birth;  		//出生年月
+	  
+	  public human() {   
+		 //默认的构造方法
+	  }
+	  public human(String name) {   
+		  this.name=name;     //改造的构造方法
+	  }
+	  void sleeping(){   //人类会睡觉
+	  }
+	  void eating(){     //人类会吃
+	  }
 }
 ```
 
@@ -180,7 +188,7 @@ public class Student {
 //该方法需要接受一个 Student 类型的参数，最后需要将一个 StringBuffer 类型的数据返回。
 ```
 
-#### 1 方法的返回值
+#### 方法的返回值
 
 若方法有返回值，则在方法体中用 return 语句指明要返回的值，其格式如下所示。
 
@@ -191,7 +199,7 @@ return (表达式)
 ```
 表达式可以是常量、变量、对象等。
 
-#### 2 形参、实参及方法的调用
+#### 形参、实参及方法的调用
 
 一般来说，可以通过以下方式来调用成员方法：`methodName({paramList})`
 
@@ -219,7 +227,7 @@ public static void main(String[] args) {
 * 方法调用中发生的数据传送是单向的，即只能把实参的值传送绐形参，而不能把形参的值反向地传送给实参。因此在方法调用过程中，形参的值发生改变，而实参中的值不会变化。
 
 
-#### 3 方法体中的局部变量
+#### 方法体中的局部变量
 
 在方法体内可以定义本方法所使用的变量，这种变量是局部变量。它的生存期与作用域是在本方法内，也就是说，局部变量只能在本方法内有效或可见，离开本方法则这些变量将被自动释放。
 
@@ -341,23 +349,28 @@ stu.run(1,2);  //调用对象的run方法
 ```
 
 
-# 类的封装
+## 类的封装
 
->类的封装就是指在定义一个类时，把类的属性私有化（用private修饰），私有属性只能在本类中被访问，为了能让外界访问，通过构造方法来访问私有属性。
+类的封装可以防止类中的代码和数据被外部类的代码随机访问,必须通过严格的接口控制才能访问，增加程序的安全性。
 
+封装的步骤：
+1.修改属性的可见性来限制外部类对属性的访问（一般限制为private）。
+2.对每个属性提供对外的公共方法进行设置和访问。
+
+例子
 ```java
 public class human {
-	private String name;    //姓名
+	private String name;    //姓名，设置私有属性，来限制对属性的随意访问
 	private int age;   		//年龄
 	private String sex;		//性别		
 	private Date birth;  		//出生年月
-	  public human() {   
-		 //默认的构造方法
+	  public human() {    //默认的构造方法
+		 
 	  }
-	  public human(String name) {   
-		  this.name=name;     //改造的构造方法
+	  public human(String name) {    //改造的构造方法
+		  this.name=name;    
 	  }
-	public String getName() {
+	public String getName() {  //提供公共方法对属性进行操作
 		return name;
 	}
 	public void setName(String name) {
@@ -463,7 +476,7 @@ import java.io.*;
 
 ### 内部类
 
->java允许在一个类的内部在定义类，这样的类叫做内部类。
+java允许在一个类的内部在定义类，这样的类叫做内部类。内部类有三种：成员内部类，静态内部类，方法内部类。
 
 <h4>①：成员内部类</h4>
 

@@ -34,49 +34,74 @@ Java 是由 Sun Microsystems 公司于 1995 年推出的一门面向对象程序
 
 不同操作系统配置jdk环境变量的方法，自行百度。
 
-## 第一个Java程序
+## 第一个Java程序"helloworld"
 
-下面展示一个完整 Java 应用程序的开发过程。
+### 终端运行java程序
 
-1. 创建一个名为HelloJava.java的文件。
-2. 文件内容如下
-   
+①：创建一个新文件，命名为HelloWorld.java
+②：在文件中编写如下代码：
+
 ```java
-/*
-*第一个java程序
-*/
-public class HelloJava {
-    // 这里是程序入口
-    public static void main(String[] args) {
-        // 输出字符串
-        System.out.println("你好 Java");
+public class HelloWorld {
+    /* 第一个Java程序
+     * 它将打印字符串 Hello World
+     */
+    public static void main(String []args) {
+        System.out.println("Hello World"); // 打印 Hello World
+    }
+    // main() 方法是所有程序的入口，最先开始执行。
+}
+```
+
+③：编译java文件
+
+找到HelloWorld.java文件在那个路径下,执行命令(假如文件在c盘下)：
+
+```
+C : > javac HelloWorld.java    //编译文件，产生.class的字节码文件
+```
+
+Java代码写到文件之后，还需要进行编译才能运行。编译 Java 源程序使用的是 JDK 中的 javac 命令。
+
+
+
+④：运行java文件
+
+运行字节码文件需要使用 JDK 中的 java 命令，例如运行上步生成的 .class 文件，命令如下
+
+```
+C : > java HelloWorld      //运行字节码文件，执行程序源代码
+```
+
+⑤：运行结果：
+
+![java_img_1](../blog_img/java_img_1.png)
+
+
+### IDE创建一个Java程序并运行
+
+①：创建java project：
+![2](../blog_img/java_img_2.png)
+
+②：创建package包，class类
+![3](../blog_img/java_img_3.png)
+
+③：在类中编写源代码：
+```java
+package Hello1;
+
+public class HelloWorld {
+    /* 第一个Java程序
+     * 它将打印字符串 Hello World
+     */
+    public static void main(String []args) {
+        System.out.println("Hello World"); // 打印 Hello World
     }
 }
-
-// main() 方法是所有程序的入口，最先开始执行。
 ```
 
-3. 编译HelloJava.java文件
-
-Java源程序编写到文件之后，还需要进行编译才能运行。编译 Java 源程序使用的是 JDK 中的 javac 命令。编译命令如下
-
-```
-javac HelloJava.java
-```
-
-`javac HelloJava.java`命令的作用是让 Java 编译器获取 Java 应用程序 HelloJava.java 的源代码，把它编译成符合 Java 虚拟机规范的字节码文件。这时会生成一个新文件 HelloJava.class，此文件便是字节码文件，它也是 JVM 上的可执行文件。 
-
-![java_20230621143816.png](../blog_img/java_20230621143816.png)
-
-4. 运行字节码文件
-
-运行 Java 程序需要使用 JDK 中的 java 命令，例如运行上步生成的 .class 文件，命令如下
-
-```
-java HelloJava
-```
-具体效果如下
-![java_20230621144037.png](../blog_img/java_20230621144037.png)
+④：运行程序。（右键 --> RunAs --> Java application）
+![4](../blog_img/java_img_4.png)
 
 
 ## Java程序的运行过程（执行流程）分析
@@ -87,6 +112,11 @@ Java 程序的运行必须经过编写、编译和运行 3 个步骤。
 3. 运行：是指使用 Java 解释器将.class字节码文件翻译成机器代码，然后执行机器代码并显示结果。
 
 ![java_20230621144507.png](../blog_img/java_20230621144507.png)
+
+![5](../blog_img/java_img_5.png)
+
+编译的主要作用是让 Java 编译器获取 Java 应用程序 HelloWorld.java 的源代码，把它编译成符合 Java 虚拟机规范的字节码文件。这时会生成一个新文件.class文件，此文件便是字节码文件，它也是 JVM 上的可执行文件。 
+
 
 ## Java是如何实现跨平台的？
 
@@ -109,3 +139,5 @@ Java 虚拟机（JVM）是运行 Java 程序的软件环境，Java解释器是 J
 * JVM（Java Virtual Machine，Java 虚拟机）是整个 Java 实现跨平台的最核心的部分，能够运行以 Java 语言编写的软件程序。
 
 ![java_20230621150008.png](../blog_img/java_20230621150008.png)
+
+

@@ -19,59 +19,17 @@ Java 集合之所以被设计成这样，是因为集合的设计者不知道我
 
 所以为了解决上述问题，从 Java 1.5 开始提供了泛型。泛型可以在编译的时候检查类型安全，并且所有的强制转换都是自动和隐式的，提高了代码的重用率。
 
+泛型本质上是参数化类型。我们可以为类、接口或方法指定一个类型参数，通过这个参数限制被操作数据的数据类型，从而保证类型转换的绝对安全。
+
 ## 泛型集合
 
-泛型本质上是参数化类型。我们可以为类、接口或方法指定一个类型参数，通过这个参数限制被操作数据的数据类型，从而保证类型转换的绝对安全。
+泛型可以指定集合存入取出的参数数据类型。使用泛型后，每次遍历集合元素不用把Object类型强制转换为其他类型。
 
 例子
 ```java
-public class Book {
-    private int Id; // 图书编号
-    private String Name; // 图书名称
-    private int Price; // 图书价格
-    public Book(int id, String name, int price) { // 构造方法
-        this.Id = id;
-        this.Name = name;
-        this.Price = price;
-    }
-    public String toString() { // 重写 toString()方法
-        return this.Id + ", " + this.Name + "，" + this.Price;
-    }
-}
-
-//---------------
-
-public class Test14 {
-    public static void main(String[] args) {
-        // 创建3个Book对象
-        Book book1 = new Book(1, "唐诗三百首", 8);
-        Book book2 = new Book(2, "小星星", 12);
-        Book book3 = new Book(3, "成语大全", 22);
-        Map<Integer, Book> books = new HashMap<Integer, Book>(); // 定义泛型 Map 集合
-        books.put(1001, book1); // 将第一个 Book 对象存储到 Map 中
-        books.put(1002, book2); // 将第二个 Book 对象存储到 Map 中
-        books.put(1003, book3); // 将第三个 Book 对象存储到 Map 中
-        System.out.println("泛型Map存储的图书信息如下：");
-        for (Integer id : books.keySet()) {
-            // 遍历键
-            System.out.print(id + "——");
-            System.out.println(books.get(id)); // 不需要类型转换
-        }
-        List<Book> bookList = new ArrayList<Book>(); // 定义泛型的 List 集合
-        bookList.add(book1);
-        bookList.add(book2);
-        bookList.add(book3);
-        System.out.println("泛型List存储的图书信息如下：");
-        for (int i = 0; i < bookList.size(); i++) {
-            System.out.println(bookList.get(i)); // 这里不需要类型转换
-        }
-    }
-}
-
+ArrayList<String> al=new ArrayList<String>();   //指定该集合只能存取String类型的参数元素。
+ArrayList<Human> al2=new ArrayList<Human>();   //指定该集合只能存取Human对象类型的参数元素。
 ```
-
-在该示例中，创建了一个键类型为 Integer、值类型为 Book 的泛型集合，即指明了该 Map 集合中存放的键必须是 Integer 类型、值必须为 Book 类型，否则编译出错。并且在获取集合中的元素时，不需要把元素强制转换为 Book 类型，程序会隐式转换。
-
 
 ## 泛型类
 

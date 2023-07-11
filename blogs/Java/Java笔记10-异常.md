@@ -19,8 +19,7 @@ categories:
 
 Java 通过面向对象的方法来处理异常。在一个方法的运行过程中，如果发生了异常，则这个方法会产生一个异常对象，并把它交给当前系统，当前系统会寻找相应的代码来处理这一异常对象。
 
-* 其中把生成异常对象，并把它交给当前系统的过程称为拋出（throw）异常。
-* 当前系统寻找相应的代码来处理这一异常对象，这一个过程称为捕获（catch）异常。
+其中把生成异常对象，并把它交给当前系统的过程称为拋出（throw）异常。当前系统寻找相应的代码来处理这一异常对象，这一个过程称为捕获（catch）异常。
 
 
 ## 异常类型
@@ -31,23 +30,29 @@ Java 通过面向对象的方法来处理异常。在一个方法的运行过程
 
 ![java_20230628150727.png](../blog_img/java_20230628150727.png)
 
-* Exception 类用处理用户程序可能出现的异常情况，它也是用来创建自定义异常类型类的类。
-* Error 定义了在通常环境下不希望被程序捕获的异常。一般指的是 JVM 错误，如堆栈溢出。这些错误不是程序可以控制的。
+1. Throwable 类是 Java 语言中所有错误或异常的顶层父类，其他异常类都继承于该类。Throwable类有两个子类，Error类（错误）和Exception类（异常），各自都包含大量子类。 
+2. Error（错误）:是程序无法处理的错误，表示运行应用程序中较严重问题。大多数错误与代码编写者执行的操作无关。例如栈溢出等错误。这些错误是不可查的，因为它们在应用程序的控制和处理能力之外。
+3. Exception（异常）:代表程序运行时发送的各种不期望发生的事件。可以被Java异常处理机制使用，是异常处理的核心。
+
+### Exception类
+
+![20220531152054.png](../blog_img/20220531152054.png)
 
 由图可知 异常类 Exception 又分为运行时异常和非运行时异常，这两种异常有很大的区别。
-- 运行时异常都是 RuntimeException 类及其子类异常，如 NullPointerException、IndexOutOfBoundsException 等，这些异常是不检查异常，程序中可以选择捕获处理，也可以不处理。这些异常一般由程序逻辑错误引起，程序应该从逻辑角度尽可能避免这类异常的发生。
-- 非运行时异常是指 RuntimeException 以外的异常，类型上都属于 Exception 类及其子类。从程序语法角度讲是必须进行处理的异常，如果不处理，程序就不能编译通过。如 IOException、ClassNotFoundException 等以及用户自定义的 Exception 异常（一般情况下不自定义检查异常）。
+
+- 运行时异常都是 RuntimeException 类及其子类异常，如 NullPointerException等，这些异常是不检查异常，程序中可以选择捕获处理，也可以不处理。这些异常一般由程序逻辑错误引起，程序应该从逻辑角度尽可能避免这类异常的发生。
+- 非运行时异常是指 RuntimeException 以外的异常，类型上都属于 Exception 类及其子类。从程序语法角度讲是必须进行处理的异常，如果不处理，程序就不能编译通过。如 IOException等以及用户自定义的 Exception 异常。
 
 ![java_20230628151327.png](../blog_img/java_20230628151327.png)
 
 ![java_20230628151447.png](../blog_img/java_20230628151447.png)
 
 
-## Error和Exception的异同
+### Error和Exception的异同
 
-Exception 和 Error 体现了 Java 平台设计者对不同异常情况的分类，Exception 是程序正常运行过程中可以预料到的意外情况，并且应该被开发者捕获，进行相应的处理。Error 是指正常情况下不大可能出现的情况，绝大部分的 Error 是任何处理技术都无法恢复的情况，肯定会导致程序非正常终止。所以不需要被开发者捕获。
+Exception 和 Error 体现了 Java 平台设计者对不同异常情况的分类。
 
-Exception 又分为可检查（checked）异常和不检查（unchecked）异常，可检查异常在源码里必须显示的进行捕获处理，这里是编译期检查的一部分。不检查异常就是所谓的运行时异常，通常是可以编码避免的逻辑错误，具体根据需要来判断是否需要捕获，并不会在编译器强制要求。
+Exception 是程序正常运行过程中可以预料到的意外情况，并且应该被开发者捕获，进行相应的处理。Error 是指正常情况下不大可能出现的情况，绝大部分的 Error 是任何处理技术都无法恢复的情况，肯定会导致程序非正常终止。所以不需要被开发者捕获。
 
 如下是常见的 Error 和 Exception：
 
@@ -73,27 +78,9 @@ StackOverflowError：深递归导致栈被耗尽而抛出的异常
 OutOfMemoryError：内存溢出异常
 ```
 
-## 异常处理机制
+## 异常处理的五个关键字
 
-Java 的异常处理通过 5 个关键字来实现：try catch、throw、throws 和 finally。try catch 语句用于捕获并处理异常，finally 语句用于在任何情况下（除特殊情况外）都必须执行的代码，throw 语句用于拋出异常，throws 语句用于声明可能会出现的异常。
-
-Java的异常处理机制提供了一种结构性和控制性的方式来处理程序执行期间发生的事件。异常处理的机制如下：
-* 在方法中用 try catch 语句捕获并处理异常，catch 语句可以有多个，用来匹配多个异常。
-* 对于处理不了的异常或者要转型的异常，在方法的声明处通过 throws 语句拋出异常，即由更上层的系统调用方法来处理。
-
-以下代码是异常处理程序的基本结构
-```java
-try {
-    逻辑程序块
-} catch(ExceptionType1 e) {
-    处理代码块1
-} catch (ExceptionType2 e) {
-    处理代码块2
-    throw(e);    // 如果无法处理，就抛出这个"异常"
-} finally {
-    释放资源代码块
-}
-```
+Java 的异常处理通过 5 个关键字来实现：try catch、throw、throws 和 finally。
 
 ### try catch语句
 
@@ -156,10 +143,15 @@ public class Test03 {
 }
 ```
 
-### try catch finally语句
+### finally语句
 
-finally 语句可以与前面介绍的 try catch 语句块匹配使用，即无论是否发生异常，finally 语句块中的代码都会被执行。语法格式如下：
+finally 语句可以与前面介绍的 try catch 语句块匹配使用，即无论是否发生异常，finally 语句块中的代码都会被执行。
 
+finally语句块总是会被执行。它主要用于做一些清理工作(如关闭数据库连接、网络连接和磁盘文件等)。
+
+<font color="red">注意：当finally块执行完成之后，才会回来执行try或者catch块中的return。</font>
+
+语法格式如下：
 ```java
 // 方式1
 try {
@@ -178,21 +170,14 @@ try {
 }
 ```
 
-try-catch-finally 语句时需注意以下几点：
+注意以下几点：
 1. 只有 try 块是必需的，catch 块和 finally 块都是可选的，但 catch 块和 finally 块至少出现其中之一，也可以同时出现；
-2. 可以有多个 catch 块，捕获父类异常的 catch 块必须位于捕获子类异常的后面；
-3. 多个 catch 块必须位于 try 块之后，finally 块必须位于所有的 catch 块之后。
-4. try与finally语句块匹配的语法格式，由于没有catch语句，所以可能会导致异常丢失，所以不常见。
+2. finally 块必须位于所有的 catch 块之后。
 
-<font color="red">一般情况下，无论是否有异常拋出，都会执行 finally 语句块中的语句。</font>
 
 ![java_20230628155407.png](../blog_img/java_20230628155407.png)
 
-try catch finally 语句块的执行情况可以细分为以下 3 种情况：
-1. 如果 try 代码块中没有拋出异常，则执行完 try 代码块之后直接执行 finally 代码块，然后执行 try catch finally 语句块之后的语句。
-2. 如果 try 代码块中拋出异常，并被 catch 子句捕捉，那么在拋出异常的地方终止 try 代码块的执行，转而执行相匹配的 catch 代码块，之后执行 finally 代码块。如果 finally 代码块中没有拋出异常，则继续执行 try catch finally 语句块之后的语句；如果 finally 代码块中拋出异常，则把该异常传递给该方法的调用者。
-3. 如果 try 代码块中拋出的异常没有被任何 catch 子句捕捉到，那么将直接执行 finally 代码块中的语句，并把该异常传递给该方法的调用者。
-
+例子：
 ```java
 public class Test {
     public static void main(String[] args) {
@@ -208,14 +193,11 @@ public class Test {
 
 ```
 
+### throws 声明异常
 
-### throws和throw：声明和抛出异常
+throws :若某个方法内可能会发生异常。而方法内部又不想处理这些异常。则可以再方法声明上添加throws关键字。将方法内部的异常抛出到方法的外部，由外面的系统程序去进行处理。
 
-Java可以通过 throws 关键字在方法上声明该方法要拋出的异常，然后在方法内部通过 throw 拋出异常对象。
-
-#### throws 声明异常
-
-当一个方法产生一个它不处理的异常时，那么就需要在该方法的头部声明这个异常，以便将该异常传递到方法的外部进行处理。使用 throws 声明的方法表示此方法不处理异常。
+<font color="red">注意：若不通过try catch代码块处理方法内抛出的异常。也可以通过throws继续向上抛出异常。</font>
 
 throws 具体格式如下：
 ```java
@@ -226,9 +208,12 @@ throws 具体格式如下：
 // Exception 1，Exception2，… 表示多个异常类
 ```
 
-throws 声名异常的程序逻辑：如果当前方法不知道如何处理这种类型的异常，使用 throws 声明抛出异常。该异常会由向上一级的调用者处理；如果 main 方法也不知道如何处理这种类型的异常，也可以使用 throws 声明抛出异常，该异常将交给 JVM 处理。JVM 对异常的处理方法是，打印异常的跟踪栈信息，并中止程序运行，这就是前面程序在遇到异常后自动结束的原因。
+throws 声名异常的程序逻辑：
+1. 如果当前方法不知道如何处理这种类型的异常，使用 throws 声明抛出异常。
+2. 该异常会由向上一级的调用者处理；如果 main 方法也不知道如何处理这种类型的异常，也可以使用 throws 声明抛出异常，该异常将交给 JVM 处理。
+3. JVM 对异常的处理方法是，打印异常的跟踪栈信息，并中止程序运行，这就是前面程序在遇到异常后自动结束的原因。
 
-
+例子：
 ```java
 public class Test {
     public void readFile() throws IOException {
@@ -250,19 +235,25 @@ public class Test2 {
 }
 ```
 
-#### throw 拋出异常
+### throw 拋出异常
 
-throw 语句用来直接拋出一个异常，后接一个可拋出的异常类对象，其语法格式如下：
+throw ：可以通过关键字throw手动抛出一个具体的异常对象。若再方法内使用，则方法要用throws关键字声明该方法可能会有异常。或者使用try catch代码块处理这个异常。
 
+
+其语法格式如下：
 ```java
-throw ExceptionObject;
+throw exceptionObject;
 
-//ExceptionObject 必须是 Throwable 类或其子类的对象。
+//exceptionObject 必须是 Throwable 类或其子类的对象。
 //如果是自定义异常类，也必须是 Throwable 的直接或间接子类。
 ```
 
-throw 抛出异常的程序逻辑 当 throw 语句执行时，它后面的语句将不执行，此时程序转向调用者程序，寻找与之相匹配的 catch 语句，执行相应的异常处理程序。如果没有找到相匹配的 catch 语句，则再转向上一层的调用程序。这样逐层向上，直到最外层的异常处理程序终止程序并打印出调用栈情况。
+throw 抛出异常的程序逻辑：
+1. 当 throw 语句执行时，它后面的语句将不执行。
+2. 此时程序转向调用者程序，寻找与之相匹配的 catch 语句，执行相应的异常处理程序。
+3. 如果没有找到相匹配的 catch 语句，则再转向上一层的调用程序。这样逐层向上，直到最外层的异常处理程序终止程序并打印出调用栈情况。
 
+例子：
 ```java
 public class Test {
     public void validateUserName(String username) {
@@ -271,7 +262,6 @@ public class Test {
             throw new IllegalArgumentException("用户名长度必须大于 8 位！");
         }
     }
-
     public static void main(String[] args) {
         Test te = new Test();
         try {
@@ -283,11 +273,10 @@ public class Test {
 }
 ```
 
-
-#### throws与throw的区别
+### throws与throw的区别
 
 throws 关键字和 throw 关键字在使用上的几点区别如下：
-* throws 用来声明一个方法可能抛出的所有异常信息，表示出现异常的一种可能性，但并不一定会发生这些异常；throw 则是指拋出的一个具体的异常类型，执行 throw 则一定抛出了某种异常对象。
+* throws 用来声明一个方法可能抛出的所有异常信息，表示出现异常的一种可能性，但并不一定会发生这些异常；throw 则是指拋出的一个具体的异常对象，执行 throw 则一定抛出了某种异常对象。
 * 通常在一个方法（类）的声明处通过 throws 声明方法（类）可能拋出的异常信息，而在方法（类）内部通过 throw 声明一个具体的异常信息。
 * throws 通常不用显示地捕获异常，可由系统自动将所有捕获的异常信息抛给上级方法； throw 则需要用户自己捕获相关的异常，而后再对其进行相关包装，最后将包装后的异常信息抛出。
 

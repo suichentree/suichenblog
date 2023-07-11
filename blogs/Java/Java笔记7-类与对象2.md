@@ -1,5 +1,5 @@
 ---
-title: Java笔记7-面向对象2
+title: Java笔记7-类与对象2
 date: 2023-06-16
 sidebar: 'auto'
 categories: 
@@ -8,7 +8,7 @@ categories:
 
 [toc]
 
-# Java笔记7-面向对象2
+# Java笔记7-类与对象2
 
 ## 访问控制修饰符
 
@@ -16,7 +16,7 @@ categories:
 
 <font color="red">在 Java 语言中，访问控制修饰符有 4 种。分别是 public、 private、protected 和 default，其中 default 是一种没有定义专门的访问控制符的默认情况。</font>
 
-按公开程度：public > protected > default > private。
+按公开范围程度：public > protected > default > private。
 
 访问权限级别 | 本类 | 同包 | 不同包的子类 | 不同的包的非子类
 ------------ | ------------- |  ------------- |  ------------- |  ------------- 
@@ -26,8 +26,12 @@ categories:
 私有 private | √ | × | × |× 
 
 √ 可访问
-x 不可访问
-不可访问的意思是无法看到，无法调用。
+x 不可访问，意思是无法看到，无法调用。
+
+
+
+
+
 
 ### 私有 private
 
@@ -110,26 +114,88 @@ public class test3 {
 
 类中被设定为 public 的方法是这个类对外的接口部分，避免了程序的其他部分直接去操作类内的数据，实际就是数据封装思想的体现。每个 Java 程序的主类都必须是 public 类，也是基于相同的原因。
 
+### 访问修饰符的继承
+1. 父类中声明为 private 的方法，子类不能被继承。
+2. 子类重写的方法的访问权限必须 >= 父类子类重写的方法的访问权限
+
+
+### 代码举例
+
+① 同包情况下
+```java
+// test1 和 test2 是在同一包下
+public class test1 {
+    public int a_public=10;
+    protected int b_protected=20;
+    int c_default=30;
+    private int d_private=40;
+}
+
+public class test2 {
+    public static void main(String[] args) {
+        test1 test1 = new test1();
+        System.out.println(test1.a_public);     //public可以访问
+        System.out.println(test1.b_protected);  //protected可以访问
+        System.out.println(test1.c_default);    //default可以访问
+        System.out.println(test1.d_private);    //private无法访问。private变量，无法在其他类中使用
+    }
+}
+```
+
+② 不同包情况下
+```java
+// test1 和 test3 是在不同包下
+public class test1 {
+    public int a_public=10;
+    protected int b_protected=20;
+    int c_default=30;
+    private int d_private=40;
+}
+
+import demo.test1;
+public class test3 {
+    public static void main(String[] args) {
+        test1 test1 = new test1();
+        System.out.println(test1.a_public);     //可以访问
+        System.out.println(test1.b_protected);  //无法访问
+        System.out.println(test1.c_default);    //无法访问
+        System.out.println(test1.d_private);    //无法访问
+    }
+}
+```
 
 
 ## static关键字
 
-在类中，使用static关键字修饰的变量，常量，方法。统称为静态成员，归整个类所有。
-* static关键字修饰的属性（成员变量）称为静态变量
-* static关键字修饰的常量称为静态常量
-* static关键字修饰的方法称为静态方法。
-  
-静态成员不依赖于类的特定实例对象，被类的所有实例对象共享，就是说 static 修饰的方法或者变量不需要通过实例对象来进行访问，可以根据类名访问静态成员。
+static 主要用来修饰类中的成员变量和成员方法。无论一个类实例化多少对象，被static修饰的变量和方法只有一份拷贝。
+
+1. static修饰类的成员变量 ： 无论一个类实例化多少对象，它只有一份拷贝。 
+2. static修饰类的方法（静态方法）： 只有一份拷贝，并且静态方法只能使用静态变量，不能使用非静态变量。
 
 调用静态成员的语法形式如下：
 ```
 类名.静态成员
 ```
 
+```java
+public class test1 {
+   private static int a = 0;
+   protected static int b() {
+      return 1
+   }
+   public static void main(String[] args) {
+      System.out.println(test1.a); 
+      System.out.println(test1.b());
+      //类变量和类方法直接用类名访问即可
+   }
+}
+```
+
+
 注意：
-* static 修饰的成员变量和方法，从属于类。
+* static 修饰的成员变量和方法，属于类。
 * 普通变量和方法从属于对象。
-* 静态方法不能调用非静态成员，编译会报错。
+* 静态的不能调用非静态的，编译会报错。
 
 ### 静态变量
 
@@ -302,10 +368,18 @@ public class StaticCode {
 
 final 在 Java 中的意思是最终，表示对象是最终形态的，不可改变的意思。
 
-使用 final 关键字声明类、变量和方法需要注意以下几点：
-* final 修饰变量表示变量的值不可以改变，此时该变量可以被称为常量。
-* final 修饰方法表示方法不可以被重写。
-* final 修饰类表示该类不能有子类，即该类不可以被继承。
+1. final修饰的变量：该变量必须显式指定初始值，一旦被赋值后不能被重新赋值。此时可以被称为常量。
+2. final修饰的方法：该方法可以被子类继承，但是无法被子类重写。声明 final 方法的主要目的是防止该方法的内容被修改。
+3. final修饰的类：该类不能有子类，即该类不可以被继承。
+
+```java
+public class Test{
+  public static final int value = 6;
+  public void aaa(){
+     value = 12; //编译报错，该变量被final修饰，无法重新被赋值。
+  }
+}
+```
 
 ### final 修饰变量
 
@@ -653,4 +727,15 @@ public class Man extends Person {
 //父类引用变量指向子类实例对象
 Person p1 = new Man();
 System.out.println(p1 instanceof Man);    // true
+```
+
+
+## synchronized 修饰符
+
+synchronized修饰的方法，同一时间内只能被一个线程访问。即线程无法同时访问该方法。
+
+```java
+public synchronized void aaaa(){
+........
+}
 ```

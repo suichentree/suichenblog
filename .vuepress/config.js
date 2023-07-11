@@ -1,5 +1,5 @@
 module.exports = {
-  "port":"9099",
+  "port":"10~099",
   "title": "suichentree's blog",
   "description": "(;-_-)ᴇᴍᴍᴍ",
   "dest": "public",

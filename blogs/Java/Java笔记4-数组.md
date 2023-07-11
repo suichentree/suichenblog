@@ -43,6 +43,12 @@ String[] name;    	// 定义存储商品名称的数组，类型为字符串型
 分配空间就是要告诉计算机在内存中为它分配几个连续的位置来存储数据。在 Java 中可以使用 new 关键字来给数组分配空间。
 
 ```java
+int[] myList = new int[size];
+/*
+1. 使用 int[size] 创建了一个数组，并分配size空间。
+2. 把新创建的数组的引用赋值给数组变量myList。
+*/
+
 //定义数组并且分配空间
 int[] arr = new int[5];
 double[] arr2 = new double[5];

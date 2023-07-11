@@ -46,7 +46,7 @@ public static int max(int num1, int num2) {
 1. 当方法有返回值的时候，方法调用通常被当做一个值。例如：
 int larger = max(30, 40);
 2. 如果方法返回值类型是void（无返回值）,方法调用一定是一条语句。例如：
-System.out.println("欢迎访问菜鸟教程！");
+System.out.println("欢迎访问！");
 
 ## 方法的重载
 
@@ -76,31 +76,21 @@ public static double max(double num1, double num2) {
 
 Java 构造方法有以下特点：
 * 方法名必须与类名相同
-* 可以有 0 个、1 个或多个参数
-* 没有任何返回值，包括 void
-* 默认返回类型就是对象类型本身
+* 构造方法可以有 0 个、1 个或多个参数
+* 没有任何返回值，包括 void。默认返回类型就是对象类型本身
 * 只能与 new 运算符结合使用
 
-注意：构造方法不能被 static、final、synchronized、abstract 和 native（类似于 abstract）修饰。构造方法用于初始化一个新对象，所以用 static 修饰没有意义。构造方法不能被子类继承，所以用 final 和 abstract 修饰没有意义。多个线程不会同时创建内存地址相同的同一个对象，所以用 synchronized 修饰没有必要。
+注意：
+1. 构造方法不能被 static、final、synchronized、abstract 和 native（类似于 abstract）修饰。
+2. 构造方法用于初始化一个新对象，所以用 static 修饰没有意义。
+3. 构造方法不能被子类继承，所以用 final 和 abstract 修饰没有意义。
+4. 多个线程不会同时创建内存地址相同的同一个对象，所以用 synchronized 修饰没有必要。
+5. 所有的类都有构造方法，因为Java默认自动提供了一个默认的无参构造方法.
+6. 类为 public，构造函数也为 public；类改为 private，构造函数也改为 private
+7. 一旦你定义了自己的构造方法，默认的无参构造方法就会失效。但是你可以自己将无参构造方法写在类中。
 
-构造方法的语法格式如下：
-
-```
-class class_name {
-    public class_name(){}    // 默认无参构造方法
-    public ciass_name([paramList]){}    // 定义构造方法
-    …
-    // 类主体
-}
-```
-
-<font color="red">在一个类中，与类名相同的方法就是构造方法。每个类可以具有多个构造方法，但要求它们各自包含不同的方法参数。</font>
-
-
-调用带参数的构造方法，在创建对象时，一并完成了对象成员的初始化工作，简化了对象初始化的代码。
-
+例子
 ```java
-//例子
 public class Worker {
     public String name;    // 姓名
     private int age;    // 年龄
