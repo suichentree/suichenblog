@@ -20,9 +20,9 @@ Java 反射机制是 Java 语言的一个重要特性。需要先了解两个概
 
 Java 反射机制是指在运行状态中，对于任意一个类，都能够知道这个类的所有属性和方法；对于任意一个对象，都能够调用它的任意方法和属性；这种动态获取信息以及动态调用对象方法的功能称为 Java 语言的反射机制。
 
-简单来说，Java 反射机制指的是程序在运行时能够获取自身的信息。在 Java 中，只要给定类的名字，就可以通过反射机制来获得类的所有信息。
+简单来说，Java 反射机制指的是程序在运行时能够获取自身的信息。在 Java 中，只要给定类的名字，就可以通过反射机制读取类的所有属性，或者给这些属性赋值。
 
-Java 反射机制在服务器程序和中间件程序中得到了广泛运用。在服务器端，往往需要根据客户的请求，动态调用某一个对象的特定方法。并且运用 Java 反射机制可以读取任意一个 JavaBean 的所有属性，或者给这些属性赋值。
+<font color="red">例如：通常情况下类中的private 变量。只有在同类的情况下才能调用。但是通过反射可以在任何地方调用private 变量。</font>
 
 ![java_20230629133851.png](../blog_img/java_20230629133851.png)
 
@@ -35,11 +35,7 @@ Java 反射机制主要提供了以下功能，这些功能都位于java.lang.re
 
 要想知道一个类的属性和方法，必须先获取到该类的字节码文件对象。获取类的信息时，使用的就是 Class 类中的方法。所以先要获取到每一个字节码文件（.class）对应的 Class 类型的对象.
 
-众所周知，所有 Java 类均继承了 Object 类，在 Object 类中定义了一个 getClass() 方法，该方法返回同一个类型为 Class 的对象。例如，下面的示例代码：
 
-```java
-Class labelCls = label1.getClass();    // label1为 JLabel 类的对象
-```
 
 利用 Class 类的对象 labelCls 可以访问 labelCls 对象的描述信息、JLabel 类的信息以及基类 Object 的信息。
 
@@ -58,25 +54,74 @@ Java 反射机制的缺点：
 
 ## 反射类的API
 
-### java.lang.Class 类
+Java反射相关的类
 
-java.lang.Class 类是 Java 反射机制 API 中的核心类。Class 类的一个实例对象表示 Java 的一种数据类型，包括类、接口、枚举、注解（Annotation）、数组、基本数据类型和 void。
-
-在程序代码中获得 Class 实例可以通过如下代码实现：
-```java
-// 1. 通过类型class静态变量
-Class clz1 = String.class;
-String str = "Hello";
-// 2. 通过对象的getClass()方法
-Class clz2 = str.getClass();
+```
+java.lang.Class 	在运行的Java应用程序中代表类和接口
+java.lang.reflect.Field 	代表类的成员变量
+java.lang.reflect.Method 	代表类的方法
+java.lang.reflect.Constructor 	代表类的构造方法
 ```
 
-<font color="red">每一种类型包括类和接口等，都有一个 class 静态变量可以获得 Class 实例。另外，每一个对象都有 getClass() 方法可以获得 Class 实例，该方法是由 Object 类提供的实例方法。</font>
+### java.lang.Class 类
 
+java.lang.Class 类是 Java 反射机制中的核心类。
+
+> 如何获取Class类对象
+
+有3中方式获取Class类对象。
+
+1. 类型.class，例如：String.class
+2. 对象.getClass()，例如：”hello”.getClass()
+3. Class.forName()，例如：Class.forName(“java.lang.String”)
+
+```java
+Student stu = new Student();
+//方式1. 通过类的class静态变量来获取Class对象
+Class obj1 = Student.class()
+//方式2. 通过对象的getClass()方法来获取Class对象
+Class obj2 = stu.getClass();
+//方式3. 通过Class.forName()来获取Class对象
+Class obj3 = Class.forName("xxx.xxx.xxx.Student")
+```
+
+>Class类中的方法如下：
+
+```
+=========获取类
+getClassLoader() 	获得类的加载器
+getClasses() 	返回一个数组，数组中包含该类中所有公共类和接口类的对象
+getDeclaredClasses() 	返回一个数组，数组中包含该类中所有类和接口类的对象
+forName(String className) 	根据类名返回类的对象
+getName() 	获得类的完整路径名字
+newInstance() 	创建类的实例
+getPackage() 	获得类的包
+getSimpleName() 	获得类的名字
+getSuperclass() 	获得当前类继承的父类的名字
+getInterfaces() 	获得当前类实现的类或是接口
+
+==========获取属性变量
+getField(String name) 	获得某个公有的属性对象
+getFields() 	获得所有公有的属性对象
+getDeclaredField(String name) 	获得某个属性对象
+getDeclaredFields() 	获得所有属性对象
+
+==============获取构造方法
+getConstructor(Class...<?> parameterTypes) 	获得该类中与参数类型匹配的公有构造方法
+getConstructors() 	获得该类的所有公有构造方法
+getDeclaredConstructor(Class...<?> parameterTypes) 	获得该类中与参数类型匹配的构造方法
+getDeclaredConstructors() 	获得该类所有构造方法
+
+=============获得类中方法相关的方法
+getMethod(String name, Class...<?> parameterTypes) 	获得该类某个公有的方法
+getMethods() 	获得该类所有公有的方法
+getDeclaredMethod(String name, Class...<?> parameterTypes) 	获得该类某个方法
+getDeclaredMethods() 	获得该类所有方法
+```
 
 例子，Class 类提供了很多方法可以获得运行时对象的相关信息
 ```java
-public class ReflectionTest01 {
+public class Test01 {
     public static void main(String[] args) {
         // 获得Class实例
         // 1.通过类型class静态变量
@@ -102,66 +147,37 @@ public class ReflectionTest01 {
 
 ### java.lang.reflect 包
 
-java.lang.reflect 包提供了反射中用到类，主要的类说明如下：
+java.lang.reflect 包提供了反射中的其他常用类，说明如下：
 - Constructor 类：提供类的构造方法信息。
 - Field 类：提供类或接口中成员变量信息。
 - Method 类：提供类或接口成员方法信息。
 - Array 类：提供了动态创建和访问 Java 数组的方法。
 - Modifier 类：提供类和成员访问修饰符信息。
 
-例子
-```java
-public class ReflectionTest02 {
-    public static void main(String[] args) {
-        try {
-            // 动态加载xx类的运行时对象
-            Class c = Class.forName("java.lang.String");
-            // 获取成员方法集合
-            Method[] methods = c.getDeclaredMethods();
-            // 遍历成员方法集合
-            for (Method method : methods) {
-                // 打印权限修饰符，如public、protected、private
-                System.out.print(Modifier.toString(method.getModifiers()));
-                // 打印返回值类型名称
-                System.out.print(" " + method.getReturnType().getName() + " ");
-                // 打印方法名称
-                System.out.println(method.getName() + "();");
-            }
-        } catch (ClassNotFoundException e) {
-            System.out.println("找不到指定类");
-        }
-    }
-}
-```
+#### Constructor 类
 
-## 通过反射访问构造方法
+> 获取 Constructor 类的对象
 
 为了能够动态获取对象构造方法的信息，首先需要通过下列方法之一创建一个 Constructor 类型的对象或者数组。
-- getConstructors()
-- getConstructor(Class<?>…parameterTypes)
-- getDeclaredConstructors()
-- getDeclaredConstructor(Class<?>...parameterTypes)
-
-如果是访问指定的构造方法，需要根据该构造方法的入口参数的类型来访问。例如，访问一个入口参数类型依次为 int 和 String 类型的构造方法，下面的两种方式均可以实现。
 
 ```java
+getConstructors()
+getConstructor(Class<?>…parameterTypes)
+getDeclaredConstructors()
+getDeclaredConstructor(Class<?>...parameterTypes)
+
+//例子
+//获取无参构造方法
+objectClass.getConstructors();
+//获取形参为 int 和 String 类型的构造方法
 objectClass.getDeclaredConstructor(int.class,String.class);
+//获取形参为 int 和 String 类型的构造方法
 objectClass.getDeclaredConstructor(new Class[]{int.class,String.class});
 ```
 
-创建的每个 Constructor 对象表示一个构造方法，然后利用 Constructor 对象的方法操作构造方法。Constructor 类的常用方法如表下图所示。
+> Constructor 类的常用方法如图所示
 
 ![java_20230629140607.png](../blog_img/java_20230629140607.png)
-
-通过 java.lang.reflect.Modifier 类可以解析出 getMocMers() 方法的返回值所表示的修饰符信息。在该类中提供了一系列用来解析的静态方法，既可以查看是否被指定的修饰符修饰，还可以字符串的形式获得所有修饰符。下图列出了 Modifier 类的常用静态方法。
-
-![java_20230629140805.png](../blog_img/java_20230629140805.png)
-
-```java
-int modifiers = con.getModifiers();    // 获取构造方法的修饰符整数
-boolean isPublic = Modifier.isPublic(modifiers);    // 判断修饰符整数是否为public 
-string allModifiers = Modifier.toString(modifiers);
-```
 
 
 例子：演示如何调用 Constructor 类的方法获取构造方法的信息。
@@ -172,7 +188,6 @@ public class Book {
     // 空的构造方法
     private Book() {
     }
-
     // 带两个参数的构造方法
     protected Book(String _name, int _id) {
         this.name = _name;
@@ -195,7 +210,7 @@ public class Book {
     }
 }
 
-//---------------------------
+//---------------------------------------------
 
 public class Test01 {
     public static void main(String[] args) {
@@ -248,24 +263,40 @@ public class Test01 {
 ```
 
 
-## 通过反射执行方法（获取方法）
+#### Modifier 类
+
+Modifier 类可以解析出成员的修饰符信息。既可以查看是否被指定的修饰符修饰，还可以字符串的形式获得所有修饰符。
+
+下图列出了 Modifier 类的常用静态方法。
+![java_20230629140805.png](../blog_img/java_20230629140805.png)
+
+例子
+```java
+int modifiers = con.getModifiers();    // 获取构造方法的修饰符整数
+boolean isPublic = Modifier.isPublic(modifiers);    // 判断修饰符整数是否为public 
+string allModifiers = Modifier.toString(modifiers);
+```
+
+#### Method 类
+
+> 获取 Method 类的对象
 
 通过反射机制来动态获取一个方法的信息，首先需要通过下列方法之一创建一个 Method 类型的对象或者数组。
-* getMethods()
-* getMethods(String name,Class<?> …parameterTypes)
-* getDeclaredMethods()
-* getDeclaredMethods(String name,Class<?>...parameterTypes)
-
-如果是访问指定的方法，需要根据该方法的入口参数的类型来访问。例如，访问一个名称为 max，入口参数类型依次为 int 和 String 类型的方法。
 
 ```java
-//方式1
+getMethods()
+getMethods(String name,Class<?> …parameterTypes)
+getDeclaredMethods()
+getDeclaredMethods(String name,Class<?>...parameterTypes)
+
+//例子
+//访问一个名称为 max，入口参数类型依次为 int 和 String 类型的方法。
 objectClass.getDeclaredConstructor("max",int.class,String.class);
-//方式2
+//访问一个名称为 max，入口参数类型依次为 int 和 String 类型的方法。
 objectClass.getDeclaredConstructor("max",new Class[]{int.class,String.class});
 ```
 
-Method 类的常用方法如图所示。
+> Method 类的常用方法如图所示。
 
 ![java_20230629141429.png](../blog_img/java_20230629141429.png)
 
@@ -276,19 +307,16 @@ public class Book1 {
     static void staticMethod() {
         System.out.println("执行staticMethod()方法");
     }
-
     // public 作用域方法
     public int publicMethod(int i) {
         System.out.println("执行publicMethod()方法");
         return 100 + i;
     }
-
     // protected 作用域方法
     protected int protectedMethod(String s, int i) throws NumberFormatException {
         System.out.println("执行protectedMethod()方法");
         return Integer.valueOf(s) + i;
     }
-
     // private 作用域方法
     private String privateMethod(String... strings) {
         System.out.println("执行privateMethod()方法");
@@ -300,7 +328,7 @@ public class Book1 {
     }
 }
 
-//--------------
+//-------------------------------------
 
 public class Test02 {
     public static void main(String[] args) {
@@ -354,22 +382,26 @@ public class Test02 {
 ```
 
 
-## 通过反射访问成员变量
+#### Field类
+
+> 获取Field类的对象
 
 通过下列任意一个方法访问成员变量时将返回 Field 类型的对象或数组。
-* getFields()
-* getField(String name)
-* getDeclaredFields()
-* getDeclaredField(String name)
 
-上述方法返回的 Field 对象代表一个成员变量。例如，要访问一个名称为 price 的成员变量，示例代码如下：
 ```java
+getFields()
+getField(String name)
+getDeclaredFields()
+getDeclaredField(String name)
+
+//例如，访问一个名称为 price 的成员变量
 object.getDeciaredField("price");
 ```
 
-Field 类的常用方法如图所示
+> Field 类的常用方法如图所示
 
 ![java_20230629141830.png](../blog_img/java_20230629141830.png)
+
 
 例子：演示如何调用 Field 类的方法获取动态类中各个成员的信息。
 ```java

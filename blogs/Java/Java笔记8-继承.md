@@ -463,3 +463,56 @@ public class Cat extends Animal {
     }
 }
 ```
+
+## 方法重写和方法重载的区别
+
+- 方法重载：在同一类中，名字相同但是其他不相同的几个方法。叫做重载。
+- 方法重写：在父类子类中，子类对父类方法的重写。参数，返回类型，方法名相同。
+
+
+## 类的实例化顺序
+
+```java
+class A {
+	static {
+		System.out.print("1");
+	}
+	public A() {
+		System.out.print("2");
+	}
+}
+class B extends A{
+	static {
+		System.out.print("a");
+	}
+	public B() {
+		System.out.print("b");
+	}
+}
+public class Hello {
+	public static void main(String[] args) {
+		A ab = new B();
+		ab = new B();
+	}
+}
+//执行结果：1a2b2b。
+```
+
+父类和子类的静态变量，构造函数，成员变量等，当实例化对象的时候，他们的执行顺序是：
+
+**执行顺序是：先初始化父类和子类的静态成员（静态变量，静态代码块）-》然后调用父类和子类的非静态成员和构造方法**
+
+```
+从上到下执行：
+父类静态变量、
+父类静态代码块、
+子类静态变量、
+子类静态代码块、
+父类非静态变量（父类实例成员变量）、
+父类构造方法、
+子类非静态变量（子类实例成员变量）、
+子类构造方法
+```
+
+
+

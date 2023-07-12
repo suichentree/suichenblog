@@ -32,7 +32,7 @@ Java 通过面向对象的方法来处理异常。在一个方法的运行过程
 
 1. Throwable 类是 Java 语言中所有错误或异常的顶层父类，其他异常类都继承于该类。Throwable类有两个子类，Error类（错误）和Exception类（异常），各自都包含大量子类。 
 2. Error（错误）:是程序无法处理的错误，表示运行应用程序中较严重问题。大多数错误与代码编写者执行的操作无关。例如栈溢出等错误。这些错误是不可查的，因为它们在应用程序的控制和处理能力之外。
-3. Exception（异常）:代表程序运行时发送的各种不期望发生的事件。可以被Java异常处理机制使用，是异常处理的核心。
+3. Exception（异常）:代表程序运行时发送的各种不期望发生的事件。可以被Java异常处理机制使用，是程序本身可以捕获并且可以处理的异常。
 
 ### Exception类
 
@@ -40,43 +40,21 @@ Java 通过面向对象的方法来处理异常。在一个方法的运行过程
 
 由图可知 异常类 Exception 又分为运行时异常和非运行时异常，这两种异常有很大的区别。
 
-- 运行时异常都是 RuntimeException 类及其子类异常，如 NullPointerException等，这些异常是不检查异常，程序中可以选择捕获处理，也可以不处理。这些异常一般由程序逻辑错误引起，程序应该从逻辑角度尽可能避免这类异常的发生。
+- 运行时异常都是 RuntimeException 类及其子类异常，如 NullPointerException等，这些异常一般是由程序逻辑错误引起的，在程序中可以选择捕获处理，也可以不处理。程序应该从逻辑角度尽可能避免这类异常的发生。
 - 非运行时异常是指 RuntimeException 以外的异常，类型上都属于 Exception 类及其子类。从程序语法角度讲是必须进行处理的异常，如果不处理，程序就不能编译通过。如 IOException等以及用户自定义的 Exception 异常。
 
-![java_20230628151327.png](../blog_img/java_20230628151327.png)
+<font color="red">所有Java程序必须显式处理非运行时异常。如果程序没有处理，该程序在编译时就会发生错误无法编译.</font>
 
+![java_20230628151327.png](../blog_img/java_20230628151327.png)
 ![java_20230628151447.png](../blog_img/java_20230628151447.png)
 
-
-### Error和Exception的异同
+### Error和Exception的区别
 
 Exception 和 Error 体现了 Java 平台设计者对不同异常情况的分类。
 
-Exception 是程序正常运行过程中可以预料到的意外情况，并且应该被开发者捕获，进行相应的处理。Error 是指正常情况下不大可能出现的情况，绝大部分的 Error 是任何处理技术都无法恢复的情况，肯定会导致程序非正常终止。所以不需要被开发者捕获。
+* Exception 是程序正常运行过程中可以预料到的意外情况，并且应该被开发者捕获，进行相应的处理。
+* Error 表示系统级的错误和程序不必处理的异常，比如内存溢出，不可能指望程序能处理这样的情况，所以不需要被开发者捕获。
 
-如下是常见的 Error 和 Exception：
-
-1）运行时异常（RuntimeException）：
-```
-NullPropagation：空指针异常；
-ClassCastException：类型强制转换异常
-IllegalArgumentException：传递非法参数异常
-IndexOutOfBoundsException：下标越界异常
-NumberFormatException：数字格式异常
-```
-
-2）非运行时异常：
-```
-ClassNotFoundException：找不到指定 class 的异常
-IOException：IO 操作异常
-```
-
-3）错误（Error）：
-```
-NoClassDefFoundError：找不到 class 定义异常
-StackOverflowError：深递归导致栈被耗尽而抛出的异常
-OutOfMemoryError：内存溢出异常
-```
 
 ## 异常处理的五个关键字
 
@@ -192,6 +170,12 @@ public class Test {
 }
 
 ```
+
+#### try catch finally中的return语句
+
+try{}里有一个 return 语句。那么try catch后的finally{}会在return前执行。
+
+**finally代码块执行完毕之后再return 返回值，然后如果在finally中修改了返回值，就会返回修改后的值。**
 
 ### throws 声明异常
 

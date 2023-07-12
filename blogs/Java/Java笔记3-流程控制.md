@@ -71,10 +71,14 @@ switch(表达式) {
 
 </font>
 
-
 switch语句执行流程图：
 ![java_20230624154441.png](../blog_img/java_20230624154441.png)
 
+#### switch表达式
+
+switch表达式可以使用int类型或者能转换为int类型的变量，包装类。
+
+长整型（long）和 浮点型（double,float）不行，其余类型目前都可以。
 
 ## 循环语句
 

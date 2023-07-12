@@ -139,5 +139,3 @@ Java 虚拟机（JVM）是运行 Java 程序的软件环境，Java解释器是 J
 * JVM（Java Virtual Machine，Java 虚拟机）是整个 Java 实现跨平台的最核心的部分，能够运行以 Java 语言编写的软件程序。
 
 ![java_20230621150008.png](../blog_img/java_20230621150008.png)
-
-

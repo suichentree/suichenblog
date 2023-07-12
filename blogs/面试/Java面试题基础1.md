@@ -110,10 +110,15 @@ Math.round()的原理是在参数上加 0.5 然后进行下取整。
 
 ### 8. switch表达式能用那些类型数据？
 
-switch表达式可以使用int类型或者能转换为int类型的变量，变量的包装类也行。
+以java8为准，switch只支持10种类型.
 
-但是长整型（long）在目前所有的版本中都是不可以的。
+基本类型：byte char short int 
+包装类 ：Byte,Short,Character,Integer，String，enum      
 
+实际上switch表达式只能使用int类型或者能转换为int类型的包装类。上面的10种类型都能自动转换为int类型。
+
+
+浮点类型：float,double不行。长整型long占8个字节，也不行。
 
 ### 9. 两个对象值相同(x.equals(y) == true)，但却可有不同的hash code，这句话对不对？
 
