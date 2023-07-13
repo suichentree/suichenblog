@@ -32,63 +32,9 @@ String str="i"与 String str=new String(“i”)一样吗？不一样，因为�
 
 String s = new String(“xyz”);创建了几个字符串对象? 两个对象，一个是静态区的"xyz"，一个是用new创建在堆上的对象。
 
-### String和StringBuffer、StringBuilder的区别是什么？
-
-> 可变性
-
-String类中使用字符数组保存字符串，private final char value[]，所以 string对象是不可变的。
-
-StringBuilder与StringBuffer都继承自 AbstractStringBuilder类，在AbstractStringBuilder中也是使用字符数组保存字符串，char[] value，这两种对象都是可变的。
-
-> 线程安全性
-
-String中的对象是不可变的，也就可以理解为常量，线程安全。
-
-StringBuffer对方法加了同步锁或者对调用的方法加了同步锁，所以是线程安全的。StringBuilder并没有对方法进行加同步锁，所以是非线程安全的。
-
-> 性能
-
-StirngBuilder > StringBuffer > String
-
-## 包装类相关
-
-装箱：将基本类型用它们对应的引用类型包装起来；
-拆箱：将包装类型转换为基本数据类型；
-
-###  int 和 Integer 有什么区别？
-
-为了能够将这些基本数据类型当成对象操作，Java 为每一个基本数据类型都引入了对应的包装类型（wrapper class），int 的包装类就是 Integer。
-
-原始类型: boolean，char，byte，short，int，long，float，double 
-
-包装类型：Boolean，Character，Byte，Short，Integer，Long，Float，Double
-
 # 线程
 
-## 说说多线程
-
-* 线程是操作系统调度的最小单元,一个进程中可以包含多个线程。从而可以让一个进程并发地处理多个任务。
-* 每个线程拥有各自的堆栈，局部变量。同时每个线程也共享进程内的资源。由于共享资源,处理器可以让这些线程之间快速切换执行,从而让使用者感觉这些线程在同时执行。
-* 一个程序运行之后至少有一个进程,而一个进程可以包含多个线程,但至少要包含一个线程。
-
-使用多线程的原因：
-* 程序使用多线程技术,就可以将计算逻辑分配到多个处理器核心上,显著减少程序的处理时间,从而随着更多处理器核心的加入而变得更有效率。
-* 使用多线程技术,可以将数据一致性不强的逻辑操作派发给其他线程处理,如上传图片、发送邮件、生成订单等。这样响应用户请求的线程就能够尽快地完成处理,大大地缩短了响应时间。
-
-## java是如何保证线程安全？
-
-Java保证线程安全的方式有三种,按照资源占用情况由轻到重排列,分别是java.util.concurrent.atomic包中的原子类、volatile、锁。
-
-锁：
-* Java中加锁的方式有两种,分别是synchronized关键字和Lock接口。
-
 # 反射
-
-## 说说对反射的了解
-
-通过反射机制我们能做如下事情：
-1. 通过获得任意一个类的Class对象并通过该对象查看类信息。并创建类的实例对象，访问该实例对象的成员变量。
-2. 生成一个类的动态代理类或动态代理对象。应用场景有：使用JDBC时如果要创建数据库连接要通过反射机制加载数据库驱动程序。从注解或xml配置中解析出来的类是字符串需要利用反射实例化。AOP实现方案是在程序运行时通过反射机制创建目标对象代理类。
 
 
 # 集合容器
@@ -98,27 +44,6 @@ Java保证线程安全的方式有三种,按照资源占用情况由轻到重排
 * 数组是固定长度的；集合可变长度的。
 * 数组可以存储基本数据类型，也可以存储引用数据类型；集合只能存 储引用数据类型。
 * 数组存储的元素必须是同一个数据类型；集合存储的对象可以是不同 数据类型。
-
-## 常用的集合类有哪些？
-
-Map接口和Collection接口是所有集合框架的父接口：
-1. Collection接口的子接口包括：Set接口和List接口
-2. Map接口的实现类主要有：HashMap、TreeMap、Hashtable、 ConcurrentHashMap以及Properties等
-3. Set接口的实现类主要有：HashSet、TreeSet、LinkedHashSet等
-4. List接口的实现类主要有：ArrayList、LinkedList、Stack以及Vector等
-
-![20221102145854.png](../../blog_img/20221102145854.png)
-![20221102145918.png](../../blog_img/20221102145918.png)
-
-Java 容器分为 Collection 和 Map 两大类，Collection集合的子接口有Set、 List、Queue三种子接口。比较常用的是Set、List。Map接口不是 collection的子接口。
-
-Collection集合主要有List和Set两大接口
-* List：一个有序（元素存入集合的顺序和取出的顺序一致）容器，元素可以重复，可以插入多个null元素，元素都有索引。常用的实现类有 ArrayList、LinkedList 和 Vector。
-* Set：一个无序（存入和取出顺序有可能不一致）容器，不可以存储重复元素， 只允许存入一个null元素，必须保证元素唯一性。Set 接口常用实现类是 HashSet、 LinkedHashSet 以及TreeSet。
-
-Map是一个键值对集合，存储键、值和之间的映射。 Key无序，唯一；value 不要求有序，允许重复。
-
-Map没有继承于Collection接口，从Map集合中检索元素时，只要给出键对象，就会返回对应的值对象。Map 的常用实现类：HashMap、TreeMap、HashTable、LinkedHashMap、 ConcurrentHashMap。
 
 ## 各个集合容器的底层数据结构
 
@@ -144,13 +69,6 @@ java.uti包中的集合类大部分都是非线程安全的，例如：ArrayList
 
 另外java.util.concurrent包中的提供了大量的支持并发访问的集合类。例如ConcurrentHashMap和ConcurrentMap等线程安全的集合类。
 
-## List 和 Set 和 Map 区别
-
-List是存储的数据是有顺序，并且允许重复，值允许有多个null。常用的实现类有 ArrayList、LinkedList 和 Vector。
-
-Set是存储的数据是没有顺序的,并且不允许重复，只允许一个 null 元素。常用的实现类是 HashSet、LinkedHashSet 以及 TreeSet。
-
-Map是存储键和值这样的双列数据的集合，存储的数据是没有顺序的，键不能重复，值是可以有重复的，key最多有一个null。常用的几个实现类是 HashMap、LinkedHashMap、TreeMap。
 
 ## List 和 Set 和 Map的使用场景
 
@@ -215,11 +133,6 @@ HashMap 的 key 是唯一的，HashSet 添加进去的值就是作为 HashMap �
 4. 综上，equals方法被覆盖过，则hashCode方法也必须被覆盖
 5. hashCode()的默认行为是对堆上的对象产生独特值。如果没有重写hashCode()，则该class的两个对象无论如何都不会相等（即使这两个对象指向相同的数据）。
 
-### ==与equals的区别
-
-1. ==是判断两个变量或实例是不是指向同一个内存空间 equals是判断两个变量或实例所指向的内存空间的值是不是相同
-2. ==是指对内存地址进行比较 equals()是对字符串的内容进行比较
-3. == 指引用是否相同 equals()指的是值是否相同
 
 # Map接口
 
@@ -238,56 +151,6 @@ HashMap 基于 Hash 算法实现的
 当HashMap的链表长度>8时，会把链表转换为红黑树。
 
 原因：开始使用链表，占用空间少，查询性能也相差不大。但是当链表越来越长，查询效率逐渐变低，为保证查询效率才会舍弃链表转为红黑树，以空间换时间。
-
-### 红黑树
-
-红黑树本质上是平衡二叉树。有时不太平衡。
-
-红黑树和平衡二叉树的区别：
-* 平衡二叉树的左右子树的高度差绝对值不超过1，但是红黑树在某些时刻可能会超过1，只要符合红黑树的规则即可。
-* 平衡二叉树只要不平衡时就会进行旋转，而红黑树不符合规则时，有些情况只用改变颜色不用旋转，就能达到平衡。
-
-红黑树的红黑规则：
-1. 每个节点要么是黑色，要么是红色。
-2. 根节点是黑色。叶子节点（NIL）也是黑色。
-3. 若一个节点是红色的，则它的子节点必须是黑色的。(父子节点不能同时为红色)
-4. 从一个节点到该节点的子孙节点的所有路径上包含相同数目的黑节点。
-
-![20221109162317.png](../../blog_img/20221109162317.png)
-上图中根节点到叶子节点的所有路径都包含3个黑节点。
-
-红黑树使用红黑二色进行“着色”，目的是利用颜色值作为二叉树的平衡对称性的检查，只要插入的节点“着色”满足红黑二色的规定，那么最短路径与最长路径不会相差的太远，红黑树的节点分布就能大体上达至均衡。
-
-
-## HashMap的扩容操作是怎么实现的？
-
-HashMap的初始容量为16
-
-扩容是当hashMap中的键值对数量大于阀值时或者初始化时，就调用resize方法进行扩容；每次扩展的时候，都是扩展2倍；扩展后Node节点对象的位置要么在原位置，要么移动到原始位置+增加的数组大小这个位置上。
-
-## HashMap是怎么解决哈希冲突的？
-
-1. 使用链地址法（使用散列表）来链接拥有相同hash值的数据；
-2. 使用2次扰动函数（hash函数）来降低哈希冲突的概率，使得数据分布更平均；
-3. 引入红黑树进一步降低遍历的时间复杂度，使得遍历更快；
-
-## HashMap 与 HashTable 的区别？
-
-* 线程安全：HashMap 是非线程安全的，HashTable 是线程安全的；HashTable 内部方法都经过synchronized修饰。
-* 性能：HashMap > HashTable
-* null: HashMap中null可以作为键值，但只能有一个。Hashtable不允许存入null
-* 底层: HashMap和HashTable都是用数组+链表作为底层数据结构的。但是HashMap的链表长度>8时，链表会转换为红黑树。
-
-## HashMap的死循环问题？
-
-由于HashMap并非是线程安全的，所以在高并发的情况下必然会出现一个问题。即在并发的情况，当HashMap要扩容时，可能会产生循环链表，在执行get的时候，会触发死循环，引起CPU的100%问题，因此一定要避免在并发环境下使用HashMap。建议并发环境下使用ConcurrentHashMap。
-
-## HashMap 和 ConcurrentHashMap 的区别
-
-1. ConcurrentHashMap对整个桶数组进行了分割分段(Segment)，然后在每一个分段上都用lock锁进行保护，而HashMap没有锁机制，不是线程安全的。（JDK1.8之后ConcurrentHashMap启了一种全新的方式实现,利用CAS算法。）
-2. HashMap的键值对允许有null，但是ConCurrentHashMap都不允许。
-
-
 
 
 

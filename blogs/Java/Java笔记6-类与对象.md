@@ -24,9 +24,17 @@ categories:
 
 使用这种层次形的分类方式，是为了将多个类的通用属性和方法提取出来，放在它们的父类中，然后只需要在子类中各自定义自己独有的属性和方法，并以继承的形式在父类中获取它们的通用属性和方法即可。
 
+关于继承如下几点请记住：
+1. 子类不能继承父类的构造方法。
+2. 子类不能继承父类private的属性和方法。
+3. 子类可以拥有自己属性和方法，即子类可以对父类进行扩展。
+4. 子类可以用自己的方式实现父类的方法。
+
 ### 封装性
 
-封装是把数据和操作数据的方法绑定起来，对数据的访问只能通过已定义的接口。类的封装就是隐藏一切可隐藏的东西，只向外界提供最简单的接口。
+封装是把数据和操作数据的方法绑定起来，对数据的访问只能通过已定义的接口。
+
+类的封装就是隐藏对象的属性和实现细节，仅对外提供公共访问方式,便于使用，提高复用性和安全性。
 
 封装的目的在于保护信息，使用它的主要优点如下。
 * 保护类中的信息，它可以阻止外部代码随意访问内部代码和数据。
@@ -42,7 +50,7 @@ Java 语言的基本单位是类。由于类的用途是封装复杂性，所以
 
 实现多态需要做两件事：
 1). 方法重写（子类继承父类并重写父类中已有的或抽象的方法）； 
-2). 对象造型（用父类型对象变量去引用子类型对象,之后父类型对象变量调用方法就会根据引用的子类对象的不同而表现出不同的行为）。
+2). 对象引用（用父类型对象变量去引用子类型对象,之后父类型对象变量调用方法就会根据引用的子类对象的不同而表现出不同的行为）。
 
 多态性如图所示
 ![java_20230626150425](../blog_img/java_20230626150425.png)
@@ -477,111 +485,6 @@ public human(String name) {
 
 ```java
 import java.io.*;
-```
-
-### 内部类
-
-java允许在一个类的内部在定义类，这样的类叫做内部类。内部类有三种：成员内部类，静态内部类，方法内部类。
-
-<h4>①：成员内部类</h4>
-
->在一个类中在定义一个类，这种类叫做成员内部类。成员内部类中可以访问外部类的所有成员，包括私有成员。
->创建成员内部类对象语法：
->外部类名.内部类名 变量名=new 外部类名().new 内部类名();
-
-```java
-package blog;
-import java.sql.Date;
-public class human {
-private String name="xiaoming";   
-public human() {}
-public void shilihua() {    //外部类要访问内部类
-	neibu n=new neibu();
-	n.show();
-}
-  class neibu{
-	  void show() {
-		  System.out.println("这是内部类的show方法,"+"外部类的name成员的值为"+name);
-	  }
-  }
-	public static void main(String[] args) {
-		human h=new human();
-		h.shilihua();   //外部类访问内部类,可在外部类中创建方法，方法中创建内部类对象。
-		human.neibu hn=new human().new neibu();   //外部类访问内部类，要通过外部类对象去创建内部类对象
-		hn.show();
-	}
-}
-```
-
-![25](../blog_img/java_img_25.png)
-
-<font color="red">外部类访问内部类的方法：</font>
-
->1. 外部类访问内部类,可在外部类中创建方法，方法中创建内部类对象。
->2. 外部类访问内部类，要通过外部类对象去创建内部类对象,从而实现外部类访问内部类。
-
-<h4>②：静态内部类</h4>
-
-**用static修饰符修饰的成员内部类就是静态内部类。**
-
->实例化静态内部类对象语法：
-> 外部类名.内部类名 变量名=new 外部类名.内部类名();
-> 1 在静态内部类中，只能访问外部类的静态成员，非静态成员不能访问。
-> 2 静态内部类中可以定义静态成员，但在非静态内部类中不能定义静态成员。
-
-```java
-package blog;
-import java.sql.Date;
-public class human {
-private String name="xiaoming";
-private static int number=5;
-public human() {}
-public void shilihua() {    //外部类要访问内部类
-	neibu2 n=new neibu2();
-	n.show();
-}
-  
-  //静态内部类
-  static class neibu2{
-	  void show() {
-		  //静态内部类只能访问外部类的静态成员
-		  System.out.println("这是静态内部类的show方法,"+"外部类的静态number成员的值为"+number);
-	  } 
-	  
-  }
-	public static void main(String[] args) {
-		human h=new human();
-		h.shilihua();   //外部类访问内部类,可在外部类中创建方法，方法中创建内部类对象。
-		human.neibu2 hn=new human.neibu2();   //外部类访问内部类，要通过外部类对象去创建内部类对象
-		hn.show();
-	}
-}
-```
-
-<h4>③：方法内部类</h4>
-
->方法内部类指在成员方法中定义的类，它只能在当前方法中使用。方法内部类可以访问外部类成员
-
-```java
-public class human {
-private String name="xiaoming";
-	public void shilihua() {    //外部类要访问内部类
-		//方法内部类
-		class inner{
-			void show() {
-				 System.out.println("这是静态内部类的show方法,"+"外部类的静态name成员的值为"+name);
-			}
-		}
-		//实例化内部类对象
-		inner i=new inner();
-		i.show();   //调用内部类方法
-	}
-	public static void main(String[] args) {
-		human h=new human();
-		h.shilihua();
-	}
-}
-
 ```
 
 

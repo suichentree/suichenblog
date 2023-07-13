@@ -115,18 +115,6 @@ module.exports = {
         "Spring面试题1",
         "SpringBoot面试题1",
         "SpringCloud面试题1"
-      ],
-      //面试文档的侧边栏
-      "/blogs/Java/": [
-        "",
-        "Java基础",
-        "Java面向对象",
-        "Java集合容器",
-        "Java异常",
-        "Java多线程",
-        "Java输入输出流",
-        "Java设计模式",
-        "JavaWeb"
       ]
     },
     "type": "blog",

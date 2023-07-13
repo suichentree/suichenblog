@@ -63,8 +63,6 @@ C : > javac HelloWorld.java    //编译文件，产生.class的字节码文件
 
 Java代码写到文件之后，还需要进行编译才能运行。编译 Java 源程序使用的是 JDK 中的 javac 命令。
 
-
-
 ④：运行java文件
 
 运行字节码文件需要使用 JDK 中的 java 命令，例如运行上步生成的 .class 文件，命令如下

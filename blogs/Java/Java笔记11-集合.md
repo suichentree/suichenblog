@@ -27,7 +27,7 @@ Java集合按照存储结构分为单列集合与双列集合。
 
 Collection 接口是 List、Set 和 Queue 接口的父接口，通常情况下不直接使用。Collection 接口定义了一些通用的方法，通过这些方法可以实现对集合的基本操作。Collection 接口中定义的方法既可用于操作 Set 集合，也可用于操作 List 和 Queue 集合。
 
-![43](../blog_img/java_img_43.png)
+![20221102145854.png](../blog_img/20221102145854.png)
 
 >List集合存储的元素有序，可重复.
 >Set集合存储的元素无序，不可重复.
@@ -68,7 +68,7 @@ public static void main(String[] args) {
 
 List 是一个有序、可重复的集合，集合中每个元素都有其对应的顺序索引。List 集合允许使用重复元素，可以通过索引来访问指定位置的集合元素。List 集合默认按元素的添加顺序设置元素的索引，第一个添加到 List 集合中的元素的索引为 0，第二个为 1，依此类推。
 
-List 实现了 Collection 接口，它主要有两个常用的实现类：ArrayList 类和 LinkedList 类。
+List 实现了 Collection 接口，它主要有两个常用的实现类：ArrayList、LinkedList、Stack以及Vector等
 
 List集合常用方法：
 方法 | 描述
@@ -144,7 +144,7 @@ ArrayList 与 LinkedList 都是 List 接口的实现类，因此都实现了 Lis
 
 Set集合的特点是存储的元素无序,不可重复。也就是说 Set 集合中的对象不按特定的方式排序，只是简单地把对象加入集合。Set 集合中不能包含重复的对象，并且最多只允许包含一个 null 元素。
 
-Set 实现了 Collection 接口，它主要有两个常用的实现类：HashSet 类和 TreeSet类。
+Set 实现了 Collection 接口，它主要有两个常用的实现类：HashSet、TreeSet、LinkedHashSet等
 - HashSet是根据对象的哈希值来确定元素在集合的存储位置，有好的存取，查找性能。
 - TreeSet是以二叉树的方式来存储元素,可以对集合的元素进行排序。
 
@@ -276,10 +276,9 @@ Map 是一种键-值对（key-value）集合，Map 集合中的每一个元素�
 
 Map 中的 key 和 value 之间存在单向一对一关系，即通过指定的 key，总能找到唯一的、确定的 value。从 Map 中取出数据时，只要给出指定的 key，就可以取出对应的 value。
 
-Map接口的类结构图，其中最常用的类是HashMap,LinkedHashMap,TreeMap,Hashtable。
+Map接口的类结构图，其中最常用的类是HashMap,LinkedHashMap,TreeMap,Hashtable等。
 
 ![20201023142514.png](../blog_img/20201023142514.png)
-
 
 Map 接口中提供的常用方法如表图所示。
 ![java_20230628235302.png](../blog_img/java_20230628235302.png)
@@ -628,3 +627,23 @@ while(ite.hasNext())  //判断该对象是否有下一个元素
 2.在对集合元素进行迭代时，若在该过程中删除其中一个元素，迭代器对象会抛出一个异常。可以使用迭代器本身的删除方法remove(),来解决。
 
 </font>
+
+
+
+## 各个集合容器使用的底层数据结构
+
+List
+* Arraylist： Object数组
+* Vector： Object数组
+* LinkedList： 双向循环链表
+
+Set
+* HashSet（无序，唯一）：基于 HashMap 实现的，底层采用 HashMap的key来保存元素
+* LinkedHashSet： LinkedHashSet 继承与 HashSet，并且其内部是通过 LinkedHashMap 来实现的。有点类似于我们之前说的LinkedHashMap 其内部是基 于 Hashmap 实现一样，不过还是有一点点区别的。
+* TreeSet（有序，唯一）： 红黑树(自平衡的排序二叉树。) 
+
+Map
+* HashMap： JDK1.8之前HashMap由数组+链表组成的，数组是HashMap的主体，链表则是主要为了解决哈希冲突而存在的（“拉链法”解决冲突）.JDK1.8以后在解决哈希冲突时有了较大的变化，当链表长度大于阈值（默认为8）时，将链表转化为红黑树，以减少搜索时间
+* LinkedHashMap：LinkedHashMap 继承自 HashMap，所以它的底层仍然是由数组和链表或红黑树组成。另外，LinkedHashMap 在上面结构的基础上，增加了一条双向链表，使得上面的结构可以保持键值对的插入顺序。 同时通过对链表进行相应的操作，实现了访问顺序相关逻辑。
+* HashTable： 数组+链表组成的，数组是 HashMap 的主体，链表则是主要为 了解决哈希冲突而存在的
+* TreeMap： 红黑树（自平衡的排序二叉树）

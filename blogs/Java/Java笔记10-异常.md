@@ -171,11 +171,42 @@ public class Test {
 
 ```
 
-#### try catch finally中的return语句
+#### try catch finally 中 return 的执行顺序
 
-try{}里有一个 return 语句。那么try catch后的finally{}会在return前执行。
+```java
+public class Test {
+    public static void main(String[] args) {
+        System.out.println(test());
+    }
+    private static int test() {
+        int temp = 1;
+        try {
+            System.out.println(temp);
+            return ++temp;
+        } catch (Exception e) {
+            System.out.println(temp);
+            return ++temp;
+        } finally {
+            ++temp;
+            System.out.println(temp);
+        }
+    }
+}
 
-**finally代码块执行完毕之后再return 返回值，然后如果在finally中修改了返回值，就会返回修改后的值。**
+//运行结果：1 3 2
+//分析
+执行顺序为：
+输出try里面的初始temp：1；
+++temp之后，temp=2；
+保存return里面temp的值：2；
+执行finally的语句temp：3，输出temp：3；
+返回try中的return语句，返回存在里面的temp的值：2；
+输出temp：2。
+```
+
+知识点：
+1. 若try代码块内含有return，同时存在finally代码块（代码块内无return）时，先保存return结果，然后执行finally，最后返回return结果。
+2. 若try代码块内含有return，同时finally代码块内含有return时，此时finally代码块内的return值将覆盖掉try代码块中的return值，然后返回覆盖后的return结果。
 
 ### throws 声明异常
 

@@ -191,11 +191,18 @@ System.out.println(sBuffer);
 
 ### String 和 StringBuilder、StringBuffer 的区别？
 
-* String：字符串常量。String的内容是不可变的。因为String的底层是一个底层不可变的字符数组（final char[]）。
-* StringBuffer 字符串变量（线程安全），底层是可变的字符数组，其append方法有线程同步锁。
-* StringBuilder 字符串变量（非线程安全），底层是可变的字符数组，其append方法没有线程同步锁。
+> 可变性
+- String类中使用字符数组保存字符串，private final char value[]，所以 string对象是不可变的。
+- StringBuilder与StringBuffer使用字符数组保存字符串，char[] value，这两种对象都是可变的。
 
-总结：在Java中，使用"+"号来拼接字符串。底层是通过append()方法来实现。
+> 线程安全性
+- String中的对象是不可变的，也就可以理解为常量，线程安全。
+- StringBuffer对方法加了同步锁或者对调用的方法加了同步锁，所以是线程安全的。
+- StringBuilder并没有对方法进行加同步锁，所以是非线程安全的。
+
+> 性能
+
+StirngBuilder > StringBuffer > String
 
 ## Math 类
 
