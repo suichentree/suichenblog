@@ -8,7 +8,6 @@ categories:
 
 [toc]
 
-
 # Java笔记11-集合
 
 为了保存数量不确定的数据，以及保存具有映射关系的数据（键值对），Java 提供了集合类。
@@ -22,6 +21,9 @@ Java集合按照存储结构分为单列集合与双列集合。
 - 双列集合是按照键值对的方式存储元素，其根接口是Map.
 
 ![44](../blog_img/java_img_44.png)
+
+![20220527103725.png](../blog_img/20220527103725.png)
+
 
 ## Collection接口
 
@@ -86,51 +88,118 @@ int lastIndexOf(Object obj) | 返回obj对象在集合的最后一个的位置
 
 ArrayList是List接口的一个实现类。可以把其看成一个长度可变的数组对象。它还提供了快速基于索引访问元素的方式，对尾部成员的增加和删除支持较好。使用 ArrayList 创建的集合，允许对集合中的元素进行快速的随机访问，不过，向 ArrayList 中插入与删除元素的速度相对较慢。
 
-ArrayList 类的常用构造方法有如下两种重载形式：
+> ArrayList类如何扩容?
 
+ArrayList是基于对象数组实现的，添加元素时若数组的容量不够，ArrayList会自动扩容.
+- 添加元素前判断数组容量是否足够，若不够，则先扩容
+- 每次扩容都是按原容量的1.5倍进行扩容（新数组容量 = 原数组容量*1.5 + 1）
+- 扩容后,原数组通过Arrays.copyOf()将原数据元素拷贝到新数组
+
+> ArrayLisy类的优缺点
+- 由于底层是数组，所以根据下标查询元素效率较高。由于底层是数组，所以插入和删除元素的效率低。
+
+> ArrayList 类的常用构造方法有如下两种重载形式：
 ```java
 //构造一个初始容量为 10 的空列表。
 ArrayList();
 //构造一个包含指定 Collection 元素的列表,这些元素是按照该 Collection 的迭代器返回它们的顺序排列的。
 ArrayList(Collection<?extends E>c);
 ```
+> 下图是ArrayList类的常用方法
 
 ![java_20230628232259.png](../blog_img/java_20230628232259.png)
 
-例子
+>例子
 ```java
-ArrayList ar =new ArrayList();   //创建ArrayList集合
-//向集合中添加元素
-ar.add("xiaoming");
-ar.add("xiaohua");
-ar.add("xiaoqiang");
-System.out.println("此时集合的长度 "+ar.size());
-// 循环遍历集合，输出集合元素
-for (int i = 0; i < ar.size(); i++) {
-    System.out.println(ar.get(i));
+//ArrayLista的使用
+public class test1 {
+    public static void main(String[] args) {
+        ArrayList ar =new ArrayList();   //创建ArrayList集合
+        //向集合中添加元素
+        ar.add("xiaoming");
+        ar.add("xiaohua");
+        ar.add("xiaoqiang");
+        System.out.println("此时集合的长度 "+ar.size());
+        // 循环遍历集合，输出集合元素
+        for (int i = 0; i < ar.size(); i++) {
+            System.out.println(ar.get(i));
+        }
+    }
 }
+
+//下面是ArrayList的部分源代码
+public class ArrayList<E> extends AbstractList<E>
+        implements List<E>, RandomAccess, Cloneable, java.io.Serializable
+{
+    //默认的初始容量为10
+    private static final int DEFAULT_CAPACITY = 10;
+    //通过一个Object[]数组来存储元素
+    transient Object[] elementData;
+    //容器中元素的个数
+    private int size;
+    ......
+}
+
+//ArrayList每次进行增加元素的操作时，会将size与容量进行对比。当size大于实际容量时，数组会默认将扩容至原来容量的1.5倍
 ```
 
 ### LinkedList类
 
 LinkedList是List接口的一个实现类。可以把其看成一个长度可变的双向循环链表。
 
-这种结构的优点是便于向集合中插入或者删除元素。需要频繁向集合中插入和删除元素时，使用 LinkedList 类比 ArrayList 类效果高，但是 LinkedList 类随机访问元素的速度则相对较慢。这里的随机访问是指检索集合中特定索引位置的元素。
+这种结构的优点是便于向集合中插入或者删除元素。当需要频繁向集合中插入和删除元素时，使用 LinkedList 类比 ArrayList 类效果高，但是 LinkedList 类随机访问元素的速度则相对较慢。这里的随机访问是指检索集合中特定索引位置的元素。
 
 LinkedList 类除了包含 Collection 接口和 List 接口中的所有方法之外，还有下图所示的方法。
 ![java_20230628233150.png](../blog_img/java_20230628233150.png)
 
 例子
 ```java
-LinkedList link=new LinkedList();   //创建linklist集合
-link.add("xiao");
-link.add("ming");
-link.add("hua");
-link.add("qiang");
-//打印集合中的元素
-System.out.println(link.toString());
+//LinkedList的使用
+public class test1 {
+    public static void main(String[] args) {
+        LinkedList link=new LinkedList();   //创建linklist集合
+        link.add("xiao");
+        link.add("ming");
+        link.add("hua");
+        link.add("qiang");
+        //打印集合中的元素
+        System.out.println(link.toString());
+
+
+    }
+}
 
 //运行结果：[xiao, ming, hua, qiang]
+
+//LinkedList的部分源代码------------------
+public class LinkedList<E>
+    extends AbstractSequentialList<E>
+    implements List<E>, Deque<E>, Cloneable, java.io.Serializable
+{
+    transient int size = 0;
+    transient Node<E> first;  //链表的头节点
+    transient Node<E> last;    //链表的尾节点
+    public LinkedList() {
+    }
+    //每个节点包含前指针，后指针。分别指向前一个节点和后一个节点
+    private static class Node<E> {
+        E item;
+        Node<E> next;
+        Node<E> prev;
+
+        Node(Node<E> prev, E element, Node<E> next) {
+            this.item = element;
+            this.next = next;
+            this.prev = prev;
+        }
+    }
+    .......
+}
+//1. 通过节点中的next，prev，来使用双向链表的功能
+//2. 节点中的item用来存放数据
+//3. first 和 last 分别指向 首节点和尾节点
+
+
 ```
 
 ### ArrayList 类和 LinkedList 类的区别
@@ -139,6 +208,49 @@ ArrayList 与 LinkedList 都是 List 接口的实现类，因此都实现了 Lis
 
 * ArrayList 是基于动态数组数据结构的实现，可以直接按序号索引元素。但是插入元素要涉及数组元素移动等内存操作，所以查询数据快而插入数据慢。
 * LinkedList 是基于双向链表数据结构的实现，按序号索引数据需要进行前向或后向遍历，但是插入数据时只需要记录本项的前后项即可，所以插入速度较快，查询速度慢。
+
+### Vector类
+
+Vector类是线程安全的
+
+>例子
+```java
+//Vector类的使用
+public class test1 {
+    public static void main(String[] args) {
+        Vector<String> one = new Vector<String>();
+        one.add("1");
+        one.add("2");
+        System.out.println(one);
+    }
+}
+//Vector类的源代码
+public class Vector<E>
+    extends AbstractList<E>
+    implements List<E>, RandomAccess, Cloneable, java.io.Serializable
+{
+    protected Object[] elementData;
+    protected int elementCount;
+    protected int capacityIncrement;
+    public Vector() {
+        this(10);
+    }
+    public synchronized boolean add(E e) {
+        modCount++;
+        ensureCapacityHelper(elementCount + 1);
+        elementData[elementCount++] = e;
+        return true;
+    }
+    .....
+}
+```
+
+> Vector类的特征
+
+1. Vector类的底层也是通过对象数组来存储元素。
+2. Vector类中的方法都有synchronized关键字修饰，用于保证线程安全。
+3. 因为Vector类中每个方法中都添加了synchronized的关键字来保证同步，使得它的效率比ArrayList的效率要慢。
+4. <font color="red">Vector类大多数操作和ArrayList类相同，区别之处在于Vector类是线程同步的。因此可以将Vector类看作线程安全的ArrayList类。</font>
 
 ## Set接口
 
@@ -152,20 +264,46 @@ Set 实现了 Collection 接口，它主要有两个常用的实现类：HashSet
 
 <font color="red">HashSet是Set接口的一个实现类。其根据对象的Hash值来确定元素在集合的存储位置，因此具有很好的存取和查找性能。允许包含值为null的元素，但最多只能一个。</font>
 
-HashSet 具有以下特点：
+> HashSet 具有以下特点：
 * HashSet集合不出现重复元素。
 * 不能保证元素的排列顺序，顺序可能与添加顺序不同，顺序也有可能发生变化。
-* HashSet不是同步的，如果多个线程同时访问或修改一个HashSet，则必须通过其他代码的方式来保证其同步。
+* HashSet是线程不安全的，如果多个线程同时访问或修改一个HashSet，则必须通过其他代码的方式来保证其同步。
 * 集合元素值可以是 null。但最多只能一个。
 
-HashSet集合添加对象的过程：
+> HashSet集合添加对象的过程
+
 ![45](../blog_img/java_img_45.png)
 
 * 若两个对象的 hashCode 值相等且通过 equals() 方法比较返回结果为 true，则 HashSet 集合认为两个元素相等。
 * 如果向 Set 集合中添加两个相同的元素，则后添加的会覆盖前面添加的元素，即在 Set 集合中不会出现相同的元素。
 * 因此当HashSet集合存储某个对象类型的元素时，需要重写该对象的hashCode(),equals()方法。
 
-HashSet 类的常用构造方法重载形式如下
+> HashSet类的部分源代码
+
+```java
+//HashSet的部分源代码
+public class HashSet<E>
+    extends AbstractSet<E>
+    implements Set<E>, Cloneable, java.io.Serializable
+{
+    private transient HashMap<E,Object> map;
+    public HashSet() {
+        map = new HashMap<>();
+    }
+    public boolean add(E e) {
+        return map.put(e, PRESENT)==null;
+    }
+    ....
+}
+// HashSet底层是基于 HashMap 来实现的，是一个不允许有重复元素的集合。
+```
+
+1. HashSet底层是基于 HashMap 来实现的。使用HashMap的key来作为单个元素存储。因此能保证元素不重复。
+2. HashSet容器允许只能有一个null值。
+3. HashSet是根据被插入对象的hashcode值来选择对象的存储位置，若该位置已存在一个对象。则通过equals()方法来判断两个对象内容是否相同。相同则放弃插入，不相同则新对象取代旧对象。
+4. 为了保证HashSet中的对象不会出现重复，在被存放元素的类中必须要重写hashCode()和equals()这两个方法。
+
+> HashSet 类的常用构造方法重载形式如下
 ```java
 //构造一个新的空的 Set 集合。
 HashSet();
@@ -173,7 +311,7 @@ HashSet();
 HashSet(Collection<? extends E>c);
 ```
 
-例子
+> 例子
 ```java
 public class human {
 	private String name;
@@ -219,20 +357,90 @@ public class human {
 
 ![46](../blog_img/java_img_46.png)
 
+### LinkedHashSet 类
+
+LinkedHashSet类是HashSet类的子类。
+
+> 例子
+```java
+public class test1 {
+    public static void main(String[] args) {
+        LinkedHashSet<String> one = new LinkedHashSet<>();
+        one.add("1");
+        one.add("2");
+        System.out.println(one);
+    }
+}
+//LinkedHashSet源代码
+public class LinkedHashSet<E>
+    extends HashSet<E>
+    implements Set<E>, Cloneable, java.io.Serializable {
+    private static final long serialVersionUID = -2851667679971038690L;
+    public LinkedHashSet() {
+        //调用父类的有参构造方法
+        super(16, .75f, true);
+    }
+    .....
+}
+//HashSet部分源代码
+public class HashSet<E>
+    extends AbstractSet<E>
+    implements Set<E>, Cloneable, java.io.Serializable
+{
+    ......
+    //该构造方法创建LinkedHashMap对象
+    HashSet(int initialCapacity, float loadFactor, boolean dummy) {
+        map = new LinkedHashMap<>(initialCapacity, loadFactor);
+    }
+    ......
+}
+```
+
+> LinkedHashSet类的特点
+1. LinkedHashSet是HashSet的子类。底层是通过LinkedHashMap对象来实现的，而LinkedHashMap的底层是由双向链表组成。
+2. LinkedHashSet通过双向链表可以保证元素的插入顺序，又因为是HashSet的子类，所以插入的元素不能重复。
+3. LinkedHashSet类按照插入的顺序，来存储元素。
+
 ### TreeSet 类
 
 TreeSet 类同时实现了SortedSet 接口。而 SortedSet 接口是 Set 接口的子接口，可以实现对集合进行自然排序，
 
 因此TreeSet是以平衡的二叉排序树的方式来存储元素,可以对集合的元素进行排序。存储的元素会按照从小到大排序，并且去除重复元素。
 
-TreeSet排序原理：
+> TreeSet排序原理：
 * TreeSet 只能对实现了 Comparable 接口的类对象进行排序。
 * TreeSet集合在插入元素时，通过调用compareTo()方法，对集合中的元素进行比较，从而进行排序。因此，当TreeSet集合存储对象类型数据时，需要该对象实现Comparable接口，并重写compareTo()方法
 
-TreeSet 类除了实现 Collection 接口的所有方法之外，还提供了如图所示的方法。
+> TreeSet 类还提供了如图所示的方法。
+
 ![java_20230628234841.png](../blog_img/java_20230628234841.png)
 
-例子
+> TreeSet类的部分源代码如下
+
+```java
+//TreeSet的源代码
+public class TreeSet<E> extends AbstractSet<E>
+    implements NavigableSet<E>, Cloneable, java.io.Serializable
+{
+    private transient NavigableMap<E,Object> m;
+    private static final Object PRESENT = new Object();
+    TreeSet(NavigableMap<E,Object> m) {
+        this.m = m;
+    }
+    public TreeSet() {
+        this(new TreeMap<E,Object>());
+    }
+    public boolean add(E e) {
+        return m.put(e, PRESENT)==null;
+    }
+    .....
+}
+```
+
+1. TreeSet的底层是基于TreeMap实现的。而TreeMap的底层是通过红黑二叉树实现的。
+2. TreeSet通过红黑二叉树可以保证元素的插入顺序。又因为实现了Set接口，所以插入的元素不能重复。
+
+> 例子
 ```java
 //实现Comparable接口
 public class human implements Comparable{
@@ -270,139 +478,138 @@ public class human implements Comparable{
 
 ![47](../blog_img/java_img_47.png)
 
+## Queue接口
+
+Queue接口常用实现类如下：
+1. Deque接口：双端队列，它支持在两端插入和删除元素，LinkedList类实现了Deque接口。
+2. PriorityQueue类：优先级队列的元素按照其自然顺序进行排序，或者根据构造队列时提供的 Comparator 进行排序。
+
 ## Map接口
 
-Map 是一种键-值对（key-value）集合，Map 集合中的每一个元素都包含一个键（key）对象和一个值（value）对象。用于保存具有映射关系的数据。
+Map接口容器主要是键值对（key-value）的方式存储元素到容器中，Map中不能包含重复的key。有三个常用的实现类，HashMap类，TreeMap类，LinkedHashMap类。Map接口本身提供一些操作容器的方法。
 
-Map 中的 key 和 value 之间存在单向一对一关系，即通过指定的 key，总能找到唯一的、确定的 value。从 Map 中取出数据时，只要给出指定的 key，就可以取出对应的 value。
-
-Map接口的类结构图，其中最常用的类是HashMap,LinkedHashMap,TreeMap,Hashtable等。
+> Map接口的类结构图
 
 ![20201023142514.png](../blog_img/20201023142514.png)
 
-Map 接口中提供的常用方法如表图所示。
+> Map 接口中提供的常用方法如表图所示
+
 ![java_20230628235302.png](../blog_img/java_20230628235302.png)
 
-### HashMap集合
+### HashMap类
 
-HashMap集合用于存储键值对关系，且保证没有重复的key值。HashMap 类根据Hash算法来存取键对象
+HashMap类用于存储键值对元素，且保证没有重复的key值。HashMap类是根据Hash算法来存取键对象。
 
-**遍历HashMap集合元素的两种方式：①先遍历集合中的所有key,再根据key来获取value。②先获取集合中的映射关系，再根据关系取出key和value。**
-
+> HashMap源部分源代码
 ```java
-public static void main(String[] args) {
-	HashMap hm=new HashMap ();
-        hm.put(1, "小明");
-        hm.put(2, "小华");
-        hm.put(3, "小强");
-        System.out.println(hm);
-        //遍历HashMap集合的方式1：
-        //先获取集合的所有key序列
-        //再根据key序列找到value，用迭代器进行遍历
-        Set ks=hm.keySet();
-        Iterator ite=ks.iterator();    		
-        while(ite.hasNext())  //判断该对象是否有下一个元素
-        {	  
-        	Object key=ite.next();   //获得一个key值
-        	Object value=hm.get(key); //根据key序列找到value
-        	System.out.println(key+":"+value);  
-        }
-        
-        System.out.println("-------------");
-        
-        //遍历HashMap集合的方式2：
-        //先获取集合中所有的映射关系
-        //再从映射关系中取出key,value
-        Set entryset=hm.entrySet();
-        Iterator ite2=entryset.iterator();
-        while(ite2.hasNext())  //判断该对象是否有下一个元素
-        {	
-        	Map.Entry entry=(Map.Entry)(ite2.next());   //获取某一个映射关系
-        	Object key=entry.getKey(); //根据映射关系找到key值
-        	Object value=entry.getValue(); //找到value
-        	System.out.println(key+":"+value);  
-        }
-	}
+//HashMap源代码
+public class HashMap<K,V> extends AbstractMap<K,V> implements Map<K,V>, Cloneable, Serializable {
+    public V put(K key, V value) {
+        return putVal(hash(key), key, value, false, true);
+    }
+    transient Node<K,V>[] table; //数组
+    ......
+}
 
-/*
-运行结果：
-{1=小明, 2=小华, 3=小强}
-1:小明
-2:小华
-3:小强
--------------
-1:小明
-2:小华
-3:小强
-
-*/
 ```
 
-### TreeMap集合
+> HashMap类的存储结构：
+
+![20220527175157.png](../blog_img/20220527175157.png)
+
+1. HashMap中键不可以重复，重复时，后者键值会覆盖前者
+1. HashMap由数组和单向链表共同完成，当链表长度超过8个时会转化为红黑树。则HashMap的底层是散列表（数组+单向链表/红黑树）的方式进行存储元素。
+2. 数组是节点类型数组，用于存放节点。节点可存储一个键值对。
+3. HashMap的put方法步骤：
+    ① 对key进行哈希算法来确定存储在数组中的那个index。哈希算法：index = HashCode（key） & （容器HashMap长度 - 1）。
+    ② 若存储位置无元素存在，则直接存储。
+    ③ 若存储位置已经有元素存在，则根据单向链表的存储方式。将新元素作为链表的头节点存储在数组上，旧元素作为新元素的下一个节点。（其中会遍历链表，用equals()方法来检查key是否重复，若有重复的key则覆盖，没有则当作新节点插入到链表头节点中）
+    ④ 当链表的长度>8时，把链表转换为红黑树的形式存储元素。
+
+### LinkedHashMap类
+
+> LinkedHashMap类的部分源代码
+
+```java
+public class test1 {
+    public static void main(String[] args) {
+        LinkedHashMap<String, String> one = new LinkedHashMap<String,String>();
+        one.put("1","tom");
+        one.put("2","mike");
+        one.put("3","jack");
+        System.out.println(one); //{1=tom, 2=mike, 3=jack}
+    }
+}
+//LinkedHashMap的源代码
+public class LinkedHashMap<K,V> extends HashMap<K,V> implements Map<K,V>
+{
+    transient LinkedHashMap.Entry<K,V> head;
+    transient LinkedHashMap.Entry<K,V> tail;
+    static class Entry<K,V> extends HashMap.Node<K,V> {
+        Entry<K,V> before, after;
+        Entry(int hash, K key, V value, Node<K,V> next) {
+            super(hash, key, value, next);
+        }
+    }
+    .....
+}
+```
+
+> LinkedHashMap类的存储结构
+
+![20220527174643.png](../blog_img/20220527174643.png)
+
+1. LinkedHashMap类继承自HashMap类，本质上LinkedHashMap = HashMap + 双向链表。
+2. LinkedHashMap在HashMap的基础上，增加了双链表的结果（即节点中增加了前before、后after指针，LinkedHashMap中增加了head、tail指针），其他处理逻辑与HashMap一致，同样也没有锁保护，多线程使用存在风险。
+3. LinkedHashMap类是有序的，容器内元素默认是按照插入顺序进行排序。
+
+### TreeMap类
 
 TreeMap是通过二叉树的原理来保证键的唯一性。TreeMap可以对键对象进行排序。
 
-TreeMap 要注意的事项：
-1. 往TreeMap添加元素的时候，如果元素的键具备自然顺序，那么就会进行排序存储。
-2. 往TreeMap添加元素的时候，如果元素的键不具备自然顺序特性， 那么键所属的类必须要实现Comparable接口，把键的比较规则定义在CompareTo方法上。
-3. 往TreeMap添加元素的时候，如果元素的键不具备自然顺序特性，而且键所属的类也没有实现Comparable接口，那么就必须自定义比较器。
-
-通过自定义比较器对所有的键进行排序
-
+> TreeMap类的部分源代码
 ```java
-//实现Comparator接口,重写compare方法
-public class human implements Comparator{
-	private String name;
-	private int age;
-	
-	human(String name,int age){
-		this.name=name;
-		this.age=age;
-	}
-	//重写该方法
-	public String toString() {
-		return name+":"+age;
-	}
-	//重写该方法
-	public int compare(Object o1, Object o2) {
-		human h1=(human)o1;
-		human h2=(human)o2;
-		if(h1.age==h2.age) {    
-			return 0;     //表示相等
-		}else if(h1.age>h2.age){
-			return 1;    //从小到大，升序排序
-		}else {
-			return -1;
-		}
-	}
-	public static void main(String[] args) {
-		human h1=new human("小明", 22);
-		human h2=new human("小华", 19);
-		human h3=new human("小强", 26);
-		
-		TreeMap tMap=new TreeMap();
-		tMap.put(12, h1);
-		tMap.put(2, h2);
-		tMap.put(3, h3);
-		
-		Set ks=tMap.keySet();
-        Iterator ite=ks.iterator();    		
-        while(ite.hasNext())  //判断该对象是否有下一个元素
-        {	  
-        	Object key=ite.next();   //获得一个key值
-        	Object value=tMap.get(key); //根据key序列找到value
-        	System.out.println(key+":"+value);  
-        }
-	}
+public class bb {
+    public static void main(String[] args) {
+        TreeMap<String, String> one = new TreeMap<>();
+        one.put("1","jack");
+        one.put("2","tom");
+        one.put("3","mike");
+        System.out.println(one);
+    }
 }
-
-/*
-运行结果：
-2:小华:19
-3:小强:26
-12:小明:22
-*/
+//TreeMap类源代码
+public class TreeMap<K,V>
+    extends AbstractMap<K,V>
+    implements NavigableMap<K,V>, Cloneable, java.io.Serializable
+{
+    private final Comparator<? super K> comparator;
+    private transient Entry<K,V> root;
+    private transient int size = 0;
+    private transient int modCount = 0;
+    public TreeMap() {
+        comparator = null;
+    }
+    //元素节点内部构造
+    //每个节点包含父指针，左指针，右指针
+     static final class Entry<K,V> implements Map.Entry<K,V> {
+        K key;
+        V value;
+        Entry<K,V> left;
+        Entry<K,V> right;
+        Entry<K,V> parent;
+        boolean color = BLACK;
+        .....        
+    }
+    ....
+}
 ```
+
+> TreeMap类的特点
+1. TreeMap是一个有序的key-value集合，它是通过红黑树实现元素的存储。
+2. TreeMap内部存储的元素，都会经过红黑树的排序之后再存储。红黑树的存储结构天然支持排序，默认情况下通过Key值的自然顺序进行排序；
+3. TreeMap类线程不安全，按照比较的排序来存储元素。
+
 
 ### 遍历Map集合的四种方式
 
@@ -589,12 +796,31 @@ public class Test5 {
 
 Iterator（迭代器）是一个接口，它的作用就是用于遍历 Collection 集合中的元素。
 
-由于Collection接口中提供了一个抽象方法来创建Iterator对象。因此所有继承Collection接口的容器类都可以通过该方法创建一个与之关联的 Collection 对象。
+> 如何创建Iterator对象
+
+由于Collection接口中提供了一个抽象方法来创建Iterator对象。因此所有继承Collection接口的容器类都可以通过该方法创建一个与之关联的Iterator对象。
 ```java
-Iterator<E>iterator()
+//Collection接口源代码
+public interface Collection<E> extends Iterable<E> {
+    ....
+    Iterator<E> iterator(); 
+    ....
+}
+//例如Collection接口中定义了获取集合类迭代器的方法（iterator（）），因此所有Collection体系的集合类都可以获取自身的迭代器对象。
+
+
+// Iterator接口的源代码
+public interface Iterator<E> {
+    boolean hasNext();  //hasNext() 用于检测集合中是否还有元素
+    E next();           //会返回迭代器的下一个元素
+    default void remove() {  //将迭代器返回的元素删除
+        throw new UnsupportedOperationException("remove");
+    }
+    ....
+}
 ```
 
-Iterator 接口里包含了如下 4 个方法。
+> Iterator接口里包含了如下常用方法
 ```
 boolean hasNext()：如果被迭代的集合元素还没有被遍历完，则返回 true。
 Object next()：返回集合里的下一个元素。
@@ -602,13 +828,13 @@ void remove()：删除集合里上一次 next 方法返回的元素。
 void forEachRemaining(Consumer action)：这是 Java 8 为 Iterator 新增的默认方法，该方法可使用 Lambda 表达式来遍历集合元素。
 ```
 
-例子
+>例子
 ```java
 ArrayList list=new ArrayList();
 list.add("Hello");
 list.add("World");
 list.add("HAHAHAHA");
-//使用迭代器进行相关遍历,先获取该集合的迭代对象
+//使用迭代器进行相关遍历,先获取该集合类的迭代对象
 Iterator ite=list.iterator();    		
 while(ite.hasNext())  //判断该对象是否有下一个元素
 {

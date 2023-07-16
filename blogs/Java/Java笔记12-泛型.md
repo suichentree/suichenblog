@@ -20,15 +20,43 @@ Java 集合之所以被设计成这样，是因为集合的设计者不知道我
 
 泛型本质上是参数化类型。我们可以为类、接口或方法指定一个类型参数，通过这个参数限制被操作数据的数据类型，从而保证类型转换的绝对安全。
 
-泛型好处：
-* 泛型的好处是在编译的时候检查类型安全，并且所有的强制转换都是自动和隐式的，以提高代码的重用率。
-* 在编译时期没有出现警告，那么运行时期就不会出现ClassCastException异常
+> 泛型的好处：
+1. 保证了容器类中数据类型的一致性
+2. 消除源代码中的许多强制类型转换
+3. 避免了不必要的装箱、拆箱操作，提高程序的性能
+4. 提高了代码的重用性
+
+
+## 泛型中的通配符
+
+```
+常用的 T，E，K，V，？
+上面这些都是通配符，各自都没有区别。是编码时的一种约定俗成的东西。没有强制规定。
+
+<？>    表示不确定的 java 类型
+<T>     表示某个java类型
+<K,V>   分别代表java键值中的Key Value
+<E>     代表Element (在集合中使用，因为集合容器中存放的是元素)
+<N>     代指Number（数值类型）
+
+```
+
+1. 尖括号`<>`中的字母被称作类型参数，代指任何类型，也可以用其他等字母来表示。
+2. 注意：尖括号`<>`中的字母只能接受类，即使是基本数据类型必须使用包装类。
+
+
+> 限定通配符extends和super
+
+```
+< ? extends E>  //表示这个泛型的参数数据类型必须是E或者E的子类
+< ? super E>    //表示这个泛型中的参数数据类型必须是E或者E的父类
+```
 
 ## 泛型集合
 
 泛型可以指定集合类存入取出的参数数据类型。使用泛型后，每次遍历集合元素不用把Object类型强制转换为其他类型。
 
-例子
+> 例子
 ```java
 ArrayList<String> al=new ArrayList<String>();   //指定该集合只能存取String类型的参数元素。
 ArrayList<Human> al2=new ArrayList<Human>();   //指定该集合只能存取Human对象类型的参数元素。
@@ -53,67 +81,64 @@ private data_type1 property_name1;
 private data_type2 property_name2;
 ```
 
-例子: Stu类中的三个变量的数据类型会根据泛型的改变而改变
+> 例子: Stu类中的三个变量的数据类型会根据泛型的改变而改变
+
 ```java
-public class Stu<N, A, S> {
-    private N name; // 姓名
-    private A age; // 年龄
-    private S sex; // 性别
-
-    // 创建类的构造函数
-    public Stu(N name, A age, S sex) {
-        this.name = name;
-        this.age = age;
-        this.sex = sex;
+//<T,T2> 参数化数据类型
+public class Student<T,T2> {
+    private T x;        //x成员变量为T类型
+    private T2 y;       //y成员变量为T2类型
+    public Student(){}
+    public Student(T x, T2 y) {
+        this.x = x;
+        this.y = y;
     }
-
-    // 下面是上面3个属性的setter/getter方法
-    public N getName() {
-        return name;
+    public T getX() {
+        return x;
     }
-
-    public void setName(N name) {
-        this.name = name;
+    public void setX(T x) {
+        this.x = x;
     }
-
-    public A getAge() {
-        return age;
+    public T2 getY() {
+        return y;
     }
-
-    public void setAge(A age) {
-        this.age = age;
+    public void setY(T2 y) {
+        this.y = y;
     }
-
-    public S getSex() {
-        return sex;
-    }
-
-    public void setSex(S sex) {
-        this.sex = sex;
-    }
-}
-
-//-----------------------
-
-public class Test14 {
     public static void main(String[] args) {
-        Stu<String, Integer, Character> stu = new Stu<String, Integer, Character>("小明", 28, '女');
-        String name = stu.getName();
-        Integer age = stu.getAge();
-        Character sex = stu.getSex();
-        System.out.println("学生信息如下：");
-        System.out.println("学生姓名：" + name + "，年龄：" + age + "，性别：" + sex);
+        //实例化对象的时候，需要将具体的数据类型赋值给泛型
+        Student<String,Integer> one = new Student<String,Integer>();
+        one.x = "bob";
+        one.y = 1;
+        System.out.println(one.x);
+        System.out.println(one.y);
     }
 }
-
 ```
 
 ## 泛型接口
 
 ```java
-//定义一个泛型接口
-public interface Generator<T> {
-    public T next();
+//泛型接口
+public interface Student<T>{
+    public void show(T t);
+    public ArrayList<T> findAll();
+    public T findById(Integer id);
+}
+//泛型接口实现类
+public class A implements Student<String>{
+    @Override
+    public void show(String s) {
+        System.out.println("s");
+    }
+    @Override
+    public ArrayList<String> findAll() {
+        return null;
+    }
+    @Override
+    public String findById(Integer id) {
+        return null;
+    }
 }
 ```
 
@@ -123,32 +148,50 @@ public interface Generator<T> {
 
 定义泛型方法的语法格式如下：
 ```java
-[访问权限修饰符] [static] [final] <类型参数列表> 返回值类型 方法名([形式参数列表])
-
+访问修饰符 <T> 返回值类型 方法名(形参列表){
+    方法体
+}
 //例如
 public static <T> List find(Class<T> cs,int userId){}
 ```
 
 <font color="red">一般来说编写 Java 泛型方法，其返回值类型至少有一个参数类型应该是泛型，而且类型应该是一致的，如果只有返回值类型或参数类型之一使用了泛型，那么这个泛型方法的使用就被限制了。</font>
 
-例子
+> 例子
 ```java
-public class Test16 {
-    public static <T> void List(T book) { // 定义泛型方法
-        if (book != null) {
-            System.out.println(book);
-        }
+public class Student<T> {
+    //泛型类中的使用了泛型的方法并不是泛型方法
+    //非泛型方法的形参类型T由泛型类的泛型T决定
+    public void method1(T a1){
+        System.out.println("a1.class = "+a1.getClass());
+        System.out.println("a1 ="+a1);
+    }
+    //只有声明了<T>的方法才是泛型方法
+    //泛型方法的形参类型T由实参的数据类型决定，与泛型类的形参T无关
+    public <T> void method2(T a2){
+        System.out.println("a2.class = "+a2.getClass());
+        System.out.println("a2 ="+a2);
     }
     public static void main(String[] args) {
-        Book stu = new Book(1, "细学 Java 编程", 28);
-        List(stu); // 调用泛型方法
+        Student<String> one = new Student<String>();
+        one.method1("1");   //该方法不是泛型方法，形参类型由泛型类中的T决定
+        one.method2(1);     //该方法是泛型方法，形参类型根据实参类型决定
     }
 }
+
+// 运行结果：
+// a1.class = class java.lang.String
+// a1 =1
+// a2.class = class java.lang.Integer
+// a2 =1
+
 ```
 
+1. 泛型方法的方法声明比普通方法的方法声明多了泛型形参声明`<T>`
+2. 只有声明了`<T>`的方法才是泛型方法。泛型类中的使用了泛型形参的方法并不是泛型方法。
+3. 泛型方法的泛型参数T，与所在泛型类的泛型参数T无关。
 
 ## 泛型的高级用法
-
 
 ### 限制泛型可用类型
 

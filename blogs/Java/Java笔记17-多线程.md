@@ -12,8 +12,11 @@ categories:
 
 ## 什么是进程，什么是线程？
 
-* 每一个独立运行的程序称为进程。每个进程至少包含一个或多个线程。
-* 线程是CPU调度和分派的基本单位，一个进程中可以存在多个线程同时运行。
+进程与线程
+1. 进程是指系统中运行的应用程序，系统中运行的每一个应用程序就代表着每一个线程。每一个进程都有自己独立的内存空间。
+2. 线程是指进程中的一个任务操作（或者说子功能）。例如迅雷是一个进程，在迅雷中下载一个文件，这个下载功能就是一个线程。同时下载多个文件，就是多个线程在进程中执行。
+3. 一个进程可以由多个线程组成，即在一个进程中可以同时运行多个不同的线程，它们分别执行不同的任务。
+4. 当进程内的多个线程同时运行，这种运行方式称为并发运行
 
 ## 创建线程
 
@@ -21,71 +24,138 @@ Java 提供了2种创建线程的方法：
 方式①：通过继承 Thread 类本身,重写该类的run方法。
 方式②：通过实现 Runnable 接口
 
-### 方式1：继承Thread类
+记忆口诀：
+1. run()方法：包含线程运行时所执行的代码。start()方法：用于启动线程。
+1. 无论是继承Thread类还是实现Runnable接口。新的类都是先重写run()方法，后执行start()方法。
+2. 继承Thread类后，子类实例化对象直接调用执行start()方法。
+3. 实现Runnable接口后，将实现类当作参数传入Thread构造方法中，在调用start()方法。因此两种创建线程的方式都是以Thread类为主。
+4. 通常run()方法内部会被写错while循环的形式。除非达成条件，否则该线程永远运行下去。
 
-1. 若想要一个类A可以多线程运行，则需要类A继承Thread类本身,并重写Thread类的run方法。
+### 方式1：继承Thread类来创建线程
+
+> 步骤
+1. 若想要一个类A的某个方法可以多线程运行，则需要类A继承Thread类本身,并重写Thread类的run方法。
 2. 然后创建类A的实例化对象，调用类A从Thread类继承过来的start方法即可。
 3. start方法内部会创建一个新线程，这个新线程会运行类A重写的run方法。
 
 
-```java
-//创建Mythread类，该类继承 Thread 类,重写Thread类的run方法:
-class Mythread extends Thread{
-	public void run() {
-		for(int i=0;i<1000;i++) {
-			System.out.println("run方法正在执行中...");
-		}
-	}
-}
-//创建Mythread类的实例化对象，并通过调用start()方法来创建一个新线程，该线程会运行Mythread类的run方法
-public class human {
-	public static void main(String[] args) {
-		Mythread mythread=new Mythread();
-		mythread.start();   
-		for(int i=0;i<1000;i++) {
-			System.out.println("main方法正在执行中...");
-		}
-	}
-}
+> Thread类的常用方法
 
-```
-
-![31](../blog_img/java_img_31.png)
 ![32](../blog_img/java_img_32.png)
 
-### 方式2：实现 Runnable 接口
 
-<font color="red">由于java只支持单继承，所以当A类已经继承B类，则A类就无法继承Thread 类，实现不了多线程操作。因此出现了方式2。所以建议用Runnable 接口实现多线程。</font>
 
+
+> 例子
+```java
+//①通过继承 Thread 类,重写该类的run方法
+public class Mythread extends Thread{
+    public void run(){
+        //每个线程都会打印50次语句，
+        for(int i=0;i<50;i++){
+            System.out.println("线程名字："+getName()+"重写Thread类的run方法");
+        }
+    }
+}
+
+//创建Mythread类的实例化对象，并通过调用start()方法来创建一个新线程，该线程会运行重写的run方法
+public class human {
+	public static void main(String[] args) {
+		//创建3个线程，并设置线程的名字
+        Mythread mythread1 = new Mythread();
+        mythread1.setName("线程1");
+        mythread1.start();
+        Mythread mythread2 = new Mythread();
+        mythread2.setName("线程2");
+        mythread2.start();
+        Mythread mythread3 = new Mythread();
+        mythread3.setName("线程3");
+        mythread3.start();
+	}
+}
+```
+
+<font color="red">ps: 继承类必须重写 run() 方法，该方法是新线程的入口点。它也必须调用 start() 方法才能执行。本质上也是实现了Runnable接口的一个实例。</font>
+
+### 方式2：实现 Runnable 接口来创建线程
+
+<font color="red">由于java只支持单继承，若A类已经继承B类，则A类就无法继承Thread类，实现不了多线程操作。此时可以实现Runnable接口实现多线程。通常用接口来实现多线程更普遍。</font>
+
+
+> 步骤
 1. 创建一个新类Demo,该类实现Runnable接口，并重写接口的run方法
 2. 创建Demo类的实例化对象。
 3. 调用Thread类的有参构造函数，Demo类对象作为参数传入构造方法中。
 4. 执行Thread类对象的start方法，会创建一个新的线程来执行Demo类对象重写的run方法。
 
+<font color="red">PS:当Thread类的构造方法接受Runnable接口的实现类时，调用的run方法是该实现类的run方法。并不是Thread类本身的run方法。</font>
+
+>例子
 ```java
-class Demo implements Runnable {
-	   //重写run方法
-	   public void run() {
-		   String tname=Thread.currentThread().getName();   //获取当前线程的名字
-		   for(int i=1;i<=1000;i++) {
-			   	System.out.println("线程 "+tname+"正在卖第 "+i+"张票");
-		   } 
-	   }
+public class Mythread implements Runnable{
+    //重写run方法
+    public void run(){
+        String tname=Thread.currentThread().getName();   //获取当前线程的名字
+        //每个线程都会打印50次语句，
+        for(int i=0;i<50;i++){
+            System.out.println("线程名字："+tname+"打印i="+i);
+        }
+    }
 }
 
 public class human {
 	public static void main(String[] args) {
-		  Demo R1 = new Demo();   //实例化对象
-	      Thread th1=new Thread(R1,"窗口1");  //把实例化对象作为参数，传入Thread的有参构造方法中
-	      Thread th2=new Thread(R1,"窗口2"); 
-	      th1.start();  //开启线程1
-	      th2.start();  //开启线程2
+		Mythread mythread = new Mythread();
+        //创建多个线程对象，将实现类当作参数传进去
+        Thread thread1 = new Thread(mythread,"线程1");
+        Thread thread2 = new Thread(mythread,"线程2");
+        Thread thread3 = new Thread(mythread,"线程3");
+        thread1.start();
+        thread2.start();
+        thread3.start();
 	}
 	
 }
-
 ```
-![33](../blog_img/java_img_33.png)
+
+### 通过多线程实现模拟卖火车票的例子
+
+```java
+public class Mythread implements Runnable{
+    //一共100张火车票，编号为1-100
+    private static int t_num = 100;
+    public void run(){
+        //票卖完前，线程不会死亡
+        while(t_num > 0){
+            //卖票
+            sell();
+        }
+    }
+    @SneakyThrows
+    public synchronized void sell(){
+        String tname=Thread.currentThread().getName();   //获取当前线程的名字
+        if (t_num > 0){
+            Thread.sleep(500);//休息500毫秒
+            System.out.println(tname + "正在卖编号为"+t_num+"的票");
+            t_num--;
+        }else{
+            System.out.println(tname + "所有票已卖完");
+        }
+    }
+    public static void main(String[] args) {
+        Mythread mythread = new Mythread();
+        //三个窗口卖票
+        Thread thread1 = new Thread(mythread,"窗口1");
+        Thread thread2 = new Thread(mythread,"窗口2");
+        Thread thread3 = new Thread(mythread,"窗口3");
+        thread1.start();
+        thread2.start();
+        thread3.start();
+    }
+}
+```
+
+注意：若每个线程中的run方法执行完毕，则该线程就会死亡。因此在run方法中添加while循环目的是在票卖完前，让三个线程不死亡。
 
 ### 两种方式对比
 
@@ -109,18 +179,17 @@ public class human {
 3. 运行状态（Running）：就绪状态的线程获取了CPU，执行程序代码。
 4. 阻塞状态（Blocked）：阻塞状态是线程因为某种原因放弃CPU使用权，暂时停止运行。直到线程进入就绪状态，才有机会转到运行状态。
     阻塞的情况分三种：
-    1. 等待阻塞：运行的线程执行wait()方法，JVM会把该线程放入等待池中。(wait会释放持有的锁)
-    2. 同步阻塞：运行的线程在获取对象的同步锁时，若该同步锁被别的线程占用，则JVM会把该线程放入锁池中。
-    3. 其他阻塞：运行的线程执行sleep()或join()方法，或者发出了I/O请求时，JVM会把该线程置为阻塞状态。当sleep()状态超时、join()等待线程终止或者超时、或者I/O处理完毕时，线程重新转入就绪状态。（注意,sleep是不会释放持有的锁）
+    - 等待阻塞：运行的线程执行wait()方法，JVM会把该线程放入等待池中。(wait会释放持有的锁)
+    - 同步阻塞：运行的线程在获取对象的同步锁时，若该同步锁被别的线程占用，则JVM会把该线程放入锁池中。
+    - 其他阻塞：运行的线程执行sleep()或join()方法，或者发出了I/O请求时，JVM会把该线程置为阻塞状态。当sleep()状态超时、join()等待线程终止或者超时、或者I/O处理完毕时，线程重新转入就绪状态。（注意,sleep是不会释放持有的锁）
 5. 死亡状态（Dead）：线程执行完了或者因异常退出了run()方法，该线程结束生命周期。
 
 
 ### 线程的方法
 
-线程的方法如下：
+> 线程常用方法如下
 ```
 sleep() wait() yield() notify() notifyAll() join()
-```
 
 sleep()方法：线程执行该方法会设置暂停时间。将执行机会让给其他线程。这期间该线程会进入到就绪状态，并且sleep()方法不会释放对象锁。当暂停时间结束后，便重新开始执行该线程。
 
@@ -134,8 +203,12 @@ notify()方法只唤醒一个等待（对象的）线程并使该线程开始执
 
 notifyAll()会唤醒所有等待(对象的)线程，尽管哪一个线程将会第一个处理取决于操作系统的实现。
 
-#### sleep()方法和wait()方法
+```
 
+> sleep()方法和wait()方法的区别：
+1. wait方法和sleep方法都会释放cpu资源。
+1. wait()方法：会释放锁。
+2. sleep()方法：不会释放锁。
 
 ## 线程的生命周期
 
@@ -164,18 +237,39 @@ notifyAll()会唤醒所有等待(对象的)线程，尽管哪一个线程将会�
 <font color="red">注意：启动一个线程是调用start()方法，这并不意味着线程就会立即运行，只是进入了可运行状态。直接调用run()方法不会产生线程，而是把它当作普通的方法来执行。</font>
 
 
+## 线程的优先级
+
+1. 每一个 Java 线程都有一个优先级，这样有助于操作系统确定线程的调度顺序。
+2. Java 线程的优先级其取值范围是 1 - 10。默认情况下，每一个线程都会分配一个默认优先级5。
+3. 高优先级的线程对程序更重要，并且应该在低优先级的线程之前分配处理器资源。但是，线程优先级不能保证线程执行的顺序，根据平台的不同而不同。
+
 ## 线程的调度
 
-线程调度是指系统为线程分派CPU处理器使用权的过程。
-线程调度的方式：协同式线程调度，抢占式线程调度。
-
-<font color="red">Java使用的线程调度方式为抢占式。</font>
+线程调度是指系统为线程分派CPU处理器使用权的过程。线程调度的方式主要分为两种：协同式线程调度，抢占式线程调度。
 
 > 协同式线程调度
 > 线程的执行时间由线程本身来控制，线程把自己的工作执行完了之后，要主动通知系统切换到另外一个线程上去。协同式多线程的最大好处是实现简单，而且由于线程要把自己的事情干完后才会进行线程切换，切换操作对线程自己是可知的，所以一般没有什么线程同步的问题。坏处：线程执行时间不可控制，甚至如果一个线程一直不告知系统进行线程切换，那么程序就会一直阻塞在那里。
 
 > 抢占式线程调度
 > 每个线程将由系统来分配执行时间，线程的切换不由线程本身来决定。好处：抢占式线程调度方式下，线程的执行时间是系统可控的，不会出现一个线程的阻塞从而导致整个进程甚至整个系统阻塞的问题。可以通过调整线程的优先级来给线程多分配一些执行时间。
+
+
+
+Java虚拟机采用抢占式调度模型，指的是优先让可运行池中优先级高的线程占用CPU，如果可运行池中线程的优先级相同，那么就随机地选择一个线程，使其占用CPU。处于运行状态的线程会一直运行，直至它不得不放弃CPU。
+
+> 一个线程会因为以下原因而放弃CPU：
+1. Java虚拟机让当前线程暂时放弃CPU，转到就绪状态，使其他线程获得运行机会。
+2. 当前线程因为某些原因而进入阻塞状态。
+3. 线程运行结束。
+
+> 如果希望明确地让一个线程给另外一个线程运行的机会，可以采取以下办法之一：
+1. 调整各个线程的优先级。
+2. 让处于运行状态的线程调用Thread.sleep()方法。
+3. 让处于运行状态的线程调用Thread.yield()方法。
+4. 让处于运行状态的线程调用另一个线程的join()方法。
+
+
+
 
 ## 线程的同步
 

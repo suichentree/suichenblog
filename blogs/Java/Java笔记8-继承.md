@@ -514,5 +514,139 @@ public class Hello {
 子类构造方法
 ```
 
+## 四种代码块的初始化顺序
+
+java中存在如下四种代码块。
+
+1. 静态代码块：定义在类中,用static关键字修饰。该代码块属于类，因此只在类加载时会调用一次。优先于main方法执行。<font color="red">静态代码块中只能使用静态方法和静态变量</font>
+2. 构造代码块：定义在类中，无修饰符修饰。会在创建对象时被调用，每次创建时都会被调用，优先于构造函数执行。
+3. 普通代码块：定义在方法中，就是一段代码。普通代码块中声明的变量在代码块外部访问不到。执行顺序由代码块出现的次序决定。
+4. 同步代码块：定义在方法中,synchronized(){} 修饰的代码块。该代码块会被加上内置锁，用于线程同步机制。
+
+```java
+public class test2 {
+    static {
+        System.out.println("静态代码块");
+    }
+    {
+        System.out.println("构造代码块");
+    }
+    public test2(){
+        System.out.println("构造函数");
+    }
+    public void aa(){
+        System.out.println("aa方法");
+        {
+            System.out.println("普通代码块");
+        }
+        synchronized (test2.class){
+            System.out.println("同步代码块");
+        }
+    }
+    public static void main(String[] args) {
+        System.out.println("main方法");
+        test2 one = new test2();
+        one.aa();
+    }
+}
+
+运行结果：
+
+静态代码块
+main方法
+构造代码块
+构造函数
+aa方法
+普通代码块
+同步代码块
+```
+
+>代码块执行顺序
+静态代码块 -> main方法 -> 构造代码块 -> 构造函数 -> 其他代码块
+
+> 父类子类中代码块的执行顺序？
+父类静态代码块 > 子类静态代码块 > main()方法 > 父类构造代码块 > 父类构造函数 > 子类构造代码块 > 子类构造函数
+
+<font color="red">注意：静态代码块在mian方法之前就运行了。说明在Java语言中，静态块在类被加载时就会被调用，因此可以在main()方法之前运行。</font>
+
+
+
+## 类中变量，代码块，构造函数的初始化顺序
+
+举例：
+```java
+//父类test1
+public class test1 {
+
+    private static int i = 10;
+    private int j = 20;
+    public test1() {
+        System.out.println("父类 构造函数test1()");
+    }
+    static {
+        System.out.println("父类 静态变量 i = "+i);
+        System.out.println("父类 静态代码块");
+    }
+    {
+        System.out.println("父类 变量 j = "+j);
+        System.out.println("父类 构造代码块");
+    }
+
+    public static void main(String[] args) {
+        System.out.println("父类 mian方法");
+        test1 one =new test1();
+    }
+}
+//单独执行父类test1的main方法，运行结果如下
+// 父类 静态变量 i = 10
+// 父类 静态代码块
+// 父类 mian方法
+// 父类 变量 j = 20
+// 父类 构造代码块
+// 父类 构造函数test1()
+
+
+//子类test2
+public class test2 extends test1{
+    private static int x = 10;
+    private int y = 20;
+    public test2() {
+        System.out.println("子类 构造函数test2()");
+    }
+    static {
+        System.out.println("子类 静态变量 x = "+x);
+        System.out.println("子类 静态代码块");
+    }
+    {
+        System.out.println("子类 变量 y = "+y);
+        System.out.println("子类 构造代码块");
+    }
+
+    public static void main(String[] args) {
+        System.out.println("子类 mian方法");
+        test2 two = new test2();
+    }
+}
+
+//执行子类test2的main方法，运行结果如下
+// 父类 静态变量 i = 10
+// 父类 静态代码块
+// 子类 静态变量 x = 10
+// 子类 静态代码块
+// 子类 mian方法
+// 父类 变量 j = 20
+// 父类 构造代码块
+// 父类 构造函数test1()
+// 子类 变量 y = 20
+// 子类 构造代码块
+// 子类 构造函数test2()
+
+```
+
+总结：
+1. 单独类的初始化顺序：（静态变量，静态代码块）-》 main方法 -》 （普通变量，构造代码块，构造函数）
+2. 父类子类的初始化顺序：（父类的静态变量，静态代码块）-》 （子类的静态变量，静态代码块）-》 子类的main方法 -》 （父类的普通变量，构造代码块，构造函数）-》 （子类的普通变量，构造代码块，构造函数）
+
+<font color="red">注意：由于静态变量，静态代码块是属于类的。只在第一次实例化对象的时候调用一次，之后不会再调用。</font>
 
 

@@ -48,25 +48,111 @@ int larger = max(30, 40);
 2. 如果方法返回值类型是void（无返回值）,方法调用一定是一条语句。例如：
 System.out.println("欢迎访问！");
 
-## 方法的重载
 
-1. 创建两个有相同名字但参数不同的方法，这叫做方法重载。
+## 方法重载
+
+Java 允许同一个类中定义多个同名方法，只要它们的形参列表不同即可。如果同一个类中包含了两个或两个以上方法名相同的方法，但形参列表不同，这种情况被称为方法重载（overload）。
 
 ```java
-//下面的两个max方法有相同名字但参数不同：
-public static int max(int num1, int num2) {
-   int result;
-   if (num1 > num2)
-      result = num1;
-   else
-      result = num2;
-   return result; //返回值
+//如下方法重载
+public class TestClass {
+    public void max(int a, int b) {
+        // 含有两个int类型参数的方法
+        System.out.println(a > b ? a : b);
+    }
+    public void max(double a, double b) {
+        // 含有两个double类型参数的方法
+        System.out.println(a > b ? a : b);
+    }
+    public void max(double a, double b, int c) {
+        // 含有两个double类型参数和一个int类型参数的方法
+        double max = (double) (a > b ? a : b);
+        System.out.println(c > max ? c : max);
+    }
 }
-public static double max(double num1, double num2) {
-  if (num1 > num2)
-    return num1;
-  else
-    return num2;
+```
+
+<font color="red">方法重载的注意点:同一个类中方法名相同，参数列表不同。至于方法的其他部分，如方法返回值类型、修饰符等，与方法重载没有任何关系。</font>
+
+## 方法重写
+
+在子类中如果创建了一个与父类中相同名称、相同返回值类型、相同参数列表的方法，只是方法体中的实现不同，以实现不同于父类的功能，这种方式被称为方法重写（override），又称为方法覆盖。当父类中的方法无法满足子类需求或子类具有特有功能的时候，需要方法重写。
+
+方法重写的必要性：子类可以根据需要，定义特定于自己的行为。既沿袭了父类的功能名称，又根据子类的需要重新实现父类方法，从而进行扩展增强。
+
+在重写方法时，需要遵循下面的规则：
+* 参数列表和必须相同。
+* 返回的类型必须相同。
+* 访问权限不能比父类中被重写方法的访问权限更低。（public>protected>default>private）。
+
+另外还要注意以下几条：
+* 父类的成员方法只能被它的子类重写。
+* 声明为 final 的方法不能被重写。
+* 声明为 static 的方法不能被重写，但是能够再次声明。
+* 构造方法不能被重写。
+* 子类和父类在同一个包中时，子类可以重写父类的所有方法，除了声明为 private 和 final 的方法。
+* 子类和父类不在同一个包中时，子类只能重写父类的声明为 public 和 protected 的非 final 方法。
+* 如果不能继承这个方法，则不能重写这个方法。
+
+```java
+public class Animal {
+    public String name; // 名字
+    public int age;     // 年龄
+
+    public Animal(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    public String getInfo() {
+        return "我叫" + name + "，今年" + age + "岁了。";
+    }
+}
+
+//========================
+public class Cat extends Animal {
+    private String hobby;
+    public Cat(String name, int age, String hobby) {
+        super(name, age);
+        this.hobby = hobby;
+    }
+    //子类重写父类的getInfo方法
+    public String getInfo() {
+        return "喵！大家好！我叫" + this.name + "，我今年" + this.age + "岁了，我爱吃" + hobby + "。";
+    }
+
+    public static void main(String[] args) {
+        Animal animal = new Cat("小白", 2, "鱼");
+        System.out.println(animal.getInfo());
+    }
+}
+```
+
+## 方法重写和方法重载的区别
+
+- 方法重载：在同一个类中，有多个方法，名称相同，参数列表不同,与返回值类型无关，与访问权限修饰符无关。叫做方法重载。
+- 方法重写：子类对父类的允许访问的方法的实现过程进行重新编写。只是方法体重写，名称，返回值类型，访问权限修饰符，参数列表都不能改变。
+
+<font color="red">
+注意：方法重写中，子类重写方法的访问权限不能比父类被重写的方法的访问权限更低。
+</font>
+
+
+```java
+class A{
+   public void move(){
+      System.out.println("aaa");
+   }
+   //重载move方法
+   public void move(int a){
+      System.out.println("bbb");
+   }
+}
+class B extends A{
+    //重写move方法
+   public void move(){
+      System.out.println("ccc");
+   }
 }
 ```
 

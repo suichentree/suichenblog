@@ -1,5 +1,5 @@
 ---
-title: MySQL笔记
+title: MySQL命令
 date: 2021-03-15
 sidebar: 'auto'
 categories: 
@@ -10,7 +10,7 @@ tags:
 
 [toc]
 
-# MySQL笔记
+# MySQL命令
 
 ## Mysql初步使用
 
@@ -68,39 +68,7 @@ mysql> select ((4 * 4) / 10 ) + 25;
 
 ```
 
-## 操作数据库
 
-下面是操作数据库的Mysql语法
-
-### 创建数据库
-
-```sql
-create database 数据库名;
-```
-
-### 显示数据库
-
-```sql
-show databases;
-```
-
-### 删除数据库
-
-```sql
-drop database 数据库名;
-```
-
-### 连接或切换数据库(在命令行中使用)
-
-```sql
-use 数据库名;
-```
-
-### 显示当前使用的数据库名称
-
-```sql
-select database();
-```
 
 ## 操作表格
 
