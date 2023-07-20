@@ -170,16 +170,17 @@ USE test_db;
 
 如果使用错误的数据类型可能会严重影响应用程序性能以及导致数据丢失，所以在设计表时，必须为每个字段设置正确的数据类型和长度。
 
-MySQL 的数据类型有大概可以分为下面 5 种。
+> MySQL 的数据类型有大概可以分为下面 5 种。
 
-* 数值类型
-   - 整数类型： TINYINT、SMALLINT、MEDIUMINT、INT、BIGINT
-   - 浮点数类型：FLOAT 和 DOUBLE
-   - 定点数类型：DECIMAL
-* 日期时间类型：YEAR、TIME、DATE、DATETIME,TIMESTAMP。
-* 字符串类型： CHAR、VARCHAR、BINARY、VARBINARY、BLOB、TEXT、ENUM ，SET 等。
-* 二进制类型：BIT、BINARY、VARBINARY、TINYBLOB、BLOB、MEDIUMBLOB 和 LONGBLOB
-
+```
+数值类型
+   - 整数类型： tinyint、smallint、mediumint、int、bigint
+   - 浮点数类型：float 和 double
+   - 定点数类型：decimal
+日期时间类型：year、time、date、datetime,timestamp
+字符串类型： char、varchar、binary、varbinary、blob、text、enum ，set 等。
+二进制类型：bit、binary、varbinary、tinyblob、blob、mediumblob 和 longblob
+```
 
 <font color="red">注意：定义字段的数据类型对数据库的优化是十分重要的。</font>
 
@@ -229,10 +230,14 @@ TIMESTAMP 与 DATETIME 除了存储字节和支持的范围不同外，还有一
 下表中列出了 MySQL 中的字符串数据类型，括号中的M表示可以为其指定长度。
 ![mysql_20230715155021.png](../blog_img/mysql_20230715155021.png)
 
-
 VARCHAR 和 TEXT 类型是变长类型，其存储需求取决于列值的实际长度（在前面的表格中用 L 表示），而不是取决于类型的最大可能尺寸。
 
 例如，一个 VARCHAR(10) 列能保存一个最大长度为 10 个字符的字符串，实际的存储需要字符串的长度 L 加上一个字节以记录字符串的长度。对于字符 “abcd”，L 是 4，而存储要求 5 个字节。
+
+> varchar与char的区别?
+* char表示定长字符串，长度是固定的；如果插入数据的长度小于char的固定长度时，则用空格填充；因为长度固定，所以存取速度要比varchar快很多，甚至能快50%，但正因为其长度固定，所以会占据多余的空间，是空间换时间的做法；
+* varchar表示可变长字符串，长度是可变的；插入的数据是多长，就按照多长来存储；varchar在存取方面与char相反，它存取慢，因为长度不固定，但正因如此，不占据多余的空间，是时间换空间的做法；
+* 总之，结合性能角度（char更快）和节省磁盘空间角度（varchar更小），具体情况还需具体来设计数据库才是妥当的做法。
 
 
 ### 二进制类型
@@ -291,7 +296,7 @@ MySQL 目前支持的存储引擎有 InnoDB、MyISAM、Memory、Merge、Archive�
 
 mysql-5.1版本之前默认存储引擎是MyISAM，之后是innoDB。
 
-MyISAM 存储引擎不支持事务和外键，所以访问速度比较快。如果系统主要以读取和写入为主，只有少量的更新和删除操作，并且对事务的完整性、并发性要求不是很高，那么选择 MyISAM 存储引擎是非常适合的。
+MyISAM 存储引擎不支持事务，也不支持行级锁和外键。所以访问速度比较快。如果系统主要以读取和写入为主，只有少量的更新和删除操作，并且对事务的完整性、并发性要求不是很高，那么选择 MyISAM 存储引擎是非常适合的。
 
 MyISAM 是在 Web 数据仓储环境下是最常使用的存储引擎之一。
 
@@ -299,7 +304,7 @@ MyISAM 是在 Web 数据仓储环境下是最常使用的存储引擎之一。
 
 MySQL 5.5 版本之后默认的事务型引擎修改为 InnoDB。
  
-InnoDB 存储引擎在事务上具有优势，即支持具有提交、回滚和崩溃恢复能力的事务安装，所以 InnoDB 存储引擎比 MyISAM 存储引擎占用更多的磁盘空间。
+InnoDB 存储引擎提供了对数据库ACID事务的支持。并且还提供了行级锁和外键的约束。它的设计的目标就是处理大数据容量的数据库系统。
 
 如果系统对事务的完整性有比较高的要求，在并发条件下要求数据的一致性，数据操作除了插入和查询以外，还包括很多的更新、删除操作，那么 InnoDB 存储引擎是比较合适的选择。
  

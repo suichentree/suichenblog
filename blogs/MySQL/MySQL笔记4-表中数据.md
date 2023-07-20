@@ -400,6 +400,14 @@ select age from students where age between 5 and 10;
 * NOT：可选参数，表示指定范围之外的值。如果字段值不满足指定范围内的值，则这些记录被返回。
 * between 5 and 10 就相当于 age >= 5 and age <= 10
 
+### NULL值处理
+
+* is null: 当字段的值是NULL,此运算符返回true。
+* is not null: 当字段的值不为NULL,此运算符返回true。
+* <=>: 比较操作符（不同于=运算符），当比较的的两个值为NULL时返回true。
+* 不能使用 = NULL 或 != NULL 在列中查找 NULL 值 。
+* 在MySQL中，NULL值与任何其它值的比较（即使是NULL）永远返回false，即 NULL = NULL 返回false 。
+* MySQL中判断字段的值是否是NULL，需要使用is null和is not null。
 
 ### is null 空值查询
 
@@ -783,6 +791,32 @@ select * from students where age NOT in (12,13); //查询age不为12和13的记�
 
 <font color="red">MySQL支持使用NOT对IN、BETWEEN和 EXISTS子句取反。</font>
 
+### 组合查询 union，unoin all 
+
+union可以将多条select语句组合在一起。并把多个SELECT语句的查询结果组合到一个结果集中。
+
+```sql
+-- 语法如下
+SELECT * FROM table1 [WHERE conditions] 
+UNION [ALL]
+SELECT * FROM table2 [WHERE conditions];
+
+--例子
+-- 查询年龄大于5的学生和学号为111与112的学生，会过滤重复的行
+select name,age from students where age > 5 
+union 
+select name,age from student where sid in (111,222)
+
+-- 不会过滤重复的行
+select name,age from students where age > 5 
+union all 
+select name,age from student where sid in (111,222)
+```
+
+1. UNION中的每个查询必须包含相同的列、表达式或聚集函数。
+2. UNION从查询结果集中自动去除了重复的行。
+3. UNION ALL不会过滤查询出来的重复的行
+
 
 ### regexp 正则表达式
 
@@ -970,3 +1004,73 @@ TRUNCATE TABLE tb_student_course;
 * DELETE 的使用范围更广，因为它可以通过 WHERE 子句指定条件来删除部分数据；而 TRUNCATE 不支持 WHERE 子句，只能删除整体。
 
 <font color="red">当不需要该表时，用 DROP；当仍要保留该表，但要删除所有记录时，用 TRUNCATE；当要删除部分记录时，用 DELETE。</font>
+
+
+## 聚合函数
+
+
+<font color="red">聚合函数（avg、sum、max、min、count），不能作为条件放在where子句之后，但可以放在having子句之后</font>
+
+聚集函数主要用于汇总数据。例如查询表中的记录数，查询某个列的最大最小值等。这些都是对表中数据的汇总，并不是想要获取实际查询出来的数据。
+
+> ① AVG()函数：返回特定列的平均值。
+
+```sql
+select AVG(age) as average from students; //查询表中学生的平均年龄
+
+``` 
+
+1. AVG()只能用来确定特定数值列的平均值，而 且列名必须作为函数参数给出。为了获得多个列的平均值， 必须使用多个AVG()函数。
+2. AVG()函数忽略列值为NULL的行。
+
+
+> ② COUNT()函数：用于计算表中行的数目或符合特定条件的行的数目。
+
+1. 使用COUNT(*)会对表中行的数目进行计数，不管表列中包含的是空 值（NULL）还是非空值。 
+2. 使用COUNT(column)对特定列中具有值的行进行计数，忽略NULL值。
+
+
+```sql
+select COUNT(*) as num from students;     //查询表中有多少条记录，即有多少个学生
+```
+
+> ③ max()，min(),sum()函数
+
+```sql
+select max(age) as max_age from students;   //查询出最大的年龄
+select min(age) as min_age from students;   //查询最小的年龄
+select sum(age) as sum_age from students;   //查询年龄的总和
+```
+
+1. max()函数：返回指定列的最大值。忽略列值为NULL的行。
+2. min()函数：返回指定列的最小值。忽略列值为NULL的行。
+3. sum()函数：返回指定列的总和。忽略列值为NULL的行。
+
+
+## 计算字段
+
+什么是计算字段？
+
+有的时候，存储在表中的数据不是程序马上需要的。我们需要将从数据库中检索出的数据，经过转换格式、计算后，才能给应用程序使用。为什么不直接在程序中进行转换和计算的工作，是因为在数据库服务器上完成这些操作比在程序中完成要快得多。
+
+<font color="red">计算字段就是将查询出来的数据，经过二次加工。再把加工后的数据返回给应用程序。</font>
+
+### concat()函数拼接字段
+
+```sql
+select concat(name,'(',age,')') from students;  //从表中查询名字和年龄的数据，并转换成name(age)的格式。
+```
+
+### 其余数据处理函数
+
+UPPER()函数：将文本转换为大写
+DATE()函数：返回日期时间中的日期部分
+
+```sql
+select UPPER(name) FROM students; //将name转变为大写
+select * FROM students where DATE(birth) = '2000-02-02'; //查询2000年2月2日出生的学生记录
+```
+
+<font color="red">其实还有许多函数，请自行百度。</font>
+
+
