@@ -872,6 +872,17 @@ SELECT * FROM tb_students_info WHERE name REGEXP '[123]';
 
 ```
 
+### select，where,group by,order by等语句的执行顺序
+
+常见的一些语句执行顺序： from -》where -》group by -》having -》select -》order by -》limit 
+
+* from语句：数据来源
+* where条件语句：根据条件查询数据
+* group by语句：对查询的数据进行分组
+* having语句：对分组的数据进行筛选过滤
+* select语句：从查询出来的数据中选择字段显示
+* order by: 对查询出来的数据进行排序
+* limit: 对查询出来的数据进行分页限制
 
 ## 插入数据
 

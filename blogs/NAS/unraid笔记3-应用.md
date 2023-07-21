@@ -50,24 +50,26 @@ Unraid 默认并没有带文件管理器，而是以插件的形式提供给用�
 
 基本的文件管理功能都有，可以满足绝大部分需求。
 
-## 文件管理：FileBrowser docker容器
+## ★★★神器 文件管理：FileBrowser docker容器
 
 如果Dynamix File Manager插件不够好用，或者不够好看。那么可以试试这款简洁轻量易用的第三方管理器 - FileBrowser。
 
 1. 在应用市场搜索FileBrowser。找到下载量多的那个安装。
 2. 容器配置
-    1. HostPath1配置修改为/mnt/user，共享文件夹基本上都存放在这个目录中。
-    2. 把webui界面的IP地址修改为固定ip。
-    3. HostPath2和其余配置默认。
+    1. 首先将网络类型改为bridge桥接。
+    2. /srv是管理目录，修改为/mnt/user，共享文件夹基本上都存放在这个目录中。
+    3. /db/是配置目录，修改为/mnt/user/appdata/filebrowser/
+    4. 添加映射端口，主机端口为8083，容器端口为80。
 
-![unraid_202306082032.png](../blog_img/unraid_202306082032.png)
+![urnaid_20230721213853.png](../blog_img/urnaid_20230721213853.png)
 
-3. 安装好后，在docker界面点击FileBrowser容器图标，进入到webui管理界面。
-
+3. 安装好后，访问ip+8083端口，进入到管理界面。初始密码为admin/admin
+![unraid_20230721213451.png](../blog_img/unraid_20230721213451.png)
 ![unraid_20230608213647.png](../blog_img/unraid_20230608213647.png)
 
-4. 在FileBrowser的设置选项中，可以设置简体中文。
-5. 然后就可以进行文件管理了。
+4. 在FileBrowser的设置选项中，可以设置简体中文，修改登录密码。
+5. FileBrowser显示的文件就是/mnt/user下的文件。如果想让FileBrowser管理更多的文件，需要重新映射管理目录即可。
+6. 之后就可以开始进行文件管理了。
 
 ## 内网穿透：安装Zerotier docker容器
 
@@ -331,7 +333,7 @@ Navidrome 是一开源的音乐服务器，可以用来自建云端音乐播放�
 
 ## ★★★神器 个人网盘：可道云 docker容器
 
-可道云的docker镜像：kodcloud/kodbox
+可道云的dockerhub镜像：kodcloud/kodbox
 镜像地址：[https://hub.docker.com/r/kodcloud/kodbox](https://hub.docker.com/r/kodcloud/kodbox)
 
 1. 因为应用市场没有可道云，所以直接创建docker容器安装。
@@ -433,3 +435,40 @@ Resilio Sync是由Resilio推出的全平台文件同步产品。其有手机端�
 2. 在插件页面，双击该插件，进入到插件设置界面
 ![unraid_20230701132441.png](../blog_img/unraid_20230701132441.png)
 3. 设置后，回收站就生效了。
+
+## 漫画阅读：komga漫画库 docker容器
+
+komga漫画库 使用 gotson/komga 这个镜像，功能强大，它不仅可以看漫画，更适合看杂志、电子书等。
+
+1. 在应用市场搜索komga,安装komga
+![unraid_20230721222210.png](../blog_img/unraid_20230721222210.png)
+2. docker配置。主要是端口和漫画目录。配置目录默认存储在appdata中。
+![unraid_20230721222346.png](../blog_img/unraid_20230721222346.png)
+3. 安装后，访问ip端口。进入管理界面。
+![unraid_20230721222535.png](../blog_img/unraid_20230721222535.png)
+4. 设置账号密码（账号是邮箱）。
+5. 进入后，添加库，然后等待漫画加载。docker映射的目录在books目录中
+![unraid_20230721223414.png](../blog_img/unraid_20230721223414.png)
+![unraid_20230721224010.png](../blog_img/unraid_20230721224010.png)
+6. 之后就可以使用kogma阅读漫画了。
+
+
+## DDNS解析工具： ddns-go docker容器
+
+ddns-go这个工具，可用自动获得你的公网 IPv4 或 IPv6 地址，并解析到对应的域名服务上。
+
+ddns-go支持的域名服务商有 Alidns(阿里云) Dnspod(腾讯云) Cloudflare 华为云 Callback 百度云等。
+
+ddns-go的dockerhub镜像：jeessy/ddns-go
+镜像地址：[https://hub.docker.com/r/jeessy/ddns-go](https://hub.docker.com/r/jeessy/ddns-go)
+
+1. 因为unraid应用市场没有ddns-go，所以创建docker容器安装。
+2. 由于不是插件，因此需要手动映射端口和配置目录，图中可以把webui的地址也填上。
+![unraid_20230721140658.png](../blog_img/unraid_20230721140658.png)
+3. 点击应用。创建完容器后，访问webui地址。开始进行ddns-go的配置。
+![unraid_20230721141211.png](../blog_img/unraid_20230721141211.png)
+4. 首先配置账户密码，公网访问。
+![unraid_20230721155805.png](../blog_img/unraid_20230721155805.png)
+
+* 公网访问：ddns-go默认只能通过内网访问。取消后，就可以通过公网访问。
+* 默认没有账户密码。设置后，下次登录需要账户密码。
