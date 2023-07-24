@@ -12,7 +12,7 @@ tags:
 
 # Redis基础
 
-## 1. NOSQL
+## 1.NOSQL
 
 **nosql一般指非关系型数据库。nosql数据库就是为了解决大规模数据集合的存储问题。**
 

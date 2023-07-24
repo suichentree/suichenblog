@@ -289,6 +289,8 @@ User Scripts插件可以自动运行一下脚本命令，比如emby的打开核�
 
 ### 开机添加DNS数据到hosts脚本中
 
+<font color="red">该脚本已被unraid modify插件替代。unraid modify插件也可以实现更新hosts脚本的功能</font>
+
 由于UNRAID重启之后修改的host文件会被清空。因此使用User Scripts插件创建脚本每次开机自动运行添加dns数据到hosts中。
 
 1. 创建脚本，脚本代码如下：
@@ -297,6 +299,73 @@ User Scripts插件可以自动运行一下脚本命令，比如emby的打开核�
 echo "185.199.108.133 raw.github.com" >> /etc/hosts
 ```
 2. 选择后台允许。运行规则选择：At First Array Start Only（第一次阵列启动时，就是每次重启系统时运行）
+
+### 统计共享文件夹中的资源
+
+1. 创建脚本，脚本代码如下
+
+```bash
+#!/bin/bash
+
+# 同步思路
+# 1. 每个磁盘都有一个同步目录，其中disk5_ZDH9WGB7_4t磁盘中的是主同步目录，其余几个磁盘中的是分同步目录
+# 2. 用rsync命令将主同步目录中的文件，复制到分同步目录中
+# 3. 每周运行一次
+
+# 整理资源名称文本思路
+# 1. 用tree命令打印所有共享文件夹中的目录或文件名称，将打印内容整理为一个资源文本中。
+# 2. 该文本用于整理收集到的资源，方便后期磁盘损毁后，可以根据文本内容重新下载一份。
+# 3. 资源文本存储在主同步目录中
+# 4. 每周运行一次
+
+# 主同步目录路径
+mainFilePath=/mnt/user/disk5_ZDH9WGB7_4t/主同步/
+
+# 分同步目录路径数组
+brancheFilePaths=(
+/mnt/user/disk1_WCC2EHK12391_500g/分同步
+/mnt/user/disk2_W9ABJ7X3_500g/分同步
+/mnt/user/disk3_ZW60DF54_4t/分同步
+/mnt/user/disk4_ZDH9J9KJ_4t/分同步
+)
+
+# 资源文本路径
+resourceListFilePath=/mnt/user/disk5_ZDH9WGB7_4t/主同步/resourceList/$(date +%Y-%m-%d).txt
+
+# 创建资源文本
+createFile(){
+    echo ========== `date` ========== START  > $resourceListFilePath
+    tree -N -L 3 /mnt/user/ >> $resourceListFilePath
+    echo ========== `date` ==========  END   >> $resourceListFilePath
+}
+
+# 同步方法
+syncFile(){
+    echo "==========开始同步到 $1" 
+    rsync -a $mainFilePath $1
+    echo "==========结束同步"
+}
+
+# 脚本运行入口处===========================================
+
+# 1.先执行创建资源文本方法
+createFile
+
+# 2.执行for循环，遍历数组，每次调用syncFile方法并传递数组参数给syncFile方法
+for i in ${brancheFilePaths[*]}
+do
+    syncFile $i
+done
+
+```
+
+2. 选择后台允许。运行规则选择：Scheduled Weekly（每周运行一次）
+
+
+该脚本有两个功能：
+* 统计共享文件夹中所有资源目录的名称。记录到一个txt中，用来防止后期数据丢失后，在重新下载回来。
+* 将磁盘5中的主同步目录中的文件，同步到其他磁盘的分同步目录中。用来对重要数据文件进行备份。防止一个磁盘损毁后，数据文件还能从其他磁盘中找回。
+
 
 
 ## 数据库： mariadb docker容器
@@ -375,7 +444,7 @@ Navidrome 是一开源的音乐服务器，可以用来自建云端音乐播放�
 4. 我们可以直接上传下载文件到某个共享文件夹中，也可以直接播放音乐视频，也可以在线编辑文本文档等。
 
 
-## 定时任务脚本：青龙面板 docker容器
+## 定时任务脚本工具：青龙面板 docker容器
 
 青龙面板是定时任务脚本管理工具，可以通过青龙面板管理定时任务脚本。
 
@@ -452,10 +521,13 @@ komga漫画库 使用 gotson/komga 这个镜像，功能强大，它不仅可以
 ![unraid_20230721224010.png](../blog_img/unraid_20230721224010.png)
 6. 之后就可以使用kogma阅读漫画了。
 
-
 ## DDNS解析工具： ddns-go docker容器
 
-ddns-go这个工具，可用自动获得你的公网 IPv4 或 IPv6 地址，并解析到对应的域名服务上。
+由于家用宽带普及了公网ipv6，但是公网ipv6的确实不断变换的，动态的。因此需要DDNS将动态公网ipv6与域名进行绑定。
+
+DDNS:动态域名解析。DDNS系统是将主机的动态IP地址映射到一个固定的域名解析服务上，用户每次连接网络时，DDNS程序把该主机的动态IP地址传送给域名服务商，从而实现动态域名解析。
+
+ddns-go这个工具，可用自动获得你的服务器上的公网 IPv4 或 IPv6 地址，解析到对应的域名服务上。
 
 ddns-go支持的域名服务商有 Alidns(阿里云) Dnspod(腾讯云) Cloudflare 华为云 Callback 百度云等。
 
@@ -465,10 +537,73 @@ ddns-go的dockerhub镜像：jeessy/ddns-go
 1. 因为unraid应用市场没有ddns-go，所以创建docker容器安装。
 2. 由于不是插件，因此需要手动映射端口和配置目录，图中可以把webui的地址也填上。
 ![unraid_20230721140658.png](../blog_img/unraid_20230721140658.png)
+
+* 一个是界面访问端口
+* 另一个是配置文件的路径。
+
 3. 点击应用。创建完容器后，访问webui地址。开始进行ddns-go的配置。
 ![unraid_20230721141211.png](../blog_img/unraid_20230721141211.png)
+
 4. 首先配置账户密码，公网访问。
 ![unraid_20230721155805.png](../blog_img/unraid_20230721155805.png)
 
 * 公网访问：ddns-go默认只能通过内网访问。取消后，就可以通过公网访问。
 * 默认没有账户密码。设置后，下次登录需要账户密码。
+
+### 腾讯云购买域名并添加DDNS解析
+
+1. 在腾讯云上购买一个想要的域名。
+2. 购买后可在我的域名上查询域名。
+
+![unraid_20230724111859.png](../blog_img/unraid_20230724111859.png)
+
+3. 然后点击解析。开始将域名和自己主机的公网ip进行绑定。
+4. 点击添加记录，添加一条解析记录。
+![unraid_20230724112400.png](../blog_img/unraid_20230724112400.png)
+
+* @表示直接解析主域名。例如 aaa.xyz
+* www是子域名的名称，例如 www.aaa.xyz
+* 最下面的解析记录用于申请SSL证书的时候用到的。当申请SSL证书成功后，可以删除。
+* 记录值就是你当前主机的公网ip地址。
+* 多个记录可以填同一个公网ip，无非是不用的域名都对应同一个公网ip而已。
+
+5. 当解析记录添加成功后，等一会。然后ping域名。当ping域名成功之后，若能ping通，则表示解析成功。
+
+```bash
+ping 域名
+## 例如
+ping www.aaa.xyz
+ping aaa.xyz
+```
+
+### DDNS-go设置DDNS动态域名解析
+
+目前域名与公网ip通过DNSpod绑定在了一起，但是由于公网ip是动态的，因此还需要将DNSpod与ddns-go绑定在一起。
+
+ddns-go动态域名解析过程：
+```
+ddns-go通过网卡等形式获取到主机的公网ip地址-》然后将公网ip发送到DNSpod上-》DNSpod获取到公网ip地址，更新域名解析记录。-》从而最新的公网ip与域名始终绑定在一起。
+```
+
+1. 在设置之前，需要在DNSpod上创建API密钥。选择我的账户-》API密钥-》DNSpod token-》创建密钥
+![unraid_20230724122456.png](../blog_img/unraid_20230724122456.png)
+2. 在ddns-go上选择域名解析商。输入刚刚创建的id和token。点击保存。
+![unraid_20230724122640.png](../blog_img/unraid_20230724122640.png)
+
+* 由于我是在腾讯云旗下的DNSpod上添加域名解析记录的。因此在ddns-go上选择的域名解析商也要是DNSpod。
+* 当保存id和token后，ddns-go就可以通过API密钥来修改dnspod中的域名解析记录。
+
+3. 进行ipv6设置，输入自己想动态解析的域名。将域名和动态ip绑定
+![unraid_20230724122914.png](../blog_img/unraid_20230724122914.png)
+
+* 例如域名这这处填写为www.aaa.xyz。那么当ddns-go获取到最新的公网ipv6的时候，则会更新dnspod中www.aaa.xyz解析记录的公网ip,而不会更新其他子域名记录上的公网ip
+* 因此建议这个的域名设置最好和dnspod上的记录一一对应起来。
+
+4. 当都设置好后，可以查询日志。来判断ddns是否成功。
+![unraid_20230724124224.png](../blog_img/unraid_20230724124224.png)
+5. 并且你也可以通过重启主机，让主机获得新的ipv6。查看dnspod中的公网ip是不是最新的ip。从而判断ddns-go是否完成了ddns域名解析工作。
+
+
+### DDNS-go ipv6无法读取出网卡。
+
+当你的DDNS-go在ipv6选项中无法读取网卡时，你可以将docker的网络类型从bridge桥接，改为host连接试试。
