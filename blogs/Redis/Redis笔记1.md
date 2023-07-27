@@ -140,12 +140,36 @@ cd /usr/local/bin       # 进入安装目录中
 
 ## Redis配置文件
 
+windows系统中 Redis 的安装目录中有一个名为 redis.windows.conf 的配置文件，Linux 系统中则为 redis.conf。
+
+
+### 查看配置信息
+
+以使用Redis的`CONFIG`命令来查看或者更改Redis的配置信息。
+
+```bash
+# 语法如下
+127.0.0.1:6379> CONFIG GET 配置名称
+
+# 获取日志配置信息
+127.0.0.1:6379> CONFIG GET 配置名称
+1) "loglevel"
+2) "notice"
+
+# 获取所有配置信息
+127.0.0.1:6379> CONFIG GET *
+1) "dbfilename"
+2) "dump.rdb"
+......
+
+```
+
+### 修改配置信息
+
 如果我们需要修改redis配置文件的时候，一般是将原配置文件进行备份，然后再修改。
 
-1. 将redis.conf 原配置文件进行备份
-`cp redis.conf redis.conf.backup`
-
-2. 修改redis.conf文件中的一些配置
+1. 将redis.conf原配置文件复制重命名为redis.conf.backup
+2. 修改配置
 
 ```properties
 # 允许访问的地址，默认是127.0.0.1，会导致只能在本地访问。修改为0.0.0.0则可以在任意IP访问，生产环境不要设置为0.0.0.0
@@ -174,6 +198,11 @@ cd /usr/local/src/redis-6.2.6
 # 指定配置文件启动
 redis-server redis.conf
 ```
+
+### 配置文件配置项
+
+![redis_20230727094805.png](../blog_img/redis_20230727094805.png)
+![redis_20230727094900.png](../blog_img/redis_20230727094900.png)
 
 ## Redis开机自启
 

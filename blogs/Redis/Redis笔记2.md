@@ -83,7 +83,7 @@ PEXPIRE key milliseconds | 设置键的到期时间(以毫秒为单位)。
 PEXPIREAT key milliseconds-timestamp | 以Unix时间戳形式来设置键的到期时间(以毫秒为单位)。
 
 
-## 数据类型（value值的数据类型）
+## 五种基础数据类型（value值的数据类型）
 
 Redis是典型的key-value数据库，key一般是字符串，而value可以包含很多不同的数据类型。
 
@@ -411,6 +411,76 @@ sunionstore target key1 [key2] | 把并集存储在target集合中
 ```
 
 
+### Zset 有序集合类型(又名 SortedSet)
+
+Redis中Zset和set一样也是string类型元素的集合,并且不允许重复的成员。
+
+但底层数据结构却差别很大。Zset中的每一个元素都会关联一个score属性，redis正是通过score属性来为Zset中的成员进行排序。Zset底层的实现是一个跳表+hash表。
+
+<font color="red">例如：Zset在集合set的基础上，给每个元素都关联了一个score值。之前的set是(K,(v1,v2,v3,...))。现在的Zset是(K,((score1,v1),(score2,v2),(score3,v3)....) ,其中(score1,v1)是键值对。
+</font> 
+
+> Zset(SortedSet)的特点
+- 可排序
+- 元素不重复
+- 查询速度快
+
+
+> 如图是SortedSet类型value的存储形式
+
+![redis20221010180048.png](../blog_img/redis20221010180048.png)
+
+> 针对SortedSet类型value的命令
+
+ 命令  | 功能 
+----  | ---- 
+zadd key score1 member1 [score2 member2] | 向有序集合添加多个成员，或者更新已存在成员的分数
+zcard key | 获取有序集合的成员数
+zcount key min max | 计算在有序集合中指定区间分数的成员数
+zscore key member | 返回有序集合中member成员的分数值
+zrank key member | 返回指定成员的下标值（索引），从0开始
+zrevrank key member | 逆序获得下标值。
+zrange key start stop [withscores] | 返回有序集合中指定区间内的成员
+zrangebyscore key min max [withscores] [limit] | 通过分数返回有序集合指定区间内的成员
+zrevrange key start stop | 逆序返回指定区间内的成员
+zrevrangebyscore key max min | 逆序返回指定分数区间内的成员（通过分数从高到低排序）
+zrem key member [member ...] | 移除有序集合的多个成员
+zremrangebyrank key start stop | 移除有序集合中给定索引的所有成员
+zremrangebyscore key min max | 移除有序集合中给定分数区间的所有成员
+zincrby key num member | 有序集合中对指定成员的分数加上增量 num
+zinterscore target numkeys key [key ...] | 计算给定的多个有序集的交集并存储在新的有序集合target中
+zunionstore target numkeys key [key ...] | 计算给定的多个有序集的并集，并存储在新的target中
+
+> 例子
+
+```bash
+127.0.0.1:6379> zadd zset1 10 user1 20 user2 40 user4   ##设置有序集合zset1,其中10分的是user1,....
+(integer) 3
+127.0.0.1:6379> zrange zset1 0 -1    ##返回指定范围的有序集合的内容
+1) "user1"
+2) "user2"
+3) "user4"
+127.0.0.1:6379> zrange zset1 0 -1 withscores    ##返回指定范围的有序集合的内容，带分数
+1) "user1"
+2) "10"
+3) "user2"
+4) "20"
+5) "user4"
+6) "40"
+127.0.0.1:6379> zrangebyscore zset1 10 40     ##找出10分到40分的元素成员
+1) "user1"
+2) "user2"
+3) "user4"
+127.0.0.1:6379> zrangebyscore zset1 10 40 limit 0 2      ##找出10分到40分的，从第0个开始选2个元素出来
+1) "user1"
+2) "user2"
+127.0.0.1:6379> zcard zset1     ##返回有序集合的成员数
+(integer) 3
+127.0.0.1:6379> zcount zset1 10 40   ##返回有序集合中的10-40分的成员数
+(integer) 3
+```
+
+
 ### Hash 哈希散列类型
 
 Hash 哈希散列类型（key是键，value是一个map,value可以存储多个键值对）,hash类型特别适合用于存储对象。类似于Java中的HashMap结构。
@@ -512,72 +582,386 @@ OK
 6) "woman"
 ```
 
+## 三种特殊数据类型
 
-### Zset 有序集合类型(又名 SortedSet)
+### bitmap 位图类型
 
-Redis中Zset和set一样也是string类型元素的集合,并且不允许重复的成员。
+在平时开发过程中，经常会有一些 bool 类型数据需要存取。比如记录用户一年内签到的次数，签了是 1，没签是 0。如果使用 key-value 来存储，那么每个用户都要记录 365 次，当用户成百上亿时，需要的存储空间将非常巨大。为了解决这个问题，Redis 提供了位图结构。
 
-但底层数据结构却差别很大。Zset中的每一个元素都会关联一个score属性，redis正是通过score属性来为Zset中的成员进行排序。Zset底层的实现是一个跳表+hash表。
+位图（bitmap）同样属于 string 数据类型。Redis 中一个字符串类型的值最多能存储 512 MB 的内容，每个字符串由多个字节组成，每个字节又由 8 个 Bit 位组成。位图结构正是使用“位”来实现存储的，它通过将比特位设置为 0 或 1来达到数据存取的目的，这大大增加了 value 存储数量，它存储上限为2^32 。
 
-<font color="red">例如：Zset在集合set的基础上，给每个元素都关联了一个score值。之前的set是(K,(v1,v2,v3,...))。现在的Zset是(K,((score1,v1),(score2,v2),(score3,v3)....) ,其中(score1,v1)是键值对。
-</font> 
+位图本质上就是一个普通的字节串，也就是 bytes 数组。位图的结构如下所示：
 
-> Zset(SortedSet)的特点
-- 可排序
-- 元素不重复
-- 查询速度快
+![redis_20230725155218.png](../blog_img/redis_20230725155218.png)
+
+位图适用于一些特定的应用场景，比如用户签到次数、或者登录次数等。上图是表示一位用户 10 天内来网站的签到次数，1 代表签到，0 代表未签到，这样可以很轻松地统计出用户的活跃程度。相比于直接使用字符串而言，位图中的每一条记录仅占用一个 bit 位，从而大大降低了内存空间使用率。
+
+> 位图的特点
+* 相比于字符串而言，它不仅效率高，而且还非常的节省空间。
+
+如果某网站要统计一个用户一年的签到记录，若用 sring 类型存储，则需要 365 个键值对。若使用位图存储，用户签到就存 1，否则存 0。最后会生成 11010101... 这样的存储结果，其中每天的记录只占一位，一年就是 365 位，约为 46 个字节。如果只想统计用户签到的天数，那么统计 1 的个数即可。
 
 
-> 如图是SortedSet类型value的存储形式
+### HyperLoglog基数统计
 
-![redis20221010180048.png](../blog_img/redis20221010180048.png)
+Redis 2.8.9 版本中新增了 HyperLogLog 数据类型。HyperLogLog 类型非常适用于海量数据的计算、统计，其特点是占用空间小，计算速度快。
 
-> 针对SortedSet类型value的命令
+HyperLoglog 不会储存元素值本身，因此，它不能像 set 那样，可以返回具体的元素值。HyperLoglog 只记录元素的数量，并使用基数估计算法，快速地计算出集合的基数是多少。
 
- 命令  | 功能 
-----  | ---- 
-zadd key score1 member1 [score2 member2] | 向有序集合添加多个成员，或者更新已存在成员的分数
-zcard key | 获取有序集合的成员数
-zcount key min max | 计算在有序集合中指定区间分数的成员数
-zscore key member | 返回有序集合中member成员的分数值
-zrank key member | 返回指定成员的下标值（索引），从0开始
-zrevrank key member | 逆序获得下标值。
-zrange key start stop [withscores] | 返回有序集合中指定区间内的成员
-zrangebyscore key min max [withscores] [limit] | 通过分数返回有序集合指定区间内的成员
-zrevrange key start stop | 逆序返回指定区间内的成员
-zrevrangebyscore key max min | 逆序返回指定分数区间内的成员（通过分数从高到低排序）
-zrem key member [member ...] | 移除有序集合的多个成员
-zremrangebyrank key start stop | 移除有序集合中给定索引的所有成员
-zremrangebyscore key min max | 移除有序集合中给定分数区间的所有成员
-zincrby key num member | 有序集合中对指定成员的分数加上增量 num
-zinterscore target numkeys key [key ...] | 计算给定的多个有序集的交集并存储在新的有序集合target中
-zunionstore target numkeys key [key ...] | 计算给定的多个有序集的并集，并存储在新的target中
+> 什么是基数？
 
-> 例子
+基数定义：一个集合中不重复的元素个数就表示该集合的基数，比如集合 {1,2,3,1,2} ，它的基数集合为 {1,2,3} ，所以基数为 3。HyperLogLog 正是通过基数估计算法来统计输入元素的基数。
+
+> 常用命令
+
+![redis_20230725161117.png](../blog_img/redis_20230725161117.png)
+
+> 场景应用
+
+HyperLogLog 也有一些特定的使用场景，它最典型的应用场景就是统计网站用户月活量，或者网站页面的 UV(网站独立访客)数据等。
+
+UV 与 PV(页面浏览量) 不同，UV 需要去重，同一个用户一天之内的多次访问只能计数一次。这就要求用户的每一次访问都要带上自身的用户 ID，无论是登陆用户还是未登陆用户都需要一个唯一 ID 来标识。
+
+当一个网站拥有巨大的用户访问量时，我们可以使用 Redis 的 HyperLogLog 来统计网站的 UV （网站独立访客）数据，它提供的去重计数方案，虽说不精确，但 0.81% 的误差足以满足 UV 统计的需求。
+
+> 例子:有6个用户(user01-user06)，他们分别在上午 8 与 9 点访问了网站。
 
 ```bash
-127.0.0.1:6379> zadd zset1 10 user1 20 user2 40 user4   ##设置有序集合zset1,其中10分的是user1,....
+#向指定的key中添加用户
+127.0.0.1:6379> PFADD user:uv:2021011308 user01 user02 user03
+(integer) 1
+#向指定的key中添加用户
+127.0.0.1:6379> PFADD user:uv:2021011309 user04 user05
+(integer) 1
+#统计基数值
+127.0.0.1:6379> PFCOUNT user:uv:2021011308
 (integer) 3
-127.0.0.1:6379> zrange zset1 0 -1    ##返回指定范围的有序集合的内容
-1) "user1"
-2) "user2"
-3) "user4"
-127.0.0.1:6379> zrange zset1 0 -1 withscores    ##返回指定范围的有序集合的内容，带分数
-1) "user1"
-2) "10"
-3) "user2"
-4) "20"
-5) "user4"
-6) "40"
-127.0.0.1:6379> zrangebyscore zset1 10 40     ##找出10分到40分的元素成员
-1) "user1"
-2) "user2"
-3) "user4"
-127.0.0.1:6379> zrangebyscore zset1 10 40 limit 0 2      ##找出10分到40分的，从第0个开始选2个元素出来
-1) "user1"
-2) "user2"
-127.0.0.1:6379> zcard zset1     ##返回有序集合的成员数
+#重复元素不能添加成功，其基数仍然为3
+127.0.0.1:6379> PFADD user:uv:2021011308 user01 user02
+(integer) 0
+127.0.0.1:6379> PFCOUNT user:uv:2021011308
 (integer) 3
-127.0.0.1:6379> zcount zset1 10 40   ##返回有序集合中的10-40分的成员数
+#添加新元素值
+127.0.0.1:6379> PFADD user:uv:2021011308 user06
+(integer) 1
+#基数值变为4
+127.0.0.1:6379> PFCOUNT user:uv:2021011308
+(integer) 4
+#统计两个key的基数值
+127.0.0.1:6379> PFCOUNT user:uv:2021011308 user:uv:2021011309
+(integer) 6
+#将两个key值合并为一个
+127.0.0.1:6379> PFMERGE user:uv:2021011308-09 user:uv:2021011308 user:uv:2021011309
+OK
+#使用合并后key统计基数值
+127.0.0.1:6379> PFCOUNT user:uv:2021011308-09
+(integer) 6
+```
+
+### GEO 地理位置类型
+
+在 Redis 3.2 版本中，新增了存储地理位置信息的功能，即 GEO（英文全称 geographic），它的底层通过 Redis 有序集合（zset）实现。
+
+> 使用场景
+
+点当你点外卖，或者用过打车软件，在这种 APP上会显示“店家距离你有多少米”或者“司机师傅距离你有多远”，类似这种功能就可以使用 Redis GEO 实现。数据库中存放着商家所处的经纬度，你的位置则由手机定位获取，这样 APP 就计算出了最终的距离。再比如微信中附近的人、摇一摇、实时定位等功能都依赖地理位置实现。
+
+> 常用命令
+
+![redis_20230725162333.png](../blog_img/redis_20230725162333.png)
+
+> geoadd命令
+
+将指定的地理空间位置（纬度、经度、名称）添加到指定的 key 中
+
+```bash
+# 语法如下
+GEOADD key longitude latitude member [longitude latitude member ...]    
+
+* longitude：位置地点所处的经度；
+* latitude：位置地点所处的纬度；
+* member：位置名称。
+
+## 例子
+# 添加城市地理位置
+127.0.0.1:6379> geoadd city 116.20 39.56 beijing 120.52 30.40 shanghai
+(integer) 2
+# 查询城市地理位置
+127.0.0.1:6379> GEOPOS city beijing shanghai
+1) 1) "116.19999736547470093"
+   2) "39.56000019952067248"
+2) 1) "120.52000075578689575"
+   2) "30.39999952668997452"
+
+```
+
+> geodist命令
+
+获取两个地理位置间的距离。
+
+```bash
+# 语法如下
+GEODIST key member1 member2 [unit]
+
+参数 unit 是表示距离单位，取值如下所示,默认为m
+* m 表示单位为米；
+* km 表示单位为千米；
+* mi 表示单位为英里；
+* ft 表示单位为英尺。
+
+## 例子
+127.0.0.1:6379> GEODIST city beijing shanghai
+"1091868.8970"
+127.0.0.1:6379> GEODIST city beijing shanghai km
+"1091.8689"
+127.0.0.1:6379> GEODIST city beijing shanghai mi
+"678.4576"
+
+```
+
+> georadius命令
+
+以给定的经纬度为中心，计算出 key 包含的地理位置元素与中心的距离不超过给定最大距离的所有位置元素，并将其返回。
+
+```bash
+# 语法如下
+GEORADIUS key longitude latitude radius m|km|ft|mi [WITHCOORD] [WITHDIST] [WITHHASH] [COUNT count] [ASC|DESC]
+
+* WITHDIST ：在返回位置元素的同时， 将位置元素与中心之间的距离也一并返回。
+* WITHCOORD ：返回位置元素的经度和维度。
+* WITHHASH ：采用 GEOHASH 对位置元素进行编码，以 52 位有符号整数的形式返回有序集合的分值，该选项主要用于底层调试，实际作用不大。
+* COUNT：指定返回位置元素的数量，在数据量非常大时，可以使用此参数限制元素的返回数量，从而加快计算速度。
+
+## 例子
+#添加几个地理位置元素
+127.0.0.1:6379> GEOADD city 106.45 29.56 chongqing 120.33 36.06 qingdao 103.73 36.03 lanzhou
 (integer) 3
+127.0.0.1:6379> GEOADD city 106.71 26.56 guiyang
+(integer) 1
+#以首都的坐标为中心，计算各个城市距离首都的距离，最大范围设置为1500km
+#同时返回距离，与位置元素的经纬度
+127.0.0.1:6379> GEORADIUS city 116.41 39.91 1500 km WITHCOORD WITHDIST
+1) 1) "chongqing"
+   2) "1465.5618"
+   3) 1) "106.4500012993812561"
+      2) "29.56000053864853072"
+2) 1) "lanzhou"
+   2) "1191.2793"
+   3) 1) "103.72999995946884155"
+      2) "36.03000049919800318"
+3) 1) "shanghai"
+   2) "1121.4882"
+   3) 1) "120.52000075578689575"
+      2) "30.39999952668997452"
+4) 1) "qingdao"
+   2) "548.9304"
+   3) 1) "120.3299984335899353"
+      2) "36.05999892411877994"
+5) 1) "beijing"
+   2) "42.8734"
+   3) 1) "116.19999736547470093"
+      2) "39.56000019952067248"
+
+```
+
+
+> GEORADIUSBYMEMBER命令
+
+根据给定的地理位置坐标（即经纬度）获取指定范围内的位置元素集合。
+
+```bash
+# 语法如下
+GEORADIUSBYMEMBER key member radius m|km|ft|mi [WITHCOORD] [WITHDIST] [WITHHASH] [COUNT count] [ASC|DES]
+
+* m ：米，默认单位；
+* km ：千米（可选）；
+* mi ：英里（可选）；
+* ft ：英尺（可选）；
+* ASC：根据距离将查找结果从近到远排序；
+* DESC：根据距离将查找结果从远到近排序。
+
+## 例子
+#以贵阳为中心，最大距离不超过900km
+127.0.0.1:6379> GEORADIUSBYMEMBER city guiyang 900 km WITHCOORD WITHDIST
+1) 1) "guiyang"
+   2) "0.0000"
+   3) 1) "106.70999854803085327"
+      2) "26.56000089385899798"
+#只有重庆符合条件
+2) 1) "chongqing"
+   2) "334.6529"
+   3) 1) "106.4500012993812561"
+      2) "29.56000053864853072"
+
+```
+
+> GEOHASH命令
+
+返回一个或多个位置元素的哈希字符串，该字符串具有唯一 ID 标识，它与给定的位置元素一一对应。
+
+```bash
+127.0.0.1:6379> GEOHASH city lanzhou beijing shanghai
+1) "wq3ubrjcun0"
+2) "wx49h1wm8n0"
+3) "wtmsyqpuzd0"
+```
+
+
+> ZREM命令
+
+删除指定的地理位置元素
+
+```bash
+127.0.0.1:6379> zrem city beijing shanghai
+(integer) 2
+```
+
+
+
+
+## Redis的key键
+
+在Redis中可以把 key 看成 value 的变量，通过 key 就可以找到对应的 value 值。
+
+
+### key键的数据类型
+
+key 的数据类型 对应着 value 的数据类型，同样也有五种（string、list、hash、set、zset）。如果 value 是一个字符串类型的值，那么 对应的 key 也是字符串类型。
+
+TYPE命令查询key的数据类型。
+```bash
+# 字符串
+redis> SET weather "sunny"
+OK
+redis> TYPE weather
+string
+
+# 列表
+redis> LPUSH book_list "programming in scala"
+(integer) 1
+redis> TYPE book_list
+list
+
+# 集合
+redis> SADD pat "dog"
+(integer) 1
+redis> TYPE pat
+set
+
+```
+
+
+### key键的命名规范
+
+Redis没有类似MySQL中的Table的概念，我们该如何命名不同类型的key呢？
+
+例如，需要存储用户、商品信息到redis，有一个用户id是1，有一个商品id恰好也是1，此时如果使用id作为key，那就会冲突了，该怎么办？
+
+答：可以通过给key添加前缀加以区分，不过这个前缀不是随便加的，有一定的规范：Redis的key允许有多个单词形成层级结构，多个单词之间用':'隔开，格式如下：
+
+> 层级结构的基本格式
+
+```bash
+# [业务名称]:[数据名]:[id]
+项目名:业务名:id
+```
+
+![redis20220521120213631](../blog_img/redis20220521120213631.png)
+
+> 这种层级结构的好处
+- 可读性强
+- 避免key冲突
+- 方便管理
+- 更节省内存
+
+
+例如我们的项目名称叫project1，有user和product两种不同类型的数据，它们都有key为1的数据，此时我们可以这样定义key1
+
+```
+user相关的key：     project1:user:1
+product相关的key：  project1:product:1
+```
+
+如果Value是一个Java对象，则可以将对象序列化为JSON字符串后存储：
+
+| **KEY** | **VALUE** |
+| ----| ----|
+| project1:user:1    | {"id":1,  "name": "Jack", "age": 21}       |
+| project1:product:1 | {"id":1,  "name": "小米11", "price": 4999} |
+
+并且在Redis的图形客户端中，以相同前缀作为层级结构的key，让数据看起来层次分明，关系清晰：
+
+![redis20221010150928.png](../blog_img/redis20221010150928.png)
+
+
+### key键的过期时间
+
+Redis 允许你为key设置一个过期时间。
+
+Redis 会把每个设置了过期时间的 key 存放到一个独立的字典中，并且会定时遍历这个字典来删除到期的 key。除了定时遍历之外，它还会使用“惰性策略”来删除过期的 key。即当客户端访问这个 key 的时候，Redis再对 key 的过期时间进行检查，如果过期了就立即删除。Redis 使用两种方式相结合的方法来处理过期的 key。 
+
+过期时间在实际业务中是非常有用的，一是它可以避免使用频率不高的 key 长期存在，从而占用内存资源；二是可以主动控制缓存的失效时间。
+
+```bash
+## 设置key1键10秒后过期
+EXPIRE key1 10
+```
+
+### 关于key键的常用命令
+
+![redis_20230724231023.png](../blog_img/redis_20230724231023.png)
+
+> 例子
+```bash
+# DEL命令用于删除key
+127.0.0.1:6379> SET www.biancheng.net "11111"
+OK
+#删除key
+127.0.0.1:6379> DEL  www.biancheng.net
+(integer) 1
+#若key不存在，则删除失败
+127.0.0.1:6379> DEL age
+(integer) 0
+
+# EXPIRE 设置key的过期时间
+127.0.0.1:6379> set www.biancheng.net Python
+OK
+127.0.0.1:6379> EXPIRE www.biancheng.net 120
+(integer) 1
+
+# PEXPIREAT以时间戳格式设置过期时间，并以毫秒为单位
+127.0.0.1:6379> set www.biancheng.net Python
+OK
+127.0.0.1:6379> PEXPIREAT www.biancheng.net 12000000000
+(integer) 1
+
+# KEYS命令查找指定模式的key
+# 查询course开头的key
+127.0.0.1:6379> keys course*
+1) "course1"
+2) "course2"
+3) "course3"
+# 查询所有的key
+127.0.0.1:6379> keys *
+1) "course1"
+2) "course2"
+3) "course3"
+4) "www.biancheng.net"
+
+# TTL命令检查 key 剩余的过期时间
+# 当键没有设置过期时间，表示是永久有效时，TTL 命令返回 -1；
+# 当键过期或者被删除时，TTL 命令返回 -2。
+127.0.0.1:6379> SET www.biancheng.net hello
+OK
+127.0.0.1:6379> ttl www.biancheng.net
+(integer) -1
+127.0.0.1:6379> SET user:1 Jack 120
+OK
+127.0.0.1:6379> TTL user:1
+(integer) 108
+127.0.0.1:6379> DEL user:1
+(integer) 1
+127.0.0.1:6379> TTL user:1
+(integer) -2
+
 ```
