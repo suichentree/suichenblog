@@ -14,6 +14,8 @@ tags:
 
 unraid提供丰富的插件和docker容器作为应用可供选择，下面是我用到的一些。
 
+* 20230729补充：在给docker容器选中映射端口的时候，端口号最好选中10000以上的号码。
+
 ## 网络加速：unraid modify插件
 
 unraid modify插件可以修改unraid系统的hosts文件来加快Docker，应用市场的加载速度。

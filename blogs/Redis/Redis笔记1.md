@@ -42,8 +42,7 @@ tags:
 
 ## Redis介绍
 
-Redis: Remote Dictionary Server (远程字典服务器)
-Redis是一个基于内存的键值型NoSQL数据库。
+Redis 全称 Remote Dictionary Server (远程字典服务器) , 是一个基于内存的key-value数据库。
 
 ![redis20221010094849.png](../blog_img/redis20221010094849.png)
 
