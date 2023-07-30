@@ -18,14 +18,42 @@ tags:
 * OOP(Object Oriented Programming)面向对象编程。
 * AOP作用：在不改原有代码的前提下对其进行功能增强。
 
-AOP核心概念：
-* 连接点：程序执行过程中的任意位置。可为执行方法、抛出异常、设置变量等
-* 切入点：需要被增强的方法。切入点一定是连接点。但是连接点不一定是被增强的方法，而切入点一定是被增强的方法。
-* 通知：在切入点处执行的代码，也就是公共方法。
-* 通知类：通知所在的类。由于通知是方法，一定属于某个类。该类就是通知类。
-* 切面: 描述通知与切入点的对应关系。
+> AOP的作用？
 
-如图所示
+```java
+public int add(int i,int j){
+	System.out.println(" this is  "+i+" + "+j);
+	return i+j;
+}
+public int sub(int i,int j){
+	System.out.println(" this is  "+i+" - "+j);
+	return i-j;
+}
+public int mul(int i,int j){
+	System.out.println(" this is  "+i+" * "+j);
+	return i*j;
+}
+public int div(int i,int j){
+	System.out.println(" this is  "+i+" / "+j);
+	return i/j;
+}
+```
+
+<font color="red">上面是对两个参数之加减乘除的方法，里面有对该方法的日志输出。试想一想，如果对这四个方法的日志输出都修改，一次修改需要改四个地方，N次修改就需要修改4n次，并且这四个方法的日志，都差不多，是否可以抽象出来。</font>
+
+**AOP可以分离与业务无关的代码出来,使得方法保持纯净。日志输入与方法的逻辑是无关的，从而方便后期维护代码。**
+
+> AOP核心概念：
+
+AOP 中的基本单元是 Aspect(切面)
+
+1. 切面（Aspect）：本质上为一段程序代码，但是这些代码将通过 切入点切入到程序中。
+2. 连接点（Joinpoint）: 程序执行过程中的任意一点，都可以是连接点。如执行方法、抛出异常、设置变量的时候。
+3. 切入点（Pointcut）: 需要被增强的方法。切入点一定是连接点。但是连接点不一定是被增强的方法，而切入点一定是被增强的方法。
+4. 通知（Advice）: 在切入点处执行的代码，也就是公共方法。通过 “通知” 来执行切面。各种类型的通知包括“after”、“before”和“throws”通知。
+
+> 如图所示
+
 ![spring20220909115921.png](../blog_img/spring20220909115921.png)
 
 (1)上图中BookServiceImpl中有save , update , delete和select方法,这些方法我们给起了一个名字叫连接点。
@@ -151,6 +179,9 @@ book dao update ...
 可以看到在执行update方法之前打印了系统时间戳，说明对update方法进行了增强，AOP成功。
 
 
+**流程总结：**
+<font color="red">当程序流程运行到切入点时，会查看该切入点在那个切面上，并且查看该切面的前置或后置等通知是否与该切入点进行了绑定。若绑定，则根据通知的类型，若是前置通知，则先执行前置通知，再执行原本的程序流程。</font>
+
 ### @EnableAspectJAutoProxy,@Aspect,@Pointcut,@Before注解
 
 * @EnableAspectJAutoProxy
@@ -239,7 +270,7 @@ execution(public User com..UserService.findById(..))
 //.. 常用于简化包名与参数的书写
 ```
 
-### AOP通知类型
+### AOP通知
 
 AOP通知：描述了抽取的共性功能，根据共性功能抽取的位置不同，最终运行代码时要将其加入到合理的位置。
 

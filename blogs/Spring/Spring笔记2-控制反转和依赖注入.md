@@ -43,15 +43,51 @@ tags:
 <bean id="bookService" class="com.itheima.dao.impl.BookDaoImpl" scope="prototype"/>
 ```
 
-* scope属性：默认为singleton(单例)，可选prototype(非单例)。可以控制IOC容器创建bean对象时是否为单例的。
+scope属性：默认为singleton(单例)，可选prototype(非单例)。可以控制IOC容器创建bean对象时是否为单例的。
 
+#### singleton 作用域（默认）
+
+当spring中的一个bean的作用域为 singleton 时，IOC的容器中只会存在一个共享的该bean的实例，并且所有对该bean的引用，只要id 与该bean的id 相符合，就只会返回bean的单一实例。
 
 > singleton(单例)的优点：
-1. bean为单例的意思是在Spring的IOC容器中只会有该类的一个对象
-2. bean对象只有一个就避免了对象的频繁创建与销毁，达到了bean对象的复用，性能高。
+1. 优点：bean为单例的意思是在Spring的IOC容器中只会有该类的一个对象
+2. 优点：bean对象只有一个就避免了对象的频繁创建与销毁，达到了bean对象的复用，性能高。
+3. 缺点：因为所有请求线程共用一个bean对象，所以会存在线程安全问题。
 
-> singleton(单例)的缺点：
-1. 因为所有请求线程共用一个bean对象，所以会存在线程安全问题。
+
+```xml
+<bean id="school_card" class="com.entity.Schoolcard" scope="singleton">
+	<property name="id" value="1"></property>
+	<property name="name" value="xiaohuang"></property>
+</bean>
+```
+
+```java
+Schoolcard scard=(Schoolcard) app.getBean("school_card");	
+Schoolcard scard2=(Schoolcard) app.getBean("school_card");	
+System.out.println(scard==scard2);
+// 运行结果为 true。
+```
+
+#### prototype 作用域
+
+当spring中的一个bean的作用域为 prototype 时，IOC容器每次会创建一个新的bean对象实例来提供给使用者。
+
+但是当bean创建完毕并将实例对象返回给使用者时，容器不在拥有该实例对象的引用，因此，必须使用bean的后置处理器清除prototype的bean。
+
+```xml
+<bean id="school_card" class="com.entity.Schoolcard" scope="prototype">
+	<property name="id" value="1"></property>
+	<property name="name" value="xiaohuang"></property>
+</bean>
+```
+
+```java
+Schoolcard scard=(Schoolcard) app.getBean("school_card");	
+Schoolcard scard2=(Schoolcard) app.getBean("school_card");	
+System.out.println(scard==scard2);
+// 运行结果为 false。
+```
 
 ### bean的实例化
 
@@ -274,11 +310,11 @@ public class BookDaoImpl implements BookDao {
     public void save() {
         System.out.println("book dao save ...");
     }
-    //表示bean初始化对应的操作
+    //表示bean初始化对应的操作，需要在配置文件中具体指明
     public void init(){
         System.out.println("init...");
     }
-    //表示bean销毁前对应的操作
+    //表示bean销毁前对应的操作，需要在配置文件中具体指明
     public void destory(){
         System.out.println("destory...");
     }
@@ -288,6 +324,10 @@ public class BookDaoImpl implements BookDao {
 (2)修改配置文件
 
 ```xml
+<!--
+	在bean 中声明并设置init-method ，destroy-method。
+	为bean指定创建 和 销毁的方法
+-->
 <bean id="bookDao" class="com.itheima.dao.impl.BookDaoImpl" init-method="init" destroy-method="destory"/>
 ```
 * init-method: bean初始化方法
@@ -333,11 +373,11 @@ bean的生命周期如下:
 
 ## DI依赖注入各项配置
 
-依赖注入主要为容器中bean与bean之间的建立依赖关系。
+依赖注入可以为容器中bean与bean之间的建立依赖关系。
 
-依赖注入有两种注入方式：setter注入，构造器注入。
+依赖注入主要有两种注入方式：属性注入（setter注入），构造器注入。
 
-
+* 属性注入通过setter方法来给bean对象注入属性值或其他依赖对象。
 
 ### setter注入引用数据类型
 
@@ -371,8 +411,8 @@ public class BookServiceImpl implements BookService{
 ```
 
 在标签`<property>`中
-* name="bookDao"中bookDao的作用是让IOC容器在获取到名称后，将首字母大写，前面加set找对应的setBookDao()方法进行对象注入。
-* ref="bookDao"中bookDao的作用是让Spring能在IOC容器中找到id为bookDao的Bean对象注入到bookService对象中。
+* name="bookDao"的作用是让IOC容器在获取到名称后，将首字母大写，前面加set找对应的setBookDao()方法进行对象注入。
+* ref="bookDao"的作用是让Spring能在IOC容器中找到id为bookDao的Bean对象注入到bookService对象中。ref 属性表示被引用的bean。
 
 ### setter注入基本数据类型
 
@@ -397,9 +437,15 @@ public class BookDaoImpl implements BookDao {
     <property name="databaseName" value="mysql"/>
     <property name="connectionNum" value="10"/>
 </bean>
+
+<!--其他例子，给student对象的name属性，注入数值 -->
+<bean id="student" class="com.entity.Student">
+  	<property name="name" value="xiaobing"/>
+</bean>
 ```
 
-value:后面跟的是简单数据类型，Spring在注入的时候会自动转换。
+* value:后面跟的是简单数据类型，Spring在注入的时候会自动转换。
+
 但是不能写为下面的样子。因为spring在将`abc`转换成int类型的时候就会报错。
 ```xml
 <property name="connectionNum" value="abc"/>
@@ -462,9 +508,9 @@ public class BookDaoImpl implements BookDao {
 
 ## 自动装配
 
-IoC容器根据bean所依赖的资源在容器中自动查找并注入到bean对象中的过程称为自动装配。
+自动装配：IoC容器根据bean所依赖的资源，在IOC容器中自动查找并注入到bean对象中的过程称为自动装配。
 
-自动装配方式有下面几种：
+自动装配方式以下几种：
 * 按类型（常用）
 * 按名称
 * 按构造方法
@@ -472,6 +518,10 @@ IoC容器根据bean所依赖的资源在容器中自动查找并注入到bean对
 自动装配默认是不开启的。
 
 ### 按类型自动装配 byType
+
+按类型自动装配是指IOC容器根据类型自动装配。
+
+<font color="red">注意：若ioc容器中有多个与目标bean类型一致的bean对象，在这种情况下，spring无法判定，不能执行自动装配。</font>
 
 ```java
 public interface BookService {
@@ -499,16 +549,20 @@ public class BookServiceImpl implements BookService{
     <property name="bookDao" ref="bookDao"/>
 </bean> -->
 
+<!-- 这处bean标签与上面注释的bean标签功能相同 -->
 <!--autowire属性：开启自动装配，通常使用按类型装配-->
 <bean id="bookService" class="com.itheima.service.impl.BookServiceImpl" autowire="byType"/>
 ```
 
-autowire="byType"意思是根据bean对象中的setter方法名称来查询IOC容器中是否有可注入依赖对象。
+1. autowire="byType"意思是先根据bean对象中的setter方法名称来查询IOC容器中是否有可注入依赖对象。
+2. 然后IOC容器查询到setBookDao方法，根据方法的参数来查询容器中是否相同类型的bean对象。
+3. 查到后，将该bean对象注入到bookService中。
 
-按类型装配注意事项:
-* 对应属性的setter方法不能省略
-* 对象必须要被IOC容器管理
-* 若按照类型在IOC容器中如果找到多个对象，会报`NoUniqueBeanDefinitionException`
+> 按类型装配注意事项
+
+* setter方法不能省略
+* 依赖对象必须要被IOC容器管理
+* 若IOC容器按照类型在IOC容器中找到多个对象，会报`NoUniqueBeanDefinitionException`
 
 ### 按名称自动装配 byName
 
@@ -569,11 +623,12 @@ autowire="constructor" 根据构造方法的参数来从IOC容器中找到注入
 3. 使用按名称装配时（byName）必须保障容器中具有指定名称的bean，因变量名与配置耦合，不推荐使用
 4. 自动装配优先级低于setter注入与构造器注入，同时出现时自动装配配置失效。
 
-## Spring读取properties文件
+## spring读取外部属性文件(properties文件)
 
 Spring框架如何读取properties配置文件中的数据，并用于IOC容器的创建。
 
-①创建jdbc.properties文件
+①添加mysql驱动jar包，创建jdbc.properties属性文件
+
 ```
 jdbc.driver=com.mysql.jdbc.Driver 
 jdbc.url=jdbc:mysql://127.0.0.1:3306/spring_db 
@@ -581,7 +636,7 @@ jdbc.username=root
 jdbc.password=root
 ```
 
-②在applicationContext.xml中开`context`命名空间，并加载jdbc.properties配置文件
+②在applicationContext.xml中使用`context`标签，先加载jdbc.properties配置文件
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
@@ -592,12 +647,6 @@ jdbc.password=root
             http://www.springframework.org/schema/beans/spring-beans.xsd
             http://www.springframework.org/schema/context
             http://www.springframework.org/schema/context/spring-context.xsd">
-    <!--使用该标签，需要提前导入context命名空间
-        xmlns:context="http://www.springframework.org/schema/context"
-        xsi:schemaLocation="
-            http://www.springframework.org/schema/context
-            http://www.springframework.org/schema/context/spring-context.xsd"
-    -->        
     <!--加载jdbc.properties配置文件-->
     <context:property-placeholder location="jdbc.properties"/>
 </beans>
@@ -615,6 +664,7 @@ jdbc.password=root
             http://www.springframework.org/schema/beans/spring-beans.xsd
             http://www.springframework.org/schema/context
             http://www.springframework.org/schema/context/spring-context.xsd">
+    <!-- 先加载properties文件 -->
     <context:property-placeholder location="jdbc.properties"/>
     <!--此处需要先在maven导入Druid依赖,否则找不到该类-->
     <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
@@ -638,7 +688,7 @@ public class App {
 }
 ```
 
-至此，读取外部properties配置文件中的内容就已经完成。
+至此，读取外部配置文件properties中的内容就已经完成。
 
 ### Spring加载properties文件，但是不加载系统属性
 

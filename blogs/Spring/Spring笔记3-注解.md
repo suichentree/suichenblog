@@ -12,9 +12,11 @@ tags:
 
 # Spring笔记3-注解
 
-## Spring中的IOC注解开发
+## 控制反转（IOC） 的注解开发
 
 之前都是通过xml配置文件的方式来配置IOC容器中的bean对象，并且进行bean对象之间的依赖注入。这种复杂的地方在于xml配置。但是我们可以通过注解的方式来简化xml配置文件。甚至可以做到纯注解开发（无须xml配置文件）。
+
+spring能够自动扫描，检查，实例化具有特定注解的类。
 
 Spring对注解支持的版本历程:
 * 2.0版开始支持注解
@@ -79,7 +81,7 @@ public class BookServiceImpl implements BookService {
 
 ![spring20220907170956.png](../blog_img/spring20220907170956.png)
 
-③ 创建配置类用于代替applicationContext.xml配置文件
+③ 创建一个配置类用于代替applicationContext.xml配置文件。
 
 ```java
 //这两个注解一起表示。该类代替applicationContext.xml配置文件。
@@ -118,26 +120,33 @@ public class App {
 //book service save ...
 ```
 
-注意：
+注意 xml和注解 创建IOC容器的方式是不一样的。
 ```java
-//加载配置文件初始化容器 
+//xml的形式：加载配置文件初始化容器 
 ApplicationContext ctx = new ClassPathXmlApplicationContext("applicationContext.xml"); 
-//加载配置类初始化容器 
+
+//注解的形式：加载配置类初始化容器 
 ApplicationContext ctx = new AnnotationConfigApplicationContext(SpringApplicationConfig.class);
 ```
 
-* ClassPathXmlApplicationContext是加载XML配置文件的类
-* AnnotationConfigApplicationContext是加载配置类的类
+* ClassPathXmlApplicationContext是通过XML的方式来加载配置文件的类
+* AnnotationConfigApplicationContext是通过注解的方式来加载配置类的类
 
-### @Component/@Controller/@Service/@Repository注解
+### @Component/@Controller/@Service/@Repository 注解
 
-@Component @Controller @Service @Repository这四个注解的作用：当spring扫描到这些注解后，设置注解标记的类为IOC容器中的bean对象。
+@Component @Controller @Service @Repository这四个注解的作用：当spring扫描到这些注解后，将注解标记的类设置为IOC容器中的bean对象。
+
+* @Component :基本注解，用于标识类，该类将被IOC容器管理。
+* @Respository :标识数据层类，持久层类。
+* @Service: 标识业务层类。
+* @Controller ：标识控制层类。
+
 
 > 其余三个注解和@Component注解的作用是一样的，为什么要衍生出这三个呢?
 
-方便编写类的时候能很好的区分出这个类是属于表现层、业务层还是数据层的类。
+方便区分出这个类是属于表现层、业务层还是数据层的类。
 
-### @Configuration,@ComponentScan注解
+### @Configuration,@ComponentScan 注解
 
 * @Configuration注解：设置当前注解类为spring的配置类。通过配置类的形式来替换applicationContext.xml配置文件
 * @ComponentScan注解：设定扫描路径，此注解只能添加一次，多个数据请用数组格式。
@@ -220,7 +229,7 @@ public class App {
 如图所示，注解和xml配置的对应关系。
 ![spring20220908160031.png](../blog_img/spring20220908160031.png)
 
-## Spring中的DI注解开发
+##  依赖注入（DI） 的注解开发
 
 Spring为了使用注解简化DI依赖注入，并没有提供构造函数注入、setter注入对应的注解，只提供了自动装配的注解实现。
 
@@ -298,9 +307,38 @@ public class App {
 
 例如上图就无法完成注入。@Autowired注解默认按照类型自动装配，但是由于有多个BookDao类型Bean对象，此时会按照bookDao名称去找，因为IOC容器只有名称叫bookDao1和bookDao2 ,所以找不到，会报NoUniqueBeanDefinitionException。
 
-### @Autowired和@Qualifier注解 注入引用数据类型
+### @Autowired和@Qualifier注解 
 
-> @Autowired注解的问题？
+@Autowired 注解可以根据（构造器，属性字段，方法）等方式自动装配到另一个bean对象中,前提是bean存在ioc容器中。
+
+xml的形式来自动装配
+```xml
+<!-- applicationContext.xml  -->
+<bean id="UserImpl" class="com.service.UserServiceImpl"></bean>
+	
+<bean id="ucontroller" class="com.Controller.UserController" >   
+    <property name="usimpl" ref="UserImpl" />
+</bean>
+```
+
+注解形式来自动装配
+```java
+@Controller(value="UserController")
+public class UserController {
+	//把UserServiceImpl从ioc容器中取出，装配到UserController这个bean中。
+	@Autowired
+	private UserServiceImpl usimpl;
+
+	public void add(){
+		System.out.println(" UserController ");
+		usimpl.addUser();
+	}
+}
+```
+
+@Autowired,相当于 UserController 这个bean 引用了 UserServiceImpl 这个bean,同时省去了在 UserController 类中 get/set UserServiceImpl属性的方法。效果与上面的xml配置等效。
+
+#### @Autowired注解的问题？
 
 因为@Autowired注解默认按照类型自动装配。但是当@Autowired注解根据类型在IOC容器中找到多个bean,并且@Autowire注解下的属性名又和IOC容器中bean对象的名称都不一致时。@Autowired注解会找不到，此时会报NoUniqueBeanDefinitionException异常。
 
@@ -327,7 +365,6 @@ public class BookServiceImpl implements BookService {
 @Qualifier注解值就是需要注入的bean的名称。
 
 <font color="red">注意:@Qualifier不能独立使用，必须和@Autowired一起使用</font>
-
 
 ### @Value注解用法
 

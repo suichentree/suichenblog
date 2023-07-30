@@ -41,37 +41,50 @@ Spring发展到今天已经形成了完整的生态圈,Spring构建了若干个�
 * Spring5.0已经全面支持JDK8。
 
 ② Spring Framework5的架构图
+
+<font color="red">Spring Framework主要有7大模块组成。每个模块既可以单独使用，又可以与其他模块组合使用。</font>
+
 ![spring20220905163724.png](../blog_img/spring20220905163724.png)
 
-* Core Container核心容器模块：这个模块是Spring最核心的模块，其他的都需要依赖该模块
-* AOP: 面向切面编程，它依赖核心层容器，目的是在不改变原有代码的前提下对其进行功能增强
-* Aspects: AOP是思想,Aspects是对AOP思想的具体实现
+* Core Container核心容器模块：这个模块是Spring最核心的模块，其他的都需要依赖该模块。它实现了IOC 模式。
+* AOP: 面向切面编程，它依赖核心层容器，目的是在不改变原有代码的前提下对其进行功能增强。
+* Aspects: AOP是设计思想,Aspects是对AOP思想的具体实现
 * Data Access: 数据访问，Spring全家桶中有对数据访问的具体实现技术
 * Data Integration: 数据集成，Spring支持整合其他的数据层解决方案，比如Mybatis
 * Transactions: 事务，Spring中事务管理是Spring AOP的一个具体实现。
 * TEST模块：Spring主要整合了Junit来完成单元测试和集成测试
 
+
 ### Spring Framework框架主要解决的问题是什么？
+
+当某个Java对象（调用者）需要调用另一个Java对象（依赖对象）的方法时，在传统模式下通常有两种做法：
+
+1. 原始做法: 调用者先主动创建依赖对象，然后再调用依赖对象的方法
+2. 简单工厂模式: 调用者先找到依赖对象的工厂，然后主动通过工厂去获取被依赖对象，最后再调用依赖对象的方法。
+
+主动创建依赖对象，这必然会导致调用者与依赖对象之间的硬编码耦合，非常不利于项目后续的维护。可以理解为对象与对象之间的关系太紧密，耦合度太高。
+
+> 如图所示
 
 ![spring20220906094028.png](../blog_img/spring20220906094028.png)
 
 (1)在使用spring Framework框架之前,业务层调用数据层的方法，就需要在业务层先new数据层的对象
 (2)如果数据层的实现类发生变化，那么业务层的代码也需要跟着改变，发生变更后，都需要进行编译，打包和重部署
-(3)这种方式存在的问题是：数据层和业务层的代码耦合度偏高
+(3)这种方式存在的问题是：数据层和业务层的代码耦合度偏高。可以理解为对象与对象之间的关系太紧密，耦合度太高。
 
 针对这个问题，Spring就提出了一个解决方案:
 
 ![spring20220906095814.png](../blog_img/spring20220906095814.png)
 
-* 使用数据层对象时，不使用new产生对象，由Spring容器来提供对象。
-* 在Spring容器中维护对象与对象之间的依赖关系。
+* 使用对象时，不通过new产生对象，由Spring容器来提供对象。
+* 由Spring负责维护容器中对象之间的依赖关系。
 
 ### Spring Framework 核心概念
 
-上面的解决方案体现的就是Spring的核心概念IOC和DI。
+上面的解决方案体现的就是Spring Framework 的核心概念IOC和DI。
 
-* IOC（控制反转）：使用对象时，程序不主动new对象，由Spring容器来提供对象。
-* DI（依赖注入）：在Spring容器中维护对象与对象之间的依赖关系。
+* IOC（控制反转）：spring负责创建所有的Java对象，这些Java对象被称为Java Bean对象。使用对象时，程序不主动new对象，由Spring来提供对象。
+* DI（依赖注入）：Spring负责管理对象与对象之间的依赖关系。而不是在程序中以编码的方式将对象与对象耦合在一起。
 
 #### IOC控制反转
 
@@ -85,8 +98,7 @@ Spring发展到今天已经形成了完整的生态圈,Spring构建了若干个�
 
 ![spring20220906101905.png](../blog_img/spring20220906101905.png)
 
-在IOC容器中建立bean对象之间的依赖关系的过程，称为依赖注入。
-
+在IOC容器中建立bean对象之间的依赖关系的过程，称为依赖注入。 
 
 #### 控制反转和依赖注入要实现的目标
 
@@ -120,7 +132,7 @@ IOC控制反转入门案例思路实现：
 
 ![spring20220906151112.png](../blog_img/spring20220906151112.png)
 
-> 步骤2:pom.xml文件中添加Spring的依赖jar包
+> 步骤2:pom.xml文件中添加spring的依赖jar包
 
 ```xml
 <dependencies>
@@ -132,7 +144,7 @@ IOC控制反转入门案例思路实现：
 </dependencies>
 ```
 
-<font color="red">spring-context是Spring Framework框架的核心模块</font>
+<font color="red">注意：spring-context依赖包是Spring Framework框架的核心模块，是搭建Spring 框架必须的依赖包。</font>
 
 > 步骤3:添加案例中需要的类
 
@@ -181,11 +193,17 @@ resources目录下添加spring配置文件applicationContext.xml，并完成bean
 </beans>
 ```
 
-<font color="red">bean标签中的id属性在同一个上下文中(配置文件)不能重复。applicationContext.xml配置文件主要是对IOC容器的配置。</font>
+<font color="red">
+
+* id : ioc容器可以用getBean方法，通过id标识符来获取bean对象。
+* class : 对象的全类名。通过反射的方式,来寻找对象，并在容器中创建该bean对象。
+* applicationContext.xml配置文件主要是对IOC容器的配置。
+
+</font>
 
 > 步骤5:获取IOC容器
 
-根据applicationContext.xml配置文件来完成IOC容器的创建，创建App启动类，编写main方法
+spring会根据applicationContext.xml配置文件来创建IOC容器，创建App启动类，编写main方法
 
 ```java
 public class App {
@@ -196,7 +214,11 @@ public class App {
 }
 ```
 
+ioc容器创建时，会根据配置文件的信息来创建bean对象，并存放在IOC容器中。
+
 > 步骤6:从容器中获取对象进行方法调用
+
+由于spring会根据配置信息来创建bean对象，并放入到IOC容器中。所以当容器创建完成后，容器中就存在已经实例化的bean对象，可以通过ioc容器来获取这些bean对象。
 
 ```java
 public class App {
@@ -289,6 +311,8 @@ public class BookServiceImpl implements BookService {
 ```
 
 ![spring20220906154429.png](../blog_img/spring20220906154429.png)
+
+
 
 <font color="red">
 
