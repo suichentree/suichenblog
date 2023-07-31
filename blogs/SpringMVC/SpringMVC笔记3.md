@@ -1,6 +1,6 @@
 ---
-title: SpringMVC笔记 版本5.3.22
-date: 2022-09-13
+title: SpringMVC笔记3
+date: 2023-07-31
 sidebar: 'auto'
 categories: 
  - 后端
@@ -10,737 +10,13 @@ tags:
 
 [toc]
 
-# SpringMVC笔记 版本5.3.22
+# SpringMVC笔记3
 
-该笔记有一部分来自于黑马程序员SpringMVC课程视频中的课件资料。
+当前SpringMVC的版本为5.3.22
 
-## 1. SpringMVC介绍
+## RESTful风格
 
-* SpringMVC是隶属于Spring框架的一部分，主要是用来进行Web开发，对Servlet进行了封装。
-* SpringMVC主要作用就是用来接收前端请求和数据，经过处理并将处理的结果响应给前端。
-
-## 2. SpringMVC入门案例（注解和配置类的形式）
-
-① 创建maven web工程
-
-1. 使用IDEA创建maven web工程。
-2. maven模板选择org.apache.maven.archetypes:maven-archetype-webapp。
-
-![springmvc20220913170949.png](../blog_img/springmvc20220913170949.png)
-
-PS: 由于maven-archetype-webapp模板目录不完整，缺少java和resources目录，所以需要手动创建目录。
-
-![springmvc20220913171807.png](../blog_img/springmvc20220913171807.png)
-
-② 在pom.xml中添加springmvc依赖和tomcat插件
-
-```xml
-<!-- springmvc的两个依赖 -->
-<dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-webmvc</artifactId>
-      <version>5.2.1.RELEASE</version>
-</dependency>
-<dependency>
-    <groupId>javax.servlet</groupId>
-    <artifactId>javax.servlet-api</artifactId>
-    <version>4.0.1</version>
-    <!-- 
-        设置该依赖只在编译和测试的时候使用 
-        运行的时候直接用tomcat7-maven-plugin插件的javax.servlet-api。避免冲突
-    -->
-    <scope>provided</scope>
-</dependency>
-
-
-<!-- tomcat-maven插件：在maven工程中内嵌tomcat -->
-<build>
-    <plugins>
-        <plugin>
-        <groupId>org.apache.tomcat.maven</groupId>
-        <artifactId>tomcat7-maven-plugin</artifactId>
-        <version>2.1</version>
-        <!-- 设置tomcat的启动端口号为8080,上下文映射路径为/ -->
-        <configuration>
-            <port>8080</port>
-            <path>/</path>
-            <uriEncoding>UTF-8</uriEncoding><!--设置编解码字符集-->
-        </configuration>
-        </plugin>
-    </plugins>
-</build>
-```
-
-* SpringMVC是基于Spring的，在pom.xml只导入了`spring-webmvc`jar包的原因是它会自动依赖spring相关坐标。
-* tomcat7-maven-plugin：在maven工程中内嵌tomcat。让项目在内嵌tomcat中运行。
-* `<scope>provided</scope>` : 1.默认是compile,在编译、测试、运行时均有效。2.设置provided表示该依赖只在编译和测试的时候有效。3.运行的时候直接用tomcat7-maven-plugin插件中的servlet-api包。避免依赖和插件的servlet-api包发生冲突。
-
-<font color="red">注意：目前IDEA只对tomcat7插件进行了适配。</font>
-
-③ 创建springMVC配置类,扫描com.example.controller包下的所有类
-
-* PS: springmvc相关的bean，大都在controller包下。
-* @Controller注解类，@RequestMapping注解方法都是springmvc相关的bean。
-
-```java
-@Configuration
-@ComponentScan("com.example.controller")
-public class SpringMVCConfig {
-    //SpringMVC配置类
-}
-```
-
-④ 创建servlet web容器配置类,用于代替web.xml
-
-1. 将webapp/WEB-INF/web.xml删除
-2. 创建自定义servlet web容器配置类.该类继承AbstractDispatcherServletInitializer类,重写其中几个方法。
-3. AbstractDispatcherServletInitializer类用于创建Servlet容器时，并加载springmvc相关的bean到servlet容器中。
-
-```java
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
-import org.springframework.web.servlet.support.AbstractDispatcherServletInitializer;
-//自定义servlet web容器配置类
-public class ServletContainersInitConfig extends AbstractDispatcherServletInitializer {
-    //初始化servlet web容器。并且容器加载SpringMVC配置类
-    protected WebApplicationContext createServletApplicationContext() {
-        //初始化servlet web容器
-        AnnotationConfigWebApplicationContext ctx = new AnnotationConfigWebApplicationContext();
-        //加载SpringMvcConfig配置类
-        ctx.register(SpringMVCConfig.class);
-        return ctx;
-    }
-
-    //拦截所有请求，并将所有请求交给spring mvc处理
-    // "/" 表示所有，但不包括.jsp/.html等文件; "/*" 表示所有，包括.jsp/.html等文件
-    protected String[] getServletMappings() {
-        return new String[]{"/"};
-    }
-
-    protected WebApplicationContext createRootApplicationContext() {
-        return null;
-    }
-}
-```
-
-⑤ 创建Controller类
-```java
-@Controller
-@RequestMapping("/user")
-public class UserController {
-    @RequestMapping("/save")
-    @ResponseBody
-    public String save(){
-        System.out.println("user save ...");
-        return "user save ...";
-    }
-}
-```
-
-⑥ 配置tomcat运行环境
-
-![springmvc20220913175117.png](../blog_img/springmvc20220913175117.png)
-
-maven运行命令：`tomcat7:run`,意思是启动maven工程内嵌的tomcat服务器。把项目放在内嵌tomcat中运行。
-
-⑦ 启动运行项目，浏览器访问地址 localhost:8080/user/save
-
-![springmvc20220913175616.png](../blog_img/springmvc20220913175616.png)
-![springmvc20220913175724.png](../blog_img/springmvc20220913175724.png)
-
-
-### 1. AbstractDispatcherServletInitializer类描述
-
-* AbstractDispatcherServletInitializer类是SpringMVC提供的快速初始化Web3.0容器的抽象类
-* AbstractDispatcherServletInitializer提供了三个接口方法供用户实现
-  * createServletApplicationContext方法：创建Servlet容器时，加载SpringMVC对应的bean并放入WebApplicationContext对象范围中，而WebApplicationContext的作用范围为ServletContext范围，即整个web容器范围
-  * getServletMappings方法，设定SpringMVC对应的请求映射路径，即SpringMVC拦截哪些请求
-  * createRootApplicationContext方法，如果创建Servlet容器时需要加载非SpringMVC对应的bean,使用当前方法进行，使用方式和createServletApplicationContext相同。
-  * createRootApplicationContext用来加载Spring环境
-
-### 2. @Controller @RequestMapping @ResponseBody注解
-
-@Controller
-位置：SpringMVC控制器类上方定义
-作用：设定为SpringMVC的控制器bean
-
-@RequestMapping
-位置：SpringMVC控制器类或方法上方定义
-作用：设置当前控制器方法的请求访问路径
-
-@ResponseBody
-位置：SpringMVC控制器类或方法定义上方
-作用：设置当前控制器方法响应内容为当前返回值，无需解析
-
-PS: 
-* springmvc默认会解析方法返回值。并把返回值当成页面名称在项目中进行查找并返回页面给前端。
-* @ResponseBody注解会让springmvc不解析方法返回值，直接把方法返回值给前端。
-
-
-## 3. SpringMVC工作流程
-
-SpringMVC的工作流程总共分两个阶段来分析，分别是启动web服务器初始化过程和单次请求过程。
-
-![springmvc20220914110552.png](../blog_img/springmvc20220914110552.png)
-
-### 1 启动web服务器初始化过程
-
-1. 服务器启动，执行ServletContainersInitConfig类，初始化web容器
-    * 功能类似于以前的web.xml
-
-2. 执行createServletApplicationContext方法，创建了WebApplicationContext对象
-    * 该方法加载SpringMVC的配置类来初始化SpringMVC的容器
-
-3. 加载Spring配置类
-```java
-@Configuration
-@ComponentScan("com.example.controller")
-public class SpringMVCConfig {
-    //SpringMVC配置类
-}
-```
-
-4. 执行@ComponentScan加载对应的bean
-   * 扫描指定包及其子包下所有类上的注解，如Controller类上的@Controller，@RequestMapping注解等。
-5. 加载UserController，每个@RequestMapping的名称对应一个具体的方法。例如下面方法中就建立了`/user/save`映射路径和save方法的对应关系
-```java
-@Controller
-@RequestMapping("/user")
-public class UserController {
-    @RequestMapping("/save")
-    @ResponseBody
-    public String save(){
-        System.out.println("user save ...");
-        return "user save ...";
-    }
-}
-```
-
-6. 执行getServletMappings方法，设定SpringMVC拦截请求的路径规则
-```java
-//  /代表所拦截请求的路径规则，只有被拦截后才能交给SpringMVC来处理请求
-protected String[] getServletMappings() {
-    return new String[]{"/"};
-}
-```
-
-### 2 单次请求过程
-
-1. 发送请求`http://localhost/user/save`
-2. web容器发现该请求满足SpringMVC拦截规则，将请求交给SpringMVC处理
-3. 解析请求路径/user/save
-4. 由/user/saveq匹配执行对应的方法save()
-   * 上面的第五步已经将请求路径和方法建立了对应关系，通过/user/save就能找到对应的save方法
-5. 执行save()方法
-6. 检测到方法有@ResponseBody注解。则直接将save()方法的返回值作为响应体返回给请求方。
-
-## 4. SpringMVC的请求与响应
-
-* SpringMVC是web层的框架，主要的作用是接收请求、接收数据、响应结果。
-* 接收请求：设置请求映射路径,用于匹配前端的请求。
-* 接收数据：设置请求参数，来接受请求传递的数据。
-* 响应结果：请求方法处理后的返回值包装成响应结果，返回给前端。
-
-### 1 设置请求映射路径
-
-设置请求映射路径,用于匹配前端的请求。
-
-如下例：
-```java
-@Controller
-@RequestMapping("/user")
-public class UserController {
-    @RequestMapping("/save")
-    @ResponseBody
-    public String save(){
-        System.out.println("user save ...");
-        return "user save ...";
-    }
-    
-    @RequestMapping("/delete")
-    @ResponseBody
-    public String save(){
-        System.out.println("user delete ...");
-        return "user delete ...";
-    }
-}
-```
-
-注意:
-* 当类上和方法上都添加了`@RequestMapping`注解，前端发送请求的时候，要和两个注解的value值相加匹配才能访问到。
-* @RequestMapping注解value属性前面加不加`/`都可以
-
-### 2 设置请求参数
-
-设置请求参数，来接受请求传递的数据。目前比较常见的两种请求方式为GET和POST方式。
-
-#### 1 GET方式设置请求参数
-
-请求路径：`http://localhost/commonParam?name=xiaoming&age=15`
-
-```java
-@Controller
-public class UserController {
-
-    @RequestMapping("/commonParam")
-    @ResponseBody
-    public String commonParam(String name,int age){
-        System.out.println("普通参数传递 name ==> "+name);
-        System.out.println("普通参数传递 age ==> "+age);
-        return "{'module':'commonParam'}";
-    }
-}
-```
-
-#### 2 POST方式设置请求参数
-
-请求路径：`http://localhost/commonParam`
-POST请求的参数通过表单传递，不直接写在请求路径上。
-
-![springmvc20220914153135.png](../blog_img/springmvc20220914153135.png)
-
-```java
-@Controller
-public class UserController {
-    @RequestMapping("/commonParam")
-    @ResponseBody
-    public String commonParam(String name,int age){
-        System.out.println("普通参数传递 name ==> "+name);
-        System.out.println("普通参数传递 age ==> "+age);
-        return "{'module':'commonParam'}";
-    }
-}
-```  
-
-若请求方法参数接受中文数据，出现乱码问题?
-
-* 解决方法：在自定义servlet配置类中设置过滤器。进行编码处理
-```java
-public class ServletContainersInitConfig extends AbstractDispatcherServletInitializer {
-    //..............省略
-
-    //编码设置为UTF-8。中文乱码处理
-    @Override
-    protected Filter[] getServletFilters() {
-        CharacterEncodingFilter filter = new CharacterEncodingFilter();
-        filter.setEncoding("UTF-8");
-        return new Filter[]{filter};
-    }
-}
-```
-
-###  3 接收五种类型请求参数
-
-常见的请求参数种类有：
-* 普通参数
-* POJO类型参数
-* 嵌套POJO类型参数
-* 数组类型参数
-* 集合类型参数
-
-#### 1. 接收普通参数与@RequestParam注解
-
-```
-请求路径
-http://localhost/common?name=张三&age=18
-```
-
-后台接收参数:
-
-```java
-@RequestMapping("/common")
-@ResponseBody
-public String common(String userName , int age){
-    System.out.println("普通参数传递 userName ==> "+userName);
-    System.out.println("普通参数传递 age ==> "+age);
-    return "{'module':'common'}";
-}
-```
-
-上面例子中的请求参数和方法形参名称一致，会导致形参无法接收到请求参数值。该如何解决？
-
-解决方案:使用@RequestParam注解
-
-```java
-@RequestMapping("/common")
-    @ResponseBody
-    public String common(@RequestParam("name") String userName , int age){
-        System.out.println("普通参数传递 userName ==> "+userName);
-        System.out.println("普通参数传递 age ==> "+age);
-        return "{'module':'common'}";
-    }
-```
-
-@RequestParam注解：
-位置：方法形参前面定义。
-作用：绑定请求参数与方法形参间的关系
-
-
-#### 2. 接收POJO类型参数
-
-* POJO参数：只要请求参数名与形参对象中的属性名一一对应，定义POJO类型形参即可接收参数
-
-```java
-// User类
-public class User {
-    private String name;
-    private int age;
-}
-```
-
-请求路径：`http://localhost/pojoParam?name=张三&age=18`
-
-后台接收参数:
-```java
-//POJO参数：请求参数与形参对象中的属性一一对应即可完成参数传递
-@RequestMapping("/pojoParam")
-@ResponseBody
-public String pojoParam(User user){
-    System.out.println("pojo参数传递 user ==> "+user);
-    return "{'module':'pojo param'}";
-}
-```
-
-**注意:**
-* 请求参数属性的名称要和POJO对象中属性的名称一致，否则无法封装。
-
-#### 3 接收嵌套POJO类型参数
-
-如果POJO对象中嵌套了其他的POJO类，如
-
-```java
-public class Address {
-    private String province;
-    private String city;
-}
-// User类嵌套了Address类
-public class User {
-    private String name;
-    private int age;
-    private Address address;
-}
-```
-
-* 嵌套POJO参数：请求参数名与形参对象属性名相同，按照对象层次结构关系即可接收嵌套POJO属性参数
-
-发送请求和参数:
-![springmvc20220914160743.png](../blog_img/springmvc20220914160743.png)
-
-后台接收参数:
-```java
-//POJO参数：请求参数与形参对象中的属性对应即可完成参数传递
-@RequestMapping("/pojoContainPojoParam")
-@ResponseBody
-public String pojoParam(User user){
-    System.out.println("pojo参数传递 user ==> "+user);
-    return "{'module':'pojo param'}";
-}
-```
-
-**注意:**
-请求参数key的名称要和POJO中属性的名称一致，否则无法封装。
-
-#### 4 接收数组类型参数
-
-* 数组参数：请求参数名与形参对象属性名相同且请求参数为多个，定义数组类型即可接收参数
-
-发送请求和参数:
-
-```
-http://localhost/arrayParam?likes=游戏&likes=电影&likes=音乐
-```
-
-后台接收参数:
-
-```java
-//数组参数：同名请求参数可以直接映射到对应名称的形参数组对象中
-//上面请求路径中的3个请求参数key都是likes
-@RequestMapping("/arrayParam")
-@ResponseBody
-public String arrayParam(String[] likes){
-    System.out.println("数组参数传递 likes ==> "+ Arrays.toString(likes));
-    return "{'module':'array param'}";
-}
-```
-
-#### 5 接收集合类型参数
-
-发送请求和参数:
-
-```
-http://localhost/arrayParam?likes=游戏&likes=电影&likes=音乐
-```
-
-后台接收参数:
-
-```java
-//集合参数：多个同名请求参数可以使用@RequestParam注解映射到对应名称的集合对象中作为数据
-@RequestMapping("/listParam")
-@ResponseBody
-public String listParam(@RequestParam List<String> likes){
-    System.out.println("集合参数传递 likes ==> "+ likes);
-    return "{'module':'list param'}";
-}
-```
-
-**注意**
-* 集合保存普通参数：请求参数名与形参集合对象名相同且请求参数为多个，@RequestParam绑定参数关系。
-* 对于简单数据类型使用数组会比集合更简单些。
-
-
-### 4 接收JSON类型请求参数
-
-对于JSON数据类型，我们常见的有三种:
-- json普通数组 ["value1","value2","value3"] 
-- json对象     {key1:value1,key2:value2}
-- json对象数组 [{key1:value1,...},{key2:value2,...}]
-
-#### 1 接收json数组数据
-
-① 步骤1:pom.xml添加json处理依赖
-
-SpringMVC默认使用的是jackson来处理json的转换，所以需要在pom.xml添加jackson依赖
-```xml
-<dependency>
-    <groupId>com.fasterxml.jackson.core</groupId>
-    <artifactId>jackson-databind</artifactId>
-    <version>2.9.0</version>
-</dependency>
-```
-
-② 步骤2:开启SpringMVC注解支持
-在SpringMVC的配置类中开启SpringMVC的注解支持，该注解包含了将JSON转换成对象的功能。
-
-```java
-@Configuration
-@ComponentScan("com.example.controller")
-//开启json数据类型自动转换
-@EnableWebMvc
-public class SpringMvcConfig {
-}
-```
-
-③ 步骤3:设置请求参数，参数格式JSON数组
-![springmvc20220914165504.png](../blog_img/springmvc20220914165504.png)
-
-
-④ 步骤4:在方法形参前添加@RequestBody
-```java
-//使用@RequestBody注解将外部传递的json数组数据映射到形参的集合对象中作为数据
-@RequestMapping("/listParamForJson")
-@ResponseBody
-public String listParamForJson(@RequestBody List<String> likes){
-    System.out.println("list common(json)参数传递 list ==> "+likes);
-    return "{'module':'list common for json param'}";
-}
-```
-
-⑤ 步骤5:启动运行程序，请求测试。
-
-#### 2 接收JSON对象数据
-
-请求和数据的发送:
-```json
-//json对象数据
-{
-	"name":"itcast",
-	"age":15
-}
-```
-
-![springmvc20220914170217.png](../blog_img/springmvc20220914170217.png)
-
-后端接收数据：
-
-```java
-@RequestMapping("/pojoParamForJson")
-@ResponseBody
-// 注意User对象中有name和age属性
-public String pojoParamForJson(@RequestBody User user){
-    System.out.println("pojo(json)参数传递 user ==> "+user);
-    return "{'module':'pojo for json param'}";
-}
-```
-
-启动程序访问测试
-
-由于User对象中有name和age属性。因此json对象中的name和age属性会转换为User对象中的name和age属性。
-
-
-#### 3 接收JSON对象数组
-
-请求和数据的发送:
-```json
-[
-    {"name":"itcast","age":15},
-    {"name":"itheima","age":12}
-]
-```
-
-后端接收数据:
-```java
-@RequestMapping("/listPojoParamForJson")
-@ResponseBody
-// 注意User对象中有name和age属性
-public String listPojoParamForJson(@RequestBody List<User> list){
-    System.out.println("list pojo(json)参数传递 list ==> "+list);
-    return "{'module':'list pojo for json param'}";
-}
-```
-
-启动程序访问测试
-
-#### 小结：@EnableWebMvc，@RequestBody注解
-
-@EnableWebMvc注解
-位置：SpringMVC配置类上方定义
-作用：开启SpringMVC多项辅助功能，包含json对象转换，日期字符串转换等
-
-@RequestBody注解
-位置：方法形参前面定义
-作用：将请求中请求体所包含的数据传递给请求参数，此注解一个方法只能使用一次
-
-@RequestBody与@RequestParam区别
-* @RequestParam注解用于接收url地址传参，表单传参【application/x-www-form-urlencoded】
-* @RequestBody注解用于接收json数据【application/json】
-* 如果发送json格式数据，则用@RequestBody接收请求参数
-* 如果发送非json格式数据，则用@RequestParam接收请求参数
-
-<font color="red">
-注意:SpringMVC的配置类把@EnableWebMvc当做标配配置上去，不要省略。
-</font>
-
-### 5 接受日期类型请求参数与@DateTimeFormat注解
-
-① 请求路径：
-```
-http://localhost/dataParam?date1=2088/08/08&date2=2088-08-08&date3=2088/08/08 8:08:08
-```
-
-② 方法接受日期参数
-```java
-@RequestMapping("/dataParam")
-@ResponseBody
-public String dataParam(Date date1,
-    @DateTimeFormat(pattern="yyyy-MM-dd") Date date2,
-    @DateTimeFormat(pattern="yyyy/MM/dd HH:mm:ss") Date date3){
-
-    System.out.println("参数传递 date ==> "+date);
-	System.out.println("参数传递 date1(yyyy-MM-dd) ==> "+date1);
-	System.out.println("参数传递 date2(yyyy/MM/dd HH:mm:ss) ==> "+date2);
-    return "{'module':'data param'}";
-}
-```
-
-* Date类型形参可以接收 'yyyy/MM/dd' 格式日期参数。
-* SpringMVC默认支持的字符串转日期的格式为yyyy/MM/dd。其他日期格式字符串，Date类型形参无法接受。
-* @DateTimeFormat注解通过设置日期格式，可以给Date类型形参传递请求参数。
-
-@DateTimeFormat注解：
-位置：方法形参前面
-作用：设定日期时间型数据格式
-相关属性：pattern：指定日期时间格式字符串
-
-
-### 6 SpringMVC的响应
-
-SpringMVC的响应，主要就包含两部分内容：
-* 响应页面
-* 响应数据（文本数据，json数据）
-
-
-#### 响应页面
-
-```java
-@Controller
-public class UserController {
-    @RequestMapping("/toJumpPage")
-    //注意
-    //1.此处不能添加@ResponseBody注解,如果加了会解析page.jsp,找到同名页面返回前端。
-    //2.方法需要返回String
-    public String toJumpPage(){
-        System.out.println("跳转页面");
-        return "page.jsp";
-    }
-}
-```
-
-#### 响应文本数据
-
-```java
-@Controller
-public class UserController {
-   	@RequestMapping("/toText")
-	//注意@ResponseBody注解不能省略，如果省略了,会把response text作为页面名称去查找
-    //如果没有对应名称的页面，会返回404错误
-    @ResponseBody
-    public String toText(){
-        System.out.println("返回纯文本数据");
-        return "response text";
-    }
-}
-```
-
-#### 响应JSON对象数据
-
-```java
-@Controller
-public class UserController {
-    @RequestMapping("/toJsonPOJO")
-    //@ResponseBody注解会把User类对象，转换为json数据格式响应
-    //需要提前开启@EnableWebMvc注解
-    @ResponseBody
-    public User toJsonPOJO(){
-        System.out.println("返回json对象数据");
-        User user = new User();
-        user.setName("itcast");
-        user.setAge(15);
-        return user;
-    }
-}
-```
-
-* 若返回值为实体类对象，可实现返回实体对象的json数据，需要依赖@ResponseBody注解和@EnableWebMvc注解。
-
-![springmvc20220915114853.png](../blog_img/springmvc20220915114853.png)
-
-#### 响应JSON对象数组
-
-```java
-@Controller
-public class UserController {
-    @RequestMapping("/toJsonList")
-    @ResponseBody
-    public List<User> toJsonList(){
-        User user1 = new User();
-        user1.setName("传智播客");
-        user1.setAge(15);
-        User user2 = new User();
-        user2.setName("黑马程序员");
-        user2.setAge(12);
-        List<User> userList = new ArrayList<User>();
-        userList.add(user1);
-        userList.add(user2);
-        return userList;
-    }
-}
-```
-
-![springmvc20220915114922.png](../blog_img/springmvc20220915114922.png)
-
-#### 小结：@ResponseBody注解
-
-@ResponseBody注解：
-* 该注解可以写在类上或者方法上
-* 写在类上就是该类中的所有方法都有@ReponseBody功能
-* 当方法上有@ReponseBody注解后
-  * 方法的返回值为字符串，会将其作为文本内容直接响应给前端
-  * 方法的返回值为对象，会将对象转换成JSON响应给前端
-
-
-## 5 RESTful风格
-
-### 1 RESTful介绍
+### RESTful介绍
 
 RESTful是一种新的请求方式风格。
 
@@ -770,7 +46,7 @@ RESTful风格请求分类:
 
 <font color="red">注意：RESTful风格是约定方式，约定不是规范，可以打破，所以称RESTful风格，而不是RESTful规范。</font>
 
-### 2 RESTful案例及其改进
+### RESTful案例及其改进
 
 ```java
 @Controller
@@ -875,7 +151,7 @@ public class BookController {
 作用: 每种对应一个请求动作，例如@GetMapping对应GET请求。
 
 
-### 3 @PathVariable注解，接收请求路径参数
+### @PathVariable注解，接收请求路径参数
 
 @PathVariable注解
 类型: 形参注解。
@@ -937,7 +213,7 @@ public class UserController {
   * 如果发送非json格式数据，选用@RequestParam接收请求参数。
   * 采用RESTful进行开发，当参数数量较少时，例如1个，可以采用@PathVariable接收请求路径变量，通常用于传递id值。
 
-## 6. SpringMVC设置静态资源放行
+## SpringMVC设置静态资源放行
 
 请求路径：`http://localhost/pages/books.html`
 
@@ -988,7 +264,7 @@ public class SpringMvcConfig {
 ```
 
 
-## 7. SpringMVC 设置统一响应结果
+## SpringMVC 设置统一响应结果
 
 随着业务的增长，我们需要返回的数据类型会越来越多。对于前端开发人员在解析数据的时候就比较凌乱了，所以对于前端来说，如果后台能够返回一个统一的数据结果，前端在解析的时候就可以按照一种方式进行解析。开发就会变得更加简单。
 
@@ -1083,7 +359,7 @@ public class BookController {
 
 此时前端可以根据返回的结果，先从中获取code,根据code判断，如果成功则取data属性的值，如果失败，则取msg中的值做提示。
 
-## 8. SpringMVC 设置统一异常处理
+## SpringMVC 设置统一异常处理
 
 异常的种类及出现异常的原因:
 - 框架内部抛出的异常：因使用不合规导致
@@ -1098,7 +374,7 @@ SpringMVC对于异常的统一处理已经提供了一套解决方案:
 
 ![springmvc20220916152802.png](../blog_img/springmvc20220916152802.png)
 
-### 1 自定义异常处理器的使用
+### 自定义异常处理器的使用
 
 ① 步骤1:创建自定义异常处理器类，并将异常内容封装为统一响应结果
 
@@ -1147,7 +423,7 @@ public Result getById(@PathVariable Integer id) {
 
 至此，就算后台执行的过程中抛出异常，最终也能按照统一响结果格式返回给前端。
 
-### 2 @RestControllerAdvice，@ExceptionHandler注解
+### @RestControllerAdvice，@ExceptionHandler注解
 
 @RestControllerAdvice注解（@ControllerAdvice + @ResponseBody + @Component）
 类型: 类注解。
@@ -1161,7 +437,7 @@ public Result getById(@PathVariable Integer id) {
 
 **说明：** 此类方法可以根据处理的异常不同，制作多个方法分别处理对应的异常
 
-### 3 自定义异常类 + 异常处理器
+### 自定义异常类 + 异常处理器
 
 ① 步骤1:自定义异常类
 
@@ -1245,9 +521,9 @@ public class ProjectExceptionAdvice {
 ![springmvc20220916170635.png](../blog_img/springmvc20220916170635.png)
 
 
-## 9 SpringMVC拦截器
+## SpringMVC拦截器
 
-### 1 拦截器介绍
+### 拦截器介绍
 
 讲解拦截器之前，先看一张图:
 ![springmvc20220916172047.png](../blog_img/springmvc20220916172047.png)
@@ -1276,7 +552,7 @@ public class ProjectExceptionAdvice {
 
 ![springmvc20220916172443.png](../blog_img/springmvc20220916172443.png)
 
-### 2 拦截器案例
+### 拦截器案例
 
 ① 步骤1:创建自定义拦截器类
 
@@ -1370,7 +646,7 @@ public class SpringMvcConfig implements WebMvcConfigurer {
 }
 ```
 
-### 3 拦截器的执行流程
+### 拦截器的执行流程
 
 ![springmvc20220916173724.png](../blog_img/springmvc20220916173724.png)
 
@@ -1379,7 +655,7 @@ public class SpringMvcConfig implements WebMvcConfigurer {
     * 如果返回false，则直接跳过后面方法的执行。
 
 
-### 4 拦截器的处理方法
+### 拦截器的处理方法
 
 #### 前置处理方法
 
@@ -1429,7 +705,7 @@ public void afterCompletion(HttpServletRequest request,HttpServletResponse respo
 这三个方法中，最常用的是preHandle前置处理方法,在这个方法中可以通过返回值来决定是否要进行放行，可以把业务逻辑放在该方法中，如果满足业务则返回true放行，不满足则返回false拦截。
 
 
-### 5  拦截器链配置（多个拦截器配置）
+### 拦截器链配置（多个拦截器配置）
 
 多个拦截器如何配置?执行顺序是什么?
 
