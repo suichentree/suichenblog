@@ -19,9 +19,7 @@ SpringMVC是web层的框架，主要的作用是接收请求、处理数据、�
 * 处理数据：接受请求传递的数据并进行处理。
 * 响应结果：请求方法处理后的返回值包装成响应结果，返回给前端。
 
-## 常用注解
-
-### @Controller 注解 ：标识控制器类
+## @Controller 注解 ：标识控制器类
 
 @Controller注解用于标记一个类，被它标记的类就是一个控制器类。具体的请求处理方法就在控制器类中。
 
@@ -40,7 +38,7 @@ public class TestController {
 
 当spring的ioc容器启动时，扫描到@Controller注解，就把该控制器类注入到ioc容器中。DispatcherServlet可直接通过IOC容器来找到对应控制器类。
 
-### @RequestMapping 注解 ：设置请求映射路径
+## @RequestMapping 注解 ：设置请求映射路径
 
 @RequestMapping 注解通常被标注在控制器方法上，负责将请求与处理请求的控制器方法关联起来，建立映射关系。
 
@@ -48,7 +46,7 @@ DispatcherServlet 拦截到用户发来的请求后，会通过 @RequestMapping 
 
 简单来说，@RequestMapping 注解会把请求和控制器方法绑定在一起。即访问特定的请求，就会执行对应的方法。
 
-#### @RequestMapping 注解的使用方式
+### @RequestMapping 注解的使用方式
 
 @RequestMapping注解可以标记在控制器类上和控制器方法上。
 
@@ -85,7 +83,7 @@ public class firstController {
 }
 ```
 
-#### @RequestMapping 注解的属性
+### @RequestMapping 注解的属性
 
 > value属性
 
@@ -347,6 +345,8 @@ public class TestController {
 
 ### @RequestBody注解：接受请求体中的参数
 
+@RequestBody注解用于读取http请求的body部分数据,解析成对象或者bean,并绑定到控制器方法的形参上。
+
 POST请求的请求参数，一般设置在请求体中，并且通常为JSON格式。
 
 常见的JSON格式有三种:
@@ -455,10 +455,9 @@ public String listPojoParamForJson(@RequestBody List<User> list){
 作用：将请求中请求体所包含的数据传递给请求参数，此注解一个方法只能使用一次
 
 > @RequestBody与@RequestParam区别
-* @RequestParam注解用于接收url地址传参，表单传参【application/x-www-form-urlencoded】
-* @RequestBody注解用于接收json数据【application/json】
-* 如果发送json格式数据，则用@RequestBody接收请求参数
-* 如果发送非json格式数据，则用@RequestParam接收请求参数
+* @RequestParam注解用于接收请求路径中的参数
+* @RequestBody注解用于接收请求体body中的数据
+
 
 <font color="red">
 注意:在SpringMVC的配置类中要把@EnableWebMvc当做标配配置上去，不要省略。
@@ -485,6 +484,95 @@ public String dataParam(Date date1,@DateTimeFormat(pattern="yyyy-MM-dd") Date da
 * @DateTimeFormat注解可以通过设置日期格式，让Date类型形参接收请求参数。
 
 
+### @PathVariable注解：获取请求路径上的动态参数
+
+@PathVariable注解可以获取请求URL中的动态参数。
+
+请求路径：`http://localhost/users/1`
+请求路径：`http://localhost/users/1/tom`
+
+> 例子
+```java
+@Controller
+public class UserController {
+    //单个请求路径参数
+	@RequestMapping(value = "/users/{id}")
+    public String test1(@PathVariable Integer id) {
+        System.out.println(id);
+        return "hello";
+    }
+    //多个请求路径参数
+	@RequestMapping(value = "/users/{id}/{name}")
+    public String test2(@PathVariable Integer id,@PathVariable String name) {
+        System.out.println(id+","+name);
+        return "hello";
+    }
+}
+
+@RequestMapping(value = "/test/{id}")
+public String test(@PathVariable(value = "id") Integer id) {
+    System.out.println("id  "+id); //此处的id=1 
+    return "hello";
+}
+```
+
+@PathVariable注解可以把请求路径中的占位符参数赋值到方法的形参中。
+
+> 若请求路径占位符参数与方法形参不同名时
+
+请求路径：`http://localhost/users/1`
+
+```java
+@Controller
+public class UserController {
+    //此时请求路径占位符参数名称为id,方法形参名称为userId
+    //可以通过@PathVariable注解设置表达式来匹配占位符和方法形参
+	@RequestMapping(value = "/users/{id}")
+    public String delete(@PathVariable("id") Integer userId) {
+        System.out.println(id);
+        return "hello";
+    }
+}
+```
+
+* 可以通过@PathVariable注解设置表达式来匹配请求路径占位符参数和方法形参
+
+### @RequestHeader注解：获取请求头的属性参数
+
+@RequestHeader注解会获取到请求中的请求头信息，并把请求头中的属性数据绑定到控制器方法形参上。
+
+请求路径：`http://localhost:8080/testHeader`
+
+```java
+@RequestMapping(value="/testHeader")
+public String testHeader(@RequestHeader(value="Accept-Language") String al) {
+    System.out.println("Accept-Language: "+al);      
+    return "hello";
+}
+   	
+```
+
+* `@RequestHeader(value="Accept-Language")`获取请求头中的Accept-Language属性的值。将值绑定到方法形参上。
+
+### @CookieValue注解：获取请求中cookie的数据
+
+@CookieValue注解用于把请求中的cookie数据绑定到控制器方法参数上。
+
+
+请求路径：`http://localhost:8080/testcookie`
+
+```java
+	@RequestMapping(value="/testcookie")
+	public String testcookie(@CookieValue(value="JSESSIONID") String JSESSIONID) {
+		System.out.println("JSESSIONID : "+JSESSIONID);      
+		return "hello";
+	}
+```
+
+* `@CookieValue(value="JSESSIONID")`获取请求cookile中的JSESSIONID属性的值。将值绑定到方法形参上。
+
+
+
 ### 接收请求参数的乱码问题
 
 当请求参数中包含中文时，控制器方法形参接收的请求参数值可能会出现乱码。
@@ -505,14 +593,13 @@ public class ServletContainersInitConfig extends AbstractDispatcherServletInitia
 
 
 
-## SpringMVC的响应
+## SpringMVC的响应结果
 
-当控制器方法接收到请求参数后，就可以对请求参数进行处理。处理完后，就可以返回响应数据。
-
+当控制器方法接收到请求参数后，就可以对请求参数进行处理。处理完后，就可以返回响应结果数据。
 
 ### @ResponseBody 注解：方法返回值作为响应数据
 
-springmvc中的控制器方法，默认情况下会把方法的返回值解析为页面名称来返回。但是控制器方法添加了 @ResponseBody 注解后，springmvc则不会把方法返回值解析为页面名称了。
+springmvc中的控制器方法，默认情况下会把方法的返回值解析为视图页面来返回。但是如果控制器方法添加了 @ResponseBody 注解后，springmvc则不会把方法返回值解析为页面名称了，而是直接作为响应数据来返回。
 
 #### 响应页面
 

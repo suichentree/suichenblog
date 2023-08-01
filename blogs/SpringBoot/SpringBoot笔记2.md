@@ -1,6 +1,6 @@
 ---
-title: SpringBoot笔记 版本2.7.4
-date: 2022-09-20
+title: SpringBoot笔记2
+date: 2023-08-01
 sidebar: 'auto'
 categories: 
  - 后端
@@ -10,494 +10,115 @@ tags:
 
 [toc]
 
-# SpringBoot笔记 版本2.7.4
+# SpringBoot笔记2
 
-当前使用的SpringBoot版本为2.7.4
+当前springboot版本为2.7.4
 
-# 1 SpringBoot简介
+# SpringBoot 静态资源映射
 
-<font color="red"> SpringBoot 基于 Spring 开发。不仅继承了Spring框架原有的优秀特性，它并不是用来替代 Spring 的解决方案，而和 Spring 框架紧密 结合进一步简化了Spring应用的整个搭建和开发过程。其设计目的是用来简化 Spring 应用的初始搭建以及开发过程怎么简化的呢?就是通过提供默认配置等方式让我们更容易使用。</font>
+在 Web 应用中会涉及到大量的静态资源，例如 JS、CSS 和 HTML 等。例如通过 Spring MVC 访问静态资源文件时，需要先配置静态资源的映射；但在 SpringBoot 中则不再需要进行此项配置，因为 SpringBoot 已经默认完成了这一工作。
 
-关于Spring Boot有一句很出名的话就是约定大于配置。采用Spring Boot可以大大的简化开发模式，它集成了大量常用的第三方库配置，所有你想集成的常用框架，它都有对应的组件支持，例如 Redis、MongoDB、Dubbo、kafka，ES等等。SpringBoot 应用中这些第 三方库几乎可以零配置地开箱即用，大部分的 SpringBoot 应用都只需要非常少量的配置代码，开发者能够更加专注于业务逻辑。另外 SpringBoot通过集成大量的框架使得依赖包的版本冲突，以及引用的不稳定性等问题得到了很好的解决。
+## 默认静态资源映射
 
-原始Spring环境搭建和开发存在以下问题：
-* 配置繁琐
-* 依赖设置繁琐
+SpringBoot默认已经完成静态资源映射的工作。
 
-SpringBoot的优点恰巧就是针对Spring的缺点
-* 快速构建一个独立的 Spring 应用程序
-* 内嵌的 Tomcat,Jetty服务器，无须部署WAR文件
-* 提供starter POMs来简化Maven配置和减少版本冲突所带来的问题
-* 对Spring和第三方库提供默认配置，也可修改默认值，简化框架配置
-* 无需配置XML，无代码生成，开箱即用
-
-# 2 SpringBoot入门案例
-
-① 步骤1：新建SpringBoot项目
-
-![springboot20220920151526.png](../blog_img/springboot20220920151526.png)
-![springboot20220920155916.png](../blog_img/springboot20220920155916.png)
-![springboot20220920165700.png](../blog_img/springboot20220920165700.png)
-
-* 选择 Spring Initializr来快速构建SpringBoot工程
-* 打包方式这里需要设置为Jar
-* 由于开发一个web程序，需要使用SpringMVC技术。因此选择加载Spring Web依赖。
-* 创建好的项目会自动生成其他的一些文件，而这些文件目前对我们来说没有任何作用，所以可以将这些文件删除。
+当访问项目中的任意静态资源（即“/**”）时，Spring Boot会默认从以下路径中查找静态资源文件（优先级依次降低）：
 
 ```
-可以删除的目录和文件如下：
-.mvn
-.gitignore
-HELP.md
-mvnw
-mvnw.cmd
+classpath:/META-INF/resources/
+classpath:/resources/
+classpath:/static/
+classpath:/public/
 ```
 
-② 步骤2：创建 Controller方法
+1. 例如在resources目录下，创建一个hello.html文件。
+2. 启动SpringBoot项目。
+3. 打开浏览器，访问该html文件。请求路径为：`http://localhost:8080/hello.html`
+4. Spring Boot就会依次从优先级高的目录开始查询hello.html并返回。
 
-创建BookController方法，代码如下：
+
+# SpringBoot 自定义拦截器
+
+Spring Boot 同样提供了拦截器功能。 
+
+在 Spring Boot 项目中，使用拦截器功能通常需要以下 3 步：
+1. 定义拦截器。
+2. 注册拦截器。
+3. 指定拦截规则（如果是拦截所有，静态资源也会被拦截）。
+
+
+> 定义拦截器
+
 ```java
-@RestController
-@RequestMapping("/books")
-public class BookController {
-    @GetMapping("/{id}")
-    public String getById(@PathVariable Integer id){
-        System.out.println("id ==> "+id);
-        return "hello , spring boot!";
+public class MyInterceptor implements HandlerInterceptor {
+   
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        //方法执行前
+        return true;
+    }
+
+    @Override
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+        //方法执行前
+    }
+
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        //页面渲染后
+    }
+}
+
+```
+
+定义一个拦截器类需要先创建一个拦截器类，并实现HandlerInterceptor接口。HandlerInterceptor接口中有以下 3 个方法,如图所示。
+![springboot_20230801223208.png](../blog_img/springboot_20230801223208.png)
+
+
+> 注册拦截器
+
+创建一个实现了 WebMvcConfigurer 接口的配置类，重写 addInterceptors() 方法，并在该方法中调用 registry.addInterceptor() 方法将自定义的拦截器注册到容器中。
+
+```java
+@Configuration
+public class MyMvcConfig implements WebMvcConfigurer {
+    ......
+    //重写WebMvcConfigurer接口的addInterceptors方法
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        // 注册自己创建拦截器
+        registry.addInterceptor(new MyInterceptor());
     }
 }
 ```
 
-③ 步骤3：运行Springbootdemo1Application启动类，并测试
+> 指定拦截规则
+
+修改 MyMvcConfig 配置类中 addInterceptors() 方法的代码，指定拦截器的拦截规则。
 
 ```java
-//启动类上会添加@SpringBootApplication注解
-@SpringBootApplication
-public class Springbootdemo1Application {
-    public static void main(String[] args) {
-        SpringApplication.run(Springbootdemo1Application.class, args);
+@Configuration
+public class MyMvcConfig implements WebMvcConfigurer {
+    ......
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        // 注册自己创建拦截器，并且指定拦截规则
+        //拦截所有请求，包括静态资源文件
+        //放行登录页，登陆接口，静态资源等
+        registry.addInterceptor(new LoginInterceptor())
+        .addPathPatterns("/**")
+        .excludePathPatterns("/", "/login", "/index.html", "/user/login", "/css/**", "/images/**", "/js/**", "/fonts/**"); 
     }
 }
 ```
 
-![springboot20220922110950.png](../blog_img/springboot20220922110950.png)
-![springboot20220922111049.png](../blog_img/springboot20220922111049.png)
+* addPathPatterns：该方法用于指定拦截路径，例如拦截路径为“/**”，表示拦截所有请求，包括对静态资源的请求。
+* excludePathPatterns：该方法用于排除拦截路径，即指定不需要被拦截器拦截的请求。
 
-* SpringBoot的引导类是项目的入口，运行启动类的main方法就可以启动项目
-* SpringBoot工程内置了tomcat服务器。不需要使用Tomcat插件和配置其他tomcat服务器。
 
+# SpringBoot统一日志
 
-④ 将springboot工程打包为jar包
-
-pom文件中的spring‐boot‐maven‐plugin插件。可以把springboot工程打包为jar包。
-
-```xml
-<build>
-    <plugins>
-        <plugin>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-maven-plugin</artifactId>
-        </plugin>
-    </plugins>
-</build>
-```
-
-⑤ 部署jar包到服务器
-
-在服务器中执行`java -jar xxxxx.jar`命令，让jar包在服务器中运行。
-
-# 3 SpringBoot起步依赖（启动依赖）
-
-<font color="red">Spring Boot将所有的功能场景都抽取出来，做成一个个的starter（启动依赖）,只需要在项目里面引入这些starte启动依赖。对应相关场景的所有依赖都会导入进来。要用什么功能就导入什么场景的启动依赖。</font>
-
-SpringBoot工程的的pom.xml配置文件中包含了很多的启动依赖。
-
-![springboot20220922113222.png](../blog_img/springboot20220922113222.png)
-
-例如：如下
-```xml
-<!--工程继承spring-boot-starter-parent启动依赖，表示当前项目也是Spring Boot项目，主要用来提供相关的Maven默认依赖。使用它之后，常用的包依赖可以省去version标签。-->
-<parent>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.7.4</version>
-    <relativePath/> <!-- lookup parent from repository -->
-</parent>
-
-<!-- spring-boot-starter-web，web场景启动依赖 -->
-<dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-web</artifactId>
-</dependency>
-```
-鼠标追踪进入到第二个启动依赖中，会发现它又引入了如下的依赖：
-
-![springboot20220922114132.png](../blog_img/springboot20220922114132.png)
-
-* spring-boot-starter-web启动依赖中又引入了spring-web和spring-webmvc的依赖等，这就是为什么工程中没有依赖这两个包还能正常使用springMVC注解的原因。
-* 上图中的spring-boot-starter-tomcat启动依赖。因为该启动依赖内置了tomcat，所以SpringBoot工程无须配置tomcat服务器和tomcat插件就能正常启动。
-
-<font color="red">小结：引入某个启动依赖，就相当于间接引入大量相关依赖。解决了Spring依赖繁琐的问题。</font>
-
-## 1. 如何更换SpringBoot项目内置的web服务器?
-
-如何把SpringBoot项目内置的tomcat服务器，更换为jetty服务器。
-
-① 去除内置的tomcat服务器
-```xml
-<dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-web</artifactId>
-    <exclusions>
-        <exclusion>
-            <artifactId>spring-boot-starter-tomcat</artifactId>
-            <groupId>org.springframework.boot</groupId>
-        </exclusion>
-    </exclusions>
-</dependency>
-```
-
-② 添加jetty服务器
-```xml
-<dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-jetty</artifactId>
-</dependency>
-```
-
-# 4 配置文件
-
-SpringBoot提供了3种属性配置方式
-
-* application.properties
-
-```properties
-server.port=80   
-```
-
-* application.yml 或 application.yaml
-```yaml
-# 注意在:后，数据前一定要加空格。
-server:
-    port: 81
-```
-
-yml和yaml主要是文件的后缀名区别。其他没区别。
-
-<font color="red">
-
-注意：
-1.SpringBoot程序的配置文件名必须是application,只是后缀名不同而已。
-2.配置文件必须放在resources目录下
-3.三种配置文件的优先级是：application.properties > application.yml > application.yaml
-</font>
-
-## 1. 两种配置文件中的配置格式
-在springboot框架中，resource文件夹里可以存放配置的文件有两种：properties和yml。建议使用yml格式，因为它的可读性更强。
-
-* application.properties的格式：扁平的k/v格式。
-```properties
-server.port=8081
-```
-
-* application.yml的用法：树型结构。
-```yaml
-enterprise:
-  name: itcast
-  age: 16
-  tel: 4006184000
-  subject:
-    - Java
-    - 前端
-    - 大数据
-```
-
-yml格式语法规则
-* 大小写敏感
-* 使用缩进表示层级关系，只允许使用空格（不允许使用Tab键）
-* 属性值前面添加空格（属性名与属性值之间使用冒号+空格作为分隔）
-
-## 2. 读取配置文件数据
-
-### 1 使用 @Value注解
-
-```yaml
-server:
-  port: 82
-enterprise:
-  name: itcast
-  age: 16
-  tel: 4006184000
-  subject:
-    - Java
-    - 前端
-    - 大数据
-```
-
-```java
-@RestController
-@RequestMapping("/books")
-public class BookController {
-    //使用 @Value注解读取配置文件中的数据
-    @Value("${server.port}")
-    private Integer port;
-    @Value("${enterprise.subject[0]}")
-    private String subject_00;
-
-    @GetMapping("/{id}")
-    public String getById(@PathVariable Integer id){
-        System.out.println(port);
-        System.out.println(subject_00);
-        return "hello , spring boot!";
-    }
-}
-```
-
-### 2 Environment对象
-
-可以使用@Autowired注解注入Environment对象的方式读取数据。这种方式SpringBoot会将配置文件中所有的数据封装到Environment对象中，如果需要使用哪个数据只需要通过调用Environment对象的getProperty(String name)方法获取。
-
-```yaml
-server:
-  port: 82
-enterprise:
-  name: itcast
-  age: 16
-  tel: 4006184000
-  subject:
-    - Java
-    - 前端
-    - 大数据
-```
-
-```java
-@RestController
-@RequestMapping("/books")
-public class BookController {
-    
-    @Autowired
-    private Environment env;
-    
-    @GetMapping("/{id}")
-    public String getById(@PathVariable Integer id){
-        System.out.println(env.getProperty("enterprise.name"));
-        System.out.println(env.getProperty("enterprise.subject[0]"));
-        return "hello , spring boot!";
-    }
-}
-```
-
-<font color="red">注意：这种方式在开发中很少使用。</font>
-
-
-## 3 多环境配置文件设置
-
-SpringBoot给开发者提供了多环境的快捷配置，需要切换环境时只需要改一个配置即可。
-
-![springboot20220922151603.png](../blog_img/springboot20220922151603.png)
-
-### 1. properties配置文件
-
-properties类型的配置文件配置多环境需要定义不同的配置文件，在resources目录下创建4个配置文件，分别对应生产，测试，开发环境和默认配置文件。
-
-* application-dev.properties是开发环境的配置文件。在该文件中配置端口号为80
-
-```properties
-server.port=80
-```
-
-* application-test.properties是测试环境的配置文件。在该文件中配置端口号为81
-
-```properties
-server.port=81
-```
-
-* application-pro.properties是生产环境的配置文件。在该文件中配置端口号为82
-
-```properties
-server.port=82
-```
-
-SpringBoot只会默认加载名为application.properties的配置文件，所以需要创建application.properties配置文件，在其中设置启用哪个环境配置文件，配置如下:
-
-```properties
-# 启动生产环境配置文件
-spring.profiles.active=pro
-```
-
-### 2. yaml配置文件
-
-> 方法1
-
-在resources目录下创建4个配置文件，分别对应生产，测试，开发环境和默认配置文件。
-
-* application-dev.yml是开发环境的配置文件。在该文件中配置端口号为80
-
-```yml
-server:
-  port: 8080
-```
-
-* application-test.yml是测试环境的配置文件。在该文件中配置端口号为81
-
-```yml
-server:
-  port: 8081
-```
-
-* application-pro.yml是生产环境的配置文件。在该文件中配置端口号为82
-
-```yml
-server:
-  port: 8082
-```
-
-SpringBoot只会默认加载名为application.yml的配置文件，所以需要创建application.yml配置文件，在其中设置启用哪个环境配置文件，配置如下:
-
-```yml
-# 启动测试环境配置文件
-spring:
-  profiles:
-    active: test
-```
-
-> 方法2
-
-不用创建多个额外的环境配置文件。在application.yml中使用 `---` .可以分割不同的环境配置。
-
-```yaml
-#设置启用的环境
-spring:
-  profiles:
-    active: dev  #表示使用的是开发环境的配置
-```
-
-综上所述，`application.yml` 配置文件内容如下
-
-```yaml
-#设置启用的环境
-spring:
-  profiles:
-    active: pro
-
-### 用---来分割不同环境的配置信息
----
-#开发环境
-spring:
-  config:
-    activate:
-      on-profile: dev
-server:
-  port: 80
----
-#生产环境
-spring:
-  config:
-    activate:
-      on-profile: pro
-server:
-  port: 81
----
-#测试环境
-spring:
-  config:
-    activate:
-      on-profile: test
-server:
-  port: 82
----
-
-
-```
-
-## 4. 命令行启动参数设置配置参数
-
-SpringBoot提供了在运行jar时设置开启指定的环境的方式。
-
-```shell
-## 通过命令行的方式设置选择那个环境配置文件
-java –jar xxx.jar –-spring.profiles.active=test
-
-## 设置临时端口号
-java –jar xxx.jar –-server.port=88
-
-## 同时指定启用哪个环境配置，又指定临时端口号
-java –jar xxx.jar –-server.port=88 –-spring.profiles.active=test
-```
-
-<font color="red">优先级：在命令行启动参数设置配置数据 > 在配置文件中设置配置数据</font>
-
-
-# 5 启动类上的@SpringBootApplication注解
-
-@SpringBootApplication注解作用：
-用来标注在某个类上,说明这个类是SpringBoot的主配置类，SpringBoot需要运行这个类的main方法来启动SpringBoot服务应用。
-
-鼠标点击进入到@SpringBootApplication注解中
-```java
-@Target({ElementType.TYPE})   //设置当前注解可以标记在哪
-@Retention(RetentionPolicy.RUNTIME) //设置注解标注的类编译以什么方式保留
-@Documented //java doc 会生成注解信息
-@Inherited  //是否会被继承
-@SpringBootConfiguration  //表示这是一个Spring Boot的配置类
-@EnableAutoConfiguration  //SpringBoot开启自动配置，会自动去加载自动配置类
-@ComponentScan(  //扫描，若指定basepackage,springboot会自动扫描当前配置类所在包及其子包。
-    excludeFilters = {@Filter(
-    type = FilterType.CUSTOM,
-    classes = {TypeExcludeFilter.class}
-), @Filter(
-    type = FilterType.CUSTOM,
-    classes = {AutoConfigurationExcludeFilter.class}
-)}
-)
-public @interface SpringBootApplication {
-  //......................
-}
-```
-
-<font color="red">springboot所有的配置类，都在启动类中被扫描并加载。</font>
-
-
-# 6 SpringBoot热部署
-
-为了进一步提高开发效率,springboot提供了全局项目热部署,在开发过程中修改了部分代码以及相关配置文件后,不需要每次重启使修改生效,在项目中开启了springboot全局热部署之后只需要在修改之后等待几秒即可使修改生效。
-
-① 步骤1：导入热部署依赖
-
-```xml
-<dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-devtools</artifactId>
-    <scope>runtime</scope>
-    <!-- 设置可选依赖为true,子项目不会继承该依赖 -->
-    <optional>true</optional>
-</dependency>
-```
-
-② 步骤2：在IDEA中修改配置
-
-```
-（1）File-Settings-Compiler-Build Project automatically 
-（2）ctrl + shift + alt + / ,选择Registry,勾上 Compiler autoMake allow when app running
-```
-
-![springboot20220926164518.png](../blog_img/springboot20220926164518.png)
-![springboot20220926164612.png](../blog_img/springboot20220926164612.png)
-
-
-③ 步骤3：启动项目，修改配置,试试热部署。
-
-![springboot20220926164917.png](../blog_img/springboot20220926164917.png)
-
-注意:日志出现restartedMain代表已经生效,在使用热部署时如果遇到修改之后不能生效,请重试重启项目在试
-
-④ 小结：
-* DevTools严格意义上其实不算热部署，而是快速重启。DevTools通过监控类路径资源，当类路径上的文件发生更改时，自动重新启动应用程序，由于只需要重新读取被修改的类所，所以要比冷启动快。
-
-
-# 7 SpringBoot统一日志
-
-## 1 介绍
+## 介绍
 
 市面上常见的日志框架有：JUL,JCL,Jboss-logging,logback,log4j,log4j2, slf4j等等，主要分类如下：
 
@@ -542,7 +163,7 @@ public class BookController {
 
 <font color="red">SpringBoot默认日志级别是 info，因此控制台只能打印 info 及更高级别的日志。</font>
 
-## 2 日志级别
+## 日志级别
 
 各个日志级别：fatal > error > warn > info > debug > trace
 
@@ -572,7 +193,7 @@ logging:
 * 注意的是:必须从根目录（com包）开始，一步一步的到指定目录；否则springboot找不到。设置无效。
 
 
-## 3 日志持久化
+## 日志持久化
 
 日志持久化：将控制台打印的日志写到相应的目录或文件下。
 
@@ -589,7 +210,7 @@ logging:
 * logging.file.path属性
     *  指定文件存放路径。默认名称为spring.log
 
-## 4 日志输出格式
+## 日志输出格式
 
 ```yaml
 logging:
@@ -600,7 +221,7 @@ logging:
         file: %d{yyyy-MM-dd} === [%thread] === %-5level === %logger{50} === - %msg%n
 ```
 
-## 5 日志框架各自配置文件
+## 日志框架各自配置文件
 
 在类路径下放上每个日志框架自己的配置文件即可, springboot就不使用默认的日志配置。
 
@@ -617,7 +238,7 @@ JUL | logging.properties
 2. logback使用application.yml中的属性。使用springProperty标签才可使用application.yml中的值,可以设置默认值。
 
 
-## 6 日志综合案例
+## 日志综合案例
 
 springboot框架下服务每天生成一份日志。
 
@@ -680,14 +301,9 @@ logback-spring.xml日志配置文件内容：
 </configuration>
 ```
 
+# SpringBoot整合Mybatis
 
-
-
-
-
-# 8 SpringBoot整合Mybatis
-
-## 1 创建SpringBoot项目
+## 创建SpringBoot项目
 
 创建SpringBoot项目，选择导入Spring Web,Mybatis,Mysql相关依赖
 
@@ -726,7 +342,7 @@ mvnw.cmd
 </dependencies>
 ```
 
-## 2 创建数据库表，实体类
+## 创建数据库表，实体类
 
 1. 创建数据库test,其中创建表book
 
@@ -753,7 +369,7 @@ public class Book {
 }
 ```
 
-## 3  定义dao接口与@Mapper注解
+## 定义dao接口与@Mapper注解
 
 创建dao包下。其中创建BookDao接口，内容如下
 
@@ -783,7 +399,7 @@ public class Springbootdemo3Application {
 ```
 
 
-## 4 定义service接口及其实现类
+## 定义service接口及其实现类
 
 创建service包下。其中创建BookService接口及其实现类，内容如下
 
@@ -805,7 +421,7 @@ public class BookServiceImpl implements BookService {
 }
 ```
 
-## 5 定义controller层
+## 定义controller层
 
 创建controller包下。其中创建BookController实现类，内容如下
 
@@ -823,7 +439,7 @@ public class BookController {
 }
 ```
 
-## 6 添加数据源配置信息
+## 添加数据源配置信息
 
 ```yaml
 spring:
@@ -834,11 +450,11 @@ spring:
     password: root
 ```
 
-## 7 运行启动类，测试接口
+## 运行启动类，测试接口
 
 ![springboot20220923104259.png](../blog_img/springboot20220923104259.png)
 
-## 8 小结（@Mapper注解）
+## 小结（@Mapper注解）
 
 Dao接口要想被SpringIOC容器扫描到，有两种解决方案:
 * 方案一:在Dao接口上添加@Mapper注解，并且确保Dao处在引导类（启动类）所在包或其子包中。该方案的缺点是需要在每个Dao接口中添加注解。
@@ -856,7 +472,7 @@ public class Springbootdemo3Application {
 }
 ```
 
-# 9 SpringBoot中使用Druid数据源
+# SpringBoot中使用Druid数据源
 
 ## 什么是数据源?
 
@@ -901,7 +517,7 @@ spring:
 ```
 
 
-# 10 Spring Boot整合Redis
+# Spring Boot整合Redis
 
 ① 添加依赖
 

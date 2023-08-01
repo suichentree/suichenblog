@@ -16,29 +16,26 @@ tags:
 
 ## RESTful风格
 
-### RESTful介绍
-
 RESTful是一种新的请求方式风格。
 
-RESTful风格与传统风格的区别:
-  * 传统风格请求资源描述形式
-    * `http://localhost/user/getById?id=1` 查询id为1的用户信息
-    * `http://localhost/user/saveUser` 保存用户信息
-  * RESTful风格请求资源描述形式
-    * `http://localhost/user/1` 
-    * `http://localhost/user`
+RESTFul 提倡我们使用统一的风格来设计请求 URL，其规则如下。
 
-RESTful风格特点:
-* 传统方式一般是一个请求url对应一种操作，这样做不仅麻烦，也不安全，因为光看请求URL就能猜出具体操作。
-* RESTful风格形式，请求地址简单化，并且光看请求URL很难猜出来该URL的具体功能。隐藏资源的访问行为，无法通过地址得知对资源是何种操作
+* 请求URL只用来标识和定位资源，不得包含任何与操作相关的动词。
+* 当请求中需要携带参数时，RESTFul 允许将参数通过斜杠（/）拼接到 URL 中。
+* HTTP 协议中有四个表示操作方式的动词：GET 用来获取资源， POST 用来新建资源， PUT 用来更新资源， DELETE 用来删除资源。
 
-RESTful风格请求分类:
-* RESTful风格下请求的方式不同，代表不同的具体操作。
+下图是传统方式请求URL与RESTful方式请求URL的对比。
+
+![springmvc_20230801140223.png](../blog_img/springmvc_20230801140223.png)
+
+
+> RESTful风格的分类:
+* RESTful风格下请求的方式不同，则代表不同的具体操作。
 * `http://localhost/users`	  查询全部用户信息 GET（查询）
 * `http://localhost/users/1`  查询指定用户信息 GET（查询）
-* `http://localhost/users`    添加用户信息    POST（新增/保存）
-* `http://localhost/users`    修改用户信息    PUT（修改/更新）
-* `http://localhost/users/1`  删除用户信息    DELETE（删除）
+* `http://localhost/users`    添加用户信息 POST（新增）
+* `http://localhost/users`    修改用户信息 PUT（更新）
+* `http://localhost/users/1`  删除用户信息 DELETE（删除）
 * 发送GET请求是用来做查询
 * 发送POST请求是用来做新增
 * 发送PUT请求是用来做修改
@@ -46,12 +43,13 @@ RESTful风格请求分类:
 
 <font color="red">注意：RESTful风格是约定方式，约定不是规范，可以打破，所以称RESTful风格，而不是RESTful规范。</font>
 
-### RESTful案例及其改进
+> RESTful的例子
 
+以下是RESTful的例子
 ```java
 @Controller
 public class BookController {
-    //新增
+    //新增，POST请求
     @RequestMapping(value = "/books",method = RequestMethod.POST)
     @ResponseBody
     public String save(@RequestBody Book book){
@@ -59,7 +57,7 @@ public class BookController {
         return "{'module':'book save'}";
     }
 
-    //删除
+    //删除，DELETE请求
     @RequestMapping(value = "/books/{id}",method = RequestMethod.DELETE)
     @ResponseBody
     public String delete(@PathVariable Integer id){
@@ -67,7 +65,7 @@ public class BookController {
         return "{'module':'book delete'}";
     }
 
-    //修改
+    //修改，PUT请求
     @RequestMapping(value = "/books",method = RequestMethod.PUT)
     @ResponseBody
     public String update(@RequestBody Book book){
@@ -75,7 +73,7 @@ public class BookController {
         return "{'module':'book update'}";
     }
 
-    //查询
+    //查询，GET请求
     @RequestMapping(value = "/books/{id}",method = RequestMethod.GET)
     @ResponseBody
     public String getById(@PathVariable Integer id){
@@ -83,7 +81,7 @@ public class BookController {
         return "{'module':'book getById'}";
     }
 
-    //查询全部
+    //查询全部，GET请求
     @RequestMapping(value = "/books",method = RequestMethod.GET)
     @ResponseBody
     public String getAll(){
@@ -93,15 +91,15 @@ public class BookController {
 }
 ```
 
-上面案例中，有些代码的重复性太高。下面是改进后的案例
-
+上面例子中，有些代码的重复性太高。下面是改进后的例子
 ```java
-@RestController   //@Controller + ReponseBody
+@Controller
 @RequestMapping("/books")
 public class BookController {
     //新增
 	//@RequestMapping(method = RequestMethod.POST)
     @PostMapping
+    @ResponseBody
     public String save(@RequestBody Book book){
         System.out.println("book save..." + book);
         return "{'module':'book save'}";
@@ -109,6 +107,7 @@ public class BookController {
     //删除
     //@RequestMapping(value = "/{id}",method = RequestMethod.DELETE)
     @DeleteMapping("/{id}")
+    @ResponseBody
     public String delete(@PathVariable Integer id){
         System.out.println("book delete..." + id);
         return "{'module':'book delete'}";
@@ -116,6 +115,7 @@ public class BookController {
     //修改
     //@RequestMapping(method = RequestMethod.PUT)
     @PutMapping
+    @ResponseBody
     public String update(@RequestBody Book book){
         System.out.println("book update..." + book);
         return "{'module':'book update'}";
@@ -123,6 +123,7 @@ public class BookController {
     //查询
     //@RequestMapping(value = "/{id}",method = RequestMethod.GET)
     @GetMapping("/{id}")
+    @ResponseBody
     public String getById(@PathVariable Integer id){
         System.out.println("book getById..." + id);
         return "{'module':'book getById'}";
@@ -130,6 +131,7 @@ public class BookController {
     //查询全部
     //@RequestMapping(method = RequestMethod.GET)
     @GetMapping
+    @ResponseBody
     public String getAll(){
         System.out.println("book getAll...");
         return "{'module':'book getAll'}";
@@ -137,81 +139,6 @@ public class BookController {
     
 }
 ```
-
-#### @RestController @GetMapping @PostMapping @PutMapping @DeleteMapping注解
-
-@RestController注解
-类型: 类注解。
-位置: 定义类上方。
-作用: 等同于@Controller与@ResponseBody两个注解组合功能。
-
-@GetMapping @PostMapping @PutMapping @DeleteMapping注解
-类型: 方法注解。
-位置: 定义方法上方。
-作用: 每种对应一个请求动作，例如@GetMapping对应GET请求。
-
-
-### @PathVariable注解，接收请求路径参数
-
-@PathVariable注解
-类型: 形参注解。
-位置: 定义形参前面。
-作用: 绑定路径参数与处理器方法形参间的关系，要求路径参数名与形参名一一对应。
-
-请求路径：`http://localhost/users/1`
-请求路径：`http://localhost/users/1/tom`
-
-后台方法：
-```java
-@Controller
-public class UserController {
-    //单个请求路径参数
-	@RequestMapping(value = "/users/{id}",method=RequestMethod.DELETE)
-    @ResponseBody
-    public String delete(@PathVariable Integer id) {
-        System.out.println("user delete..." + id);
-        return "{'module':'user delete'}";
-    }
-    //多个请求路径参数
-	@RequestMapping(value = "/users/{id}/{name}",method=RequestMethod.DELETE)
-    @ResponseBody
-    public String delete(@PathVariable Integer id,@PathVariable String name) {
-        System.out.println("user delete..." + id+","+name);
-        return "{'module':'user delete'}";
-    }
-}
-```
-
-<font color="red">@PathVariable注解可以把请求路径上的参数赋值到方法形参上。</font>
-
-> 若请求路径参数与方法形参不同名？
-
-```java
-@Controller
-public class UserController {
-    //此时请求路径参数名称为id,方法形参名称为userId
-    //可以通过@PathVariable注解设置表达式来匹配请求路径参数和方法形参
-	@RequestMapping(value = "/users/{id}",method=RequestMethod.DELETE)
-    @ResponseBody
-    public String delete(@PathVariable("id") Integer userId) {
-        System.out.println("user delete..." + id);
-        return "{'module':'user delete'}";
-    }
-}
-```
-
-* 可以通过@PathVariable注解设置表达式来匹配请求路径参数和方法形参
-
-#### @RequestBody、@RequestParam、@PathVariable注解的区别？
-
-* 区别
-  * @RequestParam用于接收url地址传参或表单传参。
-  * @RequestBody用于接收json数据。
-  * @PathVariable用于接收路径参数，使用{参数名称}描述路径参数。
-* 用法
-  * 后期开发中，发送请求参数超过1个时，以json格式为主，@RequestBody应用较广。
-  * 如果发送非json格式数据，选用@RequestParam接收请求参数。
-  * 采用RESTful进行开发，当参数数量较少时，例如1个，可以采用@PathVariable接收请求路径变量，通常用于传递id值。
 
 ## SpringMVC设置静态资源放行
 
@@ -221,7 +148,8 @@ public class UserController {
 
 > SpringMVC为什么会拦截静态资源呢?
 
-之前在自定义servlet web容器配置类中，设置了拦截所有请求
+之前在自定义servlet web容器配置类中，设置了拦截所有请求。自然将获取静态资源的请求也拦截了。
+
 ```java
 //自定义servlet web容器配置类
 public class ServletContainersInitConfig extends AbstractDispatcherServletInitializer {
@@ -253,7 +181,7 @@ public class SpringMvcSupport extends WebMvcConfigurationSupport {
 }
 ```
 
-* 该配置类是在config目录下，SpringMvcConfig配置类扫描的是controller包，所以该配置类还未生效，要想生效需要对SpringMvcConfig配置类进行修改。
+* 该配置类是在config目录下，SpringMvcConfig配置类扫描的是controller包，所以该配置类还未生效，要想生效需要对SpringMvcConfig配置类进行修改。让其扫描config目录。
 
 ```java
 @Configuration
@@ -525,7 +453,7 @@ public class ProjectExceptionAdvice {
 
 ### 拦截器介绍
 
-讲解拦截器之前，先看一张图:
+讲拦截器之前，先看一张图:
 ![springmvc20220916172047.png](../blog_img/springmvc20220916172047.png)
 
 (1)浏览器发送一个请求会先到Tomcat的web服务器
@@ -533,30 +461,58 @@ public class ProjectExceptionAdvice {
 (3)如果是静态资源，会直接到Tomcat的项目部署目录下去直接访问
 (4)如果是动态资源，就需要交给项目的后台代码进行处理
 (5)在找到具体的方法之前，我们可以去配置过滤器(可以配置多个)，按照顺序进行执行
-(6)然后进入到到中央处理器(SpringMVC中的内容)，SpringMVC会根据配置的规则进行拦截
+(6)然后进入到到中央处理器(SpringMVC的DispatcherServlet)，DispatcherServlet会根据配置的规则进行拦截
 (7)如果满足规则，则进行处理，找到其对应的controller类中的方法进行执行,完成后返回结果
 (8)如果不满足规则，则不进行处理
 (9)这个时候，如果我们需要在每个Controller方法执行的前后添加业务，具体该如何来实现?
+(10) 我们可以通过拦截器来实现这个功能。
 
-这个就是拦截器要做的事。
-* 拦截器（Interceptor）是一种动态拦截方法调用的机制，在SpringMVC中动态拦截控制器方法的执行。
-* 作用:
-  * 在指定的方法调用前后执行预先设定的代码
-  * 阻止原始方法的执行
-  * 总结：拦截器就是用来做增强控制器方法
+> 什么是拦截器？
+
+拦截器（Interceptor）是 Spring MVC 提供的一种强大的功能组件。它可以对用户请求进行拦截，并在请求进入控制器方法前后，执行一些指定的操作。
 
 > 拦截器和过滤器在作用和执行顺序上很相似,那么拦截器和过滤器之间的区别是什么?
 
 * 归属不同：过滤器Filter属于Servlet技术，拦截器Interceptor属于SpringMVC技术
-* 拦截内容不同：Filter对所有访问进行增强，Interceptor仅针对SpringMVC的访问进行增强
+* 拦截内容不同：过滤器Filter对所有访问进行过滤，拦截器Interceptor仅针对SpringMVC的方法进行拦截。
 
 ![springmvc20220916172443.png](../blog_img/springmvc20220916172443.png)
 
+### 拦截器的执行流程
+
+> 单个拦截器
+
+![springmvc_20230801143501.png](../blog_img/springmvc_20230801143501.png)
+
+拦截器处理流程的步骤如下：
+1. 当请求的路径与拦截器拦截的路径相匹配时，程序会先执行拦截器类（MyInterceptor）的 preHandl() 方法。若该方法返回值为 true，则继续向下执行 Controller（控制器）中的方法，否则将不再向下执行；
+2. 控制器方法对请求进行处理；
+3. 调用拦截器的 postHandl() 方法，此时我们可以对请求域中的模型（Model）数据和视图做出进一步的修改；
+4. 通过 DispatcherServlet 的 render() 方法对视图进行渲染；
+5. 调用拦截器的 afterCompletion () 方法，完成资源清理、日志记录等工作。
+
+
+> 多个拦截器
+
+在项目中，通常都不会只有一个拦截器，多个不同的拦截器来实现不同的功能。在程序运行期间，拦截器的执行是有一定的顺序的，该顺序与拦截器在配置文件中定义的顺序有关。
+
+![springmvc_20230801144308.png](../blog_img/springmvc_20230801144308.png)
+
+![springmvc20220916175000.png](../blog_img/springmvc20220916175000.png)
+
+如果其中有拦截器的 preHandle() 方法返回了 false，各拦截器方法执行情况如下。
+* 第一个返回 preHandle() 方法 false 的拦截器以及它之前的拦截器的 preHandle() 方法都会执行。
+* 所有拦截器的 postHandle() 都不会执行。
+* 第一个返回 preHandle() 方法 false 的拦截器之前的拦截器的 afterComplation() 方法都会执行。
+
+
 ### 拦截器案例
+
+#### 单个拦截器
 
 ① 步骤1:创建自定义拦截器类
 
-自定义拦截器类实现HandlerInterceptor接口，重写HandlerInterceptor接口中的三个方法。
+自定义拦截器类需要实现HandlerInterceptor接口，重写HandlerInterceptor接口中的三个方法。
 
 ```java
 @Component
@@ -594,15 +550,7 @@ public class SpringMvcSupport extends WebMvcConfigurationSupport {
     @Autowired
     private ProjectInterceptor projectInterceptor;
 
-    //springmvc对静态资源放行
-    @Override
-    protected void addResourceHandlers(ResourceHandlerRegistry registry) {
-        //当访问/pages/????时候，从/pages目录下查找内容
-        registry.addResourceHandler("/pages/**").addResourceLocations("/pages/");
-        registry.addResourceHandler("/js/**").addResourceLocations("/js/");
-        registry.addResourceHandler("/css/**").addResourceLocations("/css/");
-        registry.addResourceHandler("/plugins/**").addResourceLocations("/plugins/");
-    }
+    //.......
 
     //将自定义拦截器注册到SpringMvc配置类中
     @Override
@@ -626,6 +574,12 @@ public class SpringMvcConfig{
 
 ④ 步骤4:运行程序测试
 
+```java
+preHandle...
+postHandle...
+afterCompletion...
+```
+
 ⑤ 可以简化SpringMvcSupport配置类的编写
 
 SpringMvcConfig配置类可以代替SpringMvcSupport配置类。之后就不用再写SpringMvcSupport类了。
@@ -646,14 +600,82 @@ public class SpringMvcConfig implements WebMvcConfigurer {
 }
 ```
 
-### 拦截器的执行流程
+#### 多个拦截器
 
-![springmvc20220916173724.png](../blog_img/springmvc20220916173724.png)
+① 步骤1:创建多个拦截器类，实现HandlerInterceptor接口，并重写接口中的方法
 
-* 当有拦截器后，请求会先进入preHandle方法
-    * 如果方法返回true，则放行继续执行后面的处理方法和后面的方法
-    * 如果返回false，则直接跳过后面方法的执行。
+```java
+@Component
+public class ProjectInterceptor implements HandlerInterceptor {
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        System.out.println("preHandle...");
+        return true;
+    }
 
+    @Override
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+        System.out.println("postHandle...");
+    }
+
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        System.out.println("afterCompletion...");
+    }
+}
+
+//---------------------
+
+@Component
+public class ProjectInterceptor2 implements HandlerInterceptor {
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        System.out.println("preHandle...222");
+        return false;
+    }
+    @Override
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+        System.out.println("postHandle...222");
+    }
+
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        System.out.println("afterCompletion...222");
+    }
+}
+```
+
+② 步骤2:配置SpringMvcConfig类，将多个拦截器类注册其中
+
+```java
+@Configuration
+@ComponentScan({"com.itheima.controller"})
+@EnableWebMvc
+public class SpringMvcConfig implements WebMvcConfigurer {
+    //依赖多个拦截器
+    @Autowired
+    private ProjectInterceptor projectInterceptor;
+    @Autowired
+    private ProjectInterceptor2 projectInterceptor2;
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        //配置多个拦截器
+        registry.addInterceptor(projectInterceptor).addPathPatterns("/books","/books/*");
+        registry.addInterceptor(projectInterceptor2).addPathPatterns("/books","/books/*");
+    }
+}
+```
+
+③ :运行程序
+
+```
+preHandle...
+preHandle...222
+postHandle...222
+postHandle...
+afterCompletion...222
+afterCompletion...
+```
 
 ### 拦截器的处理方法
 
@@ -704,78 +726,3 @@ public void afterCompletion(HttpServletRequest request,HttpServletResponse respo
 
 这三个方法中，最常用的是preHandle前置处理方法,在这个方法中可以通过返回值来决定是否要进行放行，可以把业务逻辑放在该方法中，如果满足业务则返回true放行，不满足则返回false拦截。
 
-
-### 拦截器链配置（多个拦截器配置）
-
-多个拦截器如何配置?执行顺序是什么?
-
-① 步骤1:创建多个拦截器类，实现HandlerInterceptor接口，并重写接口中的方法
-
-```java
-@Component
-public class ProjectInterceptor implements HandlerInterceptor {
-    @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        System.out.println("preHandle...");
-        return true;
-    }
-
-    @Override
-    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
-        System.out.println("postHandle...");
-    }
-
-    @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        System.out.println("afterCompletion...");
-    }
-}
-@Component
-public class ProjectInterceptor2 implements HandlerInterceptor {
-    @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        System.out.println("preHandle...222");
-        return false;
-    }
-    @Override
-    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
-        System.out.println("postHandle...222");
-    }
-
-    @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        System.out.println("afterCompletion...222");
-    }
-}
-```
-
-② 步骤2:配置SpringMvcConfig类，将多个拦截器类注册其中
-
-```java
-@Configuration
-@ComponentScan({"com.itheima.controller"})
-@EnableWebMvc
-public class SpringMvcConfig implements WebMvcConfigurer {
-    //依赖多个拦截器
-    @Autowired
-    private ProjectInterceptor projectInterceptor;
-    @Autowired
-    private ProjectInterceptor2 projectInterceptor2;
-    @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        //配置多个拦截器
-        registry.addInterceptor(projectInterceptor).addPathPatterns("/books","/books/*");
-        registry.addInterceptor(projectInterceptor2).addPathPatterns("/books","/books/*");
-    }
-}
-```
-
-③ :运行程序
-
-拦截器执行的顺序是和配置顺序有关。先进后出。
-* 当配置多个拦截器时，形成拦截器链
-* 拦截器链的运行顺序参照拦截器添加顺序为准
-* 当拦截器中出现对原始处理器的拦截，后面的拦截器均终止运行
-* 当拦截器运行中断，仅运行配置在前面的拦截器的afterCompletion操作
-
-![springmvc20220916175000.png](../blog_img/springmvc20220916175000.png)
