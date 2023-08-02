@@ -609,3 +609,30 @@ ddns-go通过网卡等形式获取到主机的公网ip地址-》然后将公网i
 ### DDNS-go ipv6无法读取出网卡。
 
 当你的DDNS-go在ipv6选项中无法读取网卡时，你可以将docker的网络类型从bridge桥接，改为host连接试试。
+
+
+## 定时签到工具：qiandao docker容器
+
+qiandao 是 一个 基于 HAR 编辑器和 Tornado 服务端的 HTTP 定时任务自动执行 Web 框架。
+
+qiandao的dockerhub镜像：asdaragon/qiandao
+
+镜像地址：[https://hub.docker.com/r/asdaragon/qiandao](https://hub.docker.com/r/asdaragon/qiandao)
+
+qiandao官方网站 [https://qd-today.github.io/qd/zh_CN/](https://qd-today.github.io/qd/zh_CN/)    
+
+1. 因为unraid应用市场没有qiandao，所以需要创建docker容器安装。
+2. 开始配置，手动映射端口和配置目录和webui地址。
+
+![docker_20230802195139.png](../blog_img/docker_20230802195139.png)
+
+* 映射端口，容器内端口80，主机端口38923
+* 映射配置目录，如图所示。
+* webui地址：`http://[IP]:[PORT:38923]`
+
+3. 点击创建完容器后，访问webui地址。开始进行使用。需要先注册账户。
+
+![unraid_20230802195420.png](../blog_img/unraid_20230802195420.png)
+![unraid_20230802195549.png](../blog_img/unraid_20230802195549.png)
+
+4. 具体用法，自行百度。

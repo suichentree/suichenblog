@@ -152,6 +152,32 @@ public String testHeader() {
 }
 ```
 
+## @GetMapping，@PostMapping，@PutMapping，@DeleteMapping
+
+@RequestMapping有四个变体，分别是@GetMapping，@PostMapping，@PutMapping，@DeleteMapping。它们分别对应请求的四种方式，get请求，post请求，put请求，delete请求。
+
+```java
+// @GetMapping 相当于下面的写法
+@GetMapping(value = "/login")
+@RequestMapping(value = "/login",method = RequestMethod.GET)
+
+// @PostMapping 相当于下面的写法
+@PostMapping(value = "/login")
+@RequestMapping(value = "/login",method = RequestMethod.POST)
+
+// @PutMapping 相当于下面的写法
+@PutMapping(value = "/login")
+@RequestMapping(value = "/login",method = RequestMethod.PUT)
+
+// @DeleteMapping 相当于下面的写法
+@DeleteMapping(value = "/login")
+@RequestMapping(value = "/login",method = RequestMethod.DELETE)
+
+```
+
+
+
+
 
 ## GET和POST请求
 
@@ -692,4 +718,52 @@ public class UserController {
 * 当方法上有@ReponseBody注解后
   * 方法的返回值为字符串，会将其作为文本内容直接响应给前端
   * 方法的返回值为对象，会将对象转换成JSON响应给前端
+
+
+### @RestController 注解
+
+@RestController注解的作用等同于@Controller + @ResponseBody。
+
+通过使用@RestController对控制器类进行标记，则类中的控制器方法默认自动标记了@ResponseBody注解。
+
+```java
+@Controller
+public class UserController {
+   	@RequestMapping("/toText")
+    @ResponseBody
+    public String toText(){
+        System.out.println("返回纯文本数据");
+        return "response text";
+    }
+
+    @RequestMapping("/toText2")
+    @ResponseBody
+    public String toText2(){
+        System.out.println("返回纯文本数据2");
+        return "response text";
+    }
+}
+
+//-----------上下两段代码，效果等同。
+//
+
+@RestController
+public class UserController {
+   	@RequestMapping("/toText")
+    public String toText(){
+        System.out.println("返回纯文本数据");
+        return "response text";
+    }
+
+    @RequestMapping("/toText2")
+    public String toText2(){
+        System.out.println("返回纯文本数据2");
+        return "response text";
+    }
+}
+
+
+
+
+```
 
