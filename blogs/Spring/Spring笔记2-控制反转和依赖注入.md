@@ -12,90 +12,220 @@ tags:
 
 # Spring笔记2-控制反转和依赖注入
 
-## IOC容器中各项配置
+Spring Framework 最重要的两个核心概念IOC和DI。
+
+IOC（控制反转）：spring负责创建所有的Java对象，这些Java对象被称为Java Bean对象。使用对象时，程序不主动new对象，由Spring来提供对象。
+
+DI（依赖注入）：Spring负责管理对象与对象之间的依赖关系。而不是在程序中以编码的方式将对象与对象耦合在一起。
+
+下面介绍如何进行控制反转和依赖注入。控制反转涉及到IOC容器中bean的定义和实例化。依赖注入涉及到IOC容器中bean之间的注入和自动装配。
+
+## Bean 对象
+
+### Bean 对象的介绍
+
+Bean对象是 IOC 容器根据 Spring 配置文件中的信息创建的。
+
+通常情况下，Spring 的配置文件都是使用 XML 格式的。XML 配置文件的根元素是 `<beans>`，该元素包含了多个子元素 `<bean>`。每一个 `<bean>` 元素相当于一个 Bean对象，并描述了该 Bean对象 是如何被装配到 Spring 容器中的。
+
+
+例如 applicationContext.xml配置文件
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!--bookDao bean对象-->
+    <bean id="bookDao" class="com.itheima.dao.impl.BookDaoImpl"/>
+
+    <!--bookService bean对象-->
+    <bean id="bookService" class="com.itheima.service.impl.BookServiceImpl">
+        <!--配置bookService与bookDao的依赖关系-->
+        <!--property标签表示配置当前bean的属性
+        		name属性表示配置哪一个具体的属性
+        		ref属性表示参照哪一个bean
+		-->
+        <property name="bookDao" ref="bookDao"/>
+    </bean>
+
+</beans>
+```
+
+> `<bean>`元素标签的常用属性或子元素如图所示
+
+![spring_20230803141430.png](../blog_img/spring_20230803141430.png)
+
 
 <font color="red">
 
 注意：
-1. 在IOC容器中不能把接口作为bean对象。因为接口不能实例化为对象。所以必须要用接口的实现类来作为bean对象。
+1. IOC容器不能把接口作为bean对象。因为接口不能实例化为对象。所以必须要用实体类或者接口的实现类来作为bean对象。
 2. bean标签的id属性值在IOC容器中是唯一的，不能重复。
 
 </font>
 
-### bean的别名配置
+### Bean的别名 name属性
+
+name属性是 Bean 元素标签的属性之一，可以通过 name 属性为同一个 Bean 同时指定多个名称，每个名称之间用逗号或分号隔开。IOC 容器可以通过 name 属性配置和管理容器中的 Bean。
 
 ```xml
-<bean id="bookDao" name="dao" class="com.itheima.dao.impl.BookDaoImpl"/>
+<bean id="bookDao" name="book_dao" class="com.itheima.dao.impl.BookDaoImpl"/>
 
 <!--name:为bean指定别名，别名可以有多个，使用逗号，分号，空格进行分隔-->
 <bean id="bookService" name="service service1" class="com.itheima.service.impl.BookServiceImpl">
-    <property name="bookDao" ref="bookDao"/> 
+    <property name="bookDao" ref="book_dao"/> 
 </bean>
 ```
 
 * bean标签的name属性：为bean指定别名，别名可以有多个，使用逗号，分号，空格进行分隔。
 * property标签的ref属性：指定某个对象并依赖注入。该属性值既可以是bean标签的id值也可是name值。
 
-### bean的作用范围scope配置
 
-```xml
-<bean id="bookDao" class="com.itheima.dao.impl.BookDaoImpl" scope="singleton"/>
-<bean id="bookService" class="com.itheima.dao.impl.BookDaoImpl" scope="prototype"/>
-```
+### Bean的作用域 scope 属性
 
-scope属性：默认为singleton(单例)，可选prototype(非单例)。可以控制IOC容器创建bean对象时是否为单例的。
+scope 是 Bean 元素标签的子属性之一。表示 Bean 的作用域。Spring 5 共提供了 6 种 scope 作用域。如下图所示。
+
+![spring_20230803232326.png](../blog_img/spring_20230803232326.png)
+
+
+默认情况下，scope的属性值是 singleton（单例）。也就是说在整个 Spring 应用中， 一种 Bean对象 的实例只有一个。
+
+注意：在以上 6 种 Bean 作用域中，除了 singleton 和 prototype 可以直接在常规的 IoC 容器（例如 ClassPathXmlApplicationContext）中使用外，剩下的都只能在基于 Web 的 ApplicationContext 实现（例如 XmlWebApplicationContext）IOC 容器中才能使用，否则就会抛出一个 IllegalStateException 的异常。
+
 
 #### singleton 作用域（默认）
 
-当spring中的一个bean的作用域为 singleton 时，IOC的容器中只会存在一个共享的该bean的实例，并且所有对该bean的引用，只要id 与该bean的id 相符合，就只会返回bean的单一实例。
+当 Bean 的作用域为 singleton 时，Spring IoC 容器中只会存在一个共享的 Bean 实例。所有对于这个 Bean 的请求和引用，都会返回这个bean实例。
 
 > singleton(单例)的优点：
 1. 优点：bean为单例的意思是在Spring的IOC容器中只会有该类的一个对象
-2. 优点：bean对象只有一个就避免了对象的频繁创建与销毁，达到了bean对象的复用，性能高。
+2. 优点：bean对象只有一个就避免了对象的频繁创建与销毁，节省了重复创建对象的开销。
 3. 缺点：因为所有请求线程共用一个bean对象，所以会存在线程安全问题。
 
-
+> 配置方式如下
 ```xml
-<bean id="school_card" class="com.entity.Schoolcard" scope="singleton">
-	<property name="id" value="1"></property>
-	<property name="name" value="xiaohuang"></property>
-</bean>
+<bean id="school_card" class="com.entity.Schoolcard" scope="singleton"/>
 ```
 
+> 测试代码如下
 ```java
+ApplicationContext app = new ClassPathXmlApplicationContext("applicationContext.xml");
 Schoolcard scard=(Schoolcard) app.getBean("school_card");	
 Schoolcard scard2=(Schoolcard) app.getBean("school_card");	
-System.out.println(scard==scard2);
-// 运行结果为 true。
+System.out.println(scard);
+System.out.println(scard2);
+// 运行结果为
+// com.entity.Schoolcard@65e2dbf3
+// com.entity.Schoolcard@65e2dbf3
 ```
+
+两个 Bean 实例的地址完全一样，这说明 IoC 容器只创建了一个实例。
 
 #### prototype 作用域
 
-当spring中的一个bean的作用域为 prototype 时，IOC容器每次会创建一个新的bean对象实例来提供给使用者。
+当一个bean的作用域为 prototype 时，IOC容器每次会创建一个新的bean对象实例来提供给使用者。prototype作用域相当于new操作符。
 
-但是当bean创建完毕并将实例对象返回给使用者时，容器不在拥有该实例对象的引用，因此，必须使用bean的后置处理器清除prototype的bean。
+注意：当bean创建完毕并将实例对象返回给使用者时，容器不在拥有该实例对象的引用，因此，必须使用bean的后置处理器清除prototype的bean。
 
+> 配置方式如下
 ```xml
 <bean id="school_card" class="com.entity.Schoolcard" scope="prototype">
-	<property name="id" value="1"></property>
-	<property name="name" value="xiaohuang"></property>
 </bean>
 ```
 
+> 测试代码如下
 ```java
 Schoolcard scard=(Schoolcard) app.getBean("school_card");	
 Schoolcard scard2=(Schoolcard) app.getBean("school_card");	
-System.out.println(scard==scard2);
-// 运行结果为 false。
+System.out.println(scard);
+System.out.println(scard2);
+// 运行结果为
+// com.entity.Schoolcard@61f8bee4
+// com.entity.Schoolcard@65e2dbf3
 ```
 
-### bean的实例化
+两个 Bean 实例的地址不一样，这说明 IoC 容器创建两个不同的实例。
+
+
+### bean的生命周期: init-method属性和destroy-method属性
+
+init-method属性和destroy-method属性分别是`<bean>`元素标签的属性。
+
+* init-method :容器加载 Bean 时调用该方法，类似于 Servlet 中的 init() 方法
+* destroy-method : 容器删除 Bean 时调用该方法，类似于 Servlet 中的 destroy() 方法。该属性只在 scope=singleton 时有效
+
+> 例子
+
+(1)项目中添加BookDao、BookDaoImpl、BookService和BookServiceImpl类
+
+```java
+public interface BookDao {
+    public void save();
+}
+public class BookDaoImpl implements BookDao {
+    public void save() {
+        System.out.println("book dao save ...");
+    }
+    //表示bean初始化对应的操作，需要在配置文件中具体指明
+    public void init(){
+        System.out.println("init...");
+    }
+    //表示bean销毁前对应的操作，需要在配置文件中具体指明
+    public void destory(){
+        System.out.println("destory...");
+    }
+}
+```
+
+(2)修改配置文件
+
+```xml
+<!--
+	在bean 中声明并设置init-method ，destroy-method。
+	为bean指定创建 和 销毁的方法
+-->
+<bean id="bookDao" class="com.itheima.dao.impl.BookDaoImpl" init-method="init" destroy-method="destory"/>
+```
+* init-method: bean初始化方法
+* destroy-method：bean销毁方法
+
+(3)编写Test运行类，加载Spring的IOC容器，并从中获取对应的bean对象
+
+```java
+public class Test {
+    public static void main( String[] args ) {
+        // ApplicationContext中没有close方法
+        // ApplicationContext ctx = new ClassPathXmlApplicationContext("applicationContext.xml");
+        ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("applicationContext.xml");
+        BookDao bookDao = (BookDao) ctx.getBean("bookDao");
+        bookDao.save();
+        ctx.close(); //关闭ioc容器
+    }
+}
+```
+
+* 此处不能使用ApplicationContext获取IOC容器，该类没有关闭容器方法。无法触发销毁容器中的bean对象。因此使用ClassPathXmlApplicationContext类。
+
+(4)运行结果
+```
+init...
+book dao save ...
+destory...
+```
+
+init-method绑定的方法为初始化方法，在bean对象初始化的时候运行。destroy-method绑定的方法为销毁方法，在bean对象销毁的时候运行。
+
+
+## Bean对象的实例化
+
+当Spring应用程序启动的时候，IOC容器会加载并解析配置文件。通过读取配置文件上的信息，来实例化Bean对象。
 
 IOC容器实例化bean对象有三种方式，构造方法,静态工厂和实例工厂。
 
-#### 构造方法实例化bean
+### 构造方法实例化bean
 
-构造方法实例化，本质上就是IOC容器通过bean对象的构造方法来实现化bean对象
+构造方法实例化，本质上就是IOC容器通过调用bean对象的构造方法来实例化bean对象
 
 (1)步骤1:准备需要被创建的类，并给bean对象中添加无参构造方法
 
@@ -121,6 +251,7 @@ public class BookDaoImpl implements BookDao {
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
+    <!--xml配置文件中的bean对象信息-->
 	<bean id="bookDao" class="com.itheima.dao.impl.BookDaoImpl"/>
 </beans>
 ```
@@ -145,11 +276,11 @@ book dao constructor is running ....
 book dao save ...
 ```
 
-<font color="red">总结：IOC容器实例化bean对象，默认使用的是bean的无参构造方法。如果bean对象没有无参构造方法，IOC容器实例化bean会报错。</font>
+<font color="red">总结：由运行结果可知，IOC容器实例化一个bean对象，默认使用的是bean对象的无参构造方法。如果bean对象没有无参构造方法，IOC容器实例化bean对象会报错。</font>
 
-#### 静态工厂实例化bean
+### 静态工厂实例化bean
 
-静态工厂实例化，本质上就是IOC容器通过第三方工厂类的静态方法来实现化bean对象
+静态工厂实例化，本质上就是IOC容器通过第三方工厂类的静态方法来实例化bean对象
 
 (1)准备一个OrderDao接口和OrderDaoImpl接口实现类
 
@@ -186,13 +317,14 @@ public class OrderDaoFactory {
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
+<!--factory-method属性 指向工厂类的静态方法-->
 <bean id="orderDao" class="com.itheima.factory.OrderDaoFactory" factory-method="getOrderDao"/>
 
 </beans>
 ```
 
 * class:工厂类的类全名
-* factory-mehod:工厂类中创建对象的方法名
+* factory-mehod:指向工厂类中静态方法名称，该静态方法用于创建bean对象。
 
 > 对应关系如图所示
 
@@ -217,7 +349,7 @@ order dao save ...
 ```
 
 > 静态工厂实例化bean的优点：
-1. 在工厂类的静态方法中，除了new对象还可以做其他的一些业务操作，例如:
+1. 在工厂类的静态方法中，除了new对象还可以做其他的一些业务操作。
 ```java
 public class OrderDaoFactory {
     public static OrderDao getOrderDao(){
@@ -227,9 +359,9 @@ public class OrderDaoFactory {
 }
 ```
 
-#### 实例工厂实例化bean
+### 实例工厂实例化bean
 
-实例工厂实例化，本质上就是IOC容器通过第三方工厂类的静态方法来实现化bean对象
+实例工厂实例化，本质上就是IOC容器通过第三方工厂类的方法来实现化bean对象
 
 (1)准备一个UserDao和UserDaoImpl类
 
@@ -244,7 +376,7 @@ public class UserDaoImpl implements UserDao {
 }
 ```
 
-(2)创建一个工厂类OrderDaoFactory并提供一个普通方法。
+(2)创建一个工厂类OrderDaoFactory并提供一个普通方法。该方法用于new 一个bean对象。
 
 <font color="red">注意此处和静态工厂的工厂类不一样的地方是方法不是静态方法</font>
 
@@ -295,91 +427,134 @@ public class AppForInstanceUser {
 user dao save ...
 ```
 
-### bean的生命周期
 
-* bean创建之后，想要添加内容，比如用来初始化需要用到资源
-* bean销毁之前，想要添加内容，比如用来释放用到的资源
+## Bean 依赖注入
 
-(1)项目中添加BookDao、BookDaoImpl、BookService和BookServiceImpl类
+当IOC容器根据配置文件创建完Bean对象后，IOC容器还需要根据配置文件来为Bean对象之间建立依赖关系。这个过程称为依赖注入。
+
+简单点说，依赖注入就是将属性注入到 Bean 中的过程，而这属性既可以普通属性，也可以是一个对象（Bean）。
+
+依赖注入主要有两种注入方式：setter注入，构造器注入。
+
+### 构造器注入
+
+构造器注入的大致步骤如下：
+1. 在 Bean 中添加一个有参构造函数，有参构造函数内的每一个参数代表一个需要注入的属性；
+2. 在 XML 配置文件中，对 Bean 进行定义；使用 `<constructor-arg>` 元素，对构造函数内的属性进行赋值，有参构造函数内有多少参数，就需要使用多少个 `<constructor-arg>` 元素。
+
+#### 构造方法注入基本数据类型
 
 ```java
-public interface BookDao {
-    public void save();
-}
 public class BookDaoImpl implements BookDao {
-    public void save() {
-        System.out.println("book dao save ...");
-    }
-    //表示bean初始化对应的操作，需要在配置文件中具体指明
-    public void init(){
-        System.out.println("init...");
-    }
-    //表示bean销毁前对应的操作，需要在配置文件中具体指明
-    public void destory(){
-        System.out.println("destory...");
+    private String databaseName;
+    private int connectionNum;
+    // 有参构造方法，形参为基本数据类型
+    public BookDaoImpl(String databaseName, int connectionNum) {
+        this.databaseName = databaseName;
+        this.connectionNum = connectionNum;
     }
 }
 ```
 
-(2)修改配置文件
+在applicationContext.xml中进行配置
+```xml
+<bean id="bookDao" class="com.itheima.dao.impl.BookDaoImpl">
+    <constructor-arg name="databaseName" value="mysql"/>
+    <constructor-arg name="connectionNum" value="666"/>
+</bean>
+```
+
+在标签`<constructor-arg>`中
+* name属性对应的值为构造方法形参的参数名称，必须要保持一致。
+* value属性为要注入的数值。
+
+#### 构造方法注入引用数据类型
+
+```java
+public class BookServiceImpl implements BookService{
+    private BookDao bookDao;
+    private UserDao userDao;
+    // 有参构造方法，形参为引用数据类型
+    public BookServiceImpl(BookDao bookDao,UserDao userDao) {
+        this.bookDao = bookDao;
+        this.userDao = userDao;
+    }
+}
+```
+
+在applicationContext.xml中进行配置
+```xml
+<bean id="bookDao" class="com.itheima.dao.impl.BookDaoImpl"/>
+<bean id="userDao" class="com.itheima.dao.impl.UserDaoImpl"/>
+<bean id="bookService" class="com.itheima.service.impl.BookServiceImpl">
+    <constructor-arg name="bookDao" ref="bookDao"/>
+    <constructor-arg name="userDao" ref="userDao"/>
+</bean>
+```
+
+在标签`<constructor-arg>`中
+* name属性对应的值为构造函数中方法形参的参数名，必须要保持一致。
+* ref属性指向的是IOC容器中其他bean对象。
+
+### setter注入
+
+setter注入通过 Bean 的 setter 方法，将属性值注入到 Bean 的属性中。
+
+> setter注入 使用方式如下
 
 ```xml
-<!--
-	在bean 中声明并设置init-method ，destroy-method。
-	为bean指定创建 和 销毁的方法
--->
-<bean id="bookDao" class="com.itheima.dao.impl.BookDaoImpl" init-method="init" destroy-method="destory"/>
+<bean id="bookDao" class="com.xxx.xxxx">
+    <!--这是setter注入基础数据类型，需要使用value属性-->
+    <property name="username" value="mysql"/>
+    <!--这是setter注入引用数据类型，需要使用ref属性-->
+    <property name="xxx" ref="bookDao"/>
+</bean>
 ```
-* init-method: bean初始化方法
-* destroy-method：bean销毁方法
 
-(3)编写AppForLifeCycle运行类，加载Spring的IOC容器，并从中获取对应的bean对象
+> setter注入的流程如下
+1. 首先找到bean元素的子元素property。
+2. 获取property元素标签的name属性。将其首字母大写，加上set。例如上面的databaseName变成setDatabaseName。
+3. 然后从bean对象中找到是否有这个setter方法。找到后就把property元素标签的value属性或ref属性值，注入到setter方法形参中。
+4. 如果找不到setter方法，就报空指针异常。
+
+#### setter注入基本数据类型
 
 ```java
-public class AppForLifeCycle {
-    public static void main( String[] args ) {
-        // ApplicationContext中没有close方法
-        // ApplicationContext ctx = new ClassPathXmlApplicationContext("applicationContext.xml");
-        ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("applicationContext.xml");
-        BookDao bookDao = (BookDao) ctx.getBean("bookDao");
-        bookDao.save();
-        ctx.close(); //关闭ioc容器
+public class BookDaoImpl implements BookDao {
+    private String databaseName;
+    private int connectionNum;
+    //set方法
+    public void setConnectionNum(int connectionNum) {
+        this.connectionNum = connectionNum;
+    }
+    //set方法
+    public void setDatabaseName(String databaseName) {
+        this.databaseName = databaseName;
+    }
+    public void save() {
+        System.out.println("book dao save ..."+databaseName+","+connectionNum);
     }
 }
 ```
 
-* 此处不能使用ApplicationContext获取IOC容器，该类没有关闭容器方法。无法触发销毁容器中的bean对象。所以使用ClassPathXmlApplicationContext类。
-
-(4)运行结果
+在applicationContext.xml中进行配置
+```xml
+<bean id="bookDao" class="com.itheima.dao.impl.BookDaoImpl">
+    <property name="databaseName" value="mysql"/>
+    <property name="connectionNum" value="10"/>
+</bean>
 ```
-init...
-book dao save ...
-destory...
+
+* name是bean对象的属性名称。
+* value是要注入给属性的数值。Spring在注入的时候会自动转换。但是不能写为下面的样子。因为spring在将`abc`转换成int类型的时候就会报错。
+
+```xml
+<property name="connectionNum" value="abc"/>
 ```
 
-(5)bean生命周期小结
+#### setter注入引用数据类型
 
-bean的生命周期如下:
-* 初始化容器
-  * 1.创建对象(内存分配)
-  * 2.执行构造方法
-  * 3.执行属性注入(set操作)
-  * 4.执行bean初始化方法
-* 使用bean
-  * 1.执行业务操作
-* 关闭/销毁容器
-  * 1.执行bean销毁方法
-
-
-## DI依赖注入各项配置
-
-依赖注入可以为容器中bean与bean之间的建立依赖关系。
-
-依赖注入主要有两种注入方式：属性注入（setter注入），构造器注入。
-
-* 属性注入通过setter方法来给bean对象注入属性值或其他依赖对象。
-
-### setter注入引用数据类型
+setter注入 主要是通过 Bean 的 setter 方法，将属性值注入到 Bean 的属性中。
 
 (1)项目中添加类
 ```java
@@ -401,7 +576,7 @@ public class BookServiceImpl implements BookService{
 }
 ```
 
-(2)修改配置文件
+(2)修改applicationContext.xml配置文件
 
 ```xml
 <bean id="bookDao" class="com.itheima.dao.impl.BookDaoImpl"/>
@@ -410,118 +585,32 @@ public class BookServiceImpl implements BookService{
 </bean>
 ```
 
-在标签`<property>`中
-* name="bookDao"的作用是让IOC容器在获取到名称后，将首字母大写，前面加set找对应的setBookDao()方法进行对象注入。
+* name="bookDao"的作用是让IOC容器在获取到名称后，将首字母大写，前面加set后，找到对应的setBookDao()方法进行对象注入。
 * ref="bookDao"的作用是让Spring能在IOC容器中找到id为bookDao的Bean对象注入到bookService对象中。ref 属性表示被引用的bean。
 
-### setter注入基本数据类型
 
-```java
-public class BookDaoImpl implements BookDao {
-    private String databaseName;
-    private int connectionNum;
-    public void setConnectionNum(int connectionNum) {
-        this.connectionNum = connectionNum;
-    }
-    public void setDatabaseName(String databaseName) {
-        this.databaseName = databaseName;
-    }
-    public void save() {
-        System.out.println("book dao save ..."+databaseName+","+connectionNum);
-    }
-}
-```
+## 自动装配 : autowire 属性
 
-```xml
-<bean id="bookDao" class="com.itheima.dao.impl.BookDaoImpl">
-    <property name="databaseName" value="mysql"/>
-    <property name="connectionNum" value="10"/>
-</bean>
+随着Spring 应用的不断发展，IOC 容器中包含的 Bean 会越来越多，Bean 和 Bean 之间的依赖关系也越来越复杂，这就使得我们编写的 XML 配置文件也越来越复杂，越来越繁琐。
 
-<!--其他例子，给student对象的name属性，注入数值 -->
-<bean id="student" class="com.entity.Student">
-  	<property name="name" value="xiaobing"/>
-</bean>
-```
+因此Spring提供了自动装配功能，可以让IOC容器自动建立Bean对象之间的依赖关系。简而言之，自动装配就是让IOC容器自动的进行依赖注入。
 
-* value:后面跟的是简单数据类型，Spring在注入的时候会自动转换。
+> 自动装配的使用方式
 
-但是不能写为下面的样子。因为spring在将`abc`转换成int类型的时候就会报错。
-```xml
-<property name="connectionNum" value="abc"/>
-```
+Spring 框架式默认不开启自动装配的，要想使用自动装配，则需要对xml配置文件中 `<bean>` 元素的 autowire 属性进行设置。
 
-### 构造方法注入引用数据类型
+> 自动装配的规则
 
-```java
-public class BookServiceImpl implements BookService{
-    private BookDao bookDao;
-    private UserDao userDao;
+Spring 共提供了 5 中自动装配规则，它们分别与 autowire 属性的 5 个取值对应。
 
-    public BookServiceImpl(BookDao bookDao,UserDao userDao) {
-        this.bookDao = bookDao;
-        this.userDao = userDao;
-    }
-}
-```
+如图所示
+![spring_20230803161834.png](../blog_img/spring_20230803161834.png)
 
-在applicationContext.xml中配置注入
-```xml
-<bean id="bookDao" class="com.itheima.dao.impl.BookDaoImpl"/>
-<bean id="userDao" class="com.itheima.dao.impl.UserDaoImpl"/>
-<bean id="bookService" class="com.itheima.service.impl.BookServiceImpl">
-    <constructor-arg name="bookDao" ref="bookDao"/>
-    <constructor-arg name="userDao" ref="userDao"/>
-</bean>
-```
+### 默认不适用自动装配 no
 
-在标签`<constructor-arg>`中
-* name属性对应的值为构造函数中方法形参的参数名，必须要保持一致。
-* ref属性指向的是IOC容器中其他bean对象。
+autowire="no" 表示不使用自动装配，此时必须手动配置 `<bean>` 元素中的 `<constructor-arg>`或 `<property>` 子元素来维护 Bean 的依赖关系。
 
-### 构造方法注入基本数据类型
-
-```java
-public class BookDaoImpl implements BookDao {
-    private String databaseName;
-    private int connectionNum;
-    public BookDaoImpl(String databaseName, int connectionNum) {
-        this.databaseName = databaseName;
-        this.connectionNum = connectionNum;
-    }
-}
-```
-
-在applicationContext.xml中进行注入配置
-
-```xml
-<bean id="bookDao" class="com.itheima.dao.impl.BookDaoImpl">
-    <constructor-arg name="databaseName" value="mysql"/>
-    <constructor-arg name="connectionNum" value="666"/>
-</bean>
-```
-
-在标签`<constructor-arg>`中
-* name属性对应的值为构造函数中方法形参的参数名，必须要保持一致。
-* value属性为要注入的数值。
-
-
-## 自动装配
-
-自动装配：IoC容器根据bean所依赖的资源，在IOC容器中自动查找并注入到bean对象中的过程称为自动装配。
-
-自动装配方式以下几种：
-* 按类型（常用）
-* 按名称
-* 按构造方法
-
-自动装配默认是不开启的。
-
-### 按类型自动装配 byType
-
-按类型自动装配是指IOC容器根据类型自动装配。
-
-<font color="red">注意：若ioc容器中有多个与目标bean类型一致的bean对象，在这种情况下，spring无法判定，不能执行自动装配。</font>
+> 例子
 
 ```java
 public interface BookService {
@@ -529,11 +618,9 @@ public interface BookService {
 }
 public class BookServiceImpl implements BookService{
     private BookDao bookDao;
-
     public void setBookDao(BookDao bookDao) {
         this.bookDao = bookDao;
     }
-
     public void save() {
         System.out.println("book service save ...");
         bookDao.save();
@@ -541,30 +628,30 @@ public class BookServiceImpl implements BookService{
 }
 ```
 
-修改applicationContext.xml配置文件
-
 ```xml
 <bean id="bookDao" class="com.itheima.dao.impl.BookDaoImpl"/>
-<!-- <bean id="bookService" class="com.itheima.service.impl.BookServiceImpl">
+<bean id="bookService" class="com.itheima.service.impl.BookServiceImpl">
+    <!--setter注入，注入引用数据类型-->
     <property name="bookDao" ref="bookDao"/>
-</bean> -->
-
-<!-- 这处bean标签与上面注释的bean标签功能相同 -->
-<!--autowire属性：开启自动装配，通常使用按类型装配-->
-<bean id="bookService" class="com.itheima.service.impl.BookServiceImpl" autowire="byType"/>
+</bean>
 ```
 
-1. autowire="byType"意思是先根据bean对象中的setter方法名称来查询IOC容器中是否有可注入依赖对象。
-2. 然后IOC容器查询到setBookDao方法，根据方法的参数来查询容器中是否相同类型的bean对象。
-3. 查到后，将该bean对象注入到bookService中。
-
-> 按类型装配注意事项
-
-* setter方法不能省略
-* 依赖对象必须要被IOC容器管理
-* 若IOC容器按照类型在IOC容器中找到多个对象，会报`NoUniqueBeanDefinitionException`
-
 ### 按名称自动装配 byName
+
+autowire="byName"，表示按bean中的set方法名称自动装配。
+
+> 流程如下
+1. 如果某个bean，在配置文件中设置autowire="byName"。
+2. 首先找到该bean对应的类中所有的set方法名，例如setBookDao，将set去掉并且首字母小写的字符串，即bookDao。
+3. 然后去IOC容器中寻找是否有此字符串作为id或name的bean对象。如果有，就取出注入；如果没有，就报空指针异常。
+
+<font color="red">从该流程可以看出，byName自动装配，本质上还是利用bean对象的set方法来注入。</font>
+
+> 参考图片
+
+![spring_20230803222007.png](../blog_img/spring_20230803222007.png)
+
+> 例子
 
 ```java
 public interface BookService {
@@ -587,17 +674,80 @@ public class BookServiceImpl implements BookService{
 ```xml
 <bean id="bookDao" class="com.itheima.dao.impl.BookDaoImpl"/>
 <!--autowire属性：开启自动装配-->
+<!--然后找到对应的类中是所有set方法名。去掉set,首字母小写后得到的新字符串。-->
+<!--然后根据新字符串找到以其为id或name的bean对象。将其注入到set方法中-->
 <bean id="bookService" class="com.itheima.service.impl.BookServiceImpl" autowire="byName"/>
+``` 
+
+### 按类型自动装配 byType
+
+autowire="byType"，表示按bean中的属性类型来自动装配。
+
+> 流程如下
+1. 如果某个bean，在配置文件中设置autowire="byType"。
+2. 首先找到该bean对应的类中所有的属性的类型，例如bookDao属性的类型是BookDao。
+3. 然后去IOC容器中寻找是否有相同类型的bean对象。如果有，就取出注入；如果没有，就报`NoUniqueBeanDefinitionException`异常。
+
+<font color="red">注意:使用byType这种方式，必须保证配置文件中所有bean的class属性的值是唯一的，否则就会报错。并且byType这种装配方式，对于基本数据类型的无效，只针对引用数据类型。</font>
+
+> 参考图片
+
+![spring_20230803222144.png](../blog_img/spring_20230803222144.png)
+![spring_20230803222310.png](../blog_img/spring_20230803222310.png)
+
+> 例子
+```java
+public interface BookService {
+    public void save();
+}
+public class BookServiceImpl implements BookService{
+    //属性
+    private BookDao bookDao;
+
+    public void setBookDao(BookDao bookDao) {
+        this.bookDao = bookDao;
+    }
+
+    public void save() {
+        System.out.println("book service save ...");
+        bookDao.save();
+    }
+}
 ```
 
-autowire="byName"会根据setter方法名称，来查询IOC容器中是否有可注入依赖对象
+修改applicationContext.xml配置文件
 
-### 按构造方法自动装配
+```xml
+<bean id="bookDao" class="com.itheima.dao.impl.BookDaoImpl"/>
+
+<!--autowire属性：开启byType自动装配-->
+<bean id="bookService" class="com.itheima.service.impl.BookServiceImpl" autowire="byType"/>
+```
+
+1. autowire="byType"意思是先根据bean中的属性的类型来查询IOC容器中是否有可注入依赖对象。例如bookService中有一个BookDao类型的属性。
+2. 然后IOC容器查询是否有BookDao类型的bean。如果有两个，springg无法分辨就会报错，因此保证每个类型的bean在IOC容器中只有一个。
+3. 查到后，将该bean注入到bookService中。
+
+
+### 按构造方法自动装配 constructor
+
+autowire="constructor"，表示按bean中的构造方法的形参类型来自动装配。
+
+> 流程如下
+1. 如果某个bean，在配置文件中设置autowire="constructor"。
+2. 首先找到该bean对应的类中所有的构造方法，然后找出构造方法的形参的类型。例如BookDao类型和UserDao类型。
+3. 然后去IOC容器中寻找是否有相同类型的bean对象。如果有，就取出注入；
+
+<font color="red">从该流程可以看出，constructor自动装配，本质上还是利用bean对象的构造方法的形参来进行依赖注入。</font>
 
 ```java
 public class BookServiceImpl implements BookService{
     private BookDao bookDao;
     private UserDao userDao;
+    //无参构造方法
+    public BookServiceImpl() {
+    }
+    //有参构造方法
     public BookServiceImpl(BookDao bookDao,UserDao userDao) {
         this.bookDao = bookDao;
         this.userDao = userDao;
@@ -614,14 +764,23 @@ public class BookServiceImpl implements BookService{
 </bean>
 ```
 
-autowire="constructor" 根据构造方法的参数来从IOC容器中找到注入依赖对象。
+### 按上一级bean元素标签来自动装配 default
 
-### 自动装配总结
+autowire="default", 默认采用上一级标签`<beans>`设置的自动装配规则（default-autowire）进行装配
 
-1. 自动装配用于引用类型依赖注入，不能对简单类型进行操作
-2. 使用按类型装配时（byType）必须保障容器中相同类型的bean唯一，推荐使用
-3. 使用按名称装配时（byName）必须保障容器中具有指定名称的bean，因变量名与配置耦合，不推荐使用
-4. 自动装配优先级低于setter注入与构造器注入，同时出现时自动装配配置失效。
+> 例子
+```xml
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+   http://www.springframework.org/schema/beans/spring-beans-3.0.xsd" default-autowire="byType">
+
+    <bean id="aaa" class="net.xxxx" autowire="default"/>
+</beans>
+```
+
+代码中`<beans>`元素标签的default-autowire="byType",因此aaa的装配规则为byType。
+
 
 ## spring读取外部属性文件(properties文件)
 

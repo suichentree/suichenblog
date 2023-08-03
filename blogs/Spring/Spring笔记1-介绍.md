@@ -14,20 +14,30 @@ tags:
 
 当前Spring的版本为5.3.22
 
-该笔记有一部分来自于黑马程序员Spring课程视频中的课件资料。
+## Spring介绍
 
-## 介绍
+> 狭义的 Spring
+
+狭义的 Spring 特指 Spring Framework，通常我们将它称为 Spring 框架。
+
+Spring 有两个核心部分：IoC 和 AOP。
+
+> 广义上的 Spring
+
+广义上的 Spring 泛指以 Spring Framework 为核心的 Spring 技术栈。Spring 技术栈中的各个子项目涵盖了从企业级应用开发到云计算等各方面的内容，能够帮助开发人员解决软件发展过程中不断产生的各种实际问题，给开发人员带来了更好的开发体验。
 
 ### Spring家族介绍
 
-Spring发展到今天已经形成了完整的生态圈,Spring构建了若干个项目,每个项目用于完成特定的功能。我们可以根据需要自行选择，把这些个项目组合起来使用。用于完成整个大项目工程的构建、设计与开发。
+Spring 经过十多年的发展，Spring 已经不再是一个单纯的应用框架，而是逐渐发展成为一个由多个不同子项目（模块）组成的生态圈，例如 Spring Framework、Spring MVC、SpringBoot、Spring Cloud、Spring Data、Spring Security 等，其中 Spring Framework 是其他子项目的基础。
 
 ![spring20220905162200.png](../blog_img/spring20220905162200.png)
 
-下面是需要重点关注的
+例如
 * Spring Framework: 是Spring中最早最核心的技术框架，也是所有其他技术的基础。
-* SpringBoot: SpringBoot是来帮助Spring在简化的基础上能更快速进行开发。
-* SpringCloud: 是用来做分布式之微服务架构的相关开发。
+* Spring Data : Spring 提供的数据访问模块，对 JDBC 和 ORM 提供了很好的支持。通过它，开发人员可以使用一种相对统一的方式，来访问位于不同类型数据库中的数据。
+* Spring Security : 前身为 Acegi，是 Spring 中较成熟的子模块之一。它是一款可以定制化的身份验证和访问控制框架。
+* SpringBoot: SpringBoot是 Spring 团队提供的全新框架，它为 Spring 以及第三方库提供了一些开箱即用的配置，可以简化 Spring 应用的搭建及开发过程。
+* SpringCloud: 一款基于 Spring Boot 实现的微服务框架。它并不是某一门技术，而是一系列微服务解决方案或框架的有序集合。它将市面上成熟的、经过验证的微服务框架整合起来，并通过 Spring Boot 的思想进行再封装，屏蔽调其中复杂的配置和实现原理，最终为开发人员提供了一套简单易懂、易部署和易维护的分布式系统开发工具包。
 
 <font color="red">我们学习的Spring其实特指的是Spring家族中的Spring Framework框架。</font>
 
@@ -40,19 +50,18 @@ Spring发展到今天已经形成了完整的生态圈,Spring构建了若干个�
 * Spring4.0根据JDK的版本升级对个别API进行了调整。
 * Spring5.0已经全面支持JDK8。
 
-② Spring Framework5的架构图
+② Spring Framework 5 的架构图
 
 <font color="red">Spring Framework主要有7大模块组成。每个模块既可以单独使用，又可以与其他模块组合使用。</font>
 
 ![spring20220905163724.png](../blog_img/spring20220905163724.png)
 
-* Core Container核心容器模块：这个模块是Spring最核心的模块，其他的都需要依赖该模块。它实现了IOC 模式。
+* Core Container核心容器模块：这个模块是Spring Framework最核心的模块，其他的都需要依赖该模块。它实现了IOC 模式。
 * AOP: 面向切面编程，它依赖核心层容器，目的是在不改变原有代码的前提下对其进行功能增强。
 * Aspects: AOP是设计思想,Aspects是对AOP思想的具体实现
-* Data Access: 数据访问，Spring全家桶中有对数据访问的具体实现技术
-* Data Integration: 数据集成，Spring支持整合其他的数据层解决方案，比如Mybatis
-* Transactions: 事务，Spring中事务管理是Spring AOP的一个具体实现。
-* TEST模块：Spring主要整合了Junit来完成单元测试和集成测试
+* Data Access / Data Integration: 数据访问与集成，Spring Framework 中有对数据访问的具体实现技术。并且 Spring Framework支持整合其他的数据层解决方案，比如Mybatis
+* Transactions: 事务，Spring Framework中事务管理是Spring AOP的一个具体实现。
+* TEST模块：Spring Framework主要整合了Junit来完成单元测试和集成测试
 
 
 ### Spring Framework框架主要解决的问题是什么？
@@ -79,33 +88,98 @@ Spring发展到今天已经形成了完整的生态圈,Spring构建了若干个�
 * 使用对象时，不通过new产生对象，由Spring容器来提供对象。
 * 由Spring负责维护容器中对象之间的依赖关系。
 
-### Spring Framework 核心概念
+## Spring Framework 核心概念
 
-上面的解决方案体现的就是Spring Framework 的核心概念IOC和DI。
+上面的解决方案体现的就是Spring Framework 的两个核心概念IOC和DI。
 
 * IOC（控制反转）：spring负责创建所有的Java对象，这些Java对象被称为Java Bean对象。使用对象时，程序不主动new对象，由Spring来提供对象。
 * DI（依赖注入）：Spring负责管理对象与对象之间的依赖关系。而不是在程序中以编码的方式将对象与对象耦合在一起。
 
-#### IOC控制反转
+### IOC控制反转
 
-1. Spring提供一个容器，称为IOC容器。
-2. IOC容器负责对象的创建、初始化等一系列工作。让程序不主动new对象。由IOC容器来提供对象。
-3. 被创建或被管理的对象在IOC容器中统称为Bean对象。
-4. IOC容器中的bean对象之间，本来是没有依赖关系的，因此无法互相调用。
-5. DI依赖注入就是用于在IOC容器中维护对象与对象之间的依赖关系。
+> 在 Spring 应用中，Java 对象创建的控制权是掌握在 IoC 容器手里的，其大致步骤如下。
+1. 开发人员通过 XML 配置文件、注解 等方式，对 Java 对象进行定义，例如在 XML 配置文件中使用 `<bean>` 标签、在 Java 类上使用 `@Component` 注解等。
+2. Spring 应用启动后会创建一个容器，称为IOC容器。
+3. IOC容器会负责对象的创建、初始化等一系列工作。并管理起来。
+4. 这个被IOC容器创建并管理的对象在IOC容器中统称为Bean对象。
+5. 当我们想要使用某个 Bean 时，可以直接从 IoC 容器中获取（例如通过 ApplicationContext 的 getBean() 方法），而不需要手动通过代码（例如 new Obejct() 的方式）创建。
 
-#### DI依赖注入
+
+IoC 带来的最大改变不是代码层面的，而是从思想层面上发生了“主从换位”的改变。原本调用者是主动的一方，它想要使用什么资源就会主动出击，自己创建；但在 Spring 应用中，IoC 容器掌握着主动权，调用者则变成了被动的一方，被动的等待 IoC 容器创建它所需要的对象（Bean）。
+
+这个过程在职责层面发生了控制权的反转，把原本调用者通过代码实现的对象的创建，反转给 IoC 容器来帮忙实现，因此我们将这个过程称为 Spring 的“控制反转”。
+
+### DI依赖注入
+
+IOC容器中的bean对象之间，本来是没有依赖关系的，因此无法在代码层面上互相调用。DI依赖注入就是用于在IOC容器中建立对象与对象之间的依赖关系。
+
+> 什么是对象之间的依赖关系？
+
+在面向对象中，对象和对象之间是存在一种叫做“依赖”的关系。简单来说，依赖关系就是一个对象中需要用到另外一个对象的时候，即对象中存在一个属性，这个属性是另外一个类的对象。
+
+> 例子1
+```java
+public class B {
+    String bid;
+    A a;
+}
+```
+
+例如，上面代码中，B 中存在一个 A 类型的对象属性 a，此时我们就可以说 B 的对象依赖于对象 a。A与B之间存在依赖关系。
+
+
+> 例子2 如下图所示
 
 ![spring20220906101905.png](../blog_img/spring20220906101905.png)
 
-在IOC容器中建立bean对象之间的依赖关系的过程，称为依赖注入。 
+BookServiceImpl的save()方法，从逻辑上是依赖于BookDaoImpl的save()方法的。但是如果没有在Ioc容器中建立两者的依赖关系。那么左边save()方法就会报错。因为无法从BookServiceImpl对象中获取BookDaoImpl对象。
 
-#### 控制反转和依赖注入要实现的目标
+但是如果提前在IOC容器中建立了两个对象的依赖关系，那么就无须先new一个BookDaoImpl对象，再调用BookDaoImpl对象的save()方法了。
+
+### 控制反转和依赖注入要实现的目标
 
 IOC和DI的最终目标就是:充分解耦
-1. 使用IOC容器管理bean对象（IOC)
+1. 使用IOC容器管理bean对象（IOC）
 2. 在IOC容器内将需要依赖的bean对象之间进行关系绑定（DI）
 3. 最终目标：使用对象时不仅可以直接从IOC容器中获取，并且获取到的bean已经绑定了所有的依赖关系。
+
+### IOC容器的两种实现方式
+
+Spring 框架为我们提供了两种不同类型 IoC 容器，它们分别是 BeanFactory 和 ApplicationContext。
+
+> BeanFactory
+
+BeanFactory 是 IoC 容器的基本实现，也是 Spring 提供的最简单的 IoC 容器，它提供了 IoC 容器最基本的功能。
+
+BeanFactory 采用懒加载（lazy-load）机制，容器在加载配置文件时并不会立刻创建 Java 对象，只有程序中获取（使用）这个对对象时才会创建。
+
+例如：使用 BeanFactory 获取 HelloWorld 的对象
+```java
+public static void main(String[] args) {
+    BeanFactory context = new ClassPathXmlApplicationContext("Beans.xml");
+    HelloWorld obj = context.getBean("helloWorld", HelloWorld.class);
+    obj.getMessage();
+}
+```
+
+> ApplicationContext
+
+ApplicationContext 是 BeanFactory 接口的子接口，是对 BeanFactory 的扩展。ApplicationContext 在 BeanFactory 的基础上增加了许多企业级的功能，例如 AOP（面向切面编程）、国际化、事务支持等。
+
+![spring_20230803135304.png](../blog_img/spring_20230803135304.png)
+
+例如：使用 ApplicationContext 获取 HelloWorld 的对象
+```java
+public class App {
+    public static void main(String[] args) {
+        //创建IOC容器
+	    ApplicationContext ctx = new ClassPathXmlApplicationContext("Beans.xml");
+        // 从ioc容器中获取对象，并调用方法
+        HelloWorld obj = (HelloWorld) ctx.getBean("helloWorld");
+        obj.getMessage();
+    }
+}
+```
 
 
 ## Spring Framework 快速开始

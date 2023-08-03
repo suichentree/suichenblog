@@ -12,7 +12,7 @@ tags:
 
 # Spring笔记3-注解
 
-## 控制反转（IOC） 的注解开发
+## 控制反转（IOC） 的纯注解开发
 
 之前都是通过xml配置文件的方式来配置IOC容器中的bean对象，并且进行bean对象之间的依赖注入。这种复杂的地方在于xml配置。但是我们可以通过注解的方式来简化xml配置文件。甚至可以做到纯注解开发（无须xml配置文件）。
 
@@ -92,22 +92,22 @@ public class SpringApplicationConfig {
 }
 ```
 
-* @Configuration注解：用于设定当前类为配置类,用于替换为applicationContext.xml配置文件
+* @Configuration注解：用于设定当前类为配置类,用于替换applicationContext.xml配置文件
 * @ComponentScan注解：用于设定扫描路径。替换`<context:component-scan base-package=""/>`标签。
 
-如图所示
+如下图所示
 ![spring20220907174727.png](../blog_img/spring20220907174727.png)
 
-
-④创建运行类并执行
+④ 启动类TEST中通过加载配置类来创建IOC容器。
 
 ```java
-public class App {
+public class TEST {
     public static void main( String[] args )
     {
-        // new AnnotationConfigApplicationContext(SpringApplicationConfig.class)
-        // 加载SpringApplicationConfig配置类，从配置类中读取IOC容器配置
+        // new AnnotationConfigApplicationContext(SpringApplicationConfig.class) 加载SpringApplicationConfig配置类，根据配置类来创建IOC容器
         ApplicationContext applicationContext = new AnnotationConfigApplicationContext(SpringApplicationConfig.class);
+
+        // 从IOC容器中获取BookDao对象
         BookDao bookDao = applicationContext.getBean("BookDao", BookDao.class);
         BookService bookService = applicationContext.getBean("BookService",BookService.class);
         bookDao.save();
@@ -132,52 +132,69 @@ ApplicationContext ctx = new AnnotationConfigApplicationContext(SpringApplicatio
 * ClassPathXmlApplicationContext是通过XML的方式来加载配置文件的类
 * AnnotationConfigApplicationContext是通过注解的方式来加载配置类的类
 
-### @Component/@Controller/@Service/@Repository 注解
 
-@Component @Controller @Service @Repository这四个注解的作用：当spring扫描到这些注解后，将注解标记的类设置为IOC容器中的bean对象。
+### 配置类和扫描路径 @Configuration,@ComponentScan 注解
 
-* @Component :基本注解，用于标识类，该类将被IOC容器管理。
-* @Respository :标识数据层类，持久层类。
-* @Service: 标识业务层类。
-* @Controller ：标识控制层类。
-
-
-> 其余三个注解和@Component注解的作用是一样的，为什么要衍生出这三个呢?
-
-方便区分出这个类是属于表现层、业务层还是数据层的类。
-
-### @Configuration,@ComponentScan 注解
-
-* @Configuration注解：设置当前注解类为spring的配置类。通过配置类的形式来替换applicationContext.xml配置文件
-* @ComponentScan注解：设定扫描路径，此注解只能添加一次，多个数据请用数组格式。
+* @Configuration注解：标记当前类为spring的配置类。通过配置类的形式来代替applicationContext.xml配置文件
+* @ComponentScan注解：设定 spring 的扫描路径，此注解只能添加一次，多个数据请用数组格式。
 
 ```java
-@ComponentScan({com.itheima.service","com.itheima.dao"})
+//这两个注解一起表示。该类代替applicationContext.xml配置文件。
+//并且扫描com.example包和com.itheima包下的所有文件。若找到@Component注解。则将该注解标记的类变成bean对象存放到IOC容器中。
+@Configuration
+@ComponentScan({"org.example","com.itheima"})
+public class SpringApplicationConfig {
+}
 ```
 
 ![spring20220907174727.png](../blog_img/spring20220907174727.png)
 
 如图所示左边的applicationContext.xml配置文件与右边的配置类作用是等价的。
 
-### 注解设置bean作用范围 @Scope
+### Bean定义 @Component/@Controller/@Service/@Repository 注解
 
+@Component @Controller @Service @Repository这四个注解的作用：当spring扫描到这些注解后，将注解标记的类设置为IOC容器中的bean对象。
+
+这四个注解相当于xml配置文件中的`<bean>`元素标签。
+
+```xml
+<bean id="xxx" class="com.xxxx"/>
+```
+
+> 其余三个注解和@Component注解的作用是一样的，为什么要衍生出这三个呢?
+
+方便区分出这个类是属于表现层、业务层，数据层还是普通的类。
+
+* @Component :基本注解，用于标识类，该类将被IOC容器管理。
+* @Respository :标识数据层类，持久层类。
+* @Service: 标识业务层类。
+* @Controller ：标识控制层类。
+
+### bean作用域  @Scope注解
+
+@Scope注解：设置该类bean对象的作用域。默认值singleton（单例）
+
+@Scope注解就相当于`<bean>`元素标签的scope属性。Spring 5 共提供了 6 种 scope 作用域。如下图所示。
+
+![spring_20230803232326.png](../blog_img/spring_20230803232326.png)
+
+
+> 例子
 ```java
-public interface BookDao {
-    public void save();
-}
-@Component("bookDao")
 //@Scope设置bean的作用范围 
+@Component("Book")
 @Scope("prototype")
-public class BookDaoImpl implements BookDao {
-    public void save() {
-        System.out.println("book dao save ..." );
-    }
+public class Book {
+    ......
 }
 ```
 
-* @Scope注解：设置该类bean对象的作用范围。默认值singleton（单例），可选值prototype（非单例）。
 
-### 注解设置bean生命周期 @PostConstruct @PreDestroy
+### bean生命周期 @PostConstruct @PreDestroy注解
+
+@PostConstruct注解相当于`<bean>`元素标签的init-method属性。
+
+@PreDestroy注解相当于`<bean>`元素标签的destroy-method属性。
 
 ```java
 @Repository
@@ -185,11 +202,11 @@ public class BookDaoImpl implements BookDao {
     public void save() {
         System.out.println("book dao save ...");
     }
-    @PostConstruct //在构造方法之后执行，替换init-method
+    @PostConstruct //在构造方法之后执行，替换init-method属性
     public void init() {
         System.out.println("init ...");
     }
-    @PreDestroy //在销毁方法之前执行,替换destroy-method
+    @PreDestroy //在销毁方法之前执行,替换destroy-method属性
     public void destroy() {
         System.out.println("destroy ...");
     }
@@ -198,6 +215,7 @@ public class BookDaoImpl implements BookDao {
 
 * @PostConstruct注解：设置该方法为初始化方法。在bean对象构造之后执行
 * @PreDestroy注解：设置该方法为销毁方法。在bean对象销毁之前执行
+
 注意：@PreDestroy注解只有在容器关闭的时候，才会生效。
 
 ```java

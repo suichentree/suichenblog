@@ -241,7 +241,7 @@ tinyMediaManager能帮助我们下载电影电视剧的元数据到本地。例�
 
 ### tinyMediaManager显示超时 刮削失败
 
-当你使用tinyMediaManager刮削影音数据的时候，可能会超时连接失败。
+当你使用tinyMediaManager刮削影音数据的时候，可能会超时连接失败。主要是因为网络问题，或则DNS问题。
 
 解放方法：
 1. 先修改容器的网络模式，修改为host模式(让容器使用unraid系统的网络)
