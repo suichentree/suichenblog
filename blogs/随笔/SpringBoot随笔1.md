@@ -8,6 +8,8 @@ tags:
  - SpringBoot
 ---
 
+[toc]
+
 ### 1. SpringBoot中日志的使用？
 
 市面上常见的日志框架有很多，比如：JCL、SLF4J、Jboss-logging、jUL、log4j、log4j2、logback等等。

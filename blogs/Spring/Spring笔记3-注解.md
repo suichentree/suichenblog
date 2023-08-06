@@ -10,15 +10,13 @@ tags:
 
 [toc]
 
-# Spring笔记3-注解
+# Spring笔记3-纯注解
 
-## 控制反转（IOC） 的纯注解开发
+## 控制反转（IOC）
 
-之前都是通过xml配置文件的方式来配置IOC容器中的bean对象，并且进行bean对象之间的依赖注入。这种复杂的地方在于xml配置。但是我们可以通过注解的方式来简化xml配置文件。甚至可以做到纯注解开发（无须xml配置文件）。
+之前都是通过xml配置文件的方式来配置IOC容器中的bean对象，并且进行bean对象之间的依赖注入。这种复杂的地方在于xml配置。但是我们可以通过注解的方式来简化xml配置文件。甚至可以做到纯注解开发（无须xml配置文件）。原理就是 spring 能够自动扫描，检查，实例化具有特定注解的类。
 
-spring能够自动扫描，检查，实例化具有特定注解的类。
-
-Spring对注解支持的版本历程:
+> Spring对注解支持的版本历程:
 * 2.0版开始支持注解
 * 2.5版注解功能趋于完善
 * 3.0版支持纯注解开发
@@ -135,6 +133,9 @@ ApplicationContext ctx = new AnnotationConfigApplicationContext(SpringApplicatio
 
 ### 配置类和扫描路径 @Configuration,@ComponentScan 注解
 
+Spring 默认不使用注解装配 Bean，因此需要@ComponentScan
+注解来开启Spirng的自动扫描功能。
+
 * @Configuration注解：标记当前类为spring的配置类。通过配置类的形式来代替applicationContext.xml配置文件
 * @ComponentScan注解：设定 spring 的扫描路径，此注解只能添加一次，多个数据请用数组格式。
 
@@ -163,12 +164,11 @@ public class SpringApplicationConfig {
 
 > 其余三个注解和@Component注解的作用是一样的，为什么要衍生出这三个呢?
 
-方便区分出这个类是属于表现层、业务层，数据层还是普通的类。
+为了方便区分出这个类是属于表现层、业务层，数据层还是普通的类。
 
-* @Component :基本注解，用于标识类，该类将被IOC容器管理。
-* @Respository :标识数据层类，持久层类。
-* @Service: 标识业务层类。
-* @Controller ：标识控制层类。
+如图所示
+![spring_20230804092535.png](../blog_img/spring_20230804092535.png)
+
 
 ### bean作用域  @Scope注解
 
@@ -247,9 +247,9 @@ public class App {
 如图所示，注解和xml配置的对应关系。
 ![spring20220908160031.png](../blog_img/spring20220908160031.png)
 
-##  依赖注入（DI） 的注解开发
+##  依赖注入（DI）
 
-Spring为了使用注解简化DI依赖注入，并没有提供构造函数注入、setter注入对应的注解，只提供了自动装配的注解实现。
+Spring 通过提供自动装配的注解实现。从而可以纯注解的方式来实现依赖注入的功能。
 
 ### 纯注解开发:DI入门案例
 
@@ -267,32 +267,39 @@ Spring为了使用注解简化DI依赖注入，并没有提供构造函数注入
 ② 添加BookDao、BookDaoImpl、BookService、BookServiceImpl类，并添加@Repository,@Service,@Autowired注解
 
 ```java
+//BookDao接口
 public interface BookDao {
     public void save();
 }
+
+//BookDaoImpl接口实现类
 @Repository
 public class BookDaoImpl implements BookDao{
-    @Override
     public void save() {
         System.out.println("this is BookDaoImpl save()");
     }
 }
+
+//BookService接口
 public interface BookService {
     public void add();
 }
+
+//BookServiceImpl接口实现类
 @Service
 public class BookServiceImpl implements BookService{
     @Autowired
     private BookDao bookDao;
 
-    @Override
     public void add() {
         bookDao.save();
     }
 }
 ```
 
-③ 创建配置类用于代替applicationContext.xml配置文件
+* @Autowired注解作用：按照byType规则来自动装配。将该BookDao类型的bean注入到BookServiceImpl类中。
+
+③ 创建配置类并使用@Configuration注解和@ComponentScan注解，来代替applicationContext.xml配置文件
 
 ```java
 @Configuration
@@ -301,10 +308,10 @@ public class SpringApplicationConfig {
 }
 ```
 
-④创建运行类并执行
+④ 创建测试类Test并执行
 
 ```java
-public class App {
+public class Test {
     public static void main( String[] args )
     {
         ApplicationContext applicationContext = new AnnotationConfigApplicationContext(SpringApplicationConfig.class);
@@ -316,77 +323,9 @@ public class App {
 //this is BookDaoImpl save()
 ```
 
-* @Autowired注解作用：按照类型注入的，将该注解表示类注入到所属外部类中。
+### 基本数据类型属性注入 @Value 注解
 
-<font color="red">注意：@Autowired默认按照类型自动装配，如果IOC容器中多个同类型的Bean对象，但是name属性不相同，就按照变量名和Bean的名称匹配。</font>
-
-如图所示
-![spring20220908164113.png](../blog_img/spring20220908164113.png)
-
-例如上图就无法完成注入。@Autowired注解默认按照类型自动装配，但是由于有多个BookDao类型Bean对象，此时会按照bookDao名称去找，因为IOC容器只有名称叫bookDao1和bookDao2 ,所以找不到，会报NoUniqueBeanDefinitionException。
-
-### @Autowired和@Qualifier注解 
-
-@Autowired 注解可以根据（构造器，属性字段，方法）等方式自动装配到另一个bean对象中,前提是bean存在ioc容器中。
-
-xml的形式来自动装配
-```xml
-<!-- applicationContext.xml  -->
-<bean id="UserImpl" class="com.service.UserServiceImpl"></bean>
-	
-<bean id="ucontroller" class="com.Controller.UserController" >   
-    <property name="usimpl" ref="UserImpl" />
-</bean>
-```
-
-注解形式来自动装配
-```java
-@Controller(value="UserController")
-public class UserController {
-	//把UserServiceImpl从ioc容器中取出，装配到UserController这个bean中。
-	@Autowired
-	private UserServiceImpl usimpl;
-
-	public void add(){
-		System.out.println(" UserController ");
-		usimpl.addUser();
-	}
-}
-```
-
-@Autowired,相当于 UserController 这个bean 引用了 UserServiceImpl 这个bean,同时省去了在 UserController 类中 get/set UserServiceImpl属性的方法。效果与上面的xml配置等效。
-
-#### @Autowired注解的问题？
-
-因为@Autowired注解默认按照类型自动装配。但是当@Autowired注解根据类型在IOC容器中找到多个bean,并且@Autowire注解下的属性名又和IOC容器中bean对象的名称都不一致时。@Autowired注解会找不到，此时会报NoUniqueBeanDefinitionException异常。
-
-如下图所示，该如何解决这种情况？
-
-![spring20220908164113.png](../blog_img/spring20220908164113.png)
-
-解决方式：需要额外添加@Qualifier注解来指定某个bean对象进行依赖注入
-
-```java
-@Service
-public class BookServiceImpl implements BookService {
-    @Autowired
-    @Qualifier("bookDao1")
-    private BookDao bookDao;
-    
-    public void save() {
-        System.out.println("book service save ...");
-        bookDao.save();
-    }
-}
-```
-
-@Qualifier注解值就是需要注入的bean的名称。
-
-<font color="red">注意:@Qualifier不能独立使用，必须和@Autowired一起使用</font>
-
-### @Value注解用法
-
-#### @Value注解注入基本数据类型
+* @Value注解：可以把基础数据类型的值直接注入给标识的属性中。注意数据格式要匹配，如将"abc"注入给int类型属性，这样程序就会报错。
 
 ```java
 @Repository("bookDao")
@@ -399,36 +338,110 @@ public class BookDaoImpl implements BookDao {
 }
 ```
 
-@Value注解：将值直接复制给对应属性。注意数据格式要匹配，如将"abc"注入给int类型属性，这样程序就会报错。
+上面代码中@Value注解将"xiaoming"赋值给name属性。
 
-#### @Value，@PropertySource 读取properties配置文件，
+### 自动装配 @Autowired，@Resource，@Qualifier 注解
 
-* @PropertySource注解用于加载properties配置文件
-* @Value注解一般用在从properties配置文件中读取内容进行使用。
+spring可以通过@Autowired，@Resource，@Qualifier 注解来实现自动装配的功能。
 
-①步骤1：resource下准备jdbc.properties文件
+![spring_20230804093154.png](../blog_img/spring_20230804093154.png)
+
+
+* @Autowired注解： 默认按照 byType 的规则来进行自动装配。如下想要按照 byName 的规则来自动装配，需要搭配 @Qualifier 注解一起使用。
+* @Resource注解：默认先按照 byName 的规则来自动装配。如果不能匹配，则再按照 byType 的规则来自动装配。
+* @Qualifier注解：与 @Autowired 注解配合，使用 byName 的规则来自动装配。
+
+
+#### @Autowired注解的例子
+
+```java
+@Controller(value="UserController")
+public class UserController {
+	//从IOC容器中找出UserServiceImpl类型的bean，装配到UserController这个bean中。
+	@Autowired
+	private UserServiceImpl usimpl;
+
+}
+```
+
+流程：@Autowired注解标记了usimpl属性。因此先找出usimpl属性的类型，即UserServiceImpl。再从IOC容器中找到UserServiceImpl类型的bean。如果找到则将该bean注入到UserController这个bean中
+
+#### @Resource注解的例子
+
+```java
+@Controller(value="UserController")
+public class UserController {
+	//从IOC容器中先找出usimpl为name的bean，注入到UserController这个bean中。
+    //如果没找到，则找出以UserServiceImpl为类型的bean，注入到UserController这个bean中。
+	@Resource
+	private UserServiceImpl usimpl;
+
+}
+```
+
+流程：@Resource 注解标记了usimpl属性。因此先找出以usimpl为name的bean,然后注入到UserController这个bean中。如果没找到，则找出以UserServiceImpl为类型的bean，注入到UserController这个bean中。
+
+#### @Qualifier注解的例子：用于解决@Autowired注解的问题
+
+@Autowired注解默认按照 byType 规则来进行自动装配。但是byType
+自动装配有个问题，即当IOC容器中出现多个相同类型的bean的同时，@Autowired注解不知道用哪一个bean，此时会报NoUniqueBeanDefinitionException异常。
+
+解决方式：可以额外添加@Qualifier注解来将@Autowired注解的byType规则改变为byName规则。
+
+```java
+@Service
+public class BookServiceImpl implements BookService {
+    //当两个注解同时使用时，装配规则从byType变为byName
+    @Autowired
+    @Qualifier("bookDao1")
+    private BookDao bookDao;
+    
+}
+```
+
+* @Qualifier注解的值就是需要注入的bean的名称。
+* @Qualifier不能独立使用，必须和@Autowired一起使用
+
+### 加载属性文件  @PropertySource 注解
+
+* @PropertySource注解用于加载properties配置文件到spring应用中。
+
+```java
+//加载多个properties配置文件
+//方式1
+@PropertySource({"jdbc.properties","xxx.properties"})
+//方式2 加载所有properties配置文件
+@PropertySource({"*.properties"})
+//方式3 classpath表示当前项目根路径
+@PropertySource({"classpath:jdbc.properties"})
+```
+
+> 例子
+
+①步骤1：resource目录下先准备jdbc.properties配置文件
 
 ```properties
 name=小明
 ```
 
-②步骤2: 使用注解加载properties配置文件
+②步骤2: 使用@PropertySource注解加载jdbc.properties配置文件
 
-在配置类上添加`@PropertySource`注解
+在配置类上添加`@PropertySource`注解，用于加载jdbc.properties配置文件到spring应用中。
 
 ```java
 @Configuration
 @ComponentScan("com.itheima")
 @PropertySource("jdbc.properties")
 public class SpringConfig {
+
 }
 ```
 
-③步骤3：使用@Value读取配置文件中的内容
+③步骤3：可以使用@Value注解读取jdbc.properties配置文件的内容
 
 ```java
-@Repository("bookDao")
 public class BookDaoImpl implements BookDao {
+  
     @Value("${name}")
     private String name;
     public void save() {
@@ -437,42 +450,19 @@ public class BookDaoImpl implements BookDao {
 }
 ```
 
-注意: @PropertySource注解用于加载properties配置文件
+`${name}`表示读取配置文件中的属性值。
 
-```java
-//加载多个properties配置文件
-//方式1
-@PropertySource({"jdbc.properties","xxx.properties"})
-//方式2
-@PropertySource({"*.properties"})
-//方式3 classpath表示当前项目根路径
-@PropertySource({"classpath:jdbc.properties"})
-```
+## 注入第三方bean @Bean注解
 
-### 小结
+如何将第三方类（其他jar包中的类）作为bean对象注入到IOC容器中?
 
-@Autowired注解：
-1. 位置：属性注解 或 方法注解 或 方法形参注解
-2. 作用：为引用类型属性设置值
+答案：使用@Bean注解可将第三方类注入到IOC容器中。
 
-@Qualifier注解：
-1. 位置：属性定义上方 或 标准set方法上方 或 类set方法上方
-2. 作用：为引用类型属性指定注入的beanId
+> @Bean注解的使用方式
+* 位置 方法注解.定义方法上方
+* 作用 设置该方法的返回值作为IOC容器管理的bean。
 
-@Value注解：
-1. 位置：属性定义上方 或 标准set方法上方 或 类set方法上方
-2. 作用：为 基本数据类型 或 字符串类型 属性设置值
-
-@PropertySource注解：
-1. 位置：类定义上方
-2. 作用：加载properties文件
-3. value（默认）设置加载的properties文件对应的文件名或文件名组成的数组。
-
-
-## 注解开发管理第三方bean
-
-如何将第三方类（其他jar包中的类）作为bean对象注入到自己的IOC容器中?
-答案：使用Bean注解可将第三方类注入到IOC容器中。
+> 例子
 
 ①创建一个Maven项目
 
@@ -523,19 +513,12 @@ public class App {
 }
 ```
 
-<font color="red">注意：如果有多个第三方bean要被IOC容器管理，直接在配置类中多些几个方法，方法上添加@Bean注解。然后spring能够扫描到这些配置类即可</font>
+<font color="red">注意：如果有多个第三方bean要被IOC容器管理，直接在配置类中多写几个方法，每个方法上添加@Bean注解。然后spring能够扫描到配置类即可。</font>
 
 
-### 小结 @Bean @Import注解
+### 导入配置类 @Import注解
 
-@Bean注解:
-1. 位置 方法注解.定义方法上方
-2. 作用 设置该方法的返回值作为IOC容器管理的bean。
-
-@Import注解:
-1. 位置 类注解.定义类上方
-2. 作用 导入配置类。可将其他多个配置类注入到一个总配置类上
-3. 当配置类有多个时使用数组格式一次性导入多个配置类
+@Import注解用于导入配置类。可将其他一个配置类注入到另一个配置类上。如果有多个配置类时，可以使用数组一次性导入多个配置类。
 
 ```java
 @Configuration

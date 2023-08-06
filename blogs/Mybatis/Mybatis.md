@@ -8,6 +8,7 @@ tags:
  - Mybatis
 ---
 
+[toc]
 
 # Mybatis基础
 
@@ -845,7 +846,7 @@ public class main {
 
 ```
 
-## <font color="red">ResultMap（注释很重要）</font>:
+## ResultMap（注释很重要★★★★★）
 
 ### 1.ResultMap的作用概述：
 &emsp;&emsp;MyBatis中在查询进行select映射的时候，返回类型可以用resultType，也可以用resultMap，resultType是直接表示返回类型的，而resultMap则是对外部ResultMap的引用（<font color="red">相当于自定义结果集映射规则</font>），但是<strong>resultType跟resultMap不能同时存在</strong>。

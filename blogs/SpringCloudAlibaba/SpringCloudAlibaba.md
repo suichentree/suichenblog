@@ -10,9 +10,9 @@ tags:
 
 [toc]
 
-## SpringCloudAlibaba笔记
+# SpringCloudAlibaba笔记
 
-## 1.什么是SpringCloud,SpringCloudAlibaba?
+## 什么是SpringCloud,SpringCloudAlibaba?
 
 * SpringCloud是微服务架构下的一站式解决方案。
 * SpringCloud是一个包含多个开发框架的工具集，集合了一套解决微服务问题的技术。让用户可以直接使用，不需要关心技术整合的问题。
@@ -32,7 +32,7 @@ tags:
 下图是微服务架构图
 ![20220728161129.png](../blog_img/20220728161129.png)
 
-## 2.版本说明
+## 版本说明
 
 注意：在搭建微服务框架的时候，要注意SpringCloudAlibaba，SpringCloud，SpringBoot三者的版本，不要各自使用最新的版本。
 
@@ -48,7 +48,7 @@ tags:
 |  ----  | ----  | ----  | ----  | ----  | ----  |
 | 2.2.8.RELEASE  | 1.8.4 | 2.1.0 | 4.9.3 | ~ | 1.5.1 |
 
-## 3.maven项目中引入SpringCloudAlibaba依赖
+## maven项目中引入SpringCloudAlibaba依赖
 
 1. 百度IDEA如何创建父子模块maven项目
 
@@ -81,7 +81,7 @@ tags:
 </dependencyManagement>
 ```
 
-## 4. 创建spring-cloud-alibaba 父子工程
+## 创建spring-cloud-alibaba 父子工程
 
 目前三者之间推荐的版本搭配
 
@@ -89,7 +89,7 @@ tags:
 |  ----  | ----  | ----  |
 | 2.2.8.RELEASE  | Spring Cloud Hoxton.SR12 | 2.3.12.RELEASE |
 
-### 1. 新建一个maven项目，作为父工程
+### 新建一个maven项目，作为父工程
 
 ![20230216105257.png](../blog_img/20230216105257.png)
 
@@ -101,7 +101,7 @@ tags:
 
 ![20230216105411.png](../blog_img/20230216105411.png)
 
-### 2. 修改父工程的pom.xml
+### 修改父工程的pom.xml
 
 注意修改父工程的打包方式为pom
 
