@@ -817,3 +817,121 @@ fetchType属性的取值有2种。
 * eager：表示立即加载。
 
 
+## Mybatis 注解
+
+为了简化 XML 的配置，MyBatis 提供了注解的实现方式。注解主要分为三大类，即 SQL 语句映射、结果集映射和关系映射。
+
+### SQL语句映射注解
+
+在xml的实现方式中，通常需要把映射文件中的sql语句与接口中的方法进行一一对应。而注解的实现方式是将注解和接口方法进行一一对应。然后再注解中编写SQL语句。
+
+这些注解统称SQL语句映射注解。分为如下几种。
+
+* @Insert：实现新增功能。
+* @Select：实现查询功能。
+* @Insert：实现插入功能。
+* @Update：实现更新功能。
+* @Delete：实现删除功能。
+* @Param：映射多个参数。
+* @SelectKey：插入后，获取id的值
+  * @SelectKey 注解中的各个属性含义如下。
+  * statement：表示要运行的 SQL 语句；
+  * keyProperty：可选项，表示将查询结果赋值给代码中的哪个对象；
+  * keyColumn：可选项，表示将查询结果赋值给数据表中的哪一列；
+  * resultType：指定 SQL 语句的返回值；
+  * before：默认值为 true，在执行插入语句之前，执行 select last_insert_id()。值为flase，则在执行插入语句之后，执行 select last_insert_id()。
+
+UserMapper.class 接口
+```java
+public interface UserMapper {
+    @Insert("insert into user(id,name) values(#{id},#{name})")
+    public int insert(User user);
+
+    @Select("Select * from user")
+    List<User> queryAllUser();
+
+    @Insert("insert into user(name,sex,age) values(#{name},#{sex},#{age}")
+    int saveUser(User user);
+
+    @Update("update user set name= #{name},sex = #{sex},age =#{age} where id = #{id}")
+    void updateUserById(User user);
+
+    @Update("update user set name= #{name},sex = #{sex},age =#{age} where id = #{id}")
+    void updateUserById(User user);
+
+    int saveUser(@Param(value="user") User user,@Param("name") String name,@Param("age") Int age);
+
+    @Insert("insert into user(id,name) values(#{id},#{name})")
+    @SelectKey(statement = "select last_insert_id()", keyProperty = "id", keyColumn = "id", resultType = int,before = false)
+    public int insert(User user);    
+    }
+```
+
+上面代码，通过给接口方法加上注解，从而把注解的sql语句和接口方法进行一一对应。省略了再映射文件中进行sql语句配置。
+
+
+### 结果集映射注解
+
+在xml的实现方式中，通过在映射文件中使用`<resultMap>`标签来将sql的查询结果和java对象进行转换。但在注解的实现方式中，是通过注解来实现这个转换。
+
+@Result、@Results、@ResultMap 是结果集映射的三大注解。
+
+> @Results的属性如下
+
+* id：表示当前结果集声明的唯一标识；
+* value：表示结果集映射关系；
+* @Result：代表一个字段的映射关系。其中，column 指定数据库字段的名称，property 指定实体类属性的名称，jdbcType 数据库字段类型，id 为 true 表示主键，默认 false。
+
+> 例子
+
+UserMapper.class 接口
+```java
+public interface UserMapper {
+    @Select({"select id, name, class_id from student"})
+    @Results(id="studentMap", value={
+        @Result(column="id", property="id", jdbcType=JdbcType.INTEGER, id=true),
+        @Result(column="name", property="name", jdbcType=JdbcType.VARCHAR),
+        @Result(column="class_id ", property="classId", jdbcType=JdbcType.INTEGER)
+    })
+    List<Student> selectAll();
+
+
+    @Select({"select id, name, class_id from student where id = #{id}"})
+    @ResultMap(value="studentMap")
+    Student selectById(Integer id);
+}
+```
+
+### 关联映射注解
+
+在xml是实现方式中，通过`<association>`标签来进行一对一关联查询的转换，通过`<collection>`标签来进行一对多关联查询的转换。
+
+但在注解的实现方式中，是通过@one和@mant注解来实现。
+
+* @one注解：用于处理一对一关系的映射。
+* @many注解：用于处理一对多关系的映射。
+
+> 例子
+
+UserMapper.class 接口
+```java
+public interface UserMapper {
+    @Select("select * from student") 
+    @Results({ 
+        @Result(id=true,property="id",column="id"), 
+        @Result(property="name",column="name"), 
+        @Result(property="age",column="age"), 
+        @Result(property="address",column="address_id",one=@One(select="net.biancheng.mapper.AddressMapper.getAddress")) 
+    }) 
+    public List<Student> getAllStudents();  
+
+
+    @Select("select * from t_class where id=#{id}") 
+    @Results({ 
+        @Result(id=true,column="id",property="id"), 
+        @Result(column="class_name",property="className"), 
+        @Result(property="students", column="id", many=@Many(select="net.biancheng.mapper.StudentMapper.getStudentsByClassId")) 
+        }) 
+    public Class getClass(int id); 
+}
+```

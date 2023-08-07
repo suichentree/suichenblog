@@ -40,7 +40,7 @@ Hibernate 和 MyBatis 都是目前业界中主流的对象关系映射（ORM）�
 * Hibernate： 全ORM框架，使用 HQL 语句，独立于数据库。不需要编写大量的 SQL。会根据数据库的表的结构，自动生成SQL语句，它提供全面的数据库封装机制。
 * Mybatis：半ORM框架。mybatis不会为程序员在运行期间自动生成 sql 语句执行，具体的sql 语句需要程序员自己编写，然后通过映射配置文件，把sql语句与持久化类进行一一对应。
 
-## 第一个Mybtais程序
+## 第一个Mybtais程序(XML方式)
 
 > 一个完整的 MyBatis 程序的步骤如下
 1. 创建数据库表。
@@ -74,6 +74,7 @@ CREATE TABLE `website` (
 Mysql的数据库驱动jar包：mysql-connector-java
 Mybatis依赖jar包：mybatis-3.5.5.jar
 
+下面代码是maven项目中添加mybatis依赖。
 ```xml
 <dependencies>
     <!--mysql-connector-java 用于java连接mysql的JDBC依赖jar包-->
@@ -105,13 +106,7 @@ public class Website {
     private int age;
     private String country;
     private Date createtime;
-
     /*省略setter和getter方法*/
-
-    @Override
-    public String toString() {
-        return "id" + id + "name" + name + "url" + url + "age" + age + "country" + country + "createtime" + createtime;
-    }
 }
 ```
 
@@ -161,7 +156,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
 当namespace属性和id属性分别是接口的类名和方法名时。mybatis才能把接口中的方法和映射文件中的sql语句绑定在一起。这样可以不用写该接口的实现类，MyBatis 会通过接口的完整限定名查找到对应的 mapper 配置来执行 SQL 语句。因此 namescape 的命名必须要跟接口同名。
 
-简而言之，在程序中调用接口的方法，就相当于执行对应的sql语句。
+简而言之，当namespace属性和id属性分别是接口的类名和方法名时。在程序中调用接口的方法，就相当于执行对应的sql语句。
 
 > 步骤6. 创建MyBatis核心配置文件。
 
@@ -611,3 +606,86 @@ and ui.head_image is not null;
 ```
 
 如果把以上 SQL 语句放到 @Select 注解中，无疑会大大降低代码的可读性，不利于日后的维护和修改。因此在一些比较复杂的场景下，使用 XML 方式会更加灵活和方便。
+
+## Mybatis 接口式编程方式
+
+接口式编程，可以简单的理解是 Mybatis 通过把持久化类与映射文件之间进行绑定，从而定义了一个接口。通过这个接口把持久化类和映射文件进行一一对应。
+
+> 映射文件如何知道自己被哪个接口绑定呢？
+
+这里就是通过映射文件的名称空间namespace属性来实现的，之前映射文件的namespace可以随意定义，现在namespace属性值必须是接口的完整名称，即路径名+接口名称。
+
+当namespace属性和id属性分别是接口的类名和方法名时。mybatis才能把接口中的方法和映射文件中的sql语句绑定在一起。这样可以不用写该接口的实现类，当调用接口的方法时，MyBatis会通过接口+方法名称 来查找到对应的 映射文件来执行 SQL 语句。
+
+简而言之，当namespace属性和id属性分别是接口的类名和方法名时。在程序中调用接口的方法，就相当于执行对应的sql语句。
+
+> 例子
+
+①：接口studentdao.java 
+
+```java
+public interface studentdao {
+	public int insertStudent(Student stu);
+	public int deleteStudent(Student stu);
+	public int updateStudent(Student stu);
+	public Student selectStudent(Student stu);
+	public List<Student> selectAllStudent();
+}
+```
+
+②：映射文件的namespace
+
+studentMapper.xml
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 为mapper指定唯一的命名空间，在不用接口式编程的情况下，随便取名,用接口式编程的情况时，应该为代理接口的全类名 -->
+<mapper namespace="com.dao.studentdao">
+    <!-- 添加 ,id属性值必须是接口中的对应方法名称-->
+    <insert id="addStudent" parameterType="com.java.entity.Student">
+        insert into student
+        (name,url,age,country)
+        values(#{name},#{url},#{age},#{country})
+    </insert>
+
+    <!-- 查询所有信息 ,id属性值必须是接口中的对应方法名称-->
+    <select id="selectAllStudent"
+        resultType="com.java.entity.Student">
+        select * from student
+    </select>
+</mapper>
+
+```
+
+③：测试类
+```java
+public class Test {
+	public static void main(String[] args) {
+        //1.通过输入流来读取mybatis的配置文件信息。告诉程序连接的数据库，用户名，密码。以及到哪里去寻找映射文件
+        InputStream inputs=Resources.getResourceAsStream("mybatis_config.xml");
+        //2. 通过xml配置文件信息，初始化mybatis。创建SqlSessionFactory对象
+        SqlSessionFactory ssf=new SqlSessionFactoryBuilder().build(inputs);
+        //3. 通过SqlSessionFactory，实例化session对象
+        SqlSession session=ssf.openSession();
+        //4. 通过session对象，用反射的方式，获取代理接口的实例化对象，这段代码，相当于实例化接口对象
+        studentdao studao=session.getMapper(studentdao.class);
+
+        //5. 创建你要操作的数据对象，用调用接口的方法，从而实现对数据库的CRUD
+        Student stu=new Student();
+        stu.setName("xiaoming");
+        stu.setAge(12);
+        // 调用接口的addStudent方法，相当于执行映射文件中的id="addStudent"的 insert语句
+        int a=studao.addStudent(stu);
+        session.commit();            
+        //调用selectStudent方法，相当于执行映射文件的select语句
+        Student sa=studao.selectStudent(stu);
+        System.out.println(sa);
+        
+        //6. 关闭sql连接
+        session.close();
+	}
+}
+
+```
