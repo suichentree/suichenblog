@@ -21,6 +21,8 @@ function push(){
     else     
         # 上传失败，重新执行上传命令
         echo "ERROR , git push fail"
+        # 重新执行push方法
+        push
     fi
 }
 
