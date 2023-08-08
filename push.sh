@@ -2,13 +2,27 @@
 # 注意1: 在git终端中运行脚本。
 # 运行脚本命令 bash push.sh
 
-# 定义提交方法
+# 定义commit方法
 function commit() {
     #定义变量commitMessage,并接受外部输入赋值
     read -p "输入commitMessage: " commitMessage 
     echo "commitMessage is  $commitMessage"
     #将暂存区的文件提交到本地分支中
     git commit -m $commitMessage
+}
+
+# 定义push方法
+function push(){
+    git push -f origin master
+    echo "is $?"
+    if [ $? -ne 0 ] 
+    then 
+        # 上传失败，重新执行上传命令
+        echo "ERROR , git push fail"
+    else     
+        # 上传成功，结束运行
+        echo "SUCCESS , git push success"
+    fi
 }
 
 # 将所有变动文件添加到暂存区
@@ -28,17 +42,7 @@ else
 fi
 
 # 本地分支推送最新文件到远程分支
-git push -u origin master
+# git push -u origin master
 
-isPush=`git push -f origin master`
-echo "$isPush is"
-echo $isPush
-echo $?
-if [ $? -ne 0 ] 
-then 
-    # 上传失败，重新执行上传命令
-    echo "ERROR , git push fail"
-else     
-    # 上传成功，结束运行
-    echo "SUCCESS , git push success"
-fi
+# 执行push方法
+push
