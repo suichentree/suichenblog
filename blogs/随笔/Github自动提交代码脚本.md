@@ -44,6 +44,8 @@ function push(){
     else     
         # 上传失败，重新执行上传命令
         echo "ERROR , git push fail"
+        # 延迟5秒
+        sleep 5s
         # 重新执行push方法
         echo "Push Code to Remote Repository Again -------------------"
         push
