@@ -18,14 +18,19 @@ function push(){
     then
         # 上传成功，结束运行
         echo "SUCCESS , git push success"
+        # 运行deploy.sh 脚本
+        source deploy.sh
     else     
         # 上传失败，重新执行上传命令
         echo "ERROR , git push fail"
         # 重新执行push方法
-        echo "restart run push method -------------------"
+        echo "Push Code to Remote Repository Again -------------------"
         push
     fi
 }
+
+# 脚本从这里开始--------------
+echo "Start Run push.sh -------------------"
 
 # 将所有变动文件添加到暂存区
 git add -A
