@@ -29,3 +29,16 @@ fi
 
 # 本地分支推送最新文件到远程分支
 git push -u origin master
+
+isPush=`git push -f origin master`
+echo "$isPush is"
+echo $isPush
+echo $?
+if [ $? -ne 0 ] 
+then 
+    # 上传失败，重新执行上传命令
+    echo "ERROR , git push fail"
+else     
+    # 上传成功，结束运行
+    echo "SUCCESS , git push success"
+fi

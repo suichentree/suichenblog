@@ -5,7 +5,7 @@
 # 注意1: 在git终端中运行脚本。
 # 注意2: 使用 source deploy.sh 命令运行该文件。bash 命令无法执行脚本中的cd命令,source命令可以。
 
-# 生成博客静态文件
+生成博客静态文件
 npm run build
 
 # 进入生成的文件夹
@@ -27,6 +27,16 @@ git commit -m "deploy blog $time3"
 git remote add origin https://github.com/suichentree/suichentree.github.io.git
 
 # 强制上传
-git push -f origin master
+# git push -f origin master
 
-
+check_push=`git push -f origin master`
+echo "$check_push is "
+echo $?
+if [ $? -ne 0 ] 
+then 
+    # 上传失败，重新执行上传命令
+    echo "ERROR , git push fail"
+else     
+    # 上传成功，结束运行
+    echo "SUCCESS , git push success"
+fi

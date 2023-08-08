@@ -615,11 +615,12 @@ ddns-go通过网卡等形式获取到主机的公网ip地址-》然后将公网i
 
 qiandao 是 一个 基于 HAR 编辑器和 Tornado 服务端的 HTTP 定时任务自动执行 Web 框架。
 
+qiandao官方网站 [https://qd-today.github.io/qd/zh_CN/](https://qd-today.github.io/qd/zh_CN/)   
+
 qiandao的dockerhub镜像：asdaragon/qiandao
 
-镜像地址：[https://hub.docker.com/r/asdaragon/qiandao](https://hub.docker.com/r/asdaragon/qiandao)
-
-qiandao官方网站 [https://qd-today.github.io/qd/zh_CN/](https://qd-today.github.io/qd/zh_CN/)    
+docker镜像地址：[https://hub.docker.com/r/asdaragon/qiandao](https://hub.docker.com/r/asdaragon/qiandao)
+ 
 
 1. 因为unraid应用市场没有qiandao，所以需要创建docker容器安装。
 2. 开始配置，手动映射端口和配置目录和webui地址。
@@ -636,3 +637,59 @@ qiandao官方网站 [https://qd-today.github.io/qd/zh_CN/](https://qd-today.gith
 ![unraid_20230802195549.png](../blog_img/unraid_20230802195549.png)
 
 4. 具体用法，自行百度。
+
+
+## 直播推流工具：KPlayer docker容器
+
+KPlayer是由ByteLang Studio设计开发的一款用于在Linux环境下进行媒体资源推流的应用程序。目前kplayer没有UI界面。
+
+KPlayer官方网站 [https://docs.kplayer.net/v0.5.8/](https://docs.kplayer.net/v0.5.8/)   
+
+KPlayer的dockerhub镜像：bytelang/kplayer
+
+docker镜像地址：[https://hub.docker.com/r/bytelang/kplayer](https://hub.docker.com/r/bytelang/kplayer)
+ 
+
+1. 因为unraid应用市场没有kplayer，所以需要创建docker容器安装。
+2. 开始配置，手动配置映射目录。一个是配置目录，一个是视频目录。
+
+![unraid_20230807224120.png](../blog_img/unraid_20230807224120.png)
+
+3. 创建完容器后，在主机上找到你映射的配置目录路径，手动创建配置文件config.json。
+
+![unraid_20230807230256.png](../blog_img/unraid_20230807230256.png)
+
+具体的config.json配置文件如何编写，需要参考官方文档。
+
+下面是最简化的config.json
+```json
+{
+    "version": "2.0.0",
+    //这里是需要直播的影视文件
+    "resource": {
+        "lists": [
+            "/video/侏罗纪公园1/侏罗纪公园1.mkv"
+        ]
+    },
+    //播放模式为循环播放
+    "play": {
+        "play_model": "loop"
+    },
+    //设置直播间推流的链接地址
+    "output": {
+        "lists": [
+            {
+                "path": "rtmp://xxx.xxx.com/live-bvc/?streamname=xxxxx"
+            }
+        ]
+    }
+}
+```
+
+`/video/侏罗纪公园1/侏罗纪公园1.mkv`是容器内的路径，对应的容器外路径就是`/mnt/user/disk5_ZDH9WGB7_4t/电影/侏罗纪公园1/侏罗纪公园1.mkv`
+
+> 如何获取直播间的推流链接。
+
+以B站直播为例。打开直播中心，直播间管理，选择你想要的分类就开始直播。然后就会有一个rtm链接和串流密钥链接，把这两个链接拼接起来就是你的推流链接了。
+
+4. config.json文件编辑好后，开始运行kplayer容器。然后看你的直播间是否播放视频即可。
