@@ -84,3 +84,9 @@ git remote add origin https://github.com/suichentree/suichentree.github.io.git
 
 # 执行push方法
 push
+
+# 回到上级目录中
+cd ..
+
+# 脚本从这里结束--------------
+echo "push.sh run finish -------------------"
