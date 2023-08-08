@@ -14,14 +14,13 @@ function commit() {
 # 定义push方法
 function push(){
     git push -f origin master
-    echo "is $?"
-    if [ $? -ne 0 ] 
-    then 
-        # 上传失败，重新执行上传命令
-        echo "ERROR , git push fail"
-    else     
+    if [ $? -eq 0 ] 
+    then
         # 上传成功，结束运行
         echo "SUCCESS , git push success"
+    else     
+        # 上传失败，重新执行上传命令
+        echo "ERROR , git push fail"
     fi
 }
 
