@@ -64,7 +64,7 @@ Sentinel可以分为两个部分:
 
 资源是Sentinel的关键概念。它可以是Java应用程序中的任何内容，例如，由应用程序提供的服务，或由应用程序调用的其它应用提供的服务，RPC接口方法，甚至可以是一段代码。sentinel通过在资源上定义各种流量控制规则。从而保护资源。
 
-## 2. Spring Cloud Alibaba中使用Sentinel
+## 2 Spring Cloud Alibaba中使用Sentinel
 
 ### 1.使用sentinel核心库来定义资源和规则
 
@@ -204,7 +204,7 @@ spring.cloud.sentinel.transport.port 该配置会在微服务应用对应的机�
 
 ![sentinel20220815162459.png](../blog_img/sentinel20220815162459.png)
 
-## 3. 控制台配置其他规则
+## 3 控制台配置其他规则
 
 实时监控：监控接口的通过的QPS和拒绝的QPS  
 ![sentinel20220815172250.png](../blog_img/sentinel20220815172250.png)
@@ -317,7 +317,7 @@ Sentinel根据服务器系统的各项指标进行自适应控制。例如服务
 
 
 
-## 4. openFeign整合sentinel
+## 4 openFeign整合sentinel
 
 场景：若第三方服务已经被sentinel进行流量控制。当通过openFeign调用第三方服务时。若第三方服务由于各种原因被sentinel流控。如何及时获取第三方服务的流控处理信息。
 
@@ -378,7 +378,7 @@ public class UserController {
 
 上图中第三方服务为order服务。该服务设置了流控规则（当qps>3时直接失败）。当调用该order服务的qps>3时。对应的接口实现类可以直接获取并处理请求失败的信息。
 
-## 5. sentinel的持久化模式
+## 5 sentinel的持久化模式
 
 <font color="red">默认情况下Sentinel控制台的数据是存放在内存中的，如果Sentinel控制台重启或者sentinel客户端（即被sentinel流控的服务）重启，sentinel控制台内设置的数据无法持久保存。</font>
 

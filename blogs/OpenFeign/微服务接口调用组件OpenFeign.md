@@ -15,7 +15,7 @@ tags:
 下图为微服务架构图
 ![20220728161129.png](../blog_img/20220728161129.png)
 
-## 1. JAVA项目如何实现服务与服务之间的接口调用？
+## 1.JAVA项目如何实现服务与服务之间的接口调用？
 
 * Httpclient
 HttpClient是Apache Jakarta Common下的子项目，提供功能丰富的支持 Http 协议的客户端编程工具包，并且它支持 HTTP 协议最新版本和建议。HttpClient 相比传统JDK 自带的 URLConnection，提升了易用性和灵活性，使客户端发送 HTTP 请求变得容易，提高了开发的效率。
@@ -30,7 +30,7 @@ RestTemplate 是 Spring 提供的用于访问 Rest 服务的客户端，Res
 * Spring Cloud openfeign对Feign进行了增强，使其支持Spring MVC注解，另外还整合了Ribbon和Nacos，从而使得Feign的使用更加方便。
 
 
-## 2. Spring Cloud Alibaba
+## 2.Spring Cloud Alibaba
 
 ① 引入starter-openfeign依赖
 ```
@@ -83,7 +83,7 @@ public class UserController {
 }
 ```
 
-## 3. OpenFeign日志配置
+## 3.OpenFeign日志配置
 
 OpenFeign的日志级别
 * NONE：默认级别，不显示日志
@@ -179,7 +179,7 @@ feign.client.config.order-service.logger-level=basic
 
 ③ 重启服务
 
-## 4. OpenFeign契约配置
+## 4.OpenFeign契约配置
 
 SpringCloud在Feign的基础上做了扩展，使用SpringMVC的注解来完成Feign的功能。原生的Feign是不支持 Spring MVC 注解的，如果你想在Spring Cloud中使用Feign原生的注解方式，可以通过修改契约配置来实现。
 
@@ -277,7 +277,7 @@ public interface OrderFeignService {
 ③ 重启服务
 
 
-## 5. 超时时间配置
+## 5.超时时间配置
 
 ```
 # 设置order-service服务的feign连接超时时间。默认为2s

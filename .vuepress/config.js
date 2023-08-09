@@ -117,6 +117,13 @@ module.exports = {
         "SpringCloud面试题1"
       ]
     },
+    "vssueConfig": {
+      "platform": 'github',
+      "owner": 'OWNER_OF_REPO',
+      "repo": 'NAME_OF_REPO',
+      "clientId": 'cff5f03ebccc27f18362',
+      "clientSecret": '5671ddca8e4eb07d91587f94bb16ac3421305a81',
+    },
     "type": "blog",
     "blogConfig": {
       "category": {

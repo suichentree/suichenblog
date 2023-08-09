@@ -3,14 +3,14 @@ title: RocketMQ 高级 当前最新版本5.0.0
 date: 2022-10-17
 sidebar: 'auto'
 categories: 
- - 中间件
+ - 后端
 tags:
  - RocketMQ
 ---
 
 [toc]
 
-# 1. RocketMQ 高级
+# RocketMQ 高级
 
 ## 1.1 消息存储
 

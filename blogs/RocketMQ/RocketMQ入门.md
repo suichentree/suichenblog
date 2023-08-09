@@ -3,7 +3,7 @@ title: RocketMQ入门 当前最新版本5.0.0
 date: 2022-10-17
 sidebar: 'auto'
 categories: 
- - 中间件
+ - 后端
 tags:
  - RocketMQ
 ---

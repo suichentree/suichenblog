@@ -12,6 +12,7 @@ tags:
 
 # 微服务网关组件Spring Cloud Gateway 
 
+<font color="red">当前Spring Cloud Gateway版本为2.2.9</font>
 
 下图为微服务架构图,图中可以看到网关的定位。
 ![20220728161129.png](../blog_img/20220728161129.png)
@@ -30,9 +31,7 @@ tags:
 
 ## 2 Spring Cloud Gateway介绍
 
-Spring Cloud Gateway 是Spring Cloud官方推出的第二代API网关框架。定位于取代 Netflix Zuul1.0。相比 Zuul 来说，Spring Cloud Gateway 提供更优秀的性能，更强大的有功能。
-
-<font color="red">当前Spring Cloud Gateway版本为2.2.9</font>
+Spring Cloud Gateway 是Spring Cloud官方推出的第二代API网关框架。定位于取代 Netflix Zuul1.0。相比 Zuul 来说，Spring Cloud Gateway 提供更优秀的性能，更强大的功能。
 
 ### Gateway功能特征
 
@@ -84,7 +83,7 @@ Gateway中的filter可以对请求和响应进行处理。例如响应内容、�
 </dependency>
 ```
 
-注意：一定要排除掉 spring-boot-starter-web 依赖，否则会启动报错
+<font color="red">注意：一定要排除掉 spring-boot-starter-web 依赖，否则会启动报错。因为springmvc 和 springcloudgateway 两者的依赖包有冲突。</font>
 
 ② 增加Gateway配置
 
@@ -188,7 +187,7 @@ spring:
 1. 删除之前设置的gateway路由规则。
 2. 只增加gateway.discovery.locator.enabled=true的属性。意思是把nacos中的服务名默认作为转发地址和断言规则。并且转发请求时自动去除第1级路径。
 
-<font color="red">这种是约定大于配置的写法，不过灵活。不推荐</font>
+<font color="red">这种是约定大于配置的写法，不够灵活。不推荐</font>
 
 
 ## 5 路由断言工厂（Route Predicate Factories）配置
@@ -442,6 +441,8 @@ public class CustomGateWayGlobalFilter implements GlobalFilter {
 
 ## 10 gateway跨域配置
 
+有两种方式配置跨域。
+
 通过在配置文件配置的方式
 ```yml
 spring:
@@ -480,7 +481,6 @@ public class GatewayCorsConfig {
 }
 
 ```
-
 
 ## 11 gateway整合sentinel实现流控降级功能
 
@@ -540,7 +540,7 @@ spring:
 
 ## 12 网关高可用（gateway网关集群）
 
-为了保证 Gateway 的高可用性，可以同时启动多个 Gateway 实例进行负载，在 Gateway 的上游使用 Nginx进行负载转发以达到高可用。
+为了保证 Gateway 的高可用性，可以同时启动多个 Gateway 实例进行负载，在 Gateway 集群的上游使用 Nginx进行负载转发以达到高可用。
 
 ![gateway20220826112702.png](../blog_img/gateway20220826112702.png)
 

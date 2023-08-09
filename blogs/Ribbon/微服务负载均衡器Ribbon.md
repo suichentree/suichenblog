@@ -41,7 +41,7 @@ SpringCloud Ribbon是基于Netflix Ribbon 实现的一套客户端的负载均
 * 加权轮询：通过对服务器性能的分型，给高配置，低负载的服务器分配更高的权重，均衡各个服务器的压力;
 * 最小链接数：根据服务器的情况，比如请求积压数等参数，将请求分配到当前压力最小的服务器上。
 
-## 2. Spring Cloud Alibaba 引入ribbon
+## 2.Spring Cloud Alibaba 引入ribbon
 
 <font color="red">ribbon的负载均衡方案主要是客户端负载均衡，即当客户端调用多个同名服务端集群时，可以通过ribbon来负载均衡。</font>
 

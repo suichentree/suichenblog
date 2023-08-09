@@ -26,24 +26,25 @@ Nacos是一种工具，帮助您快速实现动态服务发现、服务配置、
 下图为微服务架构图
 ![20220728161129.png](../blog_img/20220728161129.png)
 
-## 1. 注册中心的演变
+### 注册中心的演变
 
 注册中心用于管理所有服务、解决服务与服务之间调用关系错综复杂、难以维护的问题;
 
-![nacos_20220729113837.png](../blog_img/nacos_20220729113837.png)
 第一代：直接通过网址调用其他服务。
+![nacos_20220729113837.png](../blog_img/nacos_20220729113837.png)
 
-![nacos_20220729113855.png](../blog_img/nacos_20220729113855.png)
 第二代：通过注册表维护其他服务的网址
+![nacos_20220729113855.png](../blog_img/nacos_20220729113855.png)
 
-![nacos_20220729113919.png](../blog_img/nacos_20220729113919.png)
 第三代：通过nginx来维护其他服务的网址
+![nacos_20220729113919.png](../blog_img/nacos_20220729113919.png)
 
-![nacos_20220729113935.png](../blog_img/nacos_20220729113935.png)
 第四代：通过简单注册中心来维护服务网址和服务名称
+![nacos_20220729113935.png](../blog_img/nacos_20220729113935.png)
 
-![nacos_20220729113955.png](../blog_img/nacos_20220729113955.png)
 第五代：给注册中心加上心跳机制，并且通过部署注册中心集群等方式来维护服务网址和服务名称
+![nacos_20220729113955.png](../blog_img/nacos_20220729113955.png)
+
 
 > Nacos作为注册中心提供的核心功能：
 * 服务注册：Nacos Client会通过发送REST请求向Nacos Server注册自己的服务，提供自身的元数据，比如ip地址、端口等信息。Nacos Server接收到注册请求后，就会把这些元数据信息存储在一个双层的内存Map中。
@@ -52,7 +53,7 @@ Nacos是一种工具，帮助您快速实现动态服务发现、服务配置、
 * 服务发现：服务消费者（Nacos Client）在调用服务提供者的服务时，会发送一个REST请求给Nacos Server，获取上面注册的服务清单，并且缓存在Nacos Client本地，同时会在Nacos Client本地开启一个定时任务定时拉取Nacos服务端最新的注册表信息更新到本地缓存中。
 * 服务健康检查：Nacos Server会开启一个定时任务用来检查注册服务实例的健康情况，对于超过15s没有收到客户端心跳的实例会将它的healthy属性置为false(客户端服务发现时不会发现)，如果某个实例超过30秒没有收到心跳，直接剔除该实例(被剔除的实例如果恢复发送心跳则会重新注册)
 
-## 2.windows环境下nacos服务端的单机运行
+### windows环境下nacos服务端的单机运行
 
 1. github上找到nacos的压缩包，下载解压。注意nacos的版本。目前最新为2.1.0版本
 2. 编辑startup.cmd。将nacos从默认的集群模式，修改为单机模式。
@@ -61,12 +62,13 @@ Nacos是一种工具，帮助您快速实现动态服务发现、服务配置、
 ![20220728175719.png](../blog_img/20220728175719.png)
 ![20220728175810.png](../blog_img/20220728175810.png)
 
-## 3.windows环境下nacos服务端的集群运行
+### windows环境下nacos服务端的集群运行
 
 <font color="red">注意：nacos集群运行需要使用外部数据源mysql。3个或3个以上Nacos节点才能构成集群</font>
 
 1. github上找到nacos的压缩包，下载解压。注意nacos的版本。目前最新为2.1.0版本
 2. nacos集群部署需要连接外部数据源mysql。
+
 ```
 连接外部数据源mysql步骤：
 1. 先把/conf/nacos-mysql.sql文件运行到mysql数据库中，建库建表。
@@ -87,16 +89,18 @@ db.password.0=root
 ```
 <font color="red">注意：在nacos2.x版本中,每启动一个nacos，会有3个端口被nacos使用。例如：若某个nacos端口为8848，则9848（8848+1000）端口和9849（8848+1001）会被启用。所以设置集群nacos端口时，不要设置连续端口号。</font>
 
-4. 进入bin目录，编辑startup.cmd文件，将nacos启动模式改为集群。set MODE="cluster"
-5. 将下载的nacos目录复制3份，必须先停止nacos再复制，否则会报错
-6. 分别进入conf/application.properties配置文件，更改端口号，与cluster.conf文件相对应。
-7. 分别执行这三个nacos的/bin/startup.cmd文件
+1. 进入bin目录，编辑startup.cmd文件，将nacos启动模式改为集群。set MODE="cluster"
+2. 将下载的nacos目录复制3份，必须先停止nacos再复制，否则会报错
+3. 分别进入conf/application.properties配置文件，更改端口号，与cluster.conf文件相对应。
+4. 分别执行这三个nacos的/bin/startup.cmd文件
 
 ![nacos20220801151426.png](../blog_img/nacos20220801151426.png)
 
 8. 进入任意一个nacos可视化界面
 
 ![nacos20220801151853.png](../blog_img/nacos20220801151853.png)
+
+当部署了nacos节点的时候，有两种方式把服务端应用和nacos集群连接在一起。
 
 9. 方式一：在每个服务的application.properties中配置多个nacos集群节点的地址
 
@@ -138,7 +142,7 @@ server {
 spring.cloud.nacos.discovery.server‐addr=192.168.11.109:7070/nacos
 ```
 
-## 4. Spring Cloud Alibaba 引入Nacos注册中心服务
+### Spring Cloud Alibaba 引入Nacos注册中心服务
 
 <font color="red">注意：示例为使用springbootalibaba微服务架构的项目</font>
 
@@ -179,8 +183,6 @@ spring.cloud.nacos.discovery.server‐addr=192.168.11.109:7070/nacos
 
 </font>
 
-
-
 3. 当前项目application.properties中配置
 
 ```
@@ -200,15 +202,14 @@ spring.cloud.nacos.discovery.server‐addr=localhost:8848
 5. 测试调用服务
 使用restTemplate调用注册中心的服务，注意要给restTemplate添加@LoadBalanced注解，该注解用于开启负载均衡。    
 ```java
-//启动类UserApplication.java
+//-------------这里是启动类UserApplication.java
 @Bean
 @LoadBalanced
 public RestTemplate restTemplate(){
     return new RestTemplate();
 }
 
-///////////////////////
-//控制层类userController.java
+//-------------这里是控制层类userController.java
 @Autowired
 private RestTemplate restTemplate;
 
@@ -233,7 +234,7 @@ public String restTemplate3(){
 }
 ```
 
-## 5. nacos-discovery的部分配置信息,详细配置参考官网
+### nacos-discovery的部分配置信息,详细配置参考官网
 
 | 配置项 | Key | 默认值 | 说明 | 
 |  ----  | ----  | ----  | ----  | 
@@ -249,7 +250,7 @@ public String restTemplate3(){
 下图为微服务架构图
 ![20220728161129.png](../blog_img/20220728161129.png)
 
-## 1  介绍
+### 介绍
 
 在微服务架构中，配置中心就是统一管理各个微服务配置文件的服务。每个微服务都有自己的配置文件，为了统一维护，方便管理，所以出现了配置中心的概念。所有的微服务配置文件都在配置中心中管理和读取，因此，出现了配置中心的概念。
 
@@ -271,7 +272,7 @@ Data ID是配置项的唯一标识，它的命名是有一定规范的。
 Data ID的命名规范是：
 ${prefix}-${spring.profiles.active}.${file-extension}
 
-* prefix 默认为spring.application.name的值，也可以通过配置项spring.cloud.nacos.config.prefix来配置。
+* prefix 默认为配置项spring.application.name的值，也可以通过配置项spring.cloud.nacos.config.prefix来配置。
 
 * spring.profiles.active 即为当前环境对应的 profile。 
 注意：当 spring.profiles.active 为空时，对应的连接符 - 也将不存在，dataId 的拼接格式变成 ${prefix}.${file-extension}
@@ -281,7 +282,7 @@ ${prefix}-${spring.profiles.active}.${file-extension}
 
 <font color="red">例如：某个微服务服务名叫user-service，开发环境为dev。file-extension扩展格式为yaml，则该微服务对应的配置文件的Data ID要命名为user-service-dev.yaml。</font>
 
-## 2 Spring Cloud Alibaba引入Nacos配置中心服务
+### Spring Cloud Alibaba引入Nacos配置中心服务
 
 ① 给某个微服务引入Nacos配置中心依赖
 
@@ -348,7 +349,7 @@ public class UserConfigController {
 
 当微服务正确监听到配置中心数据后，nacos配置中心可以查询到配置文件正在被那个服务端进行监听。
 
-## 3. 自定义扩展的 Data Id 配置
+### 自定义扩展的 Data Id 配置
 
 nacos配置中心支持自定义扩展的 Data Id 配置。可以解决多个应用间配置共享的问题，又可以支持一个应用有多个配置文件。
 
