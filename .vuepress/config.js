@@ -74,6 +74,12 @@ module.exports = {
           }
         ]
       },
+      //留言板配置
+      {
+        "text": "留言板",
+        "link": "/blogs/留言板/messageBoard.html",
+        "icon": "reco-suggestion",
+      },
       {
         "text": "联系",
         "icon": "reco-message",
@@ -128,6 +134,7 @@ module.exports = {
         "SpringCloud面试题1"
       ]
     },
+    //评论配置
     "vssueConfig": {
       "platform": 'github',
       "owner": 'suichentree',
