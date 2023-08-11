@@ -1,5 +1,5 @@
 ---
-title: Linux面试题
+title: Linux面试题总结
 date: 2020-11-24
 sidebar: 'auto'
 categories:
@@ -10,7 +10,7 @@ tags:
 
 [toc]
 
-## Linux面试题
+## Linux面试题总结
 
 ### 1.绝对路径用什么符号表示？当前目录、上层目录用什么表示？主目录用什么表示? 切换目录用什么命令？
 

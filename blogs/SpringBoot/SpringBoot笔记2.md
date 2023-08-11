@@ -14,11 +14,11 @@ tags:
 
 当前springboot版本为2.7.4
 
-# SpringBoot 静态资源映射
+## SpringBoot 静态资源映射
 
 在 Web 应用中会涉及到大量的静态资源，例如 JS、CSS 和 HTML 等。例如通过 Spring MVC 访问静态资源文件时，需要先配置静态资源的映射；但在 SpringBoot 中则不再需要进行此项配置，因为 SpringBoot 已经默认完成了这一工作。
 
-## 默认静态资源映射
+### 默认静态资源映射
 
 SpringBoot默认已经完成静态资源映射的工作。
 
@@ -37,7 +37,7 @@ classpath:/public/
 4. Spring Boot就会依次从优先级高的目录开始查询hello.html并返回。
 
 
-# SpringBoot 自定义拦截器
+## SpringBoot 自定义拦截器
 
 Spring Boot 同样提供了拦截器功能。 
 
@@ -116,9 +116,9 @@ public class MyMvcConfig implements WebMvcConfigurer {
 * excludePathPatterns：该方法用于排除拦截路径，即指定不需要被拦截器拦截的请求。
 
 
-# SpringBoot统一日志
+## SpringBoot统一日志
 
-## 介绍
+### 介绍
 
 市面上常见的日志框架有：JUL,JCL,Jboss-logging,logback,log4j,log4j2, slf4j等等，主要分类如下：
 
@@ -163,7 +163,7 @@ public class BookController {
 
 <font color="red">SpringBoot默认日志级别是 info，因此控制台只能打印 info 及更高级别的日志。</font>
 
-## 日志级别
+### 日志级别
 
 各个日志级别：fatal > error > warn > info > debug > trace
 
@@ -193,7 +193,7 @@ logging:
 * 注意的是:必须从根目录（com包）开始，一步一步的到指定目录；否则springboot找不到。设置无效。
 
 
-## 日志持久化
+### 日志持久化
 
 日志持久化：将控制台打印的日志写到相应的目录或文件下。
 
@@ -210,7 +210,7 @@ logging:
 * logging.file.path属性
     *  指定文件存放路径。默认名称为spring.log
 
-## 日志输出格式
+### 日志输出格式
 
 ```yaml
 logging:
@@ -221,7 +221,7 @@ logging:
         file: %d{yyyy-MM-dd} === [%thread] === %-5level === %logger{50} === - %msg%n
 ```
 
-## 日志框架各自配置文件
+### 日志框架各自配置文件
 
 在类路径下放上每个日志框架自己的配置文件即可, springboot就不使用默认的日志配置。
 
@@ -238,7 +238,7 @@ JUL | logging.properties
 2. logback使用application.yml中的属性。使用springProperty标签才可使用application.yml中的值,可以设置默认值。
 
 
-## 日志综合案例
+### 日志综合案例
 
 springboot框架下服务每天生成一份日志。
 
@@ -301,9 +301,9 @@ logback-spring.xml日志配置文件内容：
 </configuration>
 ```
 
-# SpringBoot整合Mybatis
+## SpringBoot整合Mybatis
 
-## 创建SpringBoot项目
+### 创建SpringBoot项目
 
 创建SpringBoot项目，选择导入Spring Web,Mybatis,Mysql相关依赖
 
@@ -342,7 +342,7 @@ mvnw.cmd
 </dependencies>
 ```
 
-## 创建数据库表，实体类
+### 创建数据库表，实体类
 
 1. 创建数据库test,其中创建表book
 
@@ -369,7 +369,7 @@ public class Book {
 }
 ```
 
-## 定义dao接口与@Mapper注解
+### 定义dao接口与@Mapper注解
 
 创建dao包下。其中创建BookDao接口，内容如下
 
@@ -399,7 +399,7 @@ public class Springbootdemo3Application {
 ```
 
 
-## 定义service接口及其实现类
+### 定义service接口及其实现类
 
 创建service包下。其中创建BookService接口及其实现类，内容如下
 
@@ -421,7 +421,7 @@ public class BookServiceImpl implements BookService {
 }
 ```
 
-## 定义controller层
+### 定义controller层
 
 创建controller包下。其中创建BookController实现类，内容如下
 
@@ -439,7 +439,7 @@ public class BookController {
 }
 ```
 
-## 添加数据源配置信息
+### 添加数据源配置信息
 
 ```yaml
 spring:
@@ -450,11 +450,11 @@ spring:
     password: root
 ```
 
-## 运行启动类，测试接口
+### 运行启动类，测试接口
 
 ![springboot20220923104259.png](../blog_img/springboot20220923104259.png)
 
-## 小结（@Mapper注解）
+### 小结（@Mapper注解）
 
 Dao接口要想被SpringIOC容器扫描到，有两种解决方案:
 * 方案一:在Dao接口上添加@Mapper注解，并且确保Dao处在引导类（启动类）所在包或其子包中。该方案的缺点是需要在每个Dao接口中添加注解。
@@ -472,25 +472,25 @@ public class Springbootdemo3Application {
 }
 ```
 
-# SpringBoot中使用Druid数据源
+## SpringBoot中使用Druid数据源
 
-## 什么是数据源?
+### 什么是数据源?
 
 数据源简单理解为数据源头，提供了应用程序所需要数据的位置。数据源保证了应用程序与目标数据之间交互的规范和协议,他可以是数据库，文件系统等等。
 
-## 为什么要用数据源?
+### 为什么要用数据源?
 
 数据源是提高数据库连接性能的常规手段，数据源会负责维持一个数据库连接池,当程序创建数据源实例时,系统会一次性的创建多个数据库连接，并把这些数据库连接保存在连接池中.当程序需要进行数据库访问时,无须重新获取数据库连接，而是从连接池中取出一个空闲的数据库连接。当程序使用数据库结束后,无需关闭数据库连接，而是将数据库连接归还给连接池即可。通过这种方式,
 就可避免频繁的获取数据库连接、关闭数据库连接所导致的性能下降。
 
-## 有那些数据源?
+### 有那些数据源?
 
 * dbcp数据库连接池是apache上的一个java连接池项目，也是tomcat使用的连接池组件。单独使用dbcp需要3个包来进行数据库连接是一个非常耗时耗资源的行为，dbcp没有自动回收空闲连接的功能。
 * c3p0是一个开源的jdbc连接池，实现了数据源和jndi绑定，支持jdbc3和jdbc2的标准扩展。
 * Proxool是一种Java数据库连接池技术，是sourceforge下的一个开源项目，这个项目提供一个健壮、易用的连接池，最为关键的是这个连接池提供一个健壮、易用，便于发现连接泄漏的情况
 * Druid是一个开源项目，该源码自带SQl监控、SQL防火墙、Web应用监控、Url监控、Session监控、Spring,而且使用起来很方便，只要在web.xml或Spring的配置文件中加以配置即可。
 
-## 使用Druid数据源
+### 使用Druid数据源
 
 SpringBoot有默认的数据源，也可以指定使用Druid数据源，按照以下步骤实现
 
@@ -517,7 +517,7 @@ spring:
 ```
 
 
-# Spring Boot整合Redis
+## Spring Boot整合Redis
 
 ① 添加依赖
 
@@ -584,7 +584,7 @@ public class BookController {
 ![springboot20220928110827.png](../blog_img/springboot20220928110827.png)
 
 
-## 使用RedisTemplate造成的redis客服端乱码问题
+### 使用RedisTemplate造成的redis客服端乱码问题
 
 问题：
 使用RedisTemplate连接redis数据库，在保存中文时，发现存进去的key和value有乱码问题，也就是有\xa\xc…之类的前缀，虽然使用通过RedisTemplate读、写key和value时不会有乱码问题，但如果通过命令行或客户端直连到redis库，就会发现数据带了乱码前缀，甚至有些中文值全是乱码。

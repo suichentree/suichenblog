@@ -1,5 +1,5 @@
 ---
-title: MySql面试考点总结
+title: MySql面试题总结
 date: 2022-10-31
 sidebar: 'auto'
 categories: 
@@ -10,7 +10,7 @@ tags:
 
 [toc]
 
-# MySql面试考点总结
+# MySql面试题总结
 
 ## 说说innodb存储引擎和myisam存储引擎的区别？
 

@@ -28,11 +28,11 @@ tags:
 # 根据实际情况来修改以下配置信息 ##################################
 
 # JAVA应用程序的名称
-APP_NAME=electronic-prescription
+APP_NAME=xxxx
 # jar包存放路径
 JAR_PATH='/home/elec-prcs'
 # jar包名称
-JAR_NAME=electronic-prescription-0.0.1-SNAPSHOT.jar
+JAR_NAME=xxxx-0.0.1-SNAPSHOT.jar
 
 # ######### Shell脚本中$0、$?、$!、$$、$*、$#、$@等的说明 #########
 

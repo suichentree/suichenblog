@@ -14,10 +14,7 @@ tags:
 
 当前springboot版本为2.7.4
 
-
-
-
-# SpringBoot介绍
+## SpringBoot介绍
 
 Spring Boot 是 Pivotal 团队在 Spring Framework 的基础上开发的一套全新的开源框架，其目的是为了简化 Spring Framework 应用的搭建和开发过程。Spring Boot 去除了大量的 XML 配置文件，简化了复杂的依赖管理。
 
@@ -34,7 +31,7 @@ Spring Boot 是 Pivotal 团队在 Spring Framework 的基础上开发的一套�
 * 对Spring和第三方库提供默认配置，也可修改默认值，简化框架配置
 * 无需配置XML，无代码生成，开箱即用
 
-# SpringBoot入门案例
+## SpringBoot入门案例
 
 ① 步骤1：新建SpringBoot项目
 
@@ -110,7 +107,7 @@ public class Springbootdemo1Application {
 
 在服务器中执行`java -jar xxxxx.jar`命令，让jar包在服务器中运行。
 
-## 启动依赖starter
+### 启动依赖starter
 
 > 什么是starter
 
@@ -151,7 +148,7 @@ starter 提供了大量的自动配置，让用户摆脱了处理各种依赖和
 <font color="red">小结：引入某个启动依赖，就相当于间接引入大量相关依赖。解决了Spring依赖繁琐的问题。</font>
 
 
-## 启动类上的@SpringBootApplication注解
+### 启动类上的@SpringBootApplication注解
 
 默认情况下，SpringBoot项目会自动创建一个名为 ***Application 的主程序启动类 ，该类中使用了一个组合注解 @SpringBootApplication，用来开启 SpringBoot 的自动配置，另外该启动类中包含一个 main() 方法，用来启动该项目。
 
@@ -186,7 +183,7 @@ public @interface SpringBootApplication {
 
 
 
-## 更换SpringBoot项目内置的web服务器
+### 更换SpringBoot项目内置的web服务器
 
 如何把SpringBoot项目内置的tomcat服务器，更换为jetty服务器。
 
@@ -212,7 +209,7 @@ public @interface SpringBootApplication {
 </dependency>
 ```
 
-# SpringBoot 配置文件
+## SpringBoot 配置文件
 
 SpringBoot 默认使用以下3种全局的配置文件，其文件名是固定的。
 * application.properties
@@ -223,7 +220,7 @@ SpringBoot 默认使用以下3种全局的配置文件，其文件名是固定�
 1. 配置文件必须放在resources目录下
 2. 三种配置文件的优先级是：application.properties > application.yml > application.yaml
 
-## 配置文件中的格式
+### 配置文件中的格式
 
 在springboot框架中，建议使用yml配置文件，因为它的可读性更强。
 
@@ -256,7 +253,7 @@ spring:
 
 ![45](../blog_img/springboot_img_45.png)
 
-## 多个配置文件
+### 多个配置文件
 
 通常情况下，Spring Boot 在启动时会将 resources 目录下的 application.properties 或 apllication.yml 作为其默认配置文件。
 
@@ -292,9 +289,9 @@ SpringBoot会把所有位置的文件都加载，高优先级配置会覆盖低�
 * 存在不同的配置项时，高优先级和低优先级的配置内容取并集。
 
 
-## 程序中读取配置文件数据
+### 程序中读取配置文件数据
 
-### 使用 @Value注解
+#### 使用 @Value注解
 
 ```yaml
 server:
@@ -328,7 +325,7 @@ public class BookController {
 }
 ```
 
-### 使用 Environment 类型对象
+#### 使用 Environment 类型对象
 
 可以使用@Autowired注解注入Environment对象的方式读取数据。这种方式SpringBoot会将配置文件中所有的数据封装到Environment对象中，如果需要使用哪个数据只需要通过调用Environment对象的getProperty(String name)方法获取。
 
@@ -364,13 +361,13 @@ public class BookController {
 }
 ```
 
-## 多环境配置文件设置
+### 多环境配置文件设置
 
 SpringBoot给开发者提供了多环境的快捷配置，需要切换环境时只需要改一个配置即可。
 
 ![springboot20220922151603.png](../blog_img/springboot20220922151603.png)
 
-### properties配置文件
+#### properties配置文件
 
 properties类型的配置文件配置多环境需要定义不同的配置文件，在resources目录下创建4个配置文件，分别对应生产，测试，开发环境和默认配置文件。
 
@@ -395,11 +392,11 @@ server.port=82
 SpringBoot只会默认加载名为application.properties的配置文件，所以需要创建application.properties配置文件，在其中设置启用哪个环境配置文件，配置如下:
 
 ```properties
-# 启动生产环境配置文件
+## 启动生产环境配置文件
 spring.profiles.active=pro
 ```
 
-### yaml配置文件
+#### yaml配置文件
 
 > 方法1
 
@@ -483,7 +480,7 @@ server:
 
 ```
 
-## 命令行启动参数设置配置参数
+### 命令行启动参数设置配置参数
 
 SpringBoot提供了在运行jar时设置开启指定的环境的方式。
 
@@ -500,7 +497,7 @@ java –jar xxx.jar –-server.port=88 –-spring.profiles.active=test
 
 <font color="red">优先级：在命令行启动参数设置配置数据 > 在配置文件中设置配置数据</font>
 
-## 外部程序配置文件
+### 外部程序配置文件
 
 Spring Boot 还可以加载一些位于项目外部的配置文件。
 
@@ -519,7 +516,7 @@ java -jar xxx.jar  --spring.config.additional-location=D:\myConfig\my-applicatio
 与 `--spring.config.location` 不同，`--spring.config.additional-location` 不会使项目默认的配置文件失效，使用该命令行参数添加的外部配置文件会与项目默认的配置文件共同生效，形成互补配置，且其优先级是最高的，比所有默认配置文件的优先级都高。
 
 
-# SpringBoot热部署
+## SpringBoot热部署
 
 为了进一步提高开发效率,springboot提供了全局项目热部署,在开发过程中修改了部分代码以及相关配置文件后,不需要每次重启使修改生效,在项目中开启了springboot全局热部署之后只需要在修改之后等待几秒即可使修改生效。
 

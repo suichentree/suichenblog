@@ -1,8 +1,8 @@
 ---
-title: Java面试考点总结-JVM
-date: 2022-11-03
+title: Java面试题总结-JVM
+date: 2023-08-11
 sidebar: 'auto'
-categories:
+categories: 
  - 面试
 tags:
  - Java
@@ -10,7 +10,7 @@ tags:
 
 [toc]
 
-# Java面试考点总结-JVM
+# Java面试题总结-JVM
 
 ## JVM 的主要组成部分及其作用
 
