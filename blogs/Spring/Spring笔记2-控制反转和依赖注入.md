@@ -147,8 +147,34 @@ System.out.println(scard2);
 
 两个 Bean 实例的地址不一样，这说明 IoC 容器创建两个不同的实例。
 
+#### request 作用域
 
-### bean的生命周期: init-method属性和destroy-method属性
+该属性仅对HTTP请求产生作用，使用该属性定义Bean的作用域时，每次HTTP请求,IOC容器都会创建一个新的Bean对象，适用于WebApplicationContext环境。
+
+#### session 作用域
+
+该属性仅用于HTTP Session，同一个Session共享一个Bean实例。不同Session使用不同的实例。
+
+#### global-session 作用域
+
+该属性仅用于HTTP Session,同session作用域不同的是，所有的Session共享一个Bean实例。
+
+
+### bean的生命周期
+
+> bean的生命周期的过程如下
+
+* 首先IOC容器开始运行。通过构造器或工厂方法创建Bean实例，
+* 给bean设置属性值和对其他bean的引用
+* 把bean实例传给bean的前置处理器postProcessBeforeInitiallization方法处理
+* 调用bean的初始化方法init-method
+* 把bean实例传给bean的前置处理器postProcessAfterInitiallization方法处理
+* 此时bean可以使用，把bean放到IOC容器中
+* 当ioc容器关闭时，会调用bean的销毁方法destory-method
+
+![20201028104908.png](../blog_img/20201028104908.png)
+
+> 配置bean生命周期的属性
 
 init-method属性和destroy-method属性分别是`<bean>`元素标签的属性。
 

@@ -20,25 +20,21 @@ Spring MVC 本质上是对 Servlet 的进一步封装，其最核心的组件是
 
 ## SpringMVC 工作流程？
 
-1）用户发送请求至前端控制器 DispatcherServlet。
+（1）客户端（浏览器）发送请求到 DispatcherServlet前端控制器。
 
-2）DispatcherServlet 收到请求调用 HandlerMapping 处理器映射器。
+（2）DispatcherServlet 根据请求信息调用 HandlerMapping，解析请求对应的 Handler。
 
-3）处理器映射器找到具体的处理器并返回给DispatcherServlet。
+（3）解析到对应的 Handler（也就是我们平常说的 Controller 控制器）后，开始由 HandlerAdapter 适配器处理。
 
-4）DispatcherServlet 调用 HandlerAdapter 处理适配器。找到具体的Controller处理器。
+（4）HandlerAdapter 会根据 Handler 来调用真正的处理器开处理请求，并处理相应的业务逻辑。
 
-6）Controller 执行完成返回 ModelAndView。
+（5）处理器处理完业务后，会返回一个 ModelAndView 对象，Model 是返回的数据对象，View 是个逻辑上的 View。
 
-7）HandlerAdapter 处理适配器 将 ModelAndView 返回给 DispatcherServlet。
+（6）ViewResolver 会根据逻辑 View 查找实际的 View。
 
-8）DispatcherServlet 将 ModelAndView 传给 ViewReslover 视图解析器。
+（7）DispaterServlet 把返回的 Model 传给 View（视图渲染）。
 
-9）ViewReslover 解析后返回具体 View。
-
-10）DispatcherServlet 根据 View 进行渲染视图（即将模型数据填充至视图中）。
-
-11）DispatcherServlet 响应用户
+（8）把 View 返回给请求者（浏览器）
 
 简化：
 
@@ -50,3 +46,9 @@ Controller处理器执行完后返回ModelAndView -》HandlerAdapter 处理适�
 
 1. 创建一个自定义拦截器类，自定义拦截器类需要实现HandlerInterceptor接口，重写HandlerInterceptor接口中的三个方法。
 2. 将自定义拦截器注入到配置类中。
+
+## SpringMVC怎么样设定重定向和转发的？
+
+* （1）转发：在return返回值前面加"forward:"，譬如"forward:user.do?name=method4
+* （2）重定向：在return返回值前面加"redirect:"，譬如`redirect:http://www.baidu.com`
+

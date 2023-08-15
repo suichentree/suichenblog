@@ -12,6 +12,25 @@ tags:
 
 # Java面试题总结-集合1
 
+
+## 介绍一下java中各个集合的底层数据结构
+
+List
+* Arraylist： 对象数组
+* Vector： 对象数组
+* LinkedList： 双向循环链表
+
+Set
+* HashSet（无序，唯一）：底层采用 HashMap 来保存元素
+* LinkedHashSet： 底层是通过 LinkedHashMap 来实现的。
+* TreeSet（有序，唯一）： 底层是红黑树(自平衡的排序二叉树。) 
+
+Map
+* HashMap： 底层一开始是由数组+链表组成。当当链表长度大于阈值（默认为8）时，将链表转化为红黑树，以减少搜索时间。
+* LinkedHashMap：底层是HashMap结构。不过在HashMap结构的基础上，增加了一条双向链表。
+* HashTable： 底层是数组+链表组成的，数组是 HashMap 的主体，链表则是主要为 了解决哈希冲突而存在的
+* TreeMap： 底层是红黑树（自平衡的排序二叉树）
+
 ## 介绍一下List集合中有哪些常用类？以及各自的区别。
 
 常用类有 ArrayList、LinkedList、Vector。
@@ -36,21 +55,28 @@ ArrayList 的缺点如下：
 
 ## List 是线程安全的吗？如果要线程安全要怎么做？
 
-List中的Vector是线程安全的,其他类不是线程安全的，如果要实现线程安全，需要使用工具类 Collections.synchronizedList(new ArrayList())方法。
+List中的Vector类是线程安全的,其他类不是线程安全的，如果要实现线程安全，可以使用工具类 Collections.synchronizedList(new ArrayList())方法。
 
 ## List 和 数组Array 之间如何互相转换？
 
 - List 集合可以使用 toArray 方法，转换为Array数组。  
 - Array 使用 Arrays.asList(array)方法，转换为List集合。
 
-
 ## TreeMap 和 TreeSet 在排序时如何比较元素？
 
-TreeSet 要求存放的对象的类必须实现 Comparable 接口的 compareTo() 方法，当插入元素到TreeSet容器的时候会回调该方法比较元素的大小。
+TreeMap和TreeSet底层都是红黑树数据结构。
+
+TreeSet 要求存放入集合的对象必须实现 Comparable 接口的 compareTo() 方法，当插入元素到TreeSet容器的时候会回调该方法比较元素的大小。
 
 TreeMap 要求存放的键值对映射的键key必须实现 Comparable 接口从而根据键对元素进行排序。
 
 ## Collections 工具类中的 sort()方法如何比较元素？
+
+```
+void sort(List list)
+void sort(List list, Comparator c)
+```
+
 
 第一种要求传入的待排序容器中存放的对象比较实现Comparable 接口以实现元素的比较；
 
@@ -59,7 +85,6 @@ TreeMap 要求存放的键值对映射的键key必须实现 Comparable 接口从
 ## 用哪两种方式来实现集合的排序？
 
 你可以使用有序集合，如 TreeSet 或 TreeMap，你也可以使用有顺序的的集合，如 list，然后通过 Collections.sort() 来排序。
-
 
 ## Java 中的 TreeMap 是采用什么树实现的？
 
@@ -73,21 +98,32 @@ ArrayList 的默认大小是 10 个元素，HashMap 的默认大小是16 个元�
 ## HashMap的常见问题
 
 >1. HashMap如果有很多相同key，导致链表很长的话，你会怎么优化？或者你会用什么数据结构来存储？针对HashMap中某个Entry链太长，查找的时间复杂度可能达到O(n)，怎么优化？
+
 在jdk1.8中若HashMap中某一下标位置对应的链表长度>8时，会把链表部分转换为红黑树。利用红黑树快速增删改查的特点来提高HashMap的性能。这其中会涉及到红黑树的插入，删除，查找的算法。
 
 >2. HashMap在高并发的情况下会发生什么问题？
+
 会发送扩容问题。在jdk1.8的情况下，<font color="red">HashMap的扩容不是重新计算所有元素在数组中的位置。而是将原来数组的长度扩大为原来的2倍。</font>所有的之前元素的位置不是在原位置就是改变为原位置+2次幂的位置。
 
 >3. HashMap对象的key、value值均可为null（key只能有一个为null，而value则可以有多个为null）？
+
 HashMap在put的时候会调用hash()方法来计算key的hashcode值，当key==null时返回的值为0。因此key为null时，hash算法返回值为0，不会调用key的hashcode方法。之后会把数组中下标为0的元素覆盖。
 
 >4. HashMap是线程安全的吗？
+
 HashMap非线程安全，即任一时刻可以有多个线程同时写HashMap，会导致数据的不一致。<font color="red">如果需要满足线程安全，可以用 Collections的synchronizedMap方法使HashMap具有线程安全的能力，或者使用ConcurrentHashMap。</font>
 
-## Hashtable与HashMap的比较
+## Hashtable与HashMap的区别？
 
+- HashMap 继承的是 AbstractMap 类。Hashtable 继承的是 Dictionary类。
 - HashMap 允许 key 和 value 为 null，而 HashTable 不允许。
-- HashTable是线程安全的，HashMap不是线程安全的。如果需要线程安全的场合可以用ConcurrentHashMap替换。
+- HashMap不是线程安全的，HashTable是线程安全的，内部方法通过synchronizedMap关键字修饰。
+
+## 为什么HashMap 允许 key 和 value 为 null，而 HashTable 不允许？
+
+HashMap添加元素的时候，会判断key的hash值。当key为null的时候，则手动设置hash值为0。
+
+HashTable添加元素的时候，若key和value为null,会手动抛出空指针异常。
 
 ## JDK7和JDK8中的HashMap有什么区别？
 
@@ -97,29 +133,9 @@ JDK7中HashMap的实现方案有一个明显的缺点，即当Hash冲突严重�
 
 JDK8中的HashMap，是基于数组+链表+红黑树来实现的，它的底层维护一个Node数组。当链表的存储的数据个数大于等于8的时候，不再采用链表存储，而采用了红黑树存储结构。这么做主要是在查询的时间复杂度上进行优化，链表为O(N)，而红黑树一直是O(logN)，可以大大的提高查找性能。
 
-
-## 各个集合容器的底层数据结构
-
-List
-* Arraylist： Object数组
-* Vector： Object数组
-* LinkedList： 双向循环链表
-
-Set
-* HashSet（无序，唯一）：基于 HashMap 实现的，底层采用 HashMap 来保存元素
-* LinkedHashSet： LinkedHashSet 继承与 HashSet，并且其内部是通过 LinkedHashMap 来实现的。有点类似于我们之前说的LinkedHashMap 其内部是基 于 Hashmap 实现一样，不过还是有一点点区别的。
-* TreeSet（有序，唯一）： 红黑树(自平衡的排序二叉树。) 
-
-Map
-* HashMap： JDK1.8之前HashMap由数组+链表组成的，数组是HashMap的主体，链表则是主要为了解决哈希冲突而存在的（“拉链法”解决冲突）.JDK1.8以后在解决哈希冲突时有了较大的变化，当链表长度大于阈值（默认为8）时，将链表转化为红黑树，以减少搜索时间
-* LinkedHashMap：LinkedHashMap 继承自 HashMap，所以它的底层仍然是 基于拉链式散列结构即由数组和链表或红黑树组成。另外，LinkedHashMap 在上面 结构的基础上，增加了一条双向链表，使得上面的结构可以保持键值对的插入顺序。 同时通过对链表进行相应的操作，实现了访问顺序相关逻辑。
-* HashTable： 数组+链表组成的，数组是 HashMap 的主体，链表则是主要为 了解决哈希冲突而存在的
-* TreeMap： 红黑树（自平衡的排序二叉树）
-
-
 ## 哪些集合类是线程安全的？
 
-java.uti包中的集合类大部分都是非线程安全的，例如：ArrayList/LinkedList/HashMap等等，其中Vector和Hashtable是线程安全的，但是这两个类性能很差，在实际的开发中不常用。对于这些非线程安全的类，可以利用Collections工具类提供的synchronizedXxx()方法,可以将这些集合类包装成线程安全的集合类。
+java.uti包中的集合类大部分都是非线程安全的。其中Vector和Hashtable是线程安全的，但是这两个类性能很差，在实际的开发中不常用。对于这些非线程安全的类，可以利用Collections工具类提供的synchronizedXxx()方法,可以将这些集合类包装成线程安全的集合类。
 
 另外java.util.concurrent包中的提供了大量的支持并发访问的集合类。例如ConcurrentHashMap和ConcurrentMap等线程安全的集合类。
 
@@ -158,9 +174,8 @@ HashMap 基于 Hash 算法实现的
 3. 获取时，直接找到hash值对应的下标，在进一步判断key是否相同，从而找到对应值。
 4. 理解了以上过程就不难明白HashMap是如何解决hash冲突的问题，核心就是使用了数组的存储方式，然后将冲突的key的对象放入链表中，一旦发现冲突就在链表中做进一步的对比。当链表中的节点数据超过八个之后，该链表会转为红黑树来提高查询效率，从原来的O(n)到O(logn)
 
-## HashMap为什么使用红黑树替换链表?
+## Collection 和 Collections 的区别
 
-当HashMap的链表长度>8时，会把链表转换为红黑树。
+Collection 是集合类的上级接口，继承与他的接口主要有 Set接口 和 List接口
 
-原因：开始使用链表，占用空间少，查询性能也相差不大。但是当链表越来越长，查询效率逐渐变低，为保证查询效率才会舍弃链表转为红黑树，以空间换时间。
-
+Collections 是针对集合类的一个工具类，他提供一系列静态方法实现对各种集合的搜索、排序、线程安全化等操作。
