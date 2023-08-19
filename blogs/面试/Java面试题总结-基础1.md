@@ -104,3 +104,49 @@ uses-a, 用一个，A uses a B 代表A类方法中的参数包含了B类。
 
 GC 是垃圾收集的意思（Gabage Collection）,内存处理是编程人员容易出现问题的地方，忘记或者错误的内存回收会导致程序或系统的不稳定甚至崩溃，Java 提供的 GC 功能可以自动监测对象是否超过作用域从而达到自动回收内存的目的，Java 语言没有提供释放已分配内存的显示操作方法
 
+## Java 中实现多态的机制是什么？
+
+多态是指程序中定义的引用变量所指向的具体类型和通过该引用变量发出的方法调用在编译时不确定，在运行期间才确定，一个引用变量到底会指向哪个类的实例。这样就可以不用修改源程序，就可以让引用变量绑定到各种不同的类实现上。
+
+Java 实现多态有三个必要条件：继承、重定、向上转型，在多态中需要将子类的引用赋值给父类对象，只有这样该引用才能够具备调用父类方法和子类的方法。
+
+## 说说 Java 中 String 的了解
+
+1）String 类是 final 型，固 String 类不能被继承，它的成员方法也都默认为 final 方法。String对象一旦创建就固定不变了，对 String 对象的任何改变都不影响到原对象，相关的任何改变操作都会生成新的 String 对象。
+
+2）String 类是通过 char 数组来保存字符串的，String 对 equals 方法进行了重定，比较的是值相等。
+
+```
+String a = "test"; String b = "test"; String c = new String("test");
+```
+
+a、b 和字面上的 test 都是指向 JVM 字符串常量池中的"test"对象，他们指向同一个对象。而new 关键字一定会产生一个对象 test，该对象存储在堆中。所以 new String("test")产生了两个对象，保存在栈中的 c 和保存在堆中的 test。而在 java 中根本就不存在两个完全一模一样的字符串对象，故在堆中的 test 应该是引用字符串常量池中的 test。
+
+```
+String str1 = "abc"; //栈中开辟一块空间存放引用 str1，str1 指向池中 String 常量"abc" 
+
+String str2 = "def"; //栈中开辟一块空间存放引用 str2，str2 指向池中 String 常量"def" 
+
+String str3 = str1 + str2;//栈中开辟一块空间存放引用 str3
+//str1+str2 通过 StringBuilder 的最后一步 toString()方法返回一个新的 String 对象"abcdef"
+//会在堆中开辟一块空间存放此对象，引用str3指向堆中的(str1+str2)所返回的新String对象。
+
+System.out.println(str3 == "abcdef");//返回 false 因为 str3 指向堆中的"abcdef"对象，而"abcdef"是字符池中的对象，所以结果为 false。JVM 对 String str="abc"对象放在常量池是在编译时做的，而 String str3=str1+str2 是在运行时才知道的，new 对象也是在运行时才做的。
+
+```
+
+## String 为什么要设计成不可变的？
+
+1）字符串常量池需要 String 不可变。因为 String 设计成不可变，当创建一个 String 对象时，若此字符串值已经存在于常量池中，则不会创建一个新的对象，而是引用已经存在的对象。如果字符串变量允许必变，会导致各种逻辑错误，如改变一个对象会影响到另一个独立对象。
+
+2）String 对象可以缓存 hashCode。字符串的不可变性保证了 hash 码的唯一性，因此可以缓存 String 的 hashCode，这样不用每次去重新计算哈希码。在进行字符串比较时，可以直接比较 hashCode，提高了比较性能；
+
+3）安全性。String 被许多 java 类用来当作参数，如 url 地址，文件 path 路径，反射机制所需的 Strign 参数等，若 String 可变，将会引起各种安全隐患。
+
+## Java 中的异常层次结构
+
+- Throwable 类是异常层级中的基类。
+- Error 类表示内部错误，这类错误使我们
+无法控制的；
+- Exception 表示异常，RuntimeException 及其子类属于未检查异常，这类异常包括 ArrayIndexOutOfBoundsException、NullPointerException 等，我们应该通过条件判断等方式语句避免未检查异常的发生。
+- IOException 及其子类属于已检查异常，编译器会检查出来，若没有则会报错。对于未检查异常，我们无需捕获。
