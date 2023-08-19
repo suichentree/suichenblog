@@ -16,18 +16,18 @@ tags:
 ## 介绍一下java中各个集合的底层数据结构
 
 List
-* Arraylist： 对象数组
-* Vector： 对象数组
-* LinkedList： 双向循环链表
+* Arraylist： 对象数组，线程不安全
+* Vector： 对象数组，线程安全，所有方法被同步锁synchrionzed关键字修饰。
+* LinkedList： 双向链表，线程不安全
 
 Set
-* HashSet（无序，唯一）：底层采用 HashMap 来保存元素
-* LinkedHashSet： 底层是通过 LinkedHashMap 来实现的。
-* TreeSet（有序，唯一）： 底层是红黑树(自平衡的排序二叉树。) 
+* HashSet（无序，唯一）： 基于 HashMap 实现的，底层采⽤ HashMap 来保存元素。
+* LinkedHashSet： LinkedHashSet 是 HashSet 的⼦类，并且其内部是通过 LinkedHashMap 来实现的。
+* TreeSet（有序，唯一）： 底层是红黑树(自平衡的排序二叉树).
 
 Map
-* HashMap： 底层一开始是由数组+链表组成。当当链表长度大于阈值（默认为8）时，将链表转化为红黑树，以减少搜索时间。
-* LinkedHashMap：底层是HashMap结构。不过在HashMap结构的基础上，增加了一条双向链表。
+* HashMap: JDK1.8 之前 HashMap 由数组+链表组成的，数组是 HashMap 的主体，链表则是主要为了解决哈希冲突⽽存在的（“拉链法”解决冲突）。JDK1.8 以后，当链表⻓度⼤于阈值（默认为 8）（将链表转换成红⿊树前会判断，如果当前数组的⻓度⼩于 64，那么会选择先进⾏数组扩容，⽽不是转换为红⿊树）时，将链表转化为红⿊树，以减少搜索时间.
+* LinkedHashMap ： LinkedHashMap 继承⾃ HashMap ，所以它的底层仍然是由数组和链表或红⿊树组成。另外， LinkedHashMap 在链表的基础上，修改为双向链表，使得上⾯的结构可以保持键值对的插⼊顺序。同时通过对链表进⾏相应的操作，实现了访问顺序相关逻辑。
 * HashTable： 底层是数组+链表组成的，数组是 HashMap 的主体，链表则是主要为 了解决哈希冲突而存在的
 * TreeMap： 底层是红黑树（自平衡的排序二叉树）
 

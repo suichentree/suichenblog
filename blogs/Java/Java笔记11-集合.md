@@ -24,16 +24,16 @@ Java集合按照存储结构分为单列集合与双列集合。
 
 ![20220527103725.png](../blog_img/20220527103725.png)
 
+> List,Set,Map 三者的区别
+- List集合存储的元素有序，可重复。
+- Set集合存储的元素无序，不可重复。
+- Map集合，使⽤键值对（kye-value）存储元素。Key 是⽆序的、不可重复的，value 是⽆序的、可重复的，每个键最多映射到⼀个值。
 
 ## Collection接口
 
 Collection 接口是 List、Set 和 Queue 接口的父接口，通常情况下不直接使用。Collection 接口定义了一些通用的方法，通过这些方法可以实现对集合的基本操作。Collection 接口中定义的方法既可用于操作 Set 集合，也可用于操作 List 和 Queue 集合。
 
 ![20221102145854.png](../blog_img/20221102145854.png)
-
->List集合存储的元素有序，可重复.
->Set集合存储的元素无序，不可重复.
-
 ![java_20230628230759.png](../blog_img/java_20230628230759.png)
 
 例子：由于 Collection 是接口，不能对其实例化，所以上述代码中使用了 Collection 接口的 ArrayList 实现类来调用 Collection 的方法。
