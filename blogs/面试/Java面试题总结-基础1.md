@@ -76,6 +76,14 @@ finally一般作用在try-catch代码块中，在处理异常的时候，通常�
 
 finalize是Object类中的一个方法，一般由垃圾回收器调用finalize()方法，用于判断一个对象是否可回收。
 
+## static关键字的用法
+
+static关键字可以修饰方法，变量，代码块，内部类。
+- static 方法：静态方法，被类的实例化对象共享。
+- static 变量：静态变量，被类的实例化对象共享。
+- static 代码块：静态代码块，可以用于初始化类的操作。
+- static 内部类: 静态内部类。
+
 ## is-a , has-a ,like-a ，uses-a 分别指什么意思？
 
 is-a，是一个，代表继承关系。 如果A is-a B，那么B就是A的父类。
@@ -150,3 +158,23 @@ System.out.println(str3 == "abcdef");//返回 false 因为 str3 指向堆中的"
 无法控制的；
 - Exception 表示异常，RuntimeException 及其子类属于未检查异常，这类异常包括 ArrayIndexOutOfBoundsException、NullPointerException 等，我们应该通过条件判断等方式语句避免未检查异常的发生。
 - IOException 及其子类属于已检查异常，编译器会检查出来，若没有则会报错。对于未检查异常，我们无需捕获。
+
+
+## 什么是泛型
+
+“泛型”就是“泛指的类型”。
+
+比如ArrayList作为集合可以存放各种元素，如Integer, String，自定义的各种类型等，但在使用的时候可以泛型来约束 ArrayList集合中只存放Integer类型的元素。
+
+> 使用泛型的好处？
+
+以集合来举例，使用泛型的好处是可以通过泛型来约束集合中的元素类型。
+
+## Java创建对象有几种方式？
+
+java中提供了以下四种创建对象的方式:
+- new创建新对象
+- 通过反射机制
+- 采用clone机制
+- 通过序列化机制
+

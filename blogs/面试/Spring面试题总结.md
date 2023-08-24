@@ -14,7 +14,20 @@ tags:
 
 ## 什么是 Spring Framework？
 
-Spring 是一款轻量级的开源框架，它的目标就是要简化 Java 企业级应用程序的开发难度和周期。
+Spring 是一款轻量级的开源框架，它的目标就是要简化 Java 企业级应用程序的开发。它使得开发者只需要关心业务需求。常见的配置方式有基于XML的配置、基于注解的配置。
+
+主要由以下几个模块组成
+
+```
+Spring Core：核心模块，提供IOC功能；
+Spring AOP：AOP服务；
+Spring DAO：对JDBC的抽象，简化了数据访问异常的处理；
+Spring ORM：对现有的ORM框架的支持；
+Spring Web：提供了基本的面向Web的综合特性；
+Spring MVC：提供面向Web的MVC的实现方式。
+Spring TEST：TEST模块主要整合了单元测试和集成测试
+```
+
 
 ## 使用spring的好处？
 
@@ -22,15 +35,12 @@ Spring 是一款轻量级的开源框架，它的目标就是要简化 Java 企�
 - Spring 支持面向切面功能，可以把应用业务逻辑和系统服务分开。
 - Spring 的IOC容器功能可以管理程序中的对象。
 
+## 什么是IOC
 
-## Spring Framework 中有多少个模块，它们分别是什么？
+IOC就是控制反转，以前创建对象的主动权和时机是由自己把控的，而现在由Spring容器根据配置文件去创建实例对象和管理各个实例对象之间的依赖关系。
 
-* Core Container核心容器模块：这个模块是Spring Framework最核心的模块，其他的都需要依赖该模块。它实现了IOC 模式。
-* AOP: 面向切面编程，它依赖核心层容器，目的是在不改变原有代码的前提下对其进行功能增强。
-* Aspects: AOP是设计思想,Aspects是对AOP思想的具体实现
-* Data Access / Data Integration: 数据访问与集成，Spring Framework 中有对数据访问的具体实现技术。并且 Spring Framework支持整合其他的数据层解决方案，比如Mybatis
-* Transactions: 事务，Spring Framework中事务管理是Spring AOP的一个具体实现。
-* TEST模块：Spring Framework主要整合了Junit来完成单元测试和集成测试
+简而言之，IOC让对象的创建不用去new了，可以由spring自动生产，使用java的反射机
+制，根据配置文件在运行时动态的去创建对象以及管理对象，并调用对象的方法。
 
 ## 什么是Spring IOC容器？spring 中有多少种 IOC 容器？
 
@@ -39,7 +49,7 @@ IOC容器负责创建对象，管理对象（通过依赖注入（DI），装配
 * BeanFactory容器 - BeanFactory 就像一个包含 bean 集合的工厂类。它会在客户端要求时实例化 bean。
 * ApplicationContext容器  - ApplicationContext 接口扩展了 BeanFactory 接口。它在 BeanFactory 基础上提供了一些额外的功能。例如注解功能。
 
-## ApplicationContext的实现方式？
+> ApplicationContext的实现方式？
 
 ApplicationContext 容器已经包括 BeanFactory 容器的所有功能，通常不使用BeanFactory容器
 
@@ -87,16 +97,14 @@ Spring的 bean有5种作用域分别是：singleton、prototype、request、sess
 
 ## spring容器中bean的生命周期是什么样的？
 
-生命周期流程如下
-1. Spring的IOC容器从配置文件中读取 bean 的定义，并实例化 bean。
-2. Spring 根据 bean 的定义填充所有的属性。也就是ioc注入
-    1. 如果 bean 实现了 BeanNameAware 接口，Spring 传递 bean 的 ID 到它实现的setBeanName(String beanId)方法。
-    2. 如果 Bean 实现了 BeanFactoryAware 接口， Spring 传递beanfactory 给它实现的setBeanFactory()。
-    3. 如果 bean 实现 IntializingBean 了，调用它的 afterPropertySet 方法，如果 bean 声明了初始化方法，调用此初始化方法。
-4. 当Bean不再需要时，会经过清理阶段，如果Bean实现了DisposableBean接口，当容器关闭时会调用其实现的destroy方法
-5. 最后，如果这个Bean的Spring配置中配置了destroy-method属性，会自动调用其配置的销毁方法
+生命周期流程: 实例化，初始init，接收请求service，销毁destroy；
 
-<font color="red">注意：以上1,2工作完成以后就可以用这个Bean了，那这个Bean是一个Singleton作用域的</font>
+## Spring基于xml注入bean的几种方式
+
+基于xml配置文件的依赖注入方式有: setter注入，构造方法注入。
+
+
+
 
 ## Spring的自动装配有哪些方式？
 
@@ -117,9 +125,8 @@ Spring 支持两种类型的事务管理，分别是编程式事务和声明式�
 
 ## 什么是 Aspect切面？
 
-AOP 核心就是切面，它将多个类的通用行为封装成可重用的模块。比如，一个日志模块可以被称作 AOP 切面。根据需求的不同，一个应用程序可以有若干切面。在 SpringAOP 中，切面通过带有@Aspect 注解的类实现。
+AOP，一般称为面向切面。AOP可以把那些与业务无关，但却对业务有一定影响的公共行为和逻辑，封装为一个模块，这个模块被命名为“切面”（Aspect），减少系统中的重复代码，降低了模块间的耦合度，同时提高了系统的可维护性。
 
-简而言之，切面就相当于一段封装好的模块代码。我们可以通过aop把切面代码，任意切入到其他代码中。
 
 ## 什么是连接点？
 

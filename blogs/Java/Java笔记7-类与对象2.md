@@ -699,7 +699,9 @@ public class Test {
 boolean result = obj instanceof Class
 ```
 
-其中obj 是一个对象，Class 表示一个类或接口。若 obj 是 class 类（或接口）的实例或者子类实例时，结果 result 返回 true，否则返回 false。
+其中obj 是一个对象，Class 表示一个类或接口。若 obj 是 Class 类（或接口）的实例或者子类实例时，结果 result 返回 true，否则返回 false。
+
+注意：如果obj是null，则直接返回false。
 
 ### 用法1：判断 obj 是否为 class 类的实例对象
 
@@ -729,12 +731,3 @@ System.out.println(p1 instanceof Man);    // true
 ```
 
 
-## synchronized 修饰符
-
-synchronized修饰的方法，同一时间内只能被一个线程访问。即线程无法同时访问该方法。
-
-```java
-public synchronized void aaaa(){
-........
-}
-```

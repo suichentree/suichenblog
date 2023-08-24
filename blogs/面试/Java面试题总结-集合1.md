@@ -13,6 +13,18 @@ tags:
 # Java面试题总结-集合1
 
 
+## 为什么要使用集合？如何选择集合？
+
+当需要保存一组类型相同的数据，就可以使用集合。之所以不用数组，是因为数组的长度不可变，数组存储的元素是可重复的，类型单一的。
+
+当有多种需求的时候，集合比数组有优势。
+
+> 如何选择集合？
+
+- 可以根据key来获取value的，就选择TreeMap，HashMap，或者ConcurrentHashMap
+- 需要元素唯一的，选择TreeSet，HashSet。
+- 需要元素重复的，选择ArryList,LinkedList。
+
 ## 介绍一下java中各个集合的底层数据结构
 
 List
@@ -30,6 +42,13 @@ Map
 * LinkedHashMap ： LinkedHashMap 继承⾃ HashMap ，所以它的底层仍然是由数组和链表或红⿊树组成。另外， LinkedHashMap 在链表的基础上，修改为双向链表，使得上⾯的结构可以保持键值对的插⼊顺序。同时通过对链表进⾏相应的操作，实现了访问顺序相关逻辑。
 * HashTable： 底层是数组+链表组成的，数组是 HashMap 的主体，链表则是主要为 了解决哈希冲突而存在的
 * TreeMap： 底层是红黑树（自平衡的排序二叉树）
+
+## 哪些集合类是线程安全的？
+
+java.uti包中的集合类大部分都是非线程安全的。其中Vector和Hashtable是线程安全的，但是这两个类性能很差，在实际的开发中不常用。对于这些非线程安全的类，可以利用Collections工具类提供的synchronizedXxx()方法,可以将这些集合类包装成线程安全的集合类。
+
+另外java.util.concurrent包中的提供了大量的支持并发访问的集合类。例如ConcurrentHashMap和ConcurrentMap等线程安全的集合类。
+
 
 ## 介绍一下List集合中有哪些常用类？以及各自的区别。
 
@@ -77,14 +96,10 @@ void sort(List list)
 void sort(List list, Comparator c)
 ```
 
-
 第一种要求传入的待排序容器中存放的对象比较实现Comparable 接口以实现元素的比较；
 
 第二种不强制性的要求容器中的元素必须可比较，但是要求传入第二个参数，参数是Comparator 接口的子类型（需要重写 compare 方法实现元素的比较），相当于一个临时定义的排序规则，其实就是通过接口注入比较元素大小的算法，也是对回调模式的应用（Java 中对函数式编程的支持）。
 
-## 用哪两种方式来实现集合的排序？
-
-你可以使用有序集合，如 TreeSet 或 TreeMap，你也可以使用有顺序的的集合，如 list，然后通过 Collections.sort() 来排序。
 
 ## Java 中的 TreeMap 是采用什么树实现的？
 
@@ -125,6 +140,20 @@ HashMap添加元素的时候，会判断key的hash值。当key为null的时候�
 
 HashTable添加元素的时候，若key和value为null,会手动抛出空指针异常。
 
+## HashMap 和 HashSet 区别
+
+HashSet 底层就是基于 HashMap 实现的。
+
+其中 clone() 、 writeObject() 、 readObject() 是 HashSet ⾃⼰不得不实现之外，其他⽅法都是直接调⽤ HashMap 中的⽅法。
+
+## HashMap 和 TreeMap 区别
+
+TreeMap 和 HashMap 都继承⾃ AbstractMap ，但是需要注意的是TreeMap 它还实现了NavigableMap 接⼝和 SortedMap 接⼝。
+
+实现 NavigableMap 接⼝让 TreeMap 有了对集合内元素的搜索的能⼒。实现 SortMap 接⼝让 TreeMap 有了对集合中的元素根据键排序的能⼒。
+
+综上所述，相⽐于 HashMap 来说 TreeMap 主要多了对集合中的元素根据键排序的能⼒以及对集合内元素的搜索的能⼒。
+
 ## JDK7和JDK8中的HashMap有什么区别？
 
 JDK7中的HashMap，是基于数组+链表来实现的，它的底层维护一个Entry数组。它会根据计算的hashCode将对应的KV键值对存储到该数组中，一旦发生hashCode冲突，那么就会将该KV键值对放到对应的已有元素的后面， 此时便形成了一个链表式的存储结构。
@@ -133,11 +162,6 @@ JDK7中HashMap的实现方案有一个明显的缺点，即当Hash冲突严重�
 
 JDK8中的HashMap，是基于数组+链表+红黑树来实现的，它的底层维护一个Node数组。当链表的存储的数据个数大于等于8的时候，不再采用链表存储，而采用了红黑树存储结构。这么做主要是在查询的时间复杂度上进行优化，链表为O(N)，而红黑树一直是O(logN)，可以大大的提高查找性能。
 
-## 哪些集合类是线程安全的？
-
-java.uti包中的集合类大部分都是非线程安全的。其中Vector和Hashtable是线程安全的，但是这两个类性能很差，在实际的开发中不常用。对于这些非线程安全的类，可以利用Collections工具类提供的synchronizedXxx()方法,可以将这些集合类包装成线程安全的集合类。
-
-另外java.util.concurrent包中的提供了大量的支持并发访问的集合类。例如ConcurrentHashMap和ConcurrentMap等线程安全的集合类。
 
 
 ## List 和 Set 和 Map的使用场景
@@ -151,31 +175,60 @@ java.uti包中的集合类大部分都是非线程安全的。其中Vector和Has
 4）如果你以键和值的形式进行数据存储那么 Map 是你正确的选择。你可以根据你的后续需要 从Hashtable、HashMap、TreeMap 中进行选择。
 
 
-### 说一下 HashSet 的实现原理？
+## 说一下 HashSet 的实现原理？
 
 HashSet 是基于 HashMap 实现的，HashSet的值存放于HashMap的key上，HashMap的value统一为PRESENT，因此 HashSet 的实现比较简单，相关 HashSet 的操作，基本上都是直接调用底层HashMap 的相关方法来完成，HashSet 不允许重复的值。
 
-### HashSet如何检查重复？HashSet是如何保证数据不可重复的？
+## HashSet如何检查重复？HashSet是如何保证数据不可重复的？
 
-向HashSet 中add ()元素时，判断元素是否存在的依据，不仅要比较hash值，同时还要结合equles 方法比较。
-
-HashSet 中的add ()方法会使用HashMap 的put()方法。
-
-HashMap 的 key 是唯一的，HashSet 添加进去的值就是作为 HashMap 的key，并且在HashMap中如果K/V相同时，会用新的V覆盖掉旧的V，然后返回旧的V。所以不会重复（ HashMap比较key是否相等是先比较 hashcode 再比较equals ）。
+当你把对象加⼊ HashSet 时，HashSet 会先计算对象的 hashcode 值来判断对象加⼊的位置，同时也会与其他加⼊的对象的 hashcode 值作⽐较，如果没有相符的 hashcode，HashSet 会假设对象没有重复出现。但是如果发现有相同 hashcode 值的对象，这时会调⽤ equals() ⽅法来检查 hashcode 相等
+的对象是否真的相同。如果两者相同，HashSet 就不会让加⼊操作成功。
 
 
 ## HashMap 的实现原理？
 
 HashMap实际上是数组和链表的结合体。
 
-HashMap 基于 Hash 算法实现的
-1. 当我们往Hashmap中put元素时，利用key的hashCode重新hash计算出当前对象的元素在数组中的下标
-2. 存储时，如果出现hash值相同的key，此时有两种情况。(1)如果key相同，则覆盖原始值；(2)如果key不同（出现冲突），则将当前的key-value 放入链表中
-3. 获取时，直接找到hash值对应的下标，在进一步判断key是否相同，从而找到对应值。
-4. 理解了以上过程就不难明白HashMap是如何解决hash冲突的问题，核心就是使用了数组的存储方式，然后将冲突的key的对象放入链表中，一旦发现冲突就在链表中做进一步的对比。当链表中的节点数据超过八个之后，该链表会转为红黑树来提高查询效率，从原来的O(n)到O(logn)
+> jdk1.8之前
+
+JDK1.8 之前 HashMap 底层是 数组和链表。
+- 向 HashMap集合中加入某个 k-v 元素。
+- HashMap 通过 key 的 hashCode方法 得到 hash 值，然后通过 (n - 1) & hash 判断当前元素存放的位置（这⾥的 n 指的是数组的⻓度），
+- 如果当前位置存在元素的话，就判断该元素与要存⼊的元素的 hash
+值以及 key 是否相同，如果相同的话，直接覆盖，不相同就把value值加入到链表数组中。
+
+> jdk1.8之后
+
+1. 当向Hashmap中添加k-v元素时，利用hashCode方法重新计算出key的hash值。然后通过hash值计算出元素存放的位置。
+2. 如果当前位置没有存放元素，则把新添加的元素，存放到该位置中。
+3. 如果当前位置已经存储了元素。需要通过equals()方法判断value是否相同。此时有两种情况。(1)如果value相同，则覆盖原始值；(2)如果value不同（出现冲突），则将当前的value 放入链表中。
+4. 理解了以上过程就不难明白HashMap是如何解决hash冲突的问题，核心就是使用了数组的存储方式，然后将冲突的key的对象放入链表中，一旦发现冲突就在链表中做进一步的对比。当链表⻓度⼤于阈值（默认为8）（将链表转换成红⿊树前会判断，如果当前数组的⻓度⼩于 64，那么会选择先进⾏数组扩容，⽽不是转换为红⿊树）时，将链表转化为红⿊树，以减少搜索时间。
+
+
 
 ## Collection 和 Collections 的区别
 
 Collection 是集合类的上级接口，继承与他的接口主要有 Set接口 和 List接口
 
 Collections 是针对集合类的一个工具类，他提供一系列静态方法实现对各种集合的搜索、排序、线程安全化等操作。
+
+## 迭代器 Iterator 是什么？
+
+Iterator 迭代器可以对集合进⾏遍历。由于每⼀个集合内部的数据结构是不尽相同的，所以每⼀个集合存和取都很可能是不⼀样的。虽然可以⼈为地在每⼀个集合类中定义 hasNext() 和 next() ⽅法，但这样做会让整个集合体系过于臃肿。于是就有了迭代器。
+
+迭代器 Iterator 是将 hasNext() 和 next() 方法聚合的一个接⼝。每个集合类可以实现该接口，然后在类的内部，定义⾃⼰迭代⽅式。
+
+这样做就规定了整个集合体系的遍历⽅式都是 hasNext() 和 next() ⽅法，使⽤者不⽤管怎么实现的，会⽤即可。迭代器的定义为：提供⼀种⽅法访问⼀个容器对象中各个元素，⽽⼜不需要暴露该对象的内部细节。
+
+> 迭代器 Iterator 有啥⽤？
+
+Iterator 主要是⽤来遍历集合⽤的，它的特点是更加安全，因为它可以确保，在当前遍历的集合元
+素被更改的时候，就会抛出 ConcurrentModificationException 异常。
+
+##  Hashcode方法的作用
+
+hashCode方法：它根据对象的内存地址换算出的一个hashCode值。当集合
+要添加新的元素时，先调用这个元素的hashCode方法，就能定位到它应该放置的物理位置上。
+
+如果这个位置上没有元素，它就可以直接存储在这个位置上，不用再进行任何比较了；如果这个位置上已经有元素了，就调用它的equals方法与新元素进行比较，相同的话就不存了，不相同就散列其它的地址。这样一来实际调用equals方法的次数就大大降低了，几乎只需要一两次。
+

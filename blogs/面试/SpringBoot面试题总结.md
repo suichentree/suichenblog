@@ -14,7 +14,7 @@ tags:
 
 ## 说说你对Spring Boot的理解
 
-Spring Boot 主要是简化了使用 Spring 的难度，简省了繁重的配置，提供了各种启动器，开发者能快速上手。
+Spring Boot 是在Spring框架的基础上简化了繁重的配置，提供了各种启动器，开发者能快速上手。
 
 ## Spring Boot 的核心注解是哪个？它主要由哪几个注解组成的？
 
@@ -30,7 +30,6 @@ Spring Boot 主要是简化了使用 Spring 的难度，简省了繁重的配置
 Starters 起步依赖。它包含了一系列可以集成到应用里面的依赖包。
 
 如你想使用 Spring JPA 访问数据库，只要加入 spring-boot-starter-data-jpa 启动器依赖就能使用了。
-
 
 
 

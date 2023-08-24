@@ -20,27 +20,27 @@ Spring MVC 本质上是对 Servlet 的进一步封装，其最核心的组件是
 
 ## SpringMVC 工作流程？
 
+![springmvc_20230731143158.png](../blog_img/springmvc_20230731143158.png)
+
+```
 （1）客户端（浏览器）发送请求到 DispatcherServlet前端控制器。
-
 （2）DispatcherServlet 根据请求信息调用 HandlerMapping，解析请求对应的 Handler。
-
 （3）解析到对应的 Handler（也就是我们平常说的 Controller 控制器）后，开始由 HandlerAdapter 适配器处理。
-
 （4）HandlerAdapter 会根据 Handler 来调用真正的处理器开处理请求，并处理相应的业务逻辑。
-
 （5）处理器处理完业务后，会返回一个 ModelAndView 对象，Model 是返回的数据对象，View 是个逻辑上的 View。
-
 （6）ViewResolver 会根据逻辑 View 查找实际的 View。
-
 （7）DispaterServlet 把返回的 Model 传给 View（视图渲染）。
-
 （8）把 View 返回给请求者（浏览器）
+```
+
 
 简化：
+- 前端控制器（DispatcherServlet）：接收请求，响应结果，相当于电脑的CPU。
+- 处理映射器（HandlerMapping）：根据URL去查找处理器
+- 处理器（Handler）：（需要程序员去写代码处理逻辑的）
+- 处理器适配器（HandlerAdapter）：会把处理器包装成适配器，这样就可以支持多种类型的处理器，类比笔记本的适配器（适配器模式的应用）
+- 视图解析器（ViewResovler）：进行视图解析，对返回的字符串进行处理，解析成对应的页面
 
-用户发出请求-》前端控制器 DispatcherServlet -》 HandlerMapping 处理器映射器 -》HandlerAdapter 处理适配器 -》 具体的Controller处理器。
-
-Controller处理器执行完后返回ModelAndView -》HandlerAdapter 处理适配器 -》DispatcherServlet -》ViewReslover视图解析器，解析ModelAndView,并返回具体的View -》DispatcherServlet 拿到view 进行渲染 -》响应给用户。
 
 ## SpringMVC 拦截器怎么实现？
 

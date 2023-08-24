@@ -167,6 +167,14 @@ finally语句块总是会被执行。它主要用于做一些清理工作(如关
 
 <font color="red">注意：当finally块执行完成之后，才会回来执行 try 或者 catch 块中的return语句。</font>
 
+> 注意
+1. 不管是否出现异常，finally块中代码都会执行；
+2. 当try和catch中有return时，finally仍然会执行；
+3. finally是在return后面的表达式运算后执行的（此时并没有返回运算后的值，而是先把要返回的值保存起来，不管finally中的代码怎么样，返回的值都不会改变，任然是之前保存的值），所以函数返回值是在finally执行前确定的；
+4. 若finally中包含return语句，则返回值不是try或catch中保存的返回值，而是finally中的return返回值。
+
+
+
 > 语法格式如下所示
 
 ```java
@@ -248,9 +256,9 @@ public class Test {
 输出temp：2。
 ```
 
-知识点：
-1. 若try代码块内含有return，同时存在finally代码块（代码块内无return）时，先保存return结果，然后执行finally，最后返回return结果。
-2. 若try代码块内含有return，同时finally代码块内含有return时，此时finally代码块内的return值将覆盖掉try代码块中的return值，然后返回覆盖后的return结果。
+> 知识点：
+1. 若try代码块内含有return，同时存在finally代码块（代码块内无return）时，先保存return结果，然后执行finally，执行完finall后，最后返回return结果。
+2. 若finally代码块内含有return时，此时finally代码块内的return值将覆盖掉try代码块中的return值，然后返回覆盖后的return结果。
 
 ### throws 声明异常
 
