@@ -14,17 +14,27 @@ tags:
 
 ## 什么是Mybatis？
 
-MyBatis 是一个可以自定义 SQL、存储过程的持久层框架。它内部封装了 JDBC，不需要花费精力去处理加载驱动、创建连接、创建statement 等繁杂的过程。在开发时只需要关注 SQL 语句本身。
+Mybatis是一个半ORM（对象关系映射）框架，它内部封装了JDBC，开发时只需要关注SQL语句
+本身，不需要花费精力去处理加载驱动、创建连接、创建statement等繁杂的过程。程序员直接编写原
+生态sql，可以严格控制sql执行性能，灵活度高。
+
+MyBatis 可以使用 XML 或注解来配置和映射原生信息，将 POJO映射成数据库中的记录，避免了
+几乎所有的 JDBC 代码和手动设置参数以及获取结果集。
+
+通过xml 文件或注解的方式将要执行的各种 statement 配置起来，并通过java对象和 statement
+中sql的动态参数进行映射生成最终执行的sql语句，最后由mybatis框架执行sql并将结果映射为java对
+象并返回。（从执行sql到返回result的过程）。
 
 ## Mybatis有什么优点和缺点？
 
 优点：
-* MyBatis 把 sql 语句从 Java 源程序中独立出来，放在单独的 XML 文件中编写，将业务代码与sql语句分离开来。降低了程序的耦合度。
-* MyBatis 封装了JDBC，可以自动将结果集转换成 Java Bean 对象，大大简化了 Java 数据库编程的重复工作。
+* MyBatis 把 sql 语句从业务代码中独立出来，放在单独的 XML 文件中编写，将业务代码与sql语句分离开来。降低了程序的耦合度。并且提供XML标签，支持编写动态SQL语句，并可重用。
+* MyBatis 封装了JDBC，可以自动将结果集转换成 Java Bean 对象，大大简化了代码。
+
 
 缺点：
-* SQL 语句的编写工作量较大，尤其当字段多、关联表多时，对开发人员编写SQL 语句的功底有一定要求。
-* SQL 语句依赖于数据库，导致数据库移植性差，不能随意更换数据库。
+* MyBatis是基于SQL语句编程，相当灵活，因此 SQL 语句的编写工作量较大，尤其当字段多、关联表多时。
+* MyBatis中的 SQL 语句依赖于数据库，从而导致数据库移植性差，无法随意更换数据库。
 
 ## MyBatis 与 Hibernate 有哪些不同？
 
@@ -34,8 +44,8 @@ MyBatis 是一个可以自定义 SQL、存储过程的持久层框架。它内�
 ## #{}和${}的区别是什么？
 
 * #{}是预编译处理，${}是字符串替换。使用#{}可以有效的防止SQL注入，提高系统安全性。
-* Mybatis 在处理#{}时，会将 sql 中的#{}替换为?号，调用 PreparedStatement 的set 方法来赋值；
-* Mybatis 在处理${}时，就是把${}替换成变量的值。类似用 + 号来把参数和sql语句进行拼接。
+* Mybatis 在处理#{}时，会将 #{}替换为?号，调用 PreparedStatement 的set 方法来赋值；
+* Mybatis 在处理${}时，会把 ${}替换成对于的值。类似用 + 号来把参数和sql语句进行拼接。
 
 ## 什么是SQL注入？
 
@@ -43,24 +53,10 @@ sql注入攻击就是输入参数未经过滤，直接拼接到sql语句中，�
 
 ## 当类的属性名和表中的字段名不一样怎么办？
 
-方法1：通过在sql语句中定义字段名的别名，让字段名的别名和类的属性名一致。
-```xml
-<select id="selectorder" parametertype="int" resultetype="com.xx.xx.order">
-select order_id id, order_no orderno ,order_price price form orders where order_id=#{id};
-</select>
-```
+方法1：可以通过在sql语句中定义字段名的别名，让字段名的别名和类的属性名一致。从而让数据结果集能够转换对应的java bean对象。
 
-方法2： 通过`<resultMap>`来把字段名和类属性一一对应。
-```xml
-<select id="getOrder" parameterType="int" resultMap="AAA">
-select * from orders where order_id=#{id}
-</select>
-<resultMap type=”com.xxx.xxx.order” id="AAA">
-    <id property="id" column="order_id">   //用 id 属性来映射主键字段
-    <result property ="orderno" column ="order_no"/> //用 result 属性来映射非主键字段，property 为实体类属性名，column为数据表中的属性
-    <result property="price" column="order_price" />
-</reslutMap>
-```
+方法2： 通过`<resultMap>`标签自定义映射结果集。可以来把字段名和类属性名一一对应。
+
 
 ## 通常一个Mybatis的Xml映射文件，都会写一个Mapper接口与之对应，这个Mapper接口的工作原理是什么？Mapper接口里的方法能重载吗？
 
@@ -86,9 +82,6 @@ Mybatis 提供了 9 种动态 sql 标签：trim | where | set | foreach | if | c
 
 原因就是 namespace+id 是作为唯一key使用的，如果没有 namespace，就剩下 id，那么id重复会导致数据互相覆盖。有了namespace，namespace 不同，namespace+id 自然也就不同。
 
-## Mybatis 的一级、二级缓存？
-
-MyBatis 的缓存分为一级缓存和二级缓存,一级缓存放在 session 里面,默认就有,二级缓存放在它的命名空间里,默认是不打开的,使用二级缓存属性类需要实现 Serializable 序列化接口(可用来保存对象的状态),可在它的映射文件中配置`<cache/>`
 
 ## 什么是 MyBatis 的接口绑定？有哪些实现方式？
 
@@ -100,14 +93,40 @@ MyBatis 的缓存分为一级缓存和二级缓存,一级缓存放在 session �
 
 ## Mybatis 是如何进行分页的？分页插件的原理是什么？
 
-可以直接编写 sql实现分页，也可以使用 Mybatis的分页插件。
+Mybatis可以在sql内直接书写 limit 关键字来完成分页功能，也可以使用分页插件来完成物理分页。
 
-分页插件的原理：拦截待执行的 sql，然后重写 sql。
+分页插件的基本原理是拦截待执行的sql，然后重写sql，添加对应的物理分页语句和物理分页参数。
 
-举例：select * from student，拦截 sql 后重写为：select t.* from （select * from student）t limit 
-0，10
+举例：select * from student，拦截 sql 后重写为：select t.* from （select * from student）t limit 0，10
+
+## Mybatis是如何将sql执行结果封装为目标对象并返回的？都有哪些映射形式？
+
+第一种是使用`<resultMap>`标签，自定义数据库字段名和对象属性名之间的映射关系。
+
+第二种是使用sql语句的别名，通过在sql语句中定义查询字段的别名，让别名与类的属性名相同。从而让Mybatis将sql执行结果封装为目标对象并返回。
+
 
 ## MyBatis 实现一对一有几种方式?具体怎么操作的？
 
-有联合查询和嵌套查询,联合查询是几个表联合查询,只查询一次,通过在 resultMap 里面配置 association 节点配置一对一的类就可以完成;嵌套查询是先查一个表,根据这个表里面的结果的外键 id,去再另外一个表里面查询数据,也是通过 association 配置,但另外一个表的查询通过 select 属性配置。
 
+实现一对一有联合查询和嵌套查询两种方式。
+
+联合查询是把几个表联合查询,只查询一次, 然后通过在resultMap标签里面配置association节点配置一对一的关系就可以完成；
+
+嵌套查询需要查询两次。主要是先查一个表，根据这个表里面的结果的外键，去再另外一个表里面查询数据,也是通过association配置，但另外一个表的查询通过select属性配置。
+
+## Mybatis是否支持延迟加载？如果支持，它的实现原理是什么？
+
+在Mybatis配置文件中，可以配置是否启用延迟加载。
+
+不过，Mybatis仅支持在一对一关联对象查询和一对多关联查询上的延迟加载。
+
+延迟加载的原理是，当调用目标方法时，进入拦截器方法，比如调用a.getB().getName()，拦截器invoke()方法发现a.getB()是null值，那么就会单独发送事先保存好的查询关联B对象的sql，把B查询上来，然后调用a.setB(b)，于是a的对象b属性就有值了，接着完成a.getB().getName()方法的调用。这就是延迟加载的基本原理。当然了，不光是Mybatis，几乎所有的包括Hibernate，支持延迟加载的原理都是一样的。
+
+总结：延迟加载主要是通过动态代理的形式实现，通过代理拦截到指定⽅法，执⾏数据加载。
+
+## Mybatis 的一级、二级缓存？
+
+MyBatis 的缓存分为一级缓存和二级缓存。
+
+一级缓存放在 session 里面,默认就有,二级缓存放在它的命名空间里,默认是不打开的,使用二级缓存属性类需要实现 Serializable 序列化接口(可用来保存对象的状态),可在它的映射文件中配置`<cache/>`
