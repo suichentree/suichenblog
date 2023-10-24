@@ -14,7 +14,7 @@ tags:
 
 nginx的负载均衡需要配置upstream模块。
 
-```conf
+```shell
 
 http {
     upstream test-servers{
@@ -42,7 +42,7 @@ http {
 
 nginx默认使用的调度算法，静态调度算法。把客户端的请求逐一分配到不同的后端节点服务器，这相当于 LVS 中的 rr 算法，如果后端节点服务器宕机。宕机的服务器会自动从节点服务器池中剔除，以便客户端的用户访问不受影响。新的请求会分配给正常的服务器。
 
-```conf
+```shell
 upstream test-servers{
     server 127.0.0.1:8081;
     server 127.0.0.2:8082;
@@ -53,7 +53,7 @@ upstream test-servers{
 
 静态调度算法。在轮循算法的基础上加上权重，即为权重轮循算法，当使用该算法时，权重和用户访问成正比，权重值越大，被转发的请求也就越多。可以根据服务器的配置和性能指定权重值大小，有效解决新旧服务器性能不均带来的请求分配问题。
 
-```conf
+```shell
 upstream test-servers{
     server 127.0.0.1:8081 weight=1;
     server 127.0.0.2:8082 weight=2;
@@ -64,7 +64,7 @@ upstream test-servers{
 
 ip_hash是静态调度算法，每个请求按客户端 IP 的 hash 结果分配，当新的请求到达时，先将其客户端IP通过哈希算法哈希出一个值，在随后的客户端请求中，客户 IP 的哈希值只要相同，就会被分配至同一台服务器，该调度算法可以解决动态网页的 session 共享问题，但有时会导致请求分配不均，即无法保证 1:1 的负载均衡，因为在国内大多数公司都是 NAT 上网模式，多个客户端会对应一个外部 IP，所以，这些客户端都会被分配到同一节点服务器，从而导致请求分配不均。
 
-```conf
+```shell
 upstream test-servers{
     ip_hash;
     server 127.0.0.1:8081;
@@ -76,7 +76,7 @@ upstream test-servers{
 
 least_conn是动态调度算法，会根据后端节点的连接数来决定分配情况，哪个机器连接数少就分发。
 
-```conf
+```shell
 upstream test-servers{
     least_conn;
     server 127.0.0.1:8081;
@@ -88,7 +88,7 @@ upstream test-servers{
 
 最短响应时间（fair）调度算法是动态调度算法，会根据后端节点服务器的响应时间来分配请求，响应时间端的优先分配。这是更加智能的调度算法。此种算法可以依据页面大小和加载时间长短只能地进行负载均衡，也就是根据后端服务器的响应时间来分配请求，响应时间短的优先分配。Nginx 本身是不支持 fair 调度算法的，如果需要使用这种调度算法，必须下载 Nginx 的相关模块 upstream_fair。
 
-```conf
+```shell
 upstream test-servers{
     fair;
     server 127.0.0.1:8081;
@@ -100,7 +100,7 @@ upstream test-servers{
 
 url_hash算法是动态调度算法，按访问 URL 的 hash 结果来分配请求，使每个 URL 定向到同一个后端服务器，可以进一步提高后端缓存服务器的效率命中率。（多用于后端服务器为缓存时的场景下）Nginx 本身是不支持 rul_hash的，如果需要使用这种调度算法，必须安装 Nginx 的hash 模块软件包。
 
-```conf
+```shell
 upstream test-servers{
     hash $request_uri;
     hash_method crc32;

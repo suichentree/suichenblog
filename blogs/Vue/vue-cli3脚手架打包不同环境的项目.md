@@ -14,21 +14,21 @@ tags:
 
 ![20230214161412.png](../blog_img/20230214161412.png)
 
-```conf
+```shell
 ## 开发环境配置
 ## .env.development
 VUE_APP_ENV = 'development'
 VUE_APP_AXIOS_BASE_URL = "/elec-prcs/dev"
 ```
 
-```conf
+```shell
 ## 生产环境配置
 ## .env.production
 VUE_APP_ENV = 'production'
 VUE_APP_AXIOS_BASE_URL = "/elec-prcs/prd"
 ```
 
-```conf
+```shell
 ## 测试环境配置
 ## .env.testing
 VUE_APP_ENV = 'testing'
@@ -64,7 +64,7 @@ console.log(process.env.VUE_APP_AXIOS_BASE_URL)
 
 第二步：运行打包命令
 
-```conf
+```shell
 
 # 测试环境打包
 npm run testing

@@ -124,7 +124,7 @@ MySQL支持以下几种常见的复制类型：
 
 2. 配置主库
 
-```conf
+```shell
 # 修改配置文件
 vim /etc/my.cnf
 
@@ -142,7 +142,7 @@ systemctl restart mysqld
 
 在主库上创建一个主从复制用户。之后从库需要使用这个用户的账户密码，登录到主库上进行主从复制。
 
-```conf
+```shell
 # 创建一个主从复制用户
 mysql> grant replication slave on *.* to 'slave_test'@'192.168.136.%' identified by 'qwe123456789';
 Query OK, 0 rows affected (0.00 sec)
@@ -162,7 +162,7 @@ mysql> show grants for 'slave_test'@'192.168.136.%';
 
 4. 查询主库的二进制日志文件及其偏移量
 
-```conf
+```shell
 mysql> show master status;
 ```
 
@@ -175,7 +175,7 @@ mysql> show master status;
 
 这步可做可不做，注意生产环境需要提前申请停机时间。
 
-```conf
+```shell
 # 锁定所有表，让表处于只读状态
 #提示：如果超过设置时间不操作会自动解锁。
 mysql> flush tables with read lock;
@@ -207,7 +207,7 @@ scp /home/mysqlbackup/mysql_bak.2023-07-17.sql.gz 192.168.136.135:/home/mysqlbac
 
 6. 从库配置
 
-```conf
+```shell
 # 修改从库配置文件
 vim /etc/my.cnf
 
@@ -222,7 +222,7 @@ systemctl restart mysqld
 
 7. 在从库服务器中将主库备份数据还原
 
-```conf
+```shell
 cd /home/mysqlbackup/
 gzip -d mysql_bak.2023-07-17.sql.gz
 mysql -uroot -p < mysql_bak.2023-07-17.sql
@@ -232,7 +232,7 @@ mysql -uroot -p -e 'show databases;'
 
 8. 在从库服务器中设置主从库数据同步
 
-```conf
+```shell
 # 执行change master to 语句
 mysql> change master to
 MASTER_HOST='192.168.136.134',              #主库ip
@@ -252,7 +252,7 @@ mysql> show slave status\G
 ```
 
 其他相关的命令
-```conf
+```shell
 # 开启主从复制
 start slave;
 

@@ -17,7 +17,7 @@ tags:
 1. include命令可以用在配置文件中的任何地方。
 2. include指向的文件路径可以是绝对路径，也可以是相对路径，相对路径以主配置文件nginx.conf为基准，同时可以使用通配符。
 
-```conf
+```shell
 # 绝对路径
 include /etc/conf/nginx.conf
 # 相对路径
@@ -29,7 +29,7 @@ include *.conf
 例子：
 
 主配置文件
-```conf
+```shell
 # 主配置文件
 http {
     # 重点,子配置文件放置路径
@@ -48,7 +48,7 @@ http {
 ```
 
 负载均衡配置文件。conf.d/upstream.conf
-```conf
+```shell
 upstream aaa-server {
     server 10.87.8.115:8080;
     server 10.87.8.116:8080;
@@ -60,7 +60,7 @@ upstream bbb-server {
 ```
 
 a项目配置文件。conf.d/aaa.conf
-```conf
+```shell
 server {
     listen 8000;
     location /test/a/ {
@@ -70,7 +70,7 @@ server {
 ```
 
 b项目配置文件。conf.d/bbb.conf
-```conf
+```shell
 server {
     listen 9000;
     location /test/b/ {
