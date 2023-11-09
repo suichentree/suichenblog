@@ -77,26 +77,29 @@ MySQL可以使用多个字段建立的一个索引，叫做组合索引。由于
 
 #### 组合索引中的最左前缀原则
 
-* 组合索引中字段的先后顺序会与where子句中的字段先后顺序进行匹配，匹配上的where子句就能使用索引。
+最佳左前缀法则只适用于组合索引上。
+
+首先组合索引中字段会与where子句中的字段，会根据最左前缀原则来匹配，匹配上的where子句就能使用组合索引，否则无法使用组合索引。
+
+最左前缀原则如下：
 * 按从左到右的顺序依次进行匹配。直到遇到范围查询（>,<,between,like）就停止匹配。
-* 例如组合索引index_name(a,b,c)，只会匹配上a、a,b、a,b,c 三种类型的查询。
-* <font color="red">注意若where子句中abc三个字段都存在，无论什么顺序。where子句会将其优化为a,b,c查询。</font>
-* <font color="red">注意若where子句中的条件通过>,<,between,like连接。则不会触发组合索引</font>
+* 例如组合索引index_name(a,b,c)，只会匹配where子句中的a、a,b、a,b,c 三种类型的查询。
+* <font color="red">注意若where子句中abc三个字段都存在，无论什么顺序。mysql会将where子句优化为a,b,c查询。</font>
+* <font color="red">注意如果where子句中的各个字段通过>,<,between,like连接。则不会触发组合索引</font>
 
 ```
->例如：某个索引包含三个字段（姓名，年龄，性别）。即aaa_index(name,age,gender)
+例如：某个组合索引包含三个字段（姓名，年龄，性别）。即aaa_index(name,age,gender)
 
 select * from table where name = '小明'
 select * from table where name = '小明' and age = 12
 select * from table where name = '小明' and age = 12 and gender = '男'
 select * from table where name = '小明' and gender = '男'
 
-只有上面这三个语句能够使用到索引aaa_index。其余的查询语句无法使用到索引aaa_index。
-第四个语句只能使用到name字段索引，不能使用到gender字段索引。
+只有上面这三个语句能够使用到索引aaa_index。其余的查询语句无法使用到组合索引aaa_index。
+第四个语句只能匹配到name，gender字段索引，不能匹配到name,age,gender字段索引。
 
->原因解释：
-
-组合索引index_name(a,b,c)，只会走a、a,b、a,b,c 三种类型的查询。a,c顺序只走a字段索引，不会走c字段索引。
+原因解释：
+组合索引index_name(a,b,c)，只会走a、a,b、a,b,c 三种类型的查询。a,c顺序只能匹配a,c字段组合索引，不会匹配a,b,c字段组合索引。
 ```
 
 ### 按字段特性分类：普通索引、唯一索引、主键索引、全文索引，空间索引
@@ -303,27 +306,70 @@ alter table employee drop index emp_name;
 
 ## EXPLAIN语句
 
-explain语句可以查看sql语句中索引的使用情况
+explain语句可以模拟mysql执行sql查询语句，从而查看sql查询语句的执行情况。
 
-```
-例如： 给TTL字段创建一个索引aaa。
+<font color="red">注意explain语句是针对的查询语句，而不是更新，删除语句。</font>
+
+
+```sql
+# explain语句的语法如下
+explain + sql语句
+
+# 例如： 给TTL字段创建一个索引aaa。
+# 下面用explain语句来查询下面这个sql语句的执行情况
 explain select * from pol_law_d where TTL = '111';
 ```
 
 ![20220708160945.png](../blog_img/20220708160945.png)
 
-概要描述：
-id:标识符
-select_type:表示查询的类型.(SIMPLE表示简单SELECT)
-table:表名
-partitions:匹配的分区
-type:表示表的连接类型
-possible_keys:表示查询时，可能使用的索引
-key:表示实际使用的索引
-key_len:索引字段的长度
-ref:列与索引的比较
-rows:扫描出的行数(估算的行数)
-filtered:按表条件过滤的行百分比
-Extra:执行情况的描述和说明
+通过explain语句，我们可以获取sql查询语句的执行情况。如上图所示。
+
+上图字段描述：
+- id:标识符
+- select_type:表示sql语句的类型.(SIMPLE表示简单sql语句)
+- table:查询语句涉及到的表名
+- partitions:查询语句涉及到的分区
+- type:表示查询语句的连接类型，可以了解该语句的连接性能
+- possible_keys:表示查询语句可能使用的索引
+- key:表示查询语句实际使用的索引
+- key_len:表示使用的索引字段的长度
+- ref:列与索引的比较
+- rows:扫描出的行数(估算的行数)
+- filtered:按表条件过滤的行百分比
+- Extra:查询语句的执行情况的描述和说明
+
+### type字段
+
+type字段表示连接类型，表示查询语句是通过什么方式查询到数据的。
+
+type字段的值如下所示
+```sql
+# 从最佳连接类型到最坏连接类型
+system > const > eq_ref > ref > range > index > ALL
+```
+
+type类型 | 解释
+------------ | ------------- 
+system | 不进行磁盘IO,查询系统表，仅仅返回一条数据
+const | 表示语句只用到了主键索引，最多返回1条数据，属于精确查询
+eq_ref | 只用到了唯一性索引，属于精确查询
+ref | 只用到了非唯一性索引，返回多条数据，属于精确查询
+range | 用到了索引树中的一部分索引，属于范围查询。例如 >,<,between等范围查询
+index | 用到了索引树中的所有索引，仅仅比ALL快一些。因为索引文件比数据文件小。
+ALL | 不适用索引，直接进行了全表扫描。
 
 
+<font color="red">当type值为index或ALL的情况下，表示该sql查询语句需要进行优化，至少要达到range或者ref的级别才能使用。</font>
+
+### Extra字段
+
+Extra字段表示语句的执行情况类型。
+
+Extra类型 | 解释
+------------ | ------------- 
+Using filesort | 表示该语句进行排序查询的时候，没有使用到索引。
+Using index  | 表示语句用到了索引
+Using index condition | 表示语句用到了部分索引
+Using join buffer | 表示语句用到了连接缓存。使用join的时候会显示
+Using temporary | 表示语句用到了临时表。使用分组和排序查询的时候会显示
+Using where | 表示语句需要全表扫描，没有用到索引。
