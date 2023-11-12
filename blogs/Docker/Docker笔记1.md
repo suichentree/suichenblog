@@ -82,6 +82,9 @@ Docker客户端是与Docker服务端进行交互的主要方式。当使用docke
 
 总结，docker可以将我们的本地开发环境和应用程序进行打包成镜像，上传到仓库中。其他人可以在仓库中下载这个镜像，然后通过自己电脑上的docker将该镜像初始化为容器并运行。这样就解决了由于环境不一致，从而导致的程序无法运行的问题。
 
+## windows 安装 docker
+
+直接在docker官网上搜索Docker Desktop on Windows应用程序安装到本机即可。其他自行百度。
 
 ## ubuntu 22.04 (LTS) 安装 docker
 
