@@ -49,6 +49,8 @@ tags:
 
 ## IDEA 搭建 SpringCloudAlibaba 微服务项目
 
+搭建微服务项目，我们使用maven的父子工程来搭建。让maven的父子工程形成继承和聚合的关系。具体参考maven笔记。
+
 ### 1 先创建一个空的maven父工程
 
 ① 先创建一个空的maven父工程
@@ -71,50 +73,24 @@ tags:
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <!--父工程的相关信息-->
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.shuyx</groupId>
     <artifactId>shuyxWebsite</artifactId>
     <version>1.0-SNAPSHOT</version>
     <name>shuyxWebsite</name>
     <description>this is shuyx website system</description>
-
-    <!--修改打包方式为pom-->
+    <!--父工程的打包方式为pom-->
     <packaging>pom</packaging>
 
-    <!--properties属性配置。主要设置各个依赖的版本号-->
-    <properties>
-        <!-- java版本 -->
-        <java.version>1.8</java.version>
-        <!-- SpringBoot 版本 -->
-        <spring.boot.version>2.3.12.RELEASE</spring.boot.version>
-        <!-- Spring Cloud Alibaba 版本 -->
-        <spring.cloud.alibaba>2.2.8.RELEASE</spring.cloud.alibaba>
-        <!-- Spring Cloud 版本 -->
-        <spring.cloud>Hoxton.SR12</spring.cloud>
-    </properties>
-
-    <!--这里是子工程都能用到的公共依赖。-->
-    <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
-
-    <!--对SpringCloudAlibaba、SpringCloud,Spring Boot的依赖统一进行管理-->
-    <!--子工程依赖的时候就不用指定版本了。会直接继承下面的依赖。-->
+    <!--父工程统一对依赖进行管理，子工程的依赖都用父工程的-->
     <dependencyManagement>
         <dependencies>
             <!-- Spring Boot 版本 -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-parent</artifactId>
-                <version>${spring.boot.version}</version>
+                <version>2.3.12.RELEASE</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -122,7 +98,7 @@ tags:
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-dependencies</artifactId>
-                <version>${spring.cloud}</version>
+                <version>Hoxton.SR12</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -130,7 +106,7 @@ tags:
             <dependency>
                 <groupId>com.alibaba.cloud</groupId>
                 <artifactId>spring-cloud-alibaba-dependencies</artifactId>
-                <version>${spring.cloud.alibaba}</version>
+                <version>2.2.8.RELEASE</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -147,13 +123,13 @@ tags:
         </plugins>
     </build>
 </project>
+
 ```
 
 > 修改要点
 
 - 修改父工程的打包方式为pom
-- 添加子工程要用的公共依赖spring-boot-starter
-- 对SpringCloudAlibaba、SpringCloud,Spring Boot的依赖统一进行管理。
+- 父工程通过dependencyManagement来管理所有子工程的依赖。
 - 添加spring-boot-maven-plugin插件来打包项目。
 
 > 目前三者之间推荐的版本搭配
@@ -181,7 +157,7 @@ tags:
 
 ③ 修改父工程的pom文件
 
-给父工程的pom文件新增modules标签
+给父工程的pom文件新增modules标签，让父子工程形成聚合关系。
 
 ```xml
 <!--父pom文件新增modules标签-->
@@ -209,6 +185,7 @@ tags:
         <groupId>com.shuyx</groupId>
         <version>1.0-SNAPSHOT</version>
     </parent>
+    <!--子工程的相关信息-->
     <artifactId>shuyx-user</artifactId>
     <groupId>com.shuyx</groupId>
     <version>0.0.1-SNAPSHOT</version>
@@ -217,8 +194,8 @@ tags:
     <!--子工程的打包方式-->
     <packaging>jar</packaging>
 
+    <!--子工程使用的依赖，不用写版本，版本继承自父工程-->
     <dependencies>
-        <!--web依赖，版本继承自父工程的web依赖版本号-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -229,7 +206,7 @@ tags:
             <scope>test</scope>
         </dependency>
     </dependencies>
-
+    <!--工程打包插件-->
     <build>
         <plugins>
             <plugin>

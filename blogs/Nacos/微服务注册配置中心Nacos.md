@@ -56,11 +56,17 @@ Nacos是一种工具，帮助您快速实现动态服务发现、服务配置、
 ### windows环境下nacos服务端的单机运行
 
 1. github上找到nacos的压缩包，下载解压。注意nacos的版本。目前最新为2.1.0版本
-2. 编辑startup.cmd。将nacos从默认的集群模式，修改为单机模式。
+2. nacos默认是集群运行的，因此应该编辑startup.cmd。将nacos从默认的集群模式，修改为单机模式。
 3. 双击运行startup.cmd 或者运行命令`startup.cmd -m standalone`，启动nacos服务端。下面是nacos启动截图
 
 ![20220728175719.png](../blog_img/20220728175719.png)
 ![20220728175810.png](../blog_img/20220728175810.png)
+
+4. 控制台界面地址：http://xxxxx:8848/nacos/index.html。
+
+登录页面输入用户名和密码就可以，默认的用户名和密码都是 nacos
+
+<font color="red">注意：nacos单机运行的时候自带有数据源。</font>
 
 ### windows环境下nacos服务端的集群运行
 
@@ -244,13 +250,50 @@ public String restTemplate3(){
 | 命名空间  | spring.cloud.nacos.discovery.namespace | 无 | 常用场景之一是不同环境的注册的区分隔离，例如开发测试环境和生产环境的资源（如配置、服务）隔离等 | 
 | 是否启用nacos注册中心  | spring.cloud.nacos.discovery.enabled | true | 是否启用nacos注册中心 | 
 
+## Docker环境中搭建nacos容器
+
+步骤① 先安装docker环境，自行百度。
+
+步骤② 下载nacos镜像文件。最新版或某个旧版本
+
+```shell
+# 下载最新版的nacos镜像
+docker pull nacos/nacos-server
+# 下载2.1.0版本的nacos镜像
+docker pull nacos/nacos-server:2.1.0
+# 下载2.1.0版本的精简版nacos镜像
+docker pull nacos/nacos-server:2.1.0-slim
+# 查询镜像
+docker images
+```
+
+注意：2.1.0版本和2.1.0-slim版本的区别是带有slim的版本是精简版。
+
+步骤③：创建并启动nacos容器
+
+```shell
+# 创建启动容器
+docker run --name myNacos -e MODE=standalone -p 8848:8848 -d nacos/nacos-server:2.1.0
+# 查询容器日志，看是否成功启动。
+docker logs myNacos
+```
+
+步骤④：访问nacos控制台界面
+
+控制台界面地址：http://xxxxx:8848/nacos/index.html
+
+xxxxx一般是宿主机的ip，8848是nacos默认端口，以容器运行时宿主机映射的端口为准，一般保持一致就可以。
+
+登录页面输入用户名和密码就可以，默认的用户名和密码都是 nacos
+
+
 
 ## 微服务配置中心Nacos
 
 下图为微服务架构图
 ![20220728161129.png](../blog_img/20220728161129.png)
 
-### 介绍
+### 配置中心介绍
 
 在微服务架构中，配置中心就是统一管理各个微服务配置文件的服务。每个微服务都有自己的配置文件，为了统一维护，方便管理，所以出现了配置中心的概念。所有的微服务配置文件都在配置中心中管理和读取，因此，出现了配置中心的概念。
 
