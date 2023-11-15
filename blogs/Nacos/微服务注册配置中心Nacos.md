@@ -148,7 +148,50 @@ server {
 spring.cloud.nacos.discovery.server‐addr=192.168.11.109:7070/nacos
 ```
 
-### Spring Cloud Alibaba 引入Nacos注册中心服务
+
+### Docker环境中搭建nacos容器
+
+步骤① 先安装docker环境，自行百度。
+
+步骤② 下载nacos镜像文件。最新版或某个旧版本
+
+```shell
+# 下载最新版的nacos镜像
+docker pull nacos/nacos-server
+# 下载2.1.0版本的nacos镜像
+docker pull nacos/nacos-server:v2.1.0
+# 下载2.1.1版本的精简版nacos镜像
+docker pull nacos/nacos-server:v2.1.1-slim
+# 查询镜像
+docker images
+```
+
+注意：v2.1.0版本和v2.1.1-slim版本的区别是带有slim的版本是精简版。
+
+步骤③：创建并启动nacos容器
+
+```shell
+# 创建启动容器
+docker run --name myNacos -e MODE=standalone -p 8848:8848 -p 9848:9848 -p 9849:9849 -v /home/docker/nacos/logs:/home/nacos/logs -v /home/docker/nacos/init.d/custom.properties:/home/nacos/init.d/custom.properties -d nacos/nacos-server:v2.1.0
+
+# 查询容器日志，看是否成功启动。
+docker logs myNacos
+```
+
+<font color="red">注意：在nacos2.x版本中,会有3个端口被nacos使用。例如：若某个nacos端口为8848，则9848（8848+1000）端口和9849（8848+1001）会被启用。所以如果设置集群nacos端口时，不要设置连续端口号。</font>
+
+如图是windwos的docker客户端安装nacos容器。
+![nacos_20231115194516.png](../blog_img/nacos_20231115194516.png)
+
+步骤④：访问nacos控制台界面
+
+控制台界面地址：http://localhost:8848/nacos/index.html
+
+登录页面输入用户名和密码就可以，默认的用户名和密码都是 nacos
+
+![20220728175810.png](../blog_img/20220728175810.png)
+
+## Spring Cloud Alibaba 引入Nacos注册中心服务
 
 <font color="red">注意：示例为使用springbootalibaba微服务架构的项目</font>
 
@@ -250,43 +293,6 @@ public String restTemplate3(){
 | 命名空间  | spring.cloud.nacos.discovery.namespace | 无 | 常用场景之一是不同环境的注册的区分隔离，例如开发测试环境和生产环境的资源（如配置、服务）隔离等 | 
 | 是否启用nacos注册中心  | spring.cloud.nacos.discovery.enabled | true | 是否启用nacos注册中心 | 
 
-## Docker环境中搭建nacos容器
-
-步骤① 先安装docker环境，自行百度。
-
-步骤② 下载nacos镜像文件。最新版或某个旧版本
-
-```shell
-# 下载最新版的nacos镜像
-docker pull nacos/nacos-server
-# 下载2.1.0版本的nacos镜像
-docker pull nacos/nacos-server:2.1.0
-# 下载2.1.0版本的精简版nacos镜像
-docker pull nacos/nacos-server:2.1.0-slim
-# 查询镜像
-docker images
-```
-
-注意：2.1.0版本和2.1.0-slim版本的区别是带有slim的版本是精简版。
-
-步骤③：创建并启动nacos容器
-
-```shell
-# 创建启动容器
-docker run --name myNacos -e MODE=standalone -p 8848:8848 -d nacos/nacos-server:2.1.0
-# 查询容器日志，看是否成功启动。
-docker logs myNacos
-```
-
-步骤④：访问nacos控制台界面
-
-控制台界面地址：http://xxxxx:8848/nacos/index.html
-
-xxxxx一般是宿主机的ip，8848是nacos默认端口，以容器运行时宿主机映射的端口为准，一般保持一致就可以。
-
-登录页面输入用户名和密码就可以，默认的用户名和密码都是 nacos
-
-
 
 ## 微服务配置中心Nacos
 
@@ -338,7 +344,7 @@ ${prefix}-${spring.profiles.active}.${file-extension}
 ```
 ② 创建bootstrap.properties配置文件
 
-<font color="red">微服务客户端拉取nacos配置中心的数据，是在读取application.yml文件之前。因此需要在项目中创建bootstrap.properties配置文件。bootstrap.yml配置文件是先于application.yml文件加载到项目中。微服务客户端根据bootstrap.properties配置文件去拉取nacos配置中心数据。</font>
+<font color="red">当项目启动后，项目拉取nacos配置中心的数据，是在读取application.yml文件之前。因此需要在项目中创建bootstrap.properties配置文件。bootstrap.yml配置文件是先于application.yml文件加载到项目中。启动后的项目会根据bootstrap.properties配置文件去拉取nacos配置中心数据。</font>
 
 spring.application.name和spring.profiles.active配置可以不写在bootstrap.properties配置文件中,这里是为了方便展示
 ```

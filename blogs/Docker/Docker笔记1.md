@@ -86,6 +86,22 @@ Docker客户端是与Docker服务端进行交互的主要方式。当使用docke
 
 直接在docker官网上搜索Docker Desktop on Windows应用程序安装到本机即可。其他自行百度。
 
+Docker Desktop on Windows这个应用程序会在windows环境上虚拟一个linux环境，然后在linux环境中再安装docker。
+
+### windows中设置容器数据卷
+
+由于windows系统与linux系统不同。因此windows系统中的docker容器如何设置容器数据卷？
+
+例如
+```shell
+# 创建centos容器并启动
+docker run -it -v /d/test:/tmp/test centos
+```
+- -v /d/test:/tmp/test 会把d盘的test目录与容器中的/tmp/test目录关联到一起。
+- /d/ 代表windwos系统的D盘。
+
+注意：当将windows系统中的目录设置为容器数据卷的时候，文件名要符合windows的规定，即不要有空格和‘-’。
+
 ## ubuntu 22.04 (LTS) 安装 docker
 
 ### 安装docker

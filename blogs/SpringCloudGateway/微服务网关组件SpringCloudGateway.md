@@ -196,21 +196,21 @@ spring:
 
 下面是部分断言工厂配置的示例。具体信息请参照官网。
 
-### 基于Path请求路径的断言工厂
+① 基于Path请求路径的断言工厂
 Path：接收一个参数，判断请求的URI部分是否满足路径规则。{segment}占位符
 ```yml
 predicates:
   - Path=/red/{segment},/blue/{segment},/green/**
 ```
 
-### 基于Method请求方法的断言工厂
+② 基于Method请求方法的断言工厂
 Method：接收一个参数，判断请求类型是否跟指定的类型匹配。
 ```yml
 predicates:
   - Method=GET,POST
 ```
 
-### 基于Datetime类型的断言工厂
+③ 基于Datetime类型的断言工厂
 After： 接收一个日期参数，判断请求日期是否晚于指定日期
 Before： 接收一个日期参数，判断请求日期是否早于指定日期
 Between： 接收两个日期参数，判断请求日期是否在指定时间段内
@@ -222,7 +222,7 @@ predicates:
 # - Between=2017-01-20T17:42:47.789-07:00[Asia/Shanghai], 2017-01-21T17:42:47.789-07:00[Asia/Shanghai]
 ```
 
-### 基于远程地址的断言工厂
+④ 基于远程地址的断言工厂
 RemoteAddr：接收一个IP地址段，判断请求主机地址是否在地址段中
 ```yml
 predicates:
@@ -230,7 +230,7 @@ predicates:
   - RemoteAddr=192.168.1.1/24
 ```
 
-### 基于Cookie的断言工厂
+⑤ 基于Cookie的断言工厂
 Cookie：接收两个参数，cookie名字和值（正则表达式也行）。判断请求的cookie是否具有给定名称且值与正则表达式匹配。
 ```yml
 predicates:
@@ -240,7 +240,7 @@ predicates:
   - Cookie=chocolate,ch.
 ```
 
-### 基于Header的断言工厂
+⑥ 基于Header的断言工厂
 Header：接收两个参数，标题名称和值（正则表达式也行）。判断请求Header是否具有给定名称且值与正则表达式匹配。
 ```yml
 predicates:
@@ -250,14 +250,14 @@ predicates:
   - Header=X‐Request‐Id,\d+
 ```
 
-### 基于Host的断言工厂
+⑦ 基于Host的断言工厂
 Host：接收一个参数，主机名模式。判断请求的Host是否满足匹配规则。
 ```yml
 predicates:
   ‐ Host=**.test.com
 ```
 
-### 基于Query请求参数的断言工厂
+⑧ 基于Query请求参数的断言工厂
 Query：接收两个参数，请求param参数和值（正则表达式也行）， 判断请求参数是否具有给定名称且值与正则表达式匹配。
 ```yml
 predicates:
@@ -265,7 +265,7 @@ predicates:
   ‐ Query=name,xiaoming
 ```
 
-### 基于路由权重的断言工厂
+⑨ 基于路由权重的断言工厂
 Weight：接收一个[ 组名,权重 ], 然后对于同一个组内的路由按照权重转发
 ```yml
 spring:
