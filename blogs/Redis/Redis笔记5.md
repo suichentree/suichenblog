@@ -336,62 +336,62 @@ public class RedisJava {
 }
 ```
 
-## Spring 使用 Redis
+## SpringBoot 使用 Redis
 
-SpringData是Spring中数据操作的模块，包含对各种数据库的集成，其中对Redis的集成模块就叫做SpringDataRedis。
-
-> SpringDataRedis的特征
-- 提供了对不同Redis客户端的整合（Lettuce和Jedis）
-- 提供了RedisTemplate统一API来操作Redis
-- 支持Redis的发布订阅模型
-- 支持Redis哨兵和Redis集群
-- 支持基于Lettuce的响应式编程
-- 支持基于JDK、JSON、字符串、Spring对象的数据序列化及反序列化
-- 支持基于Redis的JDKCollection实现
-
-> RedisTemplate工具类常用方法
-![redis20221011154818.png](../blog_img/redis20221011154818.png)
-
-### 快速入门
+目前大部分的微服务项目，都是基于 SpringBoot 框架进行快速开发，在  SpringBoot 项目中我们应该如何使用 Redis。
 
 ① 创建springboot项目
-② 引入SpringDataRedis依赖
+② 添加springboot的redis启动包。
 
 ```xml
-<dependencies>
-    <!-- SpringDataRedis依赖 -->
-    <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-data-redis</artifactId>
-    </dependency>
-</dependencies>
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-redis</artifactId>
+</dependency>
 ```
+
+springboot项目默认继承一个父工程，而这个redis依赖的版本继承自父工程。
+
 
 ③ 在配置文件中配置redis
 
-```yaml
-spring:
-  redis:
-    host: localhost
-    port: 6379
-    password: 123456
-    lettuce:
-      pool:
-        max-active: 8
-        max-idle: 8
-        min-idle: 0
-        max-wait: 100ms
+```properties
+# Redis数据库索引（默认为0）
+spring.redis.database=0
+# Redis服务器地址
+spring.redis.host=127.0.0.1
+# Redis服务器连接端口
+spring.redis.port=6379
+# Redis服务器连接密码（默认为空）
+spring.redis.password=
+# 连接池最大连接数（使用负值表示没有限制） 默认 8
+spring.redis.lettuce.pool.max-active=8
+# 连接池最大阻塞等待时间（使用负值表示没有限制） 默认 -1
+spring.redis.lettuce.pool.max-wait=-1
+# 连接池中的最大空闲连接 默认 8
+spring.redis.lettuce.pool.max-idle=8
+# 连接池中的最小空闲连接 默认 0
+spring.redis.lettuce.pool.min-idle=0
 ```
 
+注意从SpringBoot 2.x开始，spring-boot-starter-data-redis默认集成的java客户端是Lettuce。
+
 ④ 测试代码
+
+SpringBoot提供了一个高度封装的RedisTemplate类来操作redis的各个命令，通过RedisTemplate提供的方法，就可以操作redis。
+
+> RedisTemplate工具类常用方法
+![redis20221011154818.png](../blog_img/redis20221011154818.png)
 
 ```java
 @RestController
 @RequestMapping("/redis")
 public class redisController {
+
     @Autowired
     private RedisTemplate redisTemplate;
 
+    //StringRedisTemplate是RedisTemplate的子类
     //StringRedisTemplate专门用于处理String类型的key和value
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
@@ -414,7 +414,7 @@ public class redisController {
 
 ### RedisTemplate的乱码问题
 
-RedisTemplate向写入Redis数据时，由于默认是采用JDK序列化，得到的结果是这样的：
+RedisTemplate向写入Redis数据时，由于默认是采用JDK序列化，因此得到的结果是这样的：
 
 ![redis20221011162513.png](../blog_img/redis20221011162513.png)
 
@@ -422,7 +422,7 @@ RedisTemplate向写入Redis数据时，由于默认是采用JDK序列化，得�
 
 ```java
 @Configuration
-public class RedisConfig {
+public class RedisTemplateConfig {
     @Bean
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory){
         // 创建RedisTemplate对象
@@ -443,7 +443,7 @@ public class RedisConfig {
 }
 ```
 
-> 解决方式2：直接使用StringRedisTemplate，它的key和value的序列化方式默认就是String方式。
+> 解决方式2：直接使用StringRedisTemplate，它的key和value的序列化方式默认就是String。
 
-方式2的优点：不需要自定义RedisTemplate的序列化方式。
-方式2的缺点：StringRedisTemplate只能处理String类型的key和value。
+- 优点：不需要自定义RedisTemplate的序列化方式。
+- 缺点：StringRedisTemplate只能处理String类型的key和value。对于其他类型的数据还是需要自定义RedisTemplate的序列化方式。
