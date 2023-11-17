@@ -71,7 +71,7 @@ java中的synchronized是非公平锁。
 
 非公平锁: 若线程A拿到了锁资源，线程B和C没有拿到。则线程BC会进行竞争，谁赢谁就排队排到前面。
 
-> 互斥锁和共享锁
+> 互斥锁和共享锁(即读锁和写锁)
 
 java中的synchronized是互斥锁。
 
@@ -90,7 +90,7 @@ java中的synchronized是互斥锁。
 * @Resource默认按照ByName自动注入。如果找不到就按照byType的方式自动注入。
 
 
-## Spring中支持几种作用域？
+## Spring中Bean有几种作用域？
 
 Spring的IOC容器中的bean有5种作用域分别是：singleton、prototype、request、session和globalSession
 
@@ -122,7 +122,6 @@ spring事务的实现方式有两种，分别是编程式事务和声明式事�
 
 - 编程式事务：通过编程的方式来管理事务，灵活但是难以维护。
 - 声明式事务：通过注解和xml配置的方式来管理事务。
-
 
 ## spirng中的AOP有哪些通知类型？
 
@@ -175,9 +174,9 @@ SpringBoot框架根据约定大于配置的原则，在Spring框架的基础上�
 - 独立运行：springboot打出的jar包，可以独立运行。因为jar包内嵌servlet容器，例如tomcat，jetty等。
 
 
-## 如何理解 Spring Boot 中的 Starters？
+## 如何理解 Spring Boot 中的 starter 依赖？
 
-Starters启动依赖。它包含了一系列可以集成到应用里面的依赖包，你可以一站式集成Spring及其他技术，而不需要到处找依赖包。如你想使用Spring JPA访问数据库，只要加入spring-boot-starter-data-jpa启动器依赖就能使用了。Starters包含了许多项目中需要用到的依赖，它们能快速持续的运行，都是一系列得到支持的管理传递性依赖。
+Starters启动依赖starter。它包含了一系列可以集成到应用里面的依赖包，你可以一站式集成Spring及其他技术，而不需要到处找依赖包。如你想使用Spring JPA访问数据库，只要加入spring-boot-starter-data-jpa启动器依赖就能使用了。Starters包含了许多项目中需要用到的依赖，它们能快速持续的运行，都是一系列得到支持的管理传递性依赖。
 
 > Starters命名
 
@@ -225,3 +224,4 @@ springboot项目打的jar包是可执行jar包，这种jar包可以直接通过j
 普通jar包解压之后就是代码。但是可执行jar包的代码在/BOOT-INF/classes目录下。
 
 我们可以在springboot项目的pom文件中，将项目打成两个jar包，一个可执行jar包，一个普通jar包。
+

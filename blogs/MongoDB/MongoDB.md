@@ -8,6 +8,8 @@ tags:
  - MongoDB
 ---
 
+[toc]
+
 # MongoDB基础
 
 MongoDB的官方网站是：[http://www.mongodb.com/](http://www.mongodb.com/)
@@ -59,14 +61,14 @@ index |	index  |	索引
 table joins | XXX	|  	表连接,MongoDB不支持
 primary key  |	primary key  |	主键,MongoDB自动将_id字段设置为主键
 
-**MongoDB支持的数据结构非常松散，是类似json的bson格式，因此可以存储比较复杂的数据类型。**
-
-![1](../blog_img/MongoDB_img_1.png)
 
 # 4.MongoDB 数据类型
 
 ![2](../blog_img/MongoDB_img_2.png)
 
+**MongoDB支持的数据结构非常松散，是类似json的bson格式，因此可以存储比较复杂的数据类型。**
+
+![1](../blog_img/MongoDB_img_1.png)
 
 # 5.MongoDB 的各种命令(windows下，以管理员身份运行命令行)
 
@@ -163,9 +165,9 @@ true
 >2. db.collection.save( `<` document >,{ writeConcern: `<` document > })    : 使用 save() 方法通过传入的文档来替换已有文档
 >3. db.collectionNAME.find()    : 查看集合中的数据
 >4. document=({~ ~ ~})      :先把一条数据包装为文档，在用insert()命令插入
+>5. 使用 update() 和 save() 方法来更新集合中的文档
 
 ```
->5. 使用 update() 和 save() 方法来更新集合中的文档
 db.collection.update(
    <query>,
    <update>,
@@ -176,39 +178,43 @@ db.collection.update(
    }
 )
 
+```
+
 参数说明：
 query : update的查询条件，类似sql update查询内where后面的。
 update : update的对象和一些更新的操作符（如$,$inc...）等，也可以理解为sql update查询内set后面的
 upsert : 可选，这个参数的意思是，如果不存在update的记录，是否插入objNew,true为插入，默认是false，不插入。
 multi : 可选，mongodb 默认是false,只更新找到的第一条记录，如果这个参数为true,就把按条件查出来多条记录全部更新。
 writeConcern :可选，抛出异常的级别。
-```
+
+>6. 移除集合中的数据
 
 ```
->6. 移除集合中的数据
 db.collectionName.remove(
     < query >,
     { justOne: < boolean >,
       writeConcern: < document > 
     }) 
 
+```
+
 参数说明：
 query :（可选）删除的文档的条件。
 justOne : （可选）如果设为 true 或 1，则只删除一个文档，如果不设置该参数，或使用默认值 false，则删除所有匹配条件的文档。
 writeConcern :（可选）抛出异常的级别。
 
-```
->7. db.collectionName.remove({})      : //删除当前集合中的所有文档
+> 7. db.collectionName.remove({})      : //删除当前集合中的所有文档
+
+> 8. 查询文档 
 
 ```
->8.查询文档 
 db.collectionName.find(query, projection)
+```
 
 参数说明：
 query ：可选，使用查询操作符指定查询条件
 projection ：可选，使用投影操作符指定返回的键。查询时返回文档中所有键值， 只需省略该参数即可（默认省略）。
 
-```
 
 >9. db.collectionName.find().pretty()   : //以易读的方式查询文档
 
@@ -252,8 +258,6 @@ WriteResult({ "nRemoved" : 1 })
 { "_id" : ObjectId("5cfcf74736c46018670f0d02"), "id" : 2, "name" : "xiaohong", "age" : 15 }
 { "_id" : ObjectId("5cfcf86c36c46018670f0d03"), "title" : "MongoDB 教程", "description" : "MongoDB 是一个 Nosql 数据库", "by" : "菜鸟教程", "url" : "http://www.runoob.com", "tags" : [ "mongodb", "database", "NoSQL" ], "likes" : 100 }
 { "_id" : ObjectId("5cfcf92d36c46018670f0d04"), "id" : 3, "name" : "xiaoqiang", "age" : 17 }
-
-
 ```
 
 ## 6.文档查询find的（and ,where ,or）条件

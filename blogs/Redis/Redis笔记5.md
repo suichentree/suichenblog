@@ -447,3 +447,5 @@ public class RedisTemplateConfig {
 
 - 优点：不需要自定义RedisTemplate的序列化方式。
 - 缺点：StringRedisTemplate只能处理String类型的key和value。对于其他类型的数据还是需要自定义RedisTemplate的序列化方式。
+
+

@@ -12,7 +12,6 @@ tags:
 
 # Java面试题总结-集合1
 
-
 ## 为什么要使用集合？如何选择集合？
 
 当需要保存一组类型相同的数据，就可以使用集合。之所以不用数组，是因为数组的长度不可变，数组存储的元素是可重复的，类型单一的。
@@ -45,7 +44,7 @@ Map
 
 ## 哪些集合类是线程安全的？
 
-java.uti包中的集合类大部分都是非线程安全的。其中Vector和Hashtable是线程安全的，但是这两个类性能很差，在实际的开发中不常用。对于这些非线程安全的类，可以利用Collections工具类提供的synchronizedXxx()方法,可以将这些集合类包装成线程安全的集合类。
+java.uti包中的集合类大部分都是非线程安全的。其中Vector和Hashtable是线程安全的，对于这些非线程安全的类，可以利用Collections工具类提供的synchronizedXxx()方法,可以将这些集合类包装成线程安全的集合类。
 
 另外java.util.concurrent包中的提供了大量的支持并发访问的集合类。例如ConcurrentHashMap和ConcurrentMap等线程安全的集合类。
 
@@ -126,13 +125,14 @@ HashMap在put的时候会调用hash()方法来计算key的hashcode值，当key==
 
 >4. HashMap是线程安全的吗？
 
-HashMap非线程安全，即任一时刻可以有多个线程同时写HashMap，会导致数据的不一致。<font color="red">如果需要满足线程安全，可以用 Collections的synchronizedMap方法使HashMap具有线程安全的能力，或者使用ConcurrentHashMap。</font>
+HashMap非线程安全，即任一时刻可以有多个线程同时写HashMap，会导致数据的不一致。
+
+如果需要满足线程安全，可以用 Collections的synchronizedMap方法使HashMap具有线程安全的能力，或者使用ConcurrentHashMap。
 
 ## Hashtable与HashMap的区别？
 
-- HashMap 继承的是 AbstractMap 类。Hashtable 继承的是 Dictionary类。
 - HashMap 允许 key 和 value 为 null，而 HashTable 不允许。
-- HashMap不是线程安全的，HashTable是线程安全的，内部方法通过synchronizedMap关键字修饰。
+- HashMap不是线程安全的。HashTable是线程安全的，内部方法通过synchronizedMap关键字修饰。
 
 ## 为什么HashMap 允许 key 和 value 为 null，而 HashTable 不允许？
 
@@ -193,7 +193,7 @@ HashMap实际上是数组和链表的结合体。
 
 JDK1.8 之前 HashMap 底层是 数组和链表。
 - 向 HashMap集合中加入某个 k-v 元素。
-- HashMap 通过 key 的 hashCode方法 得到 hash 值，然后通过 (n - 1) & hash 判断当前元素存放的位置（这⾥的 n 指的是数组的⻓度），
+- HashMap 通过 key 的 hashCode方法 得到 hash 值，然后通过 hash值 判断当前元素存放的位置
 - 如果当前位置存在元素的话，就判断该元素与要存⼊的元素的 hash
 值以及 key 是否相同，如果相同的话，直接覆盖，不相同就把value值加入到链表数组中。
 
@@ -203,7 +203,6 @@ JDK1.8 之前 HashMap 底层是 数组和链表。
 2. 如果当前位置没有存放元素，则把新添加的元素，存放到该位置中。
 3. 如果当前位置已经存储了元素。需要通过equals()方法判断value是否相同。此时有两种情况。(1)如果value相同，则覆盖原始值；(2)如果value不同（出现冲突），则将当前的value 放入链表中。
 4. 理解了以上过程就不难明白HashMap是如何解决hash冲突的问题，核心就是使用了数组的存储方式，然后将冲突的key的对象放入链表中，一旦发现冲突就在链表中做进一步的对比。当链表⻓度⼤于阈值（默认为8）（将链表转换成红⿊树前会判断，如果当前数组的⻓度⼩于 64，那么会选择先进⾏数组扩容，⽽不是转换为红⿊树）时，将链表转化为红⿊树，以减少搜索时间。
-
 
 
 ## Collection 和 Collections 的区别
