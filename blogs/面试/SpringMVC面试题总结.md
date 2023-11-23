@@ -12,11 +12,21 @@ tags:
 
 # SpringMVC面试题总结
 
-## 什么是 SpringMvc？
+## 什么是 Spring MVC？
 
 Spring MVC 是 Spring 创建的一个基于 MVC 模式的轻量级 Web 开发框架。
 
-Spring MVC 本质上是对 Servlet 的进一步封装，其最核心的组件是 DispatcherServlet。由于 Spring MVC 本身就是 Spring 框架的一部分，可以和 Spring 框架无缝集成。性能方面具有先天的优越性，是当今业界最主流的 Web 开发框架。
+Spring MVC 是围绕DispatcherServlet来设计的，它用来处理所有的 HTTP请求和响应。
+
+## Spring MVC的主要组件？
+
+- 前端控制器 DispatcherServlet：用来接收请求并转发。
+- 处理器映射器HandlerMapping：根据请求的URL来查找Handler处理器。
+- 处理器适配器HandlerAdapter：处理器Handler的时候要按照HandlerAdapter要求的规则去编写。这样HandlerAdapter才能执行处理器Handler。
+- 处理器Handler: 程序员自行开发的，对请求如何处理的部分。
+- 视图解析器 ViewResolver：进行视图的解析，根据处理器返回结果渲染为视图。
+- 视图View：通常指一个jsp或freemarker页面。
+
 
 ## SpringMVC 工作流程？
 
@@ -40,6 +50,12 @@ Spring MVC 本质上是对 Servlet 的进一步封装，其最核心的组件是
 - 处理器（Handler）：（需要程序员去写代码处理逻辑的）
 - 处理器适配器（HandlerAdapter）：会把处理器包装成适配器，这样就可以支持多种类型的处理器，类比笔记本的适配器（适配器模式的应用）
 - 视图解析器（ViewResovler）：进行视图解析，对返回的字符串进行处理，解析成对应的页面
+
+## Spring MVC常用的注解有哪些？
+
+- @RequestMapping：用于将请求url与类或方法进行绑定。
+- @RequestBody：获取请求body中的数据，并赋值给注解标记的参数上。
+- @ResponseBody：将数据塞入到响应的body数据上。通常会将方法返回对象转化为json对象响应给客户。
 
 
 ## SpringMVC 拦截器怎么实现？
