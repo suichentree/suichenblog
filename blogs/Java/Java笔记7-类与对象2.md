@@ -28,11 +28,6 @@ categories:
 √ 可访问
 x 不可访问，意思是无法看到，无法调用。
 
-
-
-
-
-
 ### 私有 private
 
 <font color="red">
