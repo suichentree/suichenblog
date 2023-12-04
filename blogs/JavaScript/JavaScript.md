@@ -553,6 +553,7 @@ finally{
 ### 1.自定义对象
 
 JavaScript的对象是一组由键-值组成的无序集合
+
 例如
 ```js
 var person = {

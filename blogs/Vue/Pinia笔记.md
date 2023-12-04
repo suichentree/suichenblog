@@ -2,7 +2,7 @@
 title: Pinia笔记
 date: 2023-11-19
 sidebar: 'auto'
-tags:
+categories:
  - 前端
 tags:
  - Vue

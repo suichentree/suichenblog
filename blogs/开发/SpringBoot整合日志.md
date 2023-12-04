@@ -2,7 +2,7 @@
 title: SpringBoot整合日志
 date: 2023-11-14
 sidebar: 'auto'
-tags:
+categories:
  - 开发
 tags:
  - 开发

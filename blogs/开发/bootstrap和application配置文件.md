@@ -2,7 +2,7 @@
 title: bootstrap和application配置文件
 date: 2023-11-15
 sidebar: 'auto'
-tags:
+categories:
  - 开发
 tags:
  - 开发

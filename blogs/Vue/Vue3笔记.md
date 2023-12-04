@@ -2,7 +2,7 @@
 title: Vue3笔记
 date: 2023-11-17
 sidebar: 'auto'
-tags:
+categories:
  - 前端
 tags:
  - Vue
