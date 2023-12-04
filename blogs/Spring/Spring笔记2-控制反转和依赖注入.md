@@ -617,6 +617,10 @@ public class BookServiceImpl implements BookService{
 
 ## 自动装配 : autowire 属性
 
+装配分为手动装配和自动装配。
+- 手动装配就是在xml配置文件中，手动显式的将bean与bean装配到一起。例如之前的构造函数注入和setter方法注入。
+- 自动装配就是让Spring自动的隐式的将bean与bean装配到一起。
+
 随着Spring 应用的不断发展，IOC 容器中包含的 Bean 会越来越多，Bean 和 Bean 之间的依赖关系也越来越复杂，这就使得我们编写的 XML 配置文件也越来越复杂，越来越繁琐。
 
 因此Spring提供了自动装配功能，可以让IOC容器自动建立Bean对象之间的依赖关系。简而言之，自动装配就是让IOC容器自动的进行依赖注入。

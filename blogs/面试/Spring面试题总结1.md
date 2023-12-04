@@ -16,20 +16,14 @@ tags:
 
 ### 什么是 Spring Framework？
 
-Spring是一个轻量级Java开发框架，可以简化Java应用程序的开发。主要是为了降低应用开发的业务逻辑层和其他各层的耦合问题。
+Spring是一个轻量级Java开发框架。主要用于解决应用开发的业务层和其他各层的耦合问题。从而达到简化java应用开发的目的。
 
-之所以能够降低代码与代码之间的耦合问题。主要依赖于它的两个核心特性，也就是依赖注入DI和面向切面AOP。
+### Spring Framework的常用模块
 
-> Spring Framework主要由以下几个模块组成
-```
-Spring Core：核心模块，提供IOC功能；
-Spring AOP：AOP服务；
-Spring DAO：对JDBC的抽象，简化了数据访问异常的处理；
-Spring ORM：对现有的ORM框架的支持；
-Spring Web：提供了基本的面向Web的综合特性；
-Spring MVC：提供面向Web的MVC的实现方式。
-Spring TEST：TEST模块主要整合了单元测试和集成测试
-```
+- Spring Core：提供了框架的基本组成部分，包括控制反转和依赖注入功能。
+- Spring beans：提供了BeanFactory，是工厂模式的一个经典实现。
+- Spring AOP：提供了面向切面的部分，让你可以自定义切面、切点等。
+- Spring Web：提供了针对 Web 开发的部分。
 
 > 使用spring的好处？
 
@@ -37,16 +31,96 @@ Spring TEST：TEST模块主要整合了单元测试和集成测试
 - Spring 支持面向切面功能，可以把应用业务逻辑和系统服务分开。
 - Spring 的IOC容器功能可以管理程序中的对象。
 
+### Spring 提供了哪些配置方式？
+
+1. 基于 xml 配置
+bean 所需的依赖项和服务在 XML 格式的配置文件中指定。这些xml配置文件通常包含许多bean定义和配置选项。它们通常以bean标签开头。
+例如：
+```xml
+<bean id="studentbean" class="org.edureka.firstSpring.StudentBean"> 
+    <property name="name" value="Edureka"></property>
+</bean>
+```
+
+2. 基于注解配置
+可以通过在相关的类，方法或字段声明上使用注解，将 bean 配置为组件类本身，而不是使用 XML 来描述 bean 装配。**默认情况下Spring 容器中未打开注解装配。因此需要在使用它之前在 Spring 配置文件中启用它。**
+例如：开启注解配置
+```xml
+<beans>
+    <context:annotation-config/>
+</beans>
+```
+
+
+
+### Spring中Bean的作用域？
+
+Spring的IOC容器中的bean有5种作用域分别是：singleton（单例）,prototype（原型）,request, session 和 global session。
+
+- singleton 单例模式 : 默认的作用域。IoC容器中只会存在一个共享的Bean实例，无论有多少个 Bean 引用它，始终指向同一对象。该模式在多线程下是不安全的。
+- prototype 原型模式：每次通过 IOC 容器获取 bean 时，容器都将创建一个新的 Bean 实例。
+- Request : 每一次http请求都会产生一个新的bean实例，并且该 bean实例 仅在当前 HTTP 请求内有效。请求完成后，bean实例就会失效。
+- session : 在每一次 Http Session中，容器都会产生一个新的bean实例。该 bean 实例仅在当前 HTTP session内有效。
+- global Session 作用和session类似，在一个全局的 Http Session 中，容器会返回该 Bean 的同一个实例。
+
+![spring_20231202135104.png](../blog_img/spring_20231202135104.png)
+
+### Spring中Bean的生命周期？
+
+![spring_20231202135221.png](../blog_img/spring_20231202135221.png)
+
+生命周期流程: 实例化，初始init，接收请求service，销毁destroy；
+
+### Spring框架中的单例bean是线程安全的吗？
+
+Spring中的bean默认是单例模式。单例bean不是线程安全的。
+
+实际上大部分时候 bean 无状态的（比如 dao 类），在某种程度上来说 bean 也是安全的，但如果 bean 有状态的话（比如 view model 对象），那就要开发者自己去保证线程安全了，最简单的就是改变 bean 的作用域。把"singleton"变更为"prototype"，这样请求 bean 相当于 new Bean() 了，所以就可以保证线程安全了。
+
+- 有状态Bean是指保存了数据。
+- 无状态Bean就是不会保存数据。
+
+### Spring如何处理线程并发问题？
+
+一般情况下，只有无状态的Bean才是线程安全的。
+
+在Spring中，绝大部分Bean都可以为singleton作用域，因为Spring会对一些Bean中非线程安全状态采用ThreadLocal + 线程同步机制 来进行处理，从而解决有状态的bean的线程安全问题。
+
+> 线程同步机制
+
+线程同步机制采用了“时间换空间”的方式，仅提供一份变量，不同的线程在访问前需要获取锁，没获得锁的线程则需要排队。
+
+> ThreadLocal
+
+ThreadLocal会为每一个线程提供一个独立的变量副本，从而隔离了多个线程对数据的访问冲突。因为每一个线程都拥有自己的变量副本，从而也就没有必要对该变量进行同步了。
+
+### Spring框架中都用到了哪些设计模式?
+
+1. 工厂模式：BeanFactory就是简单工厂模式的体现，用来创建Bean对象的实例；
+2. 单例模式：Bean对象的作用域默认为单例模式。
+3. 代理模式：Spring的AOP功能用到了JDK的动态代理和CGLIB字节码生成技术；
+4. 模板方法：用来解决代码重复的问题。比如RestTemplate, JmsTemplate, JpaTemplate。
+
+## IOC 控制反转
+
 ### 什么是IOC
 
-IOC就是控制反转，以前创建对象的主动权和时机是由自己把控的，而现在由Spring容器根据配置文件去创建实例对象和管理各个实例对象之间的依赖关系。
+IOC就是控制反转的意思。
 
-简而言之，IOC让对象的创建不用去new了，可以由spring自动生产，使用java的反射机制，根据配置文件在运行时动态的去创建对象以及管理对象，并调用对象的方法。
+以前创建对象的创建和管理是由程序代码把控的，而控制反转就是将对象的创建和管理交给Spring容器来管理。
 
 > IOC的好处
 
-- 它将最小化应用程序中的代码量。
-- 即通过IOC容器让对象与对象之间实现了松耦合。
+- 通过容器可以实现对象的集中管理。
+- 即通过IOC容器让对象与对象之间的依赖关系实现了松耦合。
+
+### IOC的实现方式？
+
+1. Spring 启动时读取配置文件中的Bean对象信息，并在 Spring 容器中生成一份相应的 Bean 配置注册表，
+2. 然后根据这张注册表实例化 Bean，装配好 Bean 之间的依赖关系，为上层应用提供准备就绪的运行环境。其中 Bean 缓存池为 HashMap 实现
+
+![spring_20231202121626.png](../blog_img/spring_20231202121626.png)
+
 
 ### 什么是IOC的实现机制？
 
@@ -108,85 +182,96 @@ IOC容器负责创建对象，管理对象（通过依赖注入（DI），装配
 
 注意：bean的作用域有singleton(单例)，prototype(普通)，request,session,globalsession。后面3种只有ApplicationContext容器才提供。
 
+### BeanFactory和FactoryBean的区别？
+
+- BeanFactory：Bean工厂，是一个工厂(Factory)，IoC容器的最顶层根接口就是这个BeanFactory，它的作用是管理Bean。比如 ApplicationContext，XmlBeanFactory 等，这些都是指不同的IOC容器。
+
+- FactoryBean 工厂Bean，是一个Bean，作用是产生其他bean实例。FactoryBean只有一个工厂方法，该方法用来返回其他bean实例。
+
+### BeanFactory 和 ApplicationContext 有什么区别？
+
+BeanFactory和ApplicationContext是Spring的两大核心接口。其中ApplicationContext是BeanFactory的子接口
+
+- BeanFactory：可以理解为就是个 HashMap，Key 是 BeanName，
+Value 是 Bean 实例。通常只提供注册，获取这两个功能。可以称之为 “低级容器”。
+- ApplicationContext 可以称之为 “高级容器”。因为它比 BeanFactory 多了更多的功能。他继承了多个接口。因此具备了更多的功能。
+
+## DI 依赖注入
+
 ### 什么是依赖注入(DI)？
 
 依赖注入是用来维护IOC容器中bean与bean之间的依赖关系。
 
-即bean与bean之间的依赖关系由IOC容器在应用系统运行期来决定，也就是由IOC容器动态地将某种依赖关系的目标对象实例注入到关联的Bean对象之中。
+即bean与bean之间的依赖关系由IOC容器来维护，由IOC容器动态地将某种依赖关系的目标对象实例注入到关联的Bean对象之中。
 
-> 可以通过多少种方式完成依赖注入？
+### 依赖注入的方式
 
-1. 构造函数注入。
-2. setter注入。
+依赖注入有4种方式。构造函数注入，setter方法注入，静态工厂注入，实例工厂注入。
 
+> 构造函数注入
 
-### spring 提供了哪些配置方式？
+通过构造函数，将bean对象注入到另一个bean对象中
 
-1. 基于 xml 配置
-bean 所需的依赖项和服务在 XML 格式的配置文件中指定。这些xml配置文件通常包含许多bean定义和配置选项。它们通常以bean标签开头。
-例如：
-```xml
-<bean id="studentbean" class="org.edureka.firstSpring.StudentBean"> 
-    <property name="name" value="Edureka"></property>
+```java
+public class BookDaoImpl{
+    private String message;
+    public BookDaoImpl(String message) {
+        this.message = message;
+    }
+}
+<bean id="bookDao" class="com.impl.BookDaoImpl">
+    <constructor-arg name="message" value="this is a message"/>
 </bean>
 ```
 
-2. 基于注解配置
-可以通过在相关的类，方法或字段声明上使用注解，将 bean 配置为组件类本身，而不是使用 XML 来描述 bean 装配。**默认情况下Spring 容器中未打开注解装配。因此需要在使用它之前在 Spring 配置文件中启用它。**
-例如：开启注解配置
+> setter方法注入
+
+通过setter方法，将bean对象注入到另一个bean对象中
+
 ```xml
-<beans>
-    <context:annotation-config/>
-</beans>
+<bean id="bookDao" class="com.xxx.xxxx">
+    <property name="username" value="mysql"/>
+</bean>
 ```
-
-### spring容器中bean的生命周期是什么样的？
-
-生命周期流程: 实例化，初始init，接收请求service，销毁destroy；
-
-### Spring中Bean有几种作用域？
-
-Spring的IOC容器中的bean有5种作用域分别是：singleton、prototype、request、session和globalSession
-
-* singleton 默认的,在IoC容器中仅有一个bean实例。每次请求，都只会拿掉这个bean实例。
-* prototype 每次请求，IOC容器会产生一个新的bean实例来提供。
-* request 每一次http请求都会产生一个新的bean实例，并且该 bean实例 仅在当前 HTTP 请求内有效。请求完成后，bean实例就会失效。
-* session 每一次 HTTP 请求都会产生一个新的bean实例，同时该 bean实例 仅在当前HTTP session 内有效。
-* globalSession 作用和session类似，只是使用portlet的时候使用。 
-
 
 ### Spring的自动装配有哪些方式？
 
-bean装配是指在Spring容器中把bean组装到一起。意味着容器不需要和配置，能通过 Bean 工厂自动处理 bean 之间的组装。
+装配分为手动装配和自动装配。
+- 手动装配就是在xml配置文件中，手动显式的将bean与bean装配到一起。例如之前的构造函数注入和setter方法注入。
+- 自动装配就是让Spring自动的隐式的将bean与bean装配到一起。
 
-* no - 这是默认设置，表示没有自动装配。应使用显式 bean 引用进行装配。
-* byName - 它根据 bean 的名称注入对象依赖项。它匹配并装配其属性与 XML文件中由相同名称定义的 bean。
-* byType - 它根据类型注入对象依赖项。如果属性的类型与 XML 文件中的一个 bean 名称匹配，则匹配并装配属性。
-* constructor - 它通过调用类的构造函数来注入依赖项。根据构造器的参数与类型来从容器中找寻匹配的bean加载。
+Spring 有五种自动装配的方式。
 
-### Spring框架中的单例bean是线程安全的吗？
+* no - 默认的方式是不进行自动装配，通过显式设置 ref 属性来进行装配。
+* byName - 在配置文件中发现bean的autowire 属性被设置成byname后，spring会装配和该 bean 的成员变量属性具有相同名字的 bean。
+* byType - 通过参数类型自动装配，Spring 容器在配置文件中发现 bean 的 autowire 属性被设置成byType，之后容器试图匹配、装配和该bean的属性具有相同类型的bean。如果有多个 bean 符合条件，则抛出错误。
+* constructor - 这个方式类似于 byType， 但是要提供给构造器参数，如果没有确定的带参数的构造器参数类型，将会抛出异常。
 
-spring 中的bean默认是单例模式。单例bean不是线程安全的。
+## 注解部分
 
-- 有状态就是有数据存储功能。
-- 无状态就是不会保存数据。
+### @Component,@Repository,@Service,@Controller的区别？
 
+- @Component：用于标注在类上，将类标注为一个普通bean对象。然后IOC容器扫描到该注解后，会将这个bean注入到容器中。
+- @Controller：用于标注在类上，将类标注为一个控制层对象,然后注入到IOC容器中。springmvc会扫描使用@Controller注解的类中的方法，并检测方法是被使用了@RequestMapping注解。
+- @Service：功能与@Component注解类似。用于标注在service层实现类上，并将类标注为一个service层对象。
+- @Repository：功能与@Component注解类似。用于标注在dao层实现类上，并将类标注为一个dao层对象。
 
-### @Component, @Controller, @Repository的区别？
+### @ResponseBody，@RequestMapping，@PathVariable, @RequestParam，@RequestHeader
 
-- @Component：将java 类标记为bean。然后IOC容器扫描到该注解后，会将这个bean注入到容器中。
-- @Controller：将java 类标记为Spring Web MVC 控制器。然后注入到IOC容器中。
-- @Service：功能与@Component注解类似。
-- @Repository：功能与@Component注解类似。
+@ResponseBody注解
+- 用于标注在方法上，用于将方法的返回值转化为json格式，并写入到Response响应对象的body区域中。
 
-### @Autowired注解自动装配的过程是怎样的？
+@RequestMapping注解
+- 标注在类或方法上，用于将请求路径绑定到方法或类上。
 
-当IOC容器扫描到@Autowied、@Resource时，就会在IoC容器自动查找需要的bean对象。然后装配给注解所在对象的属性中。
+@PathVariable注解
+- 用于将请求路径中的变量参数，绑定到方法的参数上。
 
-@Autowired注解首先在容器中查询对应类型的bean对象。 
-- 如果查询结果刚好为一个，就将该bean装配给@Autowired指定的数据；
-- 如果查询的结果不止一个，那么@Autowired会根据名称来查找；
-- 如果上述查找的结果为空，那么会抛出异常。
+@RequestParam注解
+- 用于将请求中的请求数据，绑定到方法的参数上。
+
+@RequestHeader注解
+- 将请求header区域的数据绑定到方法的参数上。
 
 ### @Autowired和@Resource之间的区别
 
@@ -197,17 +282,39 @@ spring 中的bean默认是单例模式。单例bean不是线程安全的。
 * @Autowired是按照类型（byType）装配，来注入依赖对象。如果我们想使用按照名称（byName）来装配，可以结合@Qualifier注解一起使用。
 * @Resource默认按照ByName自动注入。如果找不到就按照byType的方式自动注入。
 
+### @Autowired注解自动装配的过程是怎样的？
 
+当IOC容器扫描到@Autowied、@Resource时，就会在IoC容器自动查找需要的bean对象。然后装配给注解所在对象的属性中。
 
+@Autowired注解首先在容器中查询对应类型的bean对象。 
+- 如果查询结果刚好为一个，就将该bean装配给@Autowired指定的数据；
+- 如果查询的结果不止一个，那么@Autowired会根据名称来查找；
+- 如果上述查找的结果为空，那么会抛出异常。
+
+### @Qualifier 注解的作用是什么？
+
+当您创建多个相同类型的 bean 并希望仅使用属性装配其中一个 bean 时，您可以使用 @Qualifier 注解 和 @Autowired 通过指定应该装配哪个确切的 bean 来消除歧义。
 
 
 ## 事务部分
 
+### 什么是事务？
+
+事务是一组逻辑操作，这组操作中的所有命令，要么都执行，要么都不执行。
+
+### 事务的四个特性
+
+事务有四个特性：ACID
+- 原子性（Atomicity）：事务的原子性确保事务中的所有命令要么全部完成，要么都不完成。
+- 一致性（Consistency）：事务完成前后，业务都处于一致的状态。
+- 隔离性（Isolation）：每个事务之间相互独立，相互隔离。
+- 持久性（Durability）：一旦事务完成后，事务执行的结果会被持久化。
+
 ### Spring的事务实现方式有哪些？
 
-Spring支持两种类型的事务管理：
-- 编程式事务管理：通过编程的方式管理事务。
-- 声明式事务管理：将业务代码和事务管理分离，需用注解和XML配置来管理事务。
+Spring主要支持两种类型的事务管理：
+- 编程式事务管理：通过编程的方式管理事务，灵活但是难以维护。
+- 声明式事务管理：通过注解和xml配置的方式来管理事务。
 
 > 声明式事务
 
@@ -217,46 +324,270 @@ Spring支持两种类型的事务管理：
 
 在代码中，通过TransactionTemplate工具类来开启事务，提交事务，回滚事务。
 
+
 ### Spring事务的实现方式和实现原理？
 
-Spring事务的本质其实就是数据库对事务的支持，没有数据库的事务支持，Spring是无法提供事务功能的。
+Spring并不直接管理事务，而是提供了多种事务管理器。
 
-真正的数据库层的事务提交和回滚是通过 binlog或者redo log实现的。
+Spring事务管理器的接口是PlatformTransactionManager根接口，通过这
+个接口，Spring为各个平台如JDBC、Hibernate等都提供了对应的事务管理器，但是具体的实现就是各个平台自己的事情了。
+
+因此Spring的事务本质上是调用各个数据持久层框架的事务。
+
+![spring_20231201163527.png](../blog_img/spring_20231201163527.png)
+
+
+> jdbc事务
+
+如果应用程序中直接使用JDBC来进行持久化,DataSourceTransactionManager会为你处理事务。
+
+实际上，DataSourceTransactionManager 是通过调用java.sql.Connection来管理事务，而后者是通过 DataSource获取到的。通过调用连接的commit()方法来提交事务，同样，事务失败则通过调用 rollback()方法进行回滚。
+
+> Hibernate事务
+
+如果应用程序的持久化是通过Hibernate实习的，那么你需要使用HibernateTransactionManager来进行事务管理。
+
+> Java持久化API事务（JPA）
+
+如果你使用JPA的话，那你需要使用Spring的JpaTransactionManager来处理事务。
+
+> Java原生API事务
+
+如果你没有使用以上所述的事务管理，或者是跨越了多个事务管理源（比如两个或者是多个不同的数据源），你就需要使用JtaTransactionManager
 
 ### Spring中事务的传播行为
 
-Spring事务的传播级别描述的是：当一个使用了@Transactional注解的方法调用另一个使用@Transactional注解的方法时，Spring如何对多个事务方法进行处理。
+Spring事务的传播行为（propagation behavior）是指：当一个使用了@Transactional注解的方法调用另一个使用@Transactional注解的方法时，Spring如何对多个事务方法的执行方式进行管理。
 
-> PROPAGATION_REQUIRED
+Spring定义了七种事务传播行为。
 
-如果当前没有事务，就创建一个新事务，如果当前存在事务，就加入该事务，这是最常见的选择，也是Spring默认的事务传播行为。
+```
+PROPAGATION_REQUIRED(默认，必需传播)：存在事务，加入事务；不存在事务，新建事务运行。
+PROPAGATION_SUPPORTS(支持传播): 存在事务，加入事务；不存在事务，非事务运行。
+PROPAGATION_MANDATORY(强制传播): 存在事务，加入事务，不存在事务，抛出异常。
 
-> PROPAGATION_SUPPORTS
+PROPAGATION_REQUIRES_NEW(新建需求传播): 存在事务，挂起当前事务并创建一个新事务；不存在事务，则新建事务。
+PROPAGATION_NOT_SUPPORTED(不支持传播): 总是以非事务方式执行，如果当前存在事务，则挂起事务。
+PROPAGATION_NEVER(从不传播): 总是以非事务方式执行，如果当前存在事务，则抛出异常。
+PROPAGATION_NESTED(嵌套传播): 存在事务，则嵌套事务;不存在事务，新建事务。
 
-如果当前存在事务，就加入该事务，如果当前不存在事务，就以非事务执行。如果外围事务回滚，内部事务也要回滚。
-
-> PROPAGATION_MANDATORY
-
-如果当前存在事务，就加入该事务，如果当前不存在事务，就抛出异常。
-
-> PROPAGATION_REQUIRES_NEW
-
-创建新事务，无论当前存不存在事务，都创建新事务。
-
-> PROPAGATION_NOT_SUPPORTED
-
-以非事务方式执行操作，如果当前存在事务，就把当前事务挂起。
-
-> PROPAGATION_NEVER
-
-以非事务方式执行，如果当前存在事务，则抛出异常。
-
-> PROPAGATION_NESTED
-
-如果当前存在事务，则在嵌套事务内执行。如果当前没有事务，则按REQUIRED属性执行。
+```
 
 
-### spring的事务隔离级别？
+#### PROPAGATION_REQUIRED （必需传播）（默认传播行为）
+
+PROPAGATION_REQUIRED ：如果当前没有事务，就创建一个新事务，如果当前存在事务，就加入该事务。
+
+这是Spring默认的事务传播行为。
+
+例子：
+```java
+//事务属性 PROPAGATION_REQUIRED
+public void methodA(){
+    methodB();
+}
+//事务属性 PROPAGATION_REQUIRED
+public void methodB(){}
+```
+
+
+> 单独执行方法B
+
+单独执行方法B,那么相当于方法B就变成了一个事务方法。如下代码所示。
+
+```java
+public void main(String args[]){
+    Connection con=null;
+    try{
+        con = getConnection();
+        con.setAutoCommit(false);
+        //方法调用
+        methodB();
+        //提交事务
+        con.commit();
+    } Catch(RuntimeException ex) {
+        //回滚事务
+        con.rollback();
+    } finally {
+        //释放资源
+        closeCon();
+    }
+}
+```
+
+在上面代码中，由于方法B的传播行为是PROPAGATION_REQUIRED，并且之前程序中没有事务的存在。因此Java会单独开启一个事务来管理方法B。
+
+
+> 如果执行方法A。方法A中又执行了方法B。
+
+执行效果如下
+
+```java
+public void main(String args[]){
+    Connection con=null;
+    try{
+        con = getConnection();
+        con.setAutoCommit(false);
+        //方法调用
+        methodA();
+        methodB();
+        //提交事务
+        con.commit();
+    } Catch(RuntimeException ex) {
+        //回滚事务
+        con.rollback();
+    } finally {
+        //释放资源
+        closeCon();
+    }
+}
+```
+
+调用方法A时，此时java环境还没有事务，所以java开启一个新的事务。当在方法A中调用方法B时，java环境中已经有了一个事务，所以方法B就加入当前事务。
+
+
+#### PROPAGATION_SUPPORTS （支持传播）
+
+PROPAGATION_SUPPORTS：如果当前存在事务，就加入该事务，如果当前不存在事务，就以非事务执行。如果外层的事务回滚，内部事务也要回滚。
+
+例子：
+```java
+//事务属性 PROPAGATION_REQUIRED
+public void methodA(){
+    methodB();
+}
+//事务属性 PROPAGATION_SUPPORTS
+public void methodB(){}
+```
+
+- 单纯的调用methodB时，由于methodB方法的传播属性是PROPAGATION_SUPPORTS。因此methodB方法是非事务的执行的。
+- 当调用methdA时,则methodB加入了methodA的事务中执行。
+
+#### PROPAGATION_MANDATORY （强制传播）
+
+PROPAGATION_MANDATORY ：如果当前存在事务，就加入该事务，如果当前不存在事务，就抛出异常。
+
+例子：
+```java
+//事务属性 PROPAGATION_REQUIRED
+public void methodA(){
+    methodB();
+}
+//事务属性 PROPAGATION_MANDATORY
+public void methodB(){}
+```
+
+- 单纯的调用methodB时，由于methodB方法的传播属性是PROPAGATION_MANDATORY。因此methodB方法会抛出异常。
+- 当调用methodA时,则methodB加入了methodA的事务中执行。
+
+#### PROPAGATION_REQUIRES_NEW （新建需求传播）
+
+PROPAGATION_REQUIRES_NEW ：如果之前不存在事务，则创建一个新事务。如果当前存在一个事务A，则将该事务A暂停。并且新创建一个事务B，当事务B执行完后，再执行事务A。
+
+
+例子：
+```java
+//事务属性 PROPAGATION_REQUIRED
+public void methodA(){
+    methodB();
+}
+//事务属性 PROPAGATION_REQUIRES_NEW
+public void methodB(){}
+```
+
+- 单纯的调用methodB时，由于methodB方法的传播属性是PROPAGATION_REQUIRES_NEW。因此java会创建一个新事务来执行methodB。
+- 当调用methodA时,java会先创建一个事务A来执行methodA。当调用methodB的时候，会将事务A暂停，然后在事务A中创建另一个事务B，用这个事务B来执行methodB。当事务B执行完后，再执行事务A。
+
+如下所示
+```java
+public void main(String args[]){
+    TransactionManager tm = null;
+    try{
+        //获得一个JTA事务管理器
+        tm = getTransactionManager();
+        tm.begin();//开启一个新的事务
+        Transaction ts1 = tm.getTransaction();
+        doSomeThing();
+        tm.suspend();//挂起当前事务
+        try{
+            tm.begin();//重新开启第二个事务
+            Transaction ts2 = tm.getTransaction();
+            methodB();
+            ts2.commit();//提交第二个事务
+        } Catch(RunTimeException ex) {
+            ts2.rollback();//回滚第二个事务
+        } finally {
+            //释放资源
+        }
+        //methodB执行完后，恢复第一个事务
+        tm.resume(ts1);
+        doSomeThingB();
+        ts1.commit();//提交第一个事务
+    } catch(RunTimeException ex) {
+        ts1.rollback();//回滚第一个事务
+    } finally {
+        //释放资源
+    }
+}
+
+```
+
+
+#### PROPAGATION_NOT_SUPPORTED (不支持传播)
+
+PROPAGATION_NOT_SUPPORTED : 总是以非事务方式执行操作，如果当前存在事务，就把当前事务挂起。
+
+例子：
+```java
+//事务属性 PROPAGATION_REQUIRED
+public void methodA(){
+    methodB();
+}
+//事务属性 PROPAGATION_NOT_SUPPORTED
+public void methodB(){}
+```
+
+- 单纯的调用methodB时，methodB方法以非事务的方式运行。
+- 当调用methodA时,则methodB会暂停methodA的事务，当methodB执行结束后，methodA的事务继续执行。
+
+#### PROPAGATION_NEVER （从不传播）
+
+PROPAGATION_NEVER ：总是以非事务方式执行，如果当前存在事务，则抛出异常。
+
+例子：
+```java
+//事务属性 PROPAGATION_REQUIRED
+public void methodA(){
+    methodB();
+}
+//事务属性 PROPAGATION_NEVER
+public void methodB(){}
+```
+
+- 单纯的调用methodB时，methodB方法以非事务的方式运行。
+- 当调用methodA时,则methodB会抛出异常。
+
+
+#### PROPAGATION_NESTED （嵌套传播）
+
+PROPAGATION_NESTED ：如果当前存在事务，则在嵌套事务内执行。如果当前没有事务，则按PROPAGATION_REQUIRED传播属性执行。
+
+嵌套事务：嵌套事务就是事务中的事务。并且外层事务的回滚可以引起内层事务的回滚。而内层事务的异常并不会导致外层事务的回滚，这就是一个嵌套事务。
+
+例子：
+```java
+//事务属性 PROPAGATION_REQUIRED
+public void methodA(){
+    methodB();
+}
+//事务属性 PROPAGATION_NESTED
+public void methodB(){}
+```
+
+- 单纯的调用methodB时，methodB方法以事务的方式运行。
+- 当调用methodA时,则methodB会以一个嵌套事务的方式运行。
+
+### Spring的事务隔离级别？
 
 当多个事务访问相同数据会产生脏写，脏读，幻读，不可重复读等问题。事务的隔离级别就是用于解决这些问题的。
 
@@ -270,27 +601,82 @@ Spring 有五大隔离级别，默认值为 ISOLATION_DEFAULT（使用数据库�
 - repeatable_read 可重复读隔离级别，用于解决脏写，脏读，不可重复读问题。
 - serlalizable 串行化，最高的隔离级别，用于解决脏写，脏读，不可重复度，幻读问题。
 
-注意：隔离级别不是设置的越高越好，隔离级别越高，spring事务的效率越低。
+注意：隔离级别不是设置的越高越好，隔离级别越高，spring事务执行越复杂，效率越低。
+
+### 不可重复读和幻读的区别
+
+不可重复读的重点是修改。即同样的条件, 你读取过的数据, 再次读取出来发现值不一样了。在一个事务中前后两次读取的结果并不一致，导致了不可重复读。
+
+幻读的重点在于新增或者删除。即同样的条件, 第1次和第2次读出来的记录数不一样。
+
+
+从总的结果来看, 似乎不可重复读和幻读都表现为两次读取的结果不一致。但如果你从控制的角度来看,两者的区别就比较大。
+- 对于不可重复读, 只需要锁住满足条件的记录。
+- 对于幻读, 要锁住满足条件及其相近的记录。
+
+### 如何使用编程式事务？
+
+Spring提供两种方式的编程式事务管理。
+- 使用TransactionTemplate
+- 使用PlatformTransactionManager
+
+
+
+
 
 ## AOP部分
 
 ### 什么是 AOP？
 
-AOP 称为面向切面编程，用于将那些与业务无关的公共行为和逻辑，抽取并封装为一个可重用的模块，这个模块被命名为“切面”（Aspect），减少系统中的重复代码，降低了模块间的耦合度，同时提高了系统的可维护性。可用于权限认证、日志、事务处理等。
+AOP是面向切面编程。AOP将代码分为两个部分：核心关注点和横切关注点。
+
+业务相关的代码是核心关注点，与之关系不大的部分代码是横切关注点。横切关注点的一个特点是，它们经常发生在核心关注点的多处。比如权限认证、日志记录，事务处理等。
+
+AOP的作用是将那些与业务无关的公共行为和逻辑，封装为一个可重用的模块。将业务代码和公共代码分离开来，从而降低了代码间的复杂度和耦合度。
+
+### AOP的使用场景有哪些？
+
+AOP 主要使用场景有：
+1. Authentication 权限认证
+2. Caching 缓存
+3. Context passing 内容传递
+4. Error handling 错误处理
+5. Lazy loading 懒加载
+6. Debugging 调试
+7. logging 日志记录
+8. Performance optimization 性能优化
+9. Persistence 持久化
+10. Resource pooling 资源池
+11. Synchronization 同步
+12. Transactions 事务处理
 
 ### 什么是Aspect切面？
 
-切面就是与业务无关的公共逻辑代码。例如日志，权限认证，事务等。
+切面就是与业务无关的公共逻辑代码。例如日志记录代码，权限认证代码等。
 
 ### 什么是连接点？
 
-连接点就是切面代码需要插入到业务代码的位置。通常情况下连接点是一个方法。
+连接点是指被拦截到的点，即就是切面代码需要插入到业务代码的位置。例如某个方法被调用的时候。
 
-### 什么是切点？
+在 Spring 中连接点指的就是被拦截到的方法调用的时候。
 
-切入点本质上是一个或一组连接点，通知将在这些位置执行。
+### 什么是切入点？
 
-### 什么是AOP的通知？
+切入点代指一个或多个连接点。通常是多个方法名称，或是正则表达式匹配的方法名称来指定这些切入点。
+
+通知将在切入点的位置执行。
+
+### 什么是通知？
+
+通知是指在方法执行前或执行后要做的动作。
+
+### 什么是织入？
+
+织入是把切面应用到目标对象并创建新的代理对象的过程。
+
+代理对象 = 目标对象 + 切面。
+
+### Spirng中的AOP有哪些通知类型？
 
 Spring切面可以应用5种类型的通知：
 1. 前置通知（Before）：在目标方法被调用之前调用通知功能；
@@ -299,59 +685,16 @@ Spring切面可以应用5种类型的通知：
 4. 异常通知（After-throwing）：在目标方法抛出异常后调用通知；
 5. 环绕通知（Around）：通知包裹了被通知的方法，在被通知的方法调用之前和调用之后执行自定义的行为。
 
-### Spring框架中都用到了哪些设计模式?
+### AOP的实现方式是什么？
 
-* （1）工厂模式：BeanFactory就是简单工厂模式的体现，用来创建对象的实例；
-* （2）单例模式：Bean默认为单例模式。
-* （3）代理模式：Spring的AOP功能用到了JDK的动态代理和CGLIB字节码生成技术；
+AOP实现的关键在于代理模式，主要分为静态代理和动态代理。静态代理的代表为AspectJ；动态代理则以Spring AOP为代表。
 
+1. 静态代理，就是AOP框架会在编译阶段生成AOP代理类，它会在编译阶段将AspectJ(切面)织入到Java字节码中，运行的时候就是增强之后的AOP对象。
+2. 动态代理，就是说AOP框架不会去修改字节码，而是每次运行时在内存中临时为方法生成一个AOP对象，这个AOP对象包含了目标对象的全部方法，并且在特定的切点做了增强处理，并回调原对象的方法。
 
+动态代理可以理解为AOP会生成一个代理对象，代理对象 = 目标对象 + 增强对象。
 
+### JDK动态代理和CGLIB动态代理的区别？
 
-
-
-
-
-
-
-
-## spring事务的实现方式
-
-spring事务的实现方式有两种，分别是编程式事务和声明式事务。
-
-- 编程式事务：通过编程的方式来管理事务，灵活但是难以维护。
-- 声明式事务：通过注解和xml配置的方式来管理事务。
-
-## spirng中的AOP有哪些通知类型？
-
-通知是指在方法执行前或执行后要做的动作，实际上是程序执行时要通过 SpringAOP 框架触发的代码段。
-
-Spring 切面可以应用五种类型的通知：
-- before 前置通知，在一个方法执行前被调用。
-- after 后置通知，在方法执行之后调用的通知，无论方法执行是否成功。
-- after-returning 后置成功通知，仅当方法成功完成后执行的通知。
-- after-throwing 后置异常通知，在方法抛出异常退出时执行的通知。
-- around 环绕通知，在方法执行之前和之后调用的通知。
-
-## spring中的依赖注入是什么？
-
-依赖注入是指不需要你主动创建对象，而是在配置文件中配置你的对象，让容器帮你创建对象，并管理对象。你需要用到对象的时候，直接从容器中取出对象即可。
-
-## 依赖注入的方式有几种，分别是什么?
-
-一、构造器注入
-* 将被依赖对象通过构造函数的参数注入给依赖对象，并且在初始化对象的时候注入。
-* 优点：对象初始化完成后便可获得可使用的对象。
-* 缺点：当需要注入的对象很多时，构造器参数列表将会很长；不够灵活。若有多种注入方式，每种方式只需注入指定几个依赖，那么就需要提供多个重载的构造函数，麻烦。
-
-二、setter方法注入
-* IoC Service Provider通过调用成员变量提供的setter函数将被依赖对象注入给依赖类。
-* 优点：灵活。可以选择性地注入需要的对象。
-* 缺点：依赖对象初始化完成后由于尚未注入被依赖对象，因此还不能使用
-
-三、接口注入
-* 依赖类必须要实现指定的接口，然后实现该接口中的一个函数，该函数就是用于依赖注入。该函数的参数就是要注入的对象
-* 优点接口注入中，接口的名字、函数的名字都不重要，只要保证函数的参数是要注入的对象类型即可。
-* 缺点：侵入行太强，不建议使用。
-
+Spring AOP中的动态代理主要有两种方式，JDK动态代理和CGLIB动态代理。
 

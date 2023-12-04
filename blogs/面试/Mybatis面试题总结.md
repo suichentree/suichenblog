@@ -14,116 +14,135 @@ tags:
 
 ## 什么是Mybatis？
 
-Mybatis是一个半ORM（对象关系映射）框架，它内部封装了JDBC，开发时只需要关注SQL语句
-本身，不需要花费精力去处理加载驱动、创建连接、创建statement等繁杂的过程。程序员直接编写原
-生态sql，可以严格控制sql执行性能，灵活度高。
+MyBatis 是一个半 ORM（对象关系映射）的持久层框架。使用Mybatis开发时只需要关注SQL语句
+本身，不需要花费精力去处理加载驱动、创建连接、创建statement等繁杂的过程。
 
-MyBatis 可以使用 XML 或注解来配置和映射原生信息，将 POJO映射成数据库中的记录，避免了
-几乎所有的 JDBC 代码和手动设置参数以及获取结果集。
+## 什么是ORM？
 
-通过xml 文件或注解的方式将要执行的各种 statement 配置起来，并通过java对象和 statement
-中sql的动态参数进行映射生成最终执行的sql语句，最后由mybatis框架执行sql并将结果映射为java对
-象并返回。（从执行sql到返回result的过程）。
+ORM（Object Relational Mapping），对象关系映射，是一种为了解决关系型数据库数据与Java对象的映射关系的技术。
 
-## Mybatis有什么优点和缺点？
+简单的说，ORM可以将 java 对象自动持久化到关系型数据库中。
+
+## 为什么说Mybatis是半自动ORM映射工具？它与全自动的区别在哪里？
+
+- Hibernate是全自动ORM映射框架，使用Hibernate查询对象时，可以根据对象关系模型直接获取，所以它是全自动ORM的。
+- Mybatis是半自动ORM映射框架，它在查询对象时，需要手动编写sql来完成，所以是半自动ORM映射。
+
+## 传统传统JDBC开发存在的问题？MyBatis是如何解决这些问题的？
+
+① 数据库链接创建、释放频繁造成系统的资源浪费。
+- 解决方式：mybatis在xml配置文件中配置数据连接池，使用连接池管理数据库连接。
+
+② Sql语句写在代码中造成代码不易维护。
+- 解决方式：mybatis将Sql语句配置在mapper.xml文件中，将SQL语句与java代码分离。
+
+③ 向sql语句传参数麻烦
+- 解决方式：Mybatis通过XML标签，支持编写动态SQL语句，将java对象中的数据映射到sql语句的参数中。
+
+④ 对sql结果集解析麻烦
+- 解决方式：Mybatis自动将sql执行结果集映射为java对象。
+
+## Mybatis有什么优缺点？
 
 优点：
-* MyBatis 把 sql 语句从业务代码中独立出来，放在单独的 XML 文件中编写，将业务代码与sql语句分离开来。降低了程序的耦合度。并且提供XML标签，支持编写动态SQL语句，并可重用。
-* MyBatis 封装了JDBC，可以自动将结果集转换成 Java Bean 对象，大大简化了代码。
-
+* MyBatis 把sql语句放在XML文件中编写，将业务代码与sql语句分离开来。降低了程序的耦合度。
+* MyBatis 可以自动将数据结果集转换成 Java 对象，大大简化了代码。
 
 缺点：
-* MyBatis是基于SQL语句编程，相当灵活，因此 SQL 语句的编写工作量较大，尤其当字段多、关联表多时。
+* MyBatis 中 SQL 语句的编写工作量较大，对开发人员编写SQL语句的功底有一定要求。
 * MyBatis中的 SQL 语句依赖于数据库，从而导致数据库移植性差，无法随意更换数据库。
 
-## MyBatis 与 Hibernate 有哪些不同？
+## MyBatis的工作原理
 
-* Hibernate 属于全自动 ORM 框架，Mybatis 是一个 半ORM 框架。
-* 使用 Hibernate 查询关联对象或者关联集合对象时，可以根据对象关系模型直接获取，所以它是全自动的。而 Mybatis 在查询关联对象或关联集合对象时，需要手动编写 sql 来完成，所以，称之为半自动 ORM 映射工具。
+MyBatis 的工作原理如下图所示。
+![mybatis_20231203192025.png](../blog_img/mybatis_20231203192025.png)
+
+Mybatis启动后
+1. 读取 MyBatis 配置文件：mybatis-config.xml 为 MyBatis 的全局配置文件，配置了数据库连接信息等。
+2. 读取 SQL 映射文件：映射文件中配置了操作数据库的 SQL 语句。
+3. 创建会话工厂：通过配置文件来创建会话工厂 SqlSessionFactory。
+4. 创建会话对象：由会话工厂创建 SqlSession 对象，该对象中包含了执行 SQL 语句的所有方法
+5. Executor 执行器：MyBatis 底层定义了一个 Executor 接口来操作数据库，它将根据 SqlSession 传递的参数动态地生成需要执行的SQL语句，同时负责查询缓存的维护。
+6. MappedStatement 对象：在 Executor 接口的执行方法中有一个 MappedStatement 类型的参数，该参数是对映射信息的封装，用于存储要映射的 SQL 语句的 id、参数等信息。
+7. 输入参数映射：通过java对象给SQL语句设置参数的过程。
+8. 输出结果映射：把结果集解析为java对象的过程。
+
+## 为什么需要预编译？
+
+预编译：是指数据库驱动在发送 SQL 语句和参数给数据库之前。对SQL语句进行编译，这样数据库执行 SQL 语句时，就不需要再重新编译了。节省了数据库执行sql语句的时间。
+
+好处：
+1. 预编译节省了数据库执行sql语句的时间。
+2. Mybatis可以把预编译对象缓存起来。下次对于同一个SQL，可以直接使用缓存中的预编译对象。节省了Mybatis的执行时间。
+3. Mybatis 默认情况下，将对所有的 SQL 进行预编译。
+
+## Mybatis是否支持延迟加载？
+
+Mybatis仅支持一对一association查询和一对多collection查询的延迟加载。
+
+在Mybatis配置文件中，可以配置是否启用延迟加载`lazyLoadingEnabled=true|false。`
+
+延迟加载的原理：使用 CGLIB 创建目标对象的代理对象，当调用目标方法时，进入拦截器方法。
 
 ## #{}和${}的区别是什么？
 
-* #{}是预编译处理，${}是字符串替换。使用#{}可以有效的防止SQL注入，提高系统安全性。
-* Mybatis 在处理#{}时，会将 #{}替换为?号，调用 PreparedStatement 的set 方法来赋值；
-* Mybatis 在处理${}时，会把 ${}替换成对于的值。类似用 + 号来把参数和sql语句进行拼接。
+> `#{}`
 
+- Mybatis在处理#{}时，#{}传入参数是以字符串传入，然后对其进行预编译处理。
+- #{} 可以有效的防止SQL注入
 
-## 当类的属性名和表中的字段名不一样怎么办？
-
-方法1：可以通过在sql语句中定义字段名的别名，让字段名的别名和类的属性名一致。从而让数据结果集能够转换对应的java bean对象。
-
-方法2： 通过`<resultMap>`标签自定义映射结果集。可以来把字段名和类属性名一一对应。
-
-
-## 通常一个Mybatis的Xml映射文件，都会写一个Mapper接口与之对应，这个Mapper接口的工作原理是什么？Mapper接口里的方法能重载吗？
-
-Mapper 接口就是Dao接口。在 Mybatis的xml文件中，每一个`<select>`、`<insert>`、`<update>`、`<delete>`标签，都会被解析为一个MapperStatement 对象。
-
-举例：com.mybatis3.mappers.StudentDao.findStudentById，可以唯一找到 namespace 为 com.mybatis3.mappers.StudentDao 下面 id 为findStudentById 的 MapperStatement。
-
-Mapper 接口里的方法，是不能重载的，因为是使用 全限名+方法名 的保存和寻找策略。
-
-Mapper 接口的工作原理是 JDK 动态代理，Mybatis 运行时会使用 JDK动态代理为 Mapper 接口生成代理对象 proxy，代理对象会拦截接口方法，转而执行 MapperStatement 所代表的 sql，然后将 sql 执行结果返回。
-
-## Mybatis 动态 sql 有什么用？执行原理？有哪些动态 sql？
-
-Mybatis 动态 sql 可以让我们在 Xml 映射文件内，以标签的形式编写动态 sql，完成逻辑判断和动态拼接 sql 的功能。
-
-Mybatis 提供了 9 种动态 sql 标签：trim | where | set | foreach | if | choose| when | otherwise | bind。
-
-其执行原理为，从参数对象中获取表达式的值，根据表达式的值动态拼接sql，以此来完成动态 sql 的功能。
-
-## 不同的 Xml 映射文件中，每个sql对应id 是否可以重复？
-
-不同的 Xml 映射文件，如果配置了namespace，那么 id 可以重复；如果没有配置 namespace，那么 id 不能重复；
-
-原因就是 namespace+id 是作为唯一key使用的，如果没有 namespace，就剩下 id，那么id重复会导致数据互相覆盖。有了namespace，namespace 不同，namespace+id 自然也就不同。
-
+> `${}`
+- Mybatis在处理${}时，把{}替换成变量的值。不会对其进行预编译处理。
+- ${} 不能防止SQL 注入
 
 ## 什么是 MyBatis 的接口绑定？有哪些实现方式？
 
-接口绑定，就是在 MyBatis 中任意定义接口,然后把接口里面的方法和 SQL 语句绑定, 直接调用接口方法就相当于调用接口方法对应的sql语句,
+Mybatis的接口绑定：是指将接口中的方法与SQL语句进行绑定。我们通过调用接口中的方法，就相当于调用SQL语句。其中接口方法的参数，就是传递给SQL语句的参数。接口方法的返回值，就是SQL语句执行后的结果集。
 
-接口绑定有两种实现方式,一种是通过注解绑定，就是在接口的方法上面加上@Select、@Update 等注解，里面包含 Sql 语句来绑定；另外一种就是通过 xml映射文件里面写 SQL 来绑定, 在这种情况下,要指定 xml 映射文件里面的 namespace 必须为接口的全路径名。
+接口绑定有两种实现方式。
+- 注解绑定：在接口方法上标注@Select、@Update等注解。注解里面包含SQL语句。
+- XML文件绑定：通过编写映射XML文件。将xml文件与接口绑定，接口的方法与xml文件中的sql语句绑定。
 
-当 Sql 语句比较简单时候,用注解绑定, 当 SQL 语句比较复杂时候,用 xml 绑定,一般用 xml 绑定的比较多。
+当Sql语句比较简单时候,可以用注解绑定的方式。当SQL语句比较复杂时候,用xml绑定的方式。一般用 xml 绑定的比较多。
 
-## Mybatis 是如何进行分页的？分页插件的原理是什么？
+## MyBatis使用XML映射文件来进行接口绑定，有哪些要求？
 
-Mybatis可以在sql内直接书写 limit 关键字来完成分页功能，也可以使用分页插件来完成物理分页。
+1. XML映射文件中的namespace属性的值必须是接口的完整类路径。
+1. 接口方法名和XML映射文件中对应的SQL标签的id属性值相同。
+2. 接口方法的参数类型和XML映射文件中对应的SQL标签的parameterType属性值相同。
+3. 接口方法的返回值类型和XML映射文件中对应的SQL标签的resultType属性值相同。
 
-分页插件的基本原理是拦截待执行的sql，然后重写sql，添加对应的物理分页语句和物理分页参数。
+## Mybatis接口绑定的工作原理是什么？
 
-举例：select * from student，拦截 sql 后重写为：select t.* from （select * from student）t limit 0，10
+接口绑定的工作原理是动态代理。
 
-## Mybatis是如何将sql执行结果封装为目标对象并返回的？都有哪些映射形式？
+Mybatis 运行时会使用JDK动态代理为接口生成代理对象。当程序运行到调用接口方法的时候，代理对象会拦截接口方法，转而执行接口对于的SQL语句。然后将结果集转换为Java对象，并通过接口的返回值返回。
 
-第一种是使用`<resultMap>`标签，自定义数据库字段名和对象属性名之间的映射关系。
+## Mybatis如何将结果集封装为java对象的，有几种方式？
 
-第二种是使用sql语句的别名，通过在sql语句中定义查询字段的别名，让别名与类的属性名相同。从而让Mybatis将sql执行结果封装为目标对象并返回。
+方式1：映射文件中SQL标签有一个resultType属性。这个属性会将SQL语句的结果集转换为对应的java对象，并返回。
 
+方法2：对于复杂的结果集来说。可以映射文件中设置resultMap标签。通过`<resultMap>`标签自定义列名和对象属性名之间的映射关系。可以将复杂的结果集解析为java对象并返回。
 
-## MyBatis 实现一对一有几种方式?具体怎么操作的？
+方式3：如果列名和对象属性名不一样，那么可以在SQL语句中定义字段名的别名，让字段名的别名和对象属性名一致。从而让结果集能够转换对应的java对象。
 
+## MyBatis实现一对一，一对多查询有几种方式，怎么操作的？
 
-实现一对一有联合查询和嵌套查询两种方式。
+主要有联合查询和嵌套查询两种方式。
 
-联合查询是把几个表联合查询,只查询一次, 然后通过在resultMap标签里面配置association节点配置一对一的关系就可以完成；
+联合查询是把几个表联合起来查询。主要通过在`resultMap`标签里面配置`association`，`collection`子标签来配置一对一和一对多的映射关系；
 
-嵌套查询需要查询两次。主要是先查一个表，根据这个表里面的结果的外键，去再另外一个表里面查询数据,也是通过association配置，但另外一个表的查询通过select属性配置。
+嵌套查询主要是先查一个表，根据查询结果的外键id，再去另外一个表里面查询数据,也是通过配置`association`，`collection`子标签，但去另外一个表的查询要配置`select`标签才行。
 
-## Mybatis是否支持延迟加载？如果支持，它的实现原理是什么？
+## Mybatis的动态sql是什么？
 
-在Mybatis配置文件中，可以配置是否启用延迟加载。
+Mybatis的动态sql是指: 在XML映射文件内，可以通过SQL标签的方式来编写动态sql。
 
-不过，Mybatis仅支持在一对一关联对象查询和一对多关联查询上的延迟加载。
+Mybatis 提供9种动态sql标签：trim,where,set,foreach,if,choose,when,otherwise,bind。
 
-延迟加载的原理是，当调用目标方法时，进入拦截器方法，比如调用a.getB().getName()，拦截器invoke()方法发现a.getB()是null值，那么就会单独发送事先保存好的查询关联B对象的sql，把B查询上来，然后调用a.setB(b)，于是a的对象b属性就有值了，接着完成a.getB().getName()方法的调用。这就是延迟加载的基本原理。当然了，不光是Mybatis，几乎所有的包括Hibernate，支持延迟加载的原理都是一样的。
+## Mybatis的分页插件的原理是什么？
 
-总结：延迟加载主要是通过动态代理的形式实现，通过代理拦截到指定⽅法，执⾏数据加载。
+分页插件的基本原理是拦截待执行的sql，然后重写sql，添加对应的limit分页语句
 
-## Mybatis 的一级、二级缓存？
+举例：`select * from student`，拦截 sql 后重写为：`select t.* from （select * from student）t limit 0，10;`
 
-MyBatis 的缓存分为一级缓存和二级缓存。
-
-一级缓存放在 session 里面,默认就有,二级缓存放在它的命名空间里,默认是不打开的,使用二级缓存属性类需要实现 Serializable 序列化接口(可用来保存对象的状态),可在它的映射文件中配置`<cache/>`
