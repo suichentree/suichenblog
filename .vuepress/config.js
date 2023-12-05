@@ -65,12 +65,6 @@ module.exports = {
             "text": "面试",
             "icon":"reco-other",
             "link": "/blogs/面试/"
-          },
-          {
-            //Java文档
-            "text": "Java",
-            "icon":"reco-other",
-            "link": "/blogs/Java/"
           }
         ]
       },
@@ -118,20 +112,20 @@ module.exports = {
       //面试文档的侧边栏
       "/blogs/面试/": [
         "",
-        "Java面试题基础1",
-        "Java面试题基础2",
-        "Java面试题集合1",
-        "Java面试题设计模式1",
-        "Java面试题线程1",
-        "Java面试题File和IO流1",
-        "Java面试题JavaWeb1",
-        "Java面试题jdbc和反射1",
-        "Linux面试题1",
+        "Java面试题总结-基础1",
+        "Java面试题总结-集合1",
+        "Java面试题总结-事务1",
+        "Java面试题总结-线程1",
+        "Java面试题总结-锁1",
+        "MySql面试题总结1",
+        "MySql面试题总结2",
+        "Mybatis面试题总结",
+        "Redis面试题总结1",
         "Mybatis面试题1",
-        "Redis面试题1",
-        "Spring面试题1",
-        "SpringBoot面试题1",
-        "SpringCloud面试题1"
+        "Spring面试题总结1",
+        "SpringBoot面试题总结",
+        "SpringMVC面试题总结",
+        "SpringCloud面试题总结"
       ]
     },
     //评论配置
