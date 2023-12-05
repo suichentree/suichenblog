@@ -121,7 +121,6 @@ module.exports = {
         "MySql面试题总结2",
         "Mybatis面试题总结",
         "Redis面试题总结1",
-        "Mybatis面试题1",
         "Spring面试题总结1",
         "SpringBoot面试题总结",
         "SpringMVC面试题总结",
