@@ -124,7 +124,13 @@ module.exports = {
         "Spring面试题总结1",
         "SpringBoot面试题总结",
         "SpringMVC面试题总结",
-        "SpringCloud面试题总结"
+        "SpringCloud面试题总结",
+        "微服务面试题总结",
+        "Nacos面试题总结",
+        "Ribbon面试题总结",
+        "Sentinal面试题总结",
+        "SpringCloudGateway面试题总结",
+        "计算机网络面试题总结"
       ]
     },
     //评论配置

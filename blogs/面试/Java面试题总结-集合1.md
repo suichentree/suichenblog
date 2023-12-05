@@ -83,7 +83,7 @@ java中的集合类在设计之初都是线程安全的。例如Vector和HashTab
 
 另外java.util.concurrent包中的提供了大量的线程安全的集合类。例如ConcurrentHashMap和ConcurrentMap等线程安全的集合类。
 
-### Collection 和 Collections 的区别
+## Collection 和 Collections 的区别
 
 Collection 是集合类的根接口，它提供了对集合对象的基本操作方法。Collection接口的设计意义是为各种集合提供统一的操作规范，其直接继承接口有List与Set接口。
 
