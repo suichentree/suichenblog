@@ -1,6 +1,6 @@
 ---
 title: RocketMQ笔记1
-date: 2023-08-09
+date: 2023-12-07
 sidebar: 'auto'
 categories: 
  - 后端
@@ -102,7 +102,11 @@ RocketMQ当前最新版本：5.x
 
 ## RocketMQ的安装
 
-### linux环境下的安装与启动
+RocketMQ运行需要依赖两个服务。一个是NameServer服务，另一个是Broker服务。当这个两个服务都运行之后，RocketMQ搭建完成了。
+
+如果需要RocketMQ的图形控制界面，那么额外需要运行rocketmq-console服务。
+
+### windows环境下的安装与启动
 
 ① 先下载已经编译好的RocketMq二进制包。
 
@@ -114,6 +118,37 @@ RocketMQ当前最新版本：5.x
 - bin目录中主要存放windows和linux两个环境的各种脚本文件。
 - conf目录存放配置文件,包括broker配置文件、logback配置文件等
 - lib目录存放各种依赖jar包，包括Netty、commons-lang、FastJSON等
+
+② 将下载的二进制包存放在一个目录中。
+
+③ 创建ROCKETMQ_HOME环境变量。
+
+![rocketmq_20231208191248.png](../blog_img/rocketmq_20231208191248.png)
+
+④ 进入到bin目录中,打开CMD终端。先启动NameServer服务
+
+```shell
+start mqnamesrv.cmd
+```
+
+NameServer服务运行成功的窗口。注意：不能关闭这个窗口。
+![rocketmq_20231208191559.png](../blog_img/rocketmq_20231208191559.png)
+
+⑤ 再启动Broker服务
+
+```shell
+# Broker服务需要指定NameServer服务的ip地址。
+start mqbroker.cmd -n 127.0.0.1:9876 autoCreateTopicEnable=true
+```
+
+Broker服务运行成功的窗口。注意：不能关闭这个窗口。
+![rocketmq_20231208191852.png](../blog_img/rocketmq_20231208191852.png)
+
+⑥ 如何运行RocketMQ的图形控制界面服务，继续看下文即可。
+
+### linux环境下的安装与启动
+
+① 下载RocketMq二进制包。
 
 ② 创建一个目录，用来存放下载的二进制包
 
@@ -262,9 +297,9 @@ mkdir -m 777 -p /usr/local/rocketmq/broker/conf
 在/usr/local/rocketmq/broker/conf中创建并配置broker.conf
 
 ```shell
-# nameServer 地址多个用;隔开 默认值null
-# 例：127.0.0.1:6666;127.0.0.1:8888 
-namesrvAddr = 127.0.0.1:9876
+# nameServer的IP地址。多个地址可以用;隔开
+# 例：172.17.0.2:6666;172.17.0.2:8888 
+namesrvAddr = 172.17.0.2:9876
 # 集群名称，单机配置可以随意填写
 brokerClusterName = DefaultCluster
 # 节点名称，单机配置可以随意填写
@@ -272,7 +307,8 @@ brokerName = broker-a
 # broker id节点ID， 0 表示 master, 其他的正整数表示 slave，不能小于0 
 brokerId = 0
 # Broker服务地址。内部使用填内网ip，如果是需要给外部使用填公网ip
-brokerIP1 = 127.0.0.1
+# 172.17.0.3是 broker容器ip。
+brokerIP1 = 172.17.0.3
 # Broker角色
 brokerRole = ASYNC_MASTER
 # 刷盘方式
@@ -287,10 +323,16 @@ autoCreateTopicEnable=true
 autoCreateSubscriptionGroup=true
 ```
 
+注意
+- namesrvAddr：是填NameServer容器的IP地址。不要填localhost:9876，这是指向自己容器的IP地址。
+- brokerIP1：一般broker容器是提供给NameServer容器和dashboard容器使用的，要填broker容器的外网IP，不是填localhost。
+- 可以在容器的Inspect信息上查询容器自身的外网IP是多少。
+
+
 ④ 创建并启动Broker容器
 
 ```shell
-docker run -d --privileged=true --name my_rocketmq_broker -p 10911:10911 -p 10909:10909 -v /d/DockerVolumes/rocketmq/broker/logs:/root/logs -v /d/DockerVolumes/rocketmq/broker/store:/root/store -v /d/DockerVolumes/rocketmq/broker/conf/broker.conf:/home/rocketmq/broker.conf -e "MAX_HEAP_SIZE=512M" -e "HEAP_NEWSIZE=256M" apache/rocketmq:5.1.0 sh mqbroker -c /home/rocketmq/broker.conf
+docker run -d --privileged=true --name my_rocketmq_broker -p 10911:10911 -p 10909:10909 -v /d/DockerVolumes/rocketmq/broker/logs:/root/logs -v /d/DockerVolumes/rocketmq/broker/store:/root/store -v /d/DockerVolumes/rocketmq/broker/conf/broker.conf:/home/rocketmq/broker.conf -e "MAX_HEAP_SIZE=512M" -e "HEAP_NEWSIZE=256M" -e "MAX_POSSIBLE_HEAP=200000000" apache/rocketmq:5.1.0 sh mqbroker -c /home/rocketmq/broker.conf
 ```
 
 /d/DockerVolumes/rocketmq/.. 这是我windows环境上创建的容器映射目录。如果宿主机是linux环境，请自行更改。
@@ -307,19 +349,8 @@ docker pull apacherocketmq/rocketmq-dashboard:latest
 ② 创建并启动控制台容器
 
 ```shell
-docker run -d --name my_rocketmq_dashboard -p 9888:8080 -e "JAVA_OPTS=-Drocketmq.namesrv.addr=localhost:9876" apacherocketmq/rocketmq-dashboard
+docker run -d --name my_rocketmq_dashboard -p 9888:8080 -e "JAVA_OPTS=-Drocketmq.namesrv.addr=172.17.0.2:9876" apacherocketmq/rocketmq-dashboard
 ```
 
-## RocketMQ的使用
+`namesrv.addr=172.17.0.2:9876`这是指向NameServer容器的IP地址。不要填localhost:9876，这是指向自己容器的IP地址。
 
-### 生产者发送消息
-
-消息发送的步骤
-```
-1.创建消息生产者producer，并设置生产者组名
-2.指定Nameserver地址
-3.启动producer
-4.创建消息对象，指定主题Topic、Tag和消息体
-5.发送消息
-6.关闭生产者producer
-```
