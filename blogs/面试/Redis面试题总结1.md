@@ -212,7 +212,7 @@ redis中存储的数据都有一个过期时间。当过期时间一到，那么
 
 redis的过期策略采用的是定期删除+惰性删除
 
->> 定期删除的机制
+① 定期删除的机制
 
 redis会把每个设置了过期时间的key，都会记录到过期字典中。
 
@@ -224,7 +224,7 @@ redis会把每个设置了过期时间的key，都会记录到过期字典中。
 
 解决办法就是不要给大量的key都设置同一个过期时间，过期时间要设置一个随机范围。
 
->> 惰性删除的机制
+② 惰性删除的机制
 
 当用户读取这个key的时候，redis会对这个key的过期时间进行检查，如果过期了，就立即删除，不会返回任何数据。
 
@@ -270,7 +270,7 @@ volatile-ttl    -> 从过期时间key中，删除过期时间最早的key。
 
 > 什么是LRU算法？
 
-LRU是 Least Recently Used 的缩写，即最近最少使用，很多缓存系统都使用此算法作为淘汰策略。
+LRU是 Least Recently Used 的缩写，即最近最少使用算法。很多缓存系统都使用此算法作为淘汰策略。
 
 最简单的实现方式就是把所有缓存通过一个链表连接起来，新创建的缓存添加到链表的头部，如果有缓存被访问了，就把缓存移动到链表的头部。由于被访问的缓存会移动到链表的头部，所以没有被访问的缓存会随着时间的推移移动的链表的尾部，淘汰数据时只需要从链表的尾部开始即可。
 
@@ -485,17 +485,6 @@ Redis 集群是采用hash槽的概念，通过将hash槽均匀分配到每个节
 3. 为了主从复制的速度和连接的稳定性，Master 和 Slave 最好在同一个局域网
 4. 主从结构不要用图状结构，用单向链表结构更为稳定。
 
-### Redis分布式锁的实现方式
-
-Redis分布式锁一般有三种实现方式：
-1. 数据库乐观锁；
-2. 基于Redis的分布式锁；
-3. 基于ZooKeeper的分布式锁。
-
-基于Redis的分布式锁的实现方式是通过setnx命令来实现的。
-
-setnx 是 SET if Not EXists(如果不存在则SET)的缩写。
-
 ### 什么是Cache aside 缓存更新机制？
 
 Cache aside 缓存更新机制是用于保存数据库和缓存的数据一致性的机制。
@@ -526,3 +515,127 @@ Read/Write Through机制如下
 简而言之，在Read/Write Through机制中当缓存启动的时候，自身将从数据库中读取数据，并存入到缓存中。然后应用的读取写入操作都与缓存交互，缓存自身再与数据库进行数据同步。
 
 Read/Write Through机制：应用读写数据操作-》缓存-》数据库
+
+### 为什么senx是redis实现分布式锁的方式？
+
+简单比喻：微服务有多个用户服务节点，每个用户服务都有注册功能。注册功能会涉及到对redis数据库的读写操作。当多个线程同时执行多个用户服务节点的注册功能的时候，那么就会涉及到redis的多进程下的多线程读写操作。此时redis就需要分布式锁，来保证多线程读写操作的线程安全性。
+
+setnx 是 SET if Not EXists(如果不存在则SET)的缩写。
+
+setnx命令语法如下：
+
+```bash
+SETNX key value
+## 如果redis中key没有存在，则插入key成功。并返回1
+## 如果redis中key已经存在，则插入key失败。并返回0
+```
+
+当多个进程中的多个线程同时执行setnx命令的时候，由于setnx的特性，那么只有一个线程能插入key成功，表示该线程拿到了锁,其他线程没有拿到锁。redis是利用setnx的特性来实现分布式锁机制。
+
+例如，3个线程A，B，C同时`setnx key1 value1`。由于setnx的特性，那么只有一个线程能够执行成功。其他线程执行失败并进入到阻塞等待状态。
+
+当线程A执行`setnx key1 value1`成功后，线程A继续执行自己的业务逻辑。当线程A的业务逻辑执行完后，将`key1 value1`键值对删除。
+
+> 为什么将`key1 value1`键值对删除呢？
+
+这样做的目的是，如果不删除`key1 value1`键值对，那么其他线程BC则无法执行`setnx key1 value1`。也就是说线程BC无法拿到锁，从而线程BC无法执行自己的业务逻辑。
+
+而线程A删除`key1 value1`键值对。相当于线程A释放了锁。
+
+> SETNX 实现分布式锁的总结
+
+1. 当多个进程下的多线程同时执行`setnx key value`命令后，只有一个线程能执行成功，相当于拿到了锁。
+2. 然后拿到锁的线程，执行自己的业务逻辑。
+3. 当业务逻辑执行完后，线程将key删除。表示线程放弃了锁。从而让其他线程继续执行`setnx key value`命令，即其他线程继续争抢锁。
+
+![redis_20231213160702.png](../blog_img/redis_20231213160702.png)
+
+
+### setnx实现分布式锁的缺点？
+
+#### 缺点1 ：线程中断怎么办？
+
+由于setnx本质上就是插入键值对。
+
+如果线程A `setnx key1 value1`成功后，然后执行自己业务逻辑的时候。线程A中断了。导致线程A没有把`key1`删除。从而导致其他线程无法`setnx key1 value1`，也就是说其他线程都拿不到锁了，从而无法执行自己的业务逻辑了。
+
+因此当线程A`setnx key1 value1`的时候。必须给键值对加上过期时间。
+
+过期时间可以确保线程中断的时候，线程没有删除键值对。也可以通过过期时间来让键值对失效。从而让其他线程可以执行`setnx key1 value1`。
+
+#### 缺点2：线程执行时间超出键值对的过期时间怎么办？
+
+当线程A的执行时间超过了键值对的过期时间之后。那么会导致线程A还在执行业务逻辑的时候，键值对已经失效了。此时线程B`setnx key1 value1`了，即线程B获取了锁，然后线程B执行业务逻辑。
+
+当线程A执行完业务逻辑后，把线程B设置的键值对`key1`删除了。这种情况就算线程A删除了线程B的锁。
+
+解决方式：每个线程在删除键值对（释放锁）的时候，先检查一些这个锁是不是自己设置的。如果是自己设置的锁，那么就删除。不是自己设置的锁，就不进行删除即可。
+
+![redis_20231213160508.png](../blog_img/redis_20231213160508.png)
+
+> 如何判断键值对（锁）是不是线程自己设置的？
+
+线程在`setnx key1 value1`的时候，key1是业务功能，value1是线程自己的ID。
+
+当线程删除键值对的时候，判断`value1`是不是线程自己的ID即可。
+
+![redis_20231213155813.png](../blog_img/redis_20231213155813.png)
+
+
+### setnx实现分布式锁的代码实例
+
+加锁代码
+```java
+private static final String ID_PREFIX = UUID.randomUUID().toString(true) + "-";
+public boolean tryLock(long timeoutSec) {
+   // 生成线程的唯一标示
+   String threadId = ID_PREFIX + Thread.currentThread().getId();
+   // 通过setnx获取锁
+   Boolean success = stringRedisTemplate.opsForValue()
+                .setIfAbsent(KEY_PREFIX + name, threadId, timeoutSec, TimeUnit.SECONDS);
+   return Boolean.TRUE.equals(success);
+}
+```
+
+释放锁代码：
+```java
+public void unlock() {
+    // 获取线程标示
+    String threadId = ID_PREFIX + Thread.currentThread().getId();
+    // 获取当前锁中的标示
+    String id = stringRedisTemplate.opsForValue().get(KEY_PREFIX + name);
+    // 判断标示是否一致
+    if(threadId.equals(id)) {
+        // 一致就释放锁，即删除键值对
+        // 不一致，不操作
+        stringRedisTemplate.delete(KEY_PREFIX + name);
+    }
+}
+
+```
+
+业务代码
+```java
+public Result seckillVoucher(Long voucherId) {
+    //执行业务逻辑前的操作
+
+    //调用获取锁的方法
+    boolean isLock = tryLock(1200);
+    //获取锁失败
+    if (!isLock) {
+        return Result.fail("获取锁失败");
+    }
+    //获取锁成功
+    try {
+        //执行具体的业务逻辑
+    } finally {
+        //释放锁
+        unlock();
+    }
+}
+
+```
+
+
+
+

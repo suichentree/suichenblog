@@ -29,6 +29,11 @@ tags:
 
 ![gateway20220824155951.png](../blog_img/gateway20220824155951.png)
 
+<font color="red">
+总结：API网关主要的作用是作为微服务系统的入口节点，所有的外部请求都通过API网关来调用微服务系统中的内部服务节点。而微服务内部之间的请求，都是走OpenFeign来进行服务调用。
+</font>
+
+
 ## 2 Spring Cloud Gateway介绍
 
 Spring Cloud Gateway 是Spring Cloud官方推出的第二代API网关框架。定位于取代 Netflix Zuul1.0。相比 Zuul 来说，Spring Cloud Gateway 提供更优秀的性能，更强大的功能。
