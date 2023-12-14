@@ -30,7 +30,7 @@ RestTemplate 是 Spring 提供的用于访问 Rest 服务的客户端，Res
 * Spring Cloud openfeign对Feign进行了增强，使其支持Spring MVC注解，另外还整合了Ribbon和Nacos，从而使得Feign的使用更加方便。
 
 
-## 2.Spring Cloud Alibaba
+## 2.Spring Cloud Alibaba 引入 openfeign
 
 ① 引入starter-openfeign依赖
 ```
