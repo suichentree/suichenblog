@@ -1,5 +1,5 @@
 ---
-title: MySQL的笔记13-优化
+title: MySQL笔记13-优化
 date: 2023-08-25
 sidebar: 'auto'
 categories: 
@@ -10,7 +10,7 @@ tags:
 
 [toc]
 
-# MySQL的笔记13-优化
+# MySQL笔记13-优化
 
 主要记载一些数据库方面的优化措施。
 

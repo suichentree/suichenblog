@@ -70,6 +70,8 @@ Sentinel可以分为两个部分:
 
 ① 微服务引入 alibaba-sentinel 依赖
 
+具体的版本号，由父pom的SpringCloudAlibaba依赖来决定。
+
 ```xml
 <dependency>
     <groupId>com.alibaba.cloud</groupId>
@@ -141,7 +143,7 @@ private static void initFlowRules(){
 
 ① 下载Sentinel控制台jar包 sentinel-dashboard-1.8.4.jar。注意版本
 
-② 运行Sentinel控制台jar包
+② 运行Sentinel控制台jar包，有多种启动方式。
 ```
 启动方式1：默认端口为8080 默认账号密码为sentinel/sentinel
 java -jar C:\CodeEnviroment\sentinel-dashboard-1.8.4.jar
@@ -158,7 +160,7 @@ java ‐Dserver.port=8898 ‐Dsentinel.dashboard.auth.username=sentinel ‐Dse
 -Dsentinel.dashboard.auth.password=123456 设置登录密码为123456；默认密码为sentinel
 -Dserver.servlet.session.timeout=7200 指定Spring Boot服务端 session 的过期时间为7200秒。默认为 30 分钟；
 
-对于windows系统可以创建bat脚本文件，方面快速启动sentinel
+对于windows系统可以创建bat脚本文件，方面快速启动sentinel。bat脚本内容如下：
 java ‐Dserver.port=8898 ‐jar C:\CodeEnviroment\sentinel‐dashboard‐1.8.4.jar
 pause
 ```
@@ -194,7 +196,7 @@ spring:
 
 spring.cloud.sentinel.transport.port 该配置会在微服务应用对应的机器上启动一个 Http Server，该 Server 会与 Sentinel 控制台做交互。比如 Sentinel 控制台添加了一个限流规则，会把规则数据 push 给这个 Http Server 接收，Http Server 再将规则注册到微服务应用中。
 
-<font color="red">PS:对于上面的交互端口，若微服务应用部署在同一个服务器上，则每个微服务应用的交互端口最好不要重复。</font>
+<font color="red">PS:对于上面的交互端口8719，若多个服务部署在同一个服务器上，则每个服务的交互端口最好不要重复。</font>
 
 ⑥ 重启服务，多次调用某个接口。可在控制台上看到该接口的流量图表。
 
@@ -223,7 +225,7 @@ spring.cloud.sentinel.transport.port 该配置会在微服务应用对应的机�
 流控模式有3种：直接，关联，链路
 * 直接：当到达限流条件时，直接限流。
 * 关联：当关联的资源到达阈值，就限流自己。
-* 链路：只记录指定路上的流量，指定资源从入口资源进来的流量，如果达到阈值，就进行限流，api级别的限流。
+* 链路：只记录指定链路上的流量，指定资源从入口资源进来的流量，如果达到阈值，就进行限流，api级别的限流。
 
 流控效果有3种：快速失败,Warm up（预热）, 排队等待
 * 快速失败：默认的流量控制方式，当QPS超过任意规则的阈值后，新的请求就会被立即拒绝，拒绝方式为抛出FlowException。这种方式适用于对系统处理能力确切已知的情况下，比如通过压测确定了系统的准确水位时。
