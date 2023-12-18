@@ -128,9 +128,10 @@ tags:
 
 > 修改要点
 
+- 设置父工程的相关信息
 - 修改父工程的打包方式为pom
 - 父工程通过dependencyManagement来管理所有子工程的依赖。
-- 添加spring-boot-maven-plugin插件来打包项目。
+- 父工程添加spring-boot-maven-plugin插件来打包项目。
 
 > 目前三者之间推荐的版本搭配
 
@@ -151,7 +152,7 @@ tags:
 
 例如图中的shuyx-user子工程。每个子工程都是以springboot为基础。选择导入基本的web依赖即可。注意springboot的版本随便选，后面要修改为与父工程的版本一致。
 
-② 删除子工程不必要的目录文件
+② 删除子工程中不必要的目录文件。例如maven等文件
 
 ![springcloudalibaba_20231112164928.png](../blog_img/springcloudalibaba_20231112164928.png)
 
