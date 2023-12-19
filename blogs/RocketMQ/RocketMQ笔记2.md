@@ -352,7 +352,6 @@ SendResult result = producer.send(message);
 除此之外，还有更多的方法提供了延时和定时消息的方式。自行查询源码。
 
 
-
 ## SpringBoot整合RocketMQ
 
 ① 在springboot项目中添加RocketMQ依赖
