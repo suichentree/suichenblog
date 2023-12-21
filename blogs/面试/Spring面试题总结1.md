@@ -52,7 +52,6 @@ bean 所需的依赖项和服务在 XML 格式的配置文件中指定。这些x
 ```
 
 
-
 ### Spring中Bean的作用域？
 
 Spring的IOC容器中的bean有5种作用域分别是：singleton（单例）,prototype（原型）,request, session 和 global session。

@@ -430,10 +430,6 @@ explain select * from pol_law_d where TTL = '111';
 
 即 事务隔离级别 = 锁 + MVVC
 
-### mysql事务相关的redo.log和undo.log日志文件？
-
-
-
 ## 锁部分
 
 ### 什么是锁

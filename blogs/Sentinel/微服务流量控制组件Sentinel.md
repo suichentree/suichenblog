@@ -1,5 +1,5 @@
 ---
-title: 微服务流量控制组件Sentinel 版本1.8.4
+title: 微服务流量控制组件Sentinel
 date: 2022-08-05
 sidebar: 'auto'
 categories: 
