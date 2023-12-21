@@ -18,20 +18,19 @@ tags:
 apache-skywalking-apm-8.9.1
 apache-skywalking-java-agent-8.9.0
 
-
->什么是链路追踪？
+> 什么是链路追踪？
 
 对于一个大型的几十个、几百个微服务构成的微服务架构系统，通常会遇到下面一些问题，比如：
-1. 如何串联整个调用链路，快速定位问题？
-2. 如何缕清各个微服务之间的依赖关系？
-3. 如何进行各个微服务接口的性能分折？
+1. 如何快速定位问题？
+2. 如何缕清各个微服务之间的调用关系？
+3. 如何对各个微服务接口的进行性能分折？
 4. 如何跟踪整个业务流程的调用顺序？
 
->什么是skywalking？
+> 什么是skywalking？
 
 skywalking是分布式系统的应用程序性能监视工具，专为微服务、云原生架构和基于容器（Docker、K8s、Mesos）架构而设计。它是一款优秀的APM应用性能管理工具，包括了分布式追踪、性能指标分析、应用和服务依赖分析等。
 
->Skywalking主要的功能特性
+> Skywalking主要的功能特性
 
 1、多种监控手段，可以通过语言探针和service mesh获得监控的数据；
 2、支持多种语言自动探针，包括 Java，.NET Core 和 Node.JS；
@@ -40,7 +39,7 @@ skywalking是分布式系统的应用程序性能监视工具，专为微服务�
 5、支持告警；
 6、优秀的可视化解决方案；
 
->Skywalking的架构
+> Skywalking的架构
 
 ![skywalking20220826151038.png](../blog_img/skywalking20220826151038.png)
 
@@ -50,8 +49,7 @@ skywalking是分布式系统的应用程序性能监视工具，专为微服务�
 
 ## SkyWalking快速开始
 
-
-### 1.下载SkyWalking
+### 下载SkyWalking
 
 下载地址：http://skywalking.apache.org/downloads/
 
@@ -67,7 +65,7 @@ skywalking是分布式系统的应用程序性能监视工具，专为微服务�
 
 ![skywalking20220829224639.png](../blog_img/skywalking20220829224639.png)
 
-### 2.部署Skywalking oapservice服务
+### 部署Skywalking oapservice服务
 
 <font color="red">Skywalking oapservice服务分为两部分：展示数据的界面功能和服务端功能。</font>
 
@@ -84,11 +82,11 @@ skywalking是分布式系统的应用程序性能监视工具，专为微服务�
 下图为skywalking-web-ui界面
 ![skywalking420220829180256.png](../blog_img/skywalking420220829180256.png)
 
-### 3. 部署skywalking agent服务
+### 部署skywalking agent服务
 
 <font color="red">skywalking agent服务主要用于收集应用服务的各种数据，并发送给服务端（Skywalking oapservice服务）。它对接到应用服务的方法是完全无侵入式的。</font>
 
-#### 1. windos环境下,通过IDEA把skywalking agent服务接入到目标服务中
+#### windows环境下,通过IDEA把skywalking agent服务接入到目标服务中
 
 ① 对服务配置jvm参数。
 ![skywalking20220829150410.png](../blog_img/skywalking20220829150410.png)
@@ -114,7 +112,7 @@ skywalking是分布式系统的应用程序性能监视工具，专为微服务�
 ![skywalking420220829180256.png](../blog_img/skywalking420220829180256.png)
 ![skywalking20220829225337.png](../blog_img/skywalking20220829225337.png)
 
-#### 2. 命令行的方式，把skywalking agent服务接入到目标服务中
+#### 命令行的方式，把skywalking agent服务接入到目标服务中
 
 将目标应用服务打成jar包后，通过命令行方式运行jar包。其中添加jvm参数。
 ```
@@ -123,7 +121,7 @@ java ‐javaagent:C:\CodeEnviroment\skywalking-agent\skywalking-agent.jar
 ‐jar springboot‐aaa‐demo‐0.0.1‐SNAPSHOT.jar
 ```
 
-#### 3. linux环境下，编写启动脚本把skywalking agent服务接入到目标服务中
+#### linux环境下，编写启动脚本把skywalking agent服务接入到目标服务中
 
 ```
 #!/bin/sh
@@ -136,13 +134,13 @@ export JAVA_AGENT=‐javaagent:/usr/local/soft/apache‐skywalking‐apm‐bin�
 java $JAVA_AGENT ‐jar springboot‐aaa‐demo‐0.0.1‐SNAPSHOT.jar #jar启动
 ```
 
-#### 4 问题：跟踪链路不显示gateway服务的接口路径？
+#### 问题：跟踪链路不显示gateway服务的接口路径？
 
 解决方法：拷贝/skywalking-agent/agent/optional-plugins目录下的apm-spring-cloud-gateway-2.1.x-plugin-8.9.0.jar到/skywalking-agent/agent/plugins目录中
 
 注意：根据使用gateway的版本不同来选择不同的gateway jar包。
 
-### 4. Skywalking oapservice服务端进行mysql持久化
+### Skywalking oapservice服务端进行mysql持久化
 
 Skywalking oapservice服务端默认是通过H2数据库存储。
 
@@ -170,7 +168,7 @@ storage:
 ![skywalking20220829230530.png](../blog_img/skywalking20220829230530.png)
 
 
-### 5. 自定义SkyWalking链路追踪（将业务方法显示在链路追踪上）
+### 自定义SkyWalking链路追踪（将业务方法显示在链路追踪上）
 
 ① 导入SkyWalking链路追踪依赖
 ```xml
@@ -229,7 +227,7 @@ public class GatewayServiceImpl implements GatewayService{
 * 若返回值是对象类型，注意重写对象的toString()方法，不然在SkyWalking的界面中显示的只是一个对象的内存地址
 
 
-### 6 Skywalking集成logback日志框架
+### Skywalking集成logback日志框架
 
 由于springboot默认集成了logback日志框架，因此Skywalking集成logback日志框架更方便。
 
@@ -315,7 +313,7 @@ plugin.toolkit.log.grpc.reporter.max_message_size=${SW_GRPC_LOG_MAX_MESSAGE_SIZE
 plugin.toolkit.log.grpc.reporter.upstream_timeout=${SW_GRPC_LOG_GRPC_UPSTREAM_TIMEOUT:30}
 ```
 
-### 7 SkyWalking oap服务高可用
+### SkyWalking oap服务的高可用
 
 Skywalking集群是将多个skywalking oap作为一个服务注册到nacos上，只要skywalking oap服务没有全部宕机，保证有一个skywalking oap在运行，就能进行跟踪。
 

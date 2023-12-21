@@ -8,11 +8,13 @@ tags:
  - SpringDataJPA
 ---
 
+[toc]
+
 # SpringDataJPA基础
 
 **Spring Data JPA，主要用于简化传统连接数据库中，dao层的写法的代码，重复代码太多等问题来提供的解决方案。** 
 
-## 1. 概述：
+## 概述：
 
 <h2>JPA( JPA规范 )和Hibernate的关系：</h2>
 
