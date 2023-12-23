@@ -159,3 +159,92 @@ Navicat MySQL 是一个强大的 MySQL 数据库服务器管理和开发工具�
 
 SQLyog 是一款简洁高效、功能强大的图形化管理工具。SQLyog 操作简单，功能强大，能够帮助用户轻松管理自己的 MySQL 数据库。SQLyog 中文版支持多种数据格式导出，可以快速帮助用户备份和恢复数据，还能够快速地运行 SQL 脚本文件，为用户的使用提供便捷。使用 SQLyog 可以快速直观地让用户从世界的任何角落通过网络来维护远端的 MySQL 数据库。
 
+## 在docker环境中安装MySQL容器
+
+在windows系统中，安装docker环境，并在docker环境中安装mysqL容器。
+
+步骤① 先安装docker环境，自行百度。
+
+步骤② 下载mysql镜像文件。最新版或某个版本
+
+```shell
+# 下载mysql 8.0.20版本的镜像
+docker pull mysql:8.0.20
+# 查询镜像
+docker images
+```
+
+步骤③：创建并启动mysql容器
+
+```shell
+# 创建mysql容器
+# --name="myMySQL" myMySQL是容器的名称
+# -d 后台启动
+# -e MYSQL_ROOT_PASSWORD=123456 , -e 设置环境变量。此处是设置mysql密码
+# -p 33306:3306 , 宿主机的33306端口映射到容器的3306端口
+# -v 设置容器数据卷
+# /d/DockerVolumes/mysql/log 是宿主机目录 /var/log/mysql 是容器存放日志信息的目录
+# /d/DockerVolumes/mysql/data 是宿主机目录 /var/lib/mysql 是容器存放数据库数据的目录
+# /d/DockerVolumes/mysql/conf.d 是宿主机目录 /etc/mysql/conf.d 是容器存放配置文件的目录
+
+docker run -d -p 33306:3306 --name="myMySQL" -e MYSQL_ROOT_PASSWORD=123456 -v /d/DockerVolumes/mysql/log:/var/log/mysql -v /d/DockerVolumes/mysql/data:/var/lib/mysql -v /d/DockerVolumes/mysql/conf.d:/etc/mysql/conf.d mysql:8.0.20
+
+# 查询容器日志，看是否成功启动。
+docker logs myMySQL
+```
+
+由于宿主机的操作系统是windows，因此`/d/DockerVolumes/`是指D盘中的DockerVolumes目录。如果宿主机操作系统是linux,请自行选择宿主机目录。
+
+
+步骤④：进入到mysql容器中
+
+```shell
+# 进入到容器中
+docker exec -it myMySQL /bin/bash
+# 进入到mysql命令行模式
+mysql -uroot -p123456
+```
+
+![mysql_20231223222722.png](../blog_img/mysql_20231223222722.png)
+
+### 解决docker中的mysql容器的中文字符编码问题
+
+1. 先进入到mysql容器的mysql终端中，容器名称为myMySQL
+```shell
+# 先进入到容器终端
+docker exec -it myMySQL /bin/bash
+# 登录进入到mysql终端
+mysql -uroot -p123456
+# 查询mysql的字符集
+mysql> show variables like 'character%';
+mysql> show variables like 'collation%';
+```
+
+![docker_20231012012413.png](../blog_img/docker_20231012012413.png)
+
+如图所示，由于在mysql容器中的字符编码不是utf8。因此我们需要重新设置mysql的字符编码。由于上面创建mysql容器的时候设置了容器数据卷。因此可以直接在宿主机的conf.d目录中创建my.cnf配置文件即可。
+
+1. 在conf.d目录中创建my.cnf配置文件。并添加字符编码配置。
+
+不同版本的mysql的修改字符编码的方式不同。下面是mysql 8.0.20版本的配置写法。
+```shell
+[mysqld]
+init-connect="SET collation_connection=utf8mb4_0900_ai_ci"
+init_connect="SET NAMES utf8mb4"
+skip-character-set-client-handshake
+```
+
+3. 重新启动mysql容器，让配置文件生效。
+
+```shell
+# 重启容器，
+docker restart myMySQL
+
+# 注意如果配置文件错误，会导致容器重启失败。此时可以查询docker容器日志来寻找原因。
+# 查询mysql01容器的日志信息
+docker logs myMySQL 
+```
+
+4. 如图所示，字符编码改为了utf8mb4。
+
+![mysql_20231223233542.png](../blog_img/mysql_20231223233542.png)

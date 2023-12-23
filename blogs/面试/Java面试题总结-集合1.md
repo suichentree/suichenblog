@@ -204,16 +204,11 @@ HashTable
 - HashMap添加元素的时候，会判断key的hash值。当key为null的时候，则手动设置hash值为0。
 - HashTable添加元素的时候，若key和value为null,会手动抛出空指针异常。
 
-### ConcurrentHashMap 底层具体实现知道吗？实现原理是什么？
-
-在JDK1.8中，ConcurrentHashMap 采用Node数组 + CAS算法 + Synchronized修饰符 来保证线程安全。synchronized只锁定当前链表或红黑二叉树的首节点，这样只要hash不冲突，就不会产生并发。
-
 ### TreeMap 是采用什么树实现的？
 
 TreeMap 底层是使用红黑树实现的。
 
 红黑树是一种特化的平衡二叉树，都是在进行插入和删除操作时通过特定操作保持二叉树的平衡，从而获得较高的查找性能。
-
 
 ### HashMap的死循环问题？
 
@@ -221,10 +216,16 @@ HashMap不是线程安全的。因此在多线程并发使用HashMap的情况下
 
 即当多线程并发使用HashMap时，若HashMap发生扩容，可能会产生循环链表，在执行get的时候，会触发死循环，引起CPU的100%问题，所以一定要避免在并发环境下使用HashMap。
 
-### ConcurrentHashMap的线程安全是如何实现的？
+### ConcurrentHashMap与HashMap的区别是什么？
 
+相同点：
+- 在JDK1.8中ConcurrentHashMap与HashMap底层数据结构一样，都是采用 数组+链表/红黑树 的方式实现。
 
+不同点：
+- HashMap是线程不安全的
+- ConcurrentHashMap是线程安全的
 
+在JDK1.8中，ConcurrentHashMap 采用 Node数组 + CAS算法 + Synchronized修饰符 来保证线程安全。Synchronized修饰符来对Node数组中的节点进行加锁，来保证线程安全。
 
-
-
+如图所示
+![java_20231223200717.png](../blog_img/java_20231223200717.png)
