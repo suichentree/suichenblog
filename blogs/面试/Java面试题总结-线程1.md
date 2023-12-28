@@ -208,12 +208,6 @@ Lock 能完成 synchronized 所实现的所有功能；Lock 有比synchronized �
 
 如果其他方法没有 synchronized 的话，其他线程是可以进入的。所以要开放一个线程安全的对象时，得保证每个方法都是线程安全的。
 
-### SynchronizedMap 和 ConcurrentHashMap 有什么区别？
-
-SynchronizedMap 一次锁住整张表来保证线程安全，所以每次只能有一个线程来访为 map。
-
-ConcurrentHashMap 使用分段锁来保证在多线程下的性能。ConcurrentHashMap 中则是一次锁住一个桶。ConcurrentHashMap 默认将hash 表分为 16 个桶，诸如 get,put,remove 等常用操作只锁当前需要用到的桶。这样，原来只能一个线程进入，现在却能同时有 16 个写线程执行，并发性能的提升是显而易见的。
-
 ### 当一个线程进入一个对象的一个synchronized方法后，其它线程是否可进入此对象的其它方法? 
 
 能，一个实例对象中的synchronized方法只能由一个线程访问。但其他线程可以同时访问这个对象的非synchronized方法.

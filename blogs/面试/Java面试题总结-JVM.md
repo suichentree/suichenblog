@@ -127,6 +127,8 @@ PS: java8 取消了永久代，采用了 Metaspace元空间。
 - 当年老代内存满时会引发Full GC，Full GC将会同时清除年轻代、年老代的对象。
 - 当永久代内存满时也会引发Full GC，会导致Class、Method元信息的清除。
 
+PS: java8 取消了永久代，采用了 Metaspace元空间。
+
 ## 垃圾回收算法有哪些？
 
 当java开始进行垃圾回收机制的时候，java会通过垃圾回收算法去清除被回收的对象。
