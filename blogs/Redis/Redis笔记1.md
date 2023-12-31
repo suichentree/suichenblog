@@ -183,7 +183,7 @@ appendonly yes
 ```shell
 # 创建容器并启动
 # redis-server /etc/redis/redis.conf 在容器启动的时候运行redis-server的命令，用于加载容器内的 conf 文件。
-docker run -d --name="myRedis" --privileged=true -p 6379:6379 -v /d/DockerVolumes/redis/conf/redis.conf:/etc/redis/redis.conf  -v /d/DockerVolumes/redis/data:/data redis:7.2.3-alpine redis-server /etc/redis/redis.conf
+docker run -d --name="myRedis" --privileged=true -p 36379:6379 -v /d/DockerVolumes/redis/conf/redis.conf:/etc/redis/redis.conf  -v /d/DockerVolumes/redis/data:/data redis:7.2.3-alpine redis-server /etc/redis/redis.conf
 # 查询容器日志，看是否成功启动。
 docker logs myRedis
 ```

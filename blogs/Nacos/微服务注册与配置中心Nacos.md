@@ -176,7 +176,7 @@ docker images
 
 ```shell
 # 创建启动容器
-docker run --name myNacos -e MODE=standalone -p 8848:8848 -p 9848:9848 -p 9849:9849 -v /home/docker/nacos/logs:/home/nacos/logs -v /home/docker/nacos/init.d/custom.properties:/home/nacos/init.d/custom.properties -d nacos/nacos-server:v2.1.0
+docker run --name myNacos -e MODE=standalone -p 38848:8848 -p 39848:9848 -p 39849:9849 -v /home/docker/nacos/logs:/home/nacos/logs -v /home/docker/nacos/init.d/custom.properties:/home/nacos/init.d/custom.properties -d nacos/nacos-server:v2.1.1-slim
 
 # 查询容器日志，看是否成功启动。
 docker logs myNacos
