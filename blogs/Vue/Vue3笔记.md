@@ -32,7 +32,7 @@ tags:
 
 前置条件如下
 - 需要安装16.0或更高版本的Node.js
-- 需要安装create-vue脚手架
+- 需要安装create-vue脚手架。底层是基于vite构建的。
 
 ① 执行如下命令，这一指令将会安装create-vue脚手架工具。并为你创建一个vue3模板工程
 
@@ -126,6 +126,143 @@ main.js文件的作用如下：
 - 导入createApp函数和APP.vue文件
 - 将APP.vue文件挂载到index.html中id=app的html标签上。
 - 所有有关vue的页面样式都是先在APP.vue根组件中渲染，然后在挂载到index.html中展示出来。
+
+### vite的环境配置文件
+
+我们可以在前端工程中添加环境配置文件。
+
+当我们运行前端工程的时候，可以根据启动命令不同，从而加载不同的环境配置文件。
+
+例如 .env.development 文件 和 .env.production 文件
+
+.env.development 文件
+```js
+# 本地环境
+VITE_ENV = development
+# 标题
+VITE_APP_TITLE = SHUYX ADMIN UI
+# 接口路径首地址
+VITE_APP_API_BASEURL = /api
+# 本地端口
+VITE_APP_PORT = 31000
+```
+
+.env.production 文件
+```js
+# 生产环境
+VITE_ENV = production
+# 标题
+VITE_APP_TITLE = SHUYX ADMIN UI
+# 接口路径首地址
+VITE_APP_API_BASEURL = /api
+# 本地端口
+VITE_APP_PORT = 31000
+```
+
+当我们对工程进行`npm run dev`启动的时候，会默认加载.env.development文件的环境配置。
+
+当我们对工程进行`npm run build`启动的时候，会默认加载.env.production文件的环境配置。
+
+<font color="red">注意环境配置文件的环境变量名称，必须是VITE开头，并且名称由大写字母组成。</font>
+
+> 如何在前端工程中使用环境配置文件中的配置信息？
+
+```js
+// 前端工程应用运行的模式。即development 或 production
+import.meta.env.MODE 
+// 获取环境配置文件中的VITE_APP_TITLE
+import. meta.env.VITE_APP_TITLE
+```
+
+### vite.config.js 文件
+
+我们通常可以在vite.config.js 中配置前端工程的启动端口和请求代理等配置。
+
+并且我们可以将vite.config.js文件和环境配置文件结合起来。
+
+下面是我常用的vite.config.js文件
+
+通常情况下，vite.config.js无法正常获取环境配置文件的配置信息。
+
+```js
+import { fileURLToPath, URL } from 'node:url'
+import { defineConfig,loadEnv} from 'vite'
+import vue from '@vitejs/plugin-vue'
+
+// https://vitejs.dev/config/
+export default defineConfig(({mode}) =>  {
+  //此处process报错，不影响使用
+  //获取环境配置文件的信息
+  const env = loadEnv(mode, process.cwd(), "")
+  return {
+    plugins: [
+      vue(),
+    ],
+    resolve: {
+      alias: {
+        '@': fileURLToPath(new URL('./src', import.meta.url))
+      }
+    },
+    //服务相关配置，包括端口，请求转发代理等
+    server: {
+      host: '127.0.0.1',
+      port: env.VITE_APP_PORT,  //读取环境配置文件中的端口
+      proxy: {
+        //当接口路径是/api开头的时候，将请求转发到如下地址
+        '/api': {
+          target: "http://127.0.0.1:38080",
+          changeOrigin: true,
+          rewrite: (p) => p.replace(/^\/api/, '')  //将接口路径中的/api替换为空字符串
+        }
+      }
+    }
+  }
+})
+
+```
+
+### vite.config.js 配置跨域
+
+> 什么是跨域？
+
+通常服务器与服务器之间互相请求数据，并不会发送跨域问题。跨域问题通常出现在浏览器上。
+
+由于浏览器的安全限制，当服务器A通过浏览器去访问服务器B的资源的时候。如果两个服务器的域名、端口、协议任一不同，那么浏览器认为这时跨域行为，浏览器从而给出跨域警告。
+
+> 如何在vite中配置跨域?
+
+通过在vite.config.js中配置proxy代理。通过请求转发的方式来解决跨域问题。
+
+```js
+import { fileURLToPath, URL } from 'node:url'
+import { defineConfig,loadEnv} from 'vite'
+import vue from '@vitejs/plugin-vue'
+
+export default defineConfig(({mode}) =>  {
+  const env = loadEnv(mode, process.cwd(), "")
+  return {
+    //....此处省略部分代码
+    //服务相关配置，包括端口，请求转发代理等
+    server: {
+      host: '127.0.0.1',
+      port: env.VITE_APP_PORT,  //读取环境配置文件中的端口
+      proxy: {
+        //当接口路径是/api开头的时候，将请求转发到如下地址
+        '/api': {
+          target: "http://127.0.0.1:38080",
+          changeOrigin: true,
+          rewrite: (p) => p.replace(/^\/api/, '')  //将接口路径中的/api替换为空字符串
+        }
+      }
+    }
+  }
+})
+
+```
+
+当进行上面的配置后。`/api`开头的请求会被proxy代理转发到目标服务器中。
+
+例如 `127.0.0.1:3000/api/test/test1` -> `http://127.0.0.1:38080/test/test1`
 
 
 ## 组合式API
