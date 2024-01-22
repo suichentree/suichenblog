@@ -743,3 +743,89 @@ public void testDelete(){
 ```
 
 <font color="red">逻辑删除的本质其实是修改操作。如果加了逻辑删除字段，查询数据时也要自动带上逻辑删除字段。</font>
+
+
+# mybatisplus中手写SQL
+
+由于mybatisplus底层是封装的mybatis。因此mybatisplus中手写SQL，本质上是调用mybatis。
+
+环境：springboot + mybatisplus
+
+1. 先配置mapper.xml文件的位置
+
+```yml
+mybatis-plus:
+  mapper-locations: classpath:mapper/*.xml                # mybatis的手写 sql xml文件的位置。即resources目录中
+```
+
+2. 在resources目录中创建mapper目录，然后再创建各个xxxMapper.xml文件
+
+3. mapper.xml文件
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.shuyx.shuyxuser.mapper.UserMapper">
+
+    <!--查询用户列表，并且关联查询出用户所属的组织机构信息-->
+    <select id="selectUserOrgList" resultMap="UserDTO" parameterType="com.shuyx.shuyxuser.dto.UserDTO">
+        select u.user_id, u.org_id, u.user_name, u.email, u.avatar, u.phone,u.birthday,
+        u.gender, u.status, u.create_time, o.org_name
+        from t_user u
+        left join t_org o on u.org_id = o.org_id
+    </select>
+
+    <!--UserDTO 结果映射集合-->
+    <resultMap id="UserDTO" type="com.shuyx.shuyxuser.dto.UserDTO">
+        <!--将sql语句查出来的的字段赋值到对应的对象属性上。 -->
+        <id property="userId" column="user_id"/>
+        <result property="userName" column="user_name"/>
+        <result property="orgId" column="org_id"/>
+        <result property="email" column="email"/>
+        <result property="phone" column="phone"/>
+        <result property="gender" column="gender"/>
+        <result property="avatar" column="avatar"/>
+        <result property="password" column="password"/>
+        <result property="status" column="status"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <!-- 使用<association>标签将一对一关联查询的数据，赋值到指定的结果集中-->
+        <association property="org" javaType="com.shuyx.shuyxuser.entity.OrgEntity">
+            <id property="orgId" column="org_id"/>
+            <result property="parentId" column="parent_id"/>
+            <result property="orgName" column="org_name"/>
+            <result property="orgPath" column="org_path"/>
+            <result property="status" column="status"/>
+        </association>
+    </resultMap>
+</mapper>
+
+```
+
+4. mapper.xml文件对应的mapper接口
+
+```java
+@Repository
+public interface UserMapper extends BaseMapper<UserEntity> {
+    /**
+     * 分页查询用户信息
+     * @param dto
+     * @return
+     */
+    public List<UserDTO> selectUserOrgList(UserDTO dto);
+}
+```
+
+5. 测试
+
+```java
+private UserMapper userMapper
+@Test
+public void test1(dto){
+    //开始SQL查询
+    List<Student> list = userMapper.selectUserOrgList(dto);
+    System.out.println(list);
+}
+```

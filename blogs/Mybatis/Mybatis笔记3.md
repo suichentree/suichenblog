@@ -276,9 +276,32 @@ insert into student (id,name,gender) values (#{id},#{name},#{gender});
 
 ## Mybatis 分页
 
-MyBatis 的分页功能本质上是通过SQL语法的limit语句实现。即先查询出所有记录，再按起始位置和页面容量取出结果。
+分页可分为逻辑分页和物理分页。
 
-> 例子
+- 逻辑分页是指一次性把全部数据查询出来加载进内存中，然后通过逻辑操作将全部数据进行分页。优点是减少了数据库I/O次数（只查询一次），适合频繁访问、数据量少的情况。缺点是不适合大数据量，全部数据加载到内存中容易造成内存溢出。
+- 物理分页是指利用SQL的limit 关键字。直接在数据库中进行分页查询。优点是适合大数据量。缺点是频繁查询数据库，增大了数据库的I/O次数，从而消耗数据库的性能。
+
+> mybatis 实现分页的方式有3种
+1. 直接在SQL语句中使用 limit 关键字进行分页。（物理分页）
+2. 使用RowBounds来分页。（逻辑分页）
+3. 使用第三方分页插件 PageHelper 来进行分页。（物理分页）
+
+### limit关键字分页（物理分页）
+
+通过SQL语法的limit关键字实现分页。需要注意limit的语法。
+
+limit语法如下：
+```sql
+-- limit语法： limit pageNum pageSize
+-- pageNum是指第几页。其中0表示第一页，1表示第二页，依此类推。
+-- pageSize是每页有多少条数据。
+
+-- 例子
+select * from student limit 0 10;  --每页10条数据，查询第一页的数据。
+select * from student limit 1 20;  --每页20条数据，查询第二页的数据。
+```
+
+> 使用例子
 
 1. 接口
 
@@ -287,7 +310,7 @@ WebsiteMapper.class
 public List<Website> selectWebsite(@Param("name") String name, @Param("pageNo") Integer currentPageNo, @Param("pageSize") Integer pageSize);
 ```
 
-2. 映射文件
+2. 接口对应的sql映射文件
 
 WebsiteMapper.xml
 ```xml
@@ -310,19 +333,85 @@ public static void main(String[] args) throws IOException {
     SqlSession ss = ssf.openSession();
     // 通过反射的方式，实例化接口
     WebsiteDao websiteDao = ss.getMapper(WebsiteMapper.class);
-    //参数
+    //分页参数
     Integer pageSize = 3;
     Integer currentPageNo = 0;
     String name = "xiaoming"
+    //开始分页
     List<Website> siteList = websiteDao.selectWebsite(name, currentPageNo, pageSize);
     for (Website ws : siteList) {
         System.out.println(ws);
     }
-
+    //提交sql连接和关闭sql连接
     ss.commit();
     ss.close();
 }
 ```
+
+### RowBounds 分页（逻辑分页）
+
+不推荐使用
+
+### 第三方分页插件 PageHelper（物理分页）
+
+在springboot + mybatis 中使用 PageHelper 分页插件。
+
+1. 先导入依赖
+
+```xml
+<!-- pagehelper 分页插件 -->
+<dependency>
+    <groupId>com.github.pagehelper</groupId>
+    <artifactId>pagehelper-spring-boot-starter</artifactId>
+    <version>1.4.7</version>
+</dependency>
+```
+
+2. 分页插件配置
+
+```yml
+# PageHelper分页插件
+pagehelper:
+  helperDialect: mysql
+  supportMethodsArguments: true
+  params: count=countSql
+```
+
+3. 测试
+
+mapper接口
+```java
+public interface StudentMapper{
+    @Select("select * from student")
+    public List<Student> pagelist();
+}
+```
+
+测试类
+```java
+private StudentMapper studentMapper
+
+@Test
+public void test1(){
+    //分页设置，设置查询的页数和每页记录数
+    PageHelper.startPage(1, 3);
+    //开始SQL查询
+    List<Student> list = studentMapper.pagelist();
+    System.out.println(list);
+    //分页信息类
+    PageInfo<Student> pageInfo = new PageInfo<>(list);
+    System.out.println(pageInfo.getNextPage());  //下一页
+    System.out.println(pageInfo.getPrePage());  //上一页
+    System.out.println(pageInfo.getPageNum());  //当前页
+    System.out.println(pageInfo.getPageSize());  //每页多少条
+    System.out.println(pageInfo.getSize());  //当前页的条数
+    System.out.println(pageInfo.getTotal());  //总条数
+    System.out.println(pageInfo.getPages());  //总页数
+}
+```
+
+分页原理：在执行SQL查询之前，先进行分页设置。当进行SQL查询的时候，PageHelper会拦截`studentMapper.pagelist();`方法。把设置的分页参数插入到SQL的limit语句中。
+
 
 ## Mybatis的缓存机制
 

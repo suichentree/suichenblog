@@ -1,9 +1,9 @@
 # 该脚本主要分两个部分。
 # 第一个部分: 提交代码到博客源代码仓库 https://github.com/suichentree/suichenblog.git
-# 第一个部分: 将源代码打包运行，生成博客页面代码后。将页面代码提交到博客页面仓库 https://github.com/suichentree/suichentree.github.io.git
+# 第二个部分: 将源代码打包运行，生成博客页面代码后。将页面代码提交到博客页面仓库 https://github.com/suichentree/suichentree.github.io.git
 
 # 注意1: 在git终端中运行脚本。
-# 注意2: 使用 source push.sh 命令运行该文件。bash push.sh 命令无法执行脚本中的cd命令,source命令可以。
+# 注意2: 使用 source push.sh 命令运行该文件。bash push.sh 命令无法执行脚本中的cd命令,source push.sh 命令可以。
 
 # 定义commit方法
 function commit() {

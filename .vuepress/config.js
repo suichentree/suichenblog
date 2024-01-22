@@ -198,7 +198,9 @@ module.exports = {
       selector: '.home-blog .hero .description',
       // 打字内容
       strings: [
-        "海里的咸鱼 (;-_-)ᴇᴍᴍᴍ —— suichentree",
+        "海里的咸鱼 (;-_-)ᴇᴍᴍᴍ。绝不温水煮青蛙 —— suichentree",
+        "历史是不断螺旋上升或螺旋下降的，人也是，人是可以改变的。—— suichentree",
+        "不经历困难，怎知自己的潜力与能力。第一步是最重要的。 —— suichentree",
         "纸上得来终觉浅，绝知此事要躬行。——— 陆游《冬夜读书示子聿》",
         "好记性不如烂笔头。",
         "种一棵树最好的时间是十年前,其次是现在。",
