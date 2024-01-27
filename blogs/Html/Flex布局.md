@@ -24,7 +24,7 @@ Flex布局又称弹性盒子（ Flexible Box ）布局。是一种更加有效�
 如下图所示弹性容器元素和弹性子元素的示意图
 ![css_20240126145140.png](../blog_img/css_20240126145140.png)
 
-- 在flex容器中默认存在两条轴，水平主轴(main axis) 和垂直的交叉轴(cross axis)，这是默认的设置，你可以通过修改使垂直方向变为主轴，水平方向变为交叉轴。
+- 在flex容器中默认存在两条轴线，水平主轴(main axis) 和垂直的交叉轴(cross axis)，这是默认的设置，你可以通过修改使垂直方向变为主轴，水平方向变为交叉轴。
 - 在flex容器中的每个单元块被称之为 flex item，每个单元块占据的主轴空间为 (main size), 占据的交叉轴的空间为 (cross size)。
 
 
@@ -71,6 +71,7 @@ flex-direction属性有4种取值。
 
 ```css
 .container {
+    display: flex;
     flex-direction: row | row-reverse | column | column-reverse;
 }
 /* 四种取值分别是水平row ，反向水平row-reverse ，垂直column，反向垂直column-reverse */
@@ -108,6 +109,7 @@ flex-wrap属性有3种取值。
 
 ```css
 .container {
+    display: flex;
     flex-wrap: nowrap | wrap | wrap-reverse;
 }
 /* 3种取值分别是不换行nowrap ，换行wrap ，反向换行wrap-reverse */
@@ -133,31 +135,34 @@ wrap,换行。当子元素的总宽度大于flex容器宽度的时候。子元�
 
 ### flex-flow属性
 
-flex-flow属性是flex-direction 和 flex-wrap 两个属性合在一起的简写形式。
+flex-flow属性是flex-direction 和 flex-wrap 两个属性合在一起的简写形式。flex-flow属性的默认值为`flex-flow:row nowrap;`。
 
 ```css
 .container {
+    display: flex;
     flex-flow: <flex-direction> || <flex-wrap>;
 }
 ```
 
 ### justify-content属性
 
-justify-content属性是用来决定flex容器内的子元素的对齐方式。
+justify-content属性是用来决定flex容器内的子元素在主轴上的对齐方式。
 
 justify-content属性有5种取值。
 
 ```css
 .container {
+    display: flex;
+    flex-direction: row;
     justify-content: flex-start | flex-end | center | space-between | space-around;
 }
 ```
 
 如果felx容器还设置了`flex-direction: row;`。即子元素的排列方式是水平排列。下面例子是在此基础上的效果。
 
-> justify-content:flex-start; //子元素左对齐
+> justify-content:flex-start; //子元素在主轴方向上是左对齐
 
-flex-start是默认值。即子元素是左对齐。
+flex-start是默认值。即子元素在主轴方向上是左对齐。
 
 ![css_20240126155514.png](../blog_img/css_20240126155514.png)
 
@@ -190,6 +195,8 @@ align-items属性有5种取值。
 
 ```css
 .container {
+    display: flex;
+    flex-direction: row;
     align-items: flex-start | flex-end | center | baseline | stretch;
 }
 ```
@@ -238,6 +245,7 @@ align-content属性有6种取值。
 
 ```css
 .container {
+    display: flex;
     align-content: flex-start | flex-end | center | space-between | space-around | stretch;
 }
 ```
@@ -312,9 +320,19 @@ order属性用来定义子元素在flex容器中的排列顺序。数值越小�
 }
 ```
 
-如图所示，有5个子元素。每个子元素的order属性不一样。则它们的排序顺序不同。
-![css_20240126164024.png](../blog_img/css_20240126164024.png)
+如代码所示，有5个子元素。每个子元素的order属性不一样。则它们的排序顺序不同。
 
+```html
+<div style="display:flex">
+    <div style="order:1">1</div>
+    <div style="order:3">3</div>
+    <div style="order:5">5</div>
+    <div style="order:-1">-1</div>
+    <div style="order:-2">-2</div>
+</div>
+```
+
+![css_20240126164024.png](../blog_img/css_20240126164024.png)
 
 ### flex-basis属性
 
