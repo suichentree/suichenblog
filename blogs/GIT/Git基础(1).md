@@ -284,6 +284,15 @@ $ git pull 需要有关联的分支，第一次下拉最好新建一个空文件
 $ git branch --set-upstream-to=origin/远程分支 本地分支 关联分支
 $ git clone git@server-name:path/repo-name.git 克隆(不需要另建文件夹)
 
+更换远程仓库
+方式1：
+git remote -v                       #查看远端地址
+git remote                          #查看远端仓库名
+git remote set-url origin 新地址    #更换远程仓库地址
+方式2：
+git remote rm origin                 #删除远程的仓库
+git remote add origin 新地址         #重新添加远程仓库
+
 分支
 $ git branch -a 查看所有分支
 $ git branch -vv 查看分支关联
