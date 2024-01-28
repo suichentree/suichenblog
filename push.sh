@@ -85,7 +85,7 @@ time3=$(date "+%Y-%m-%d %H:%M:%S")
 git commit -m "deploy blog $time3"
 
 # 添加远程库地址
-git remote add origin https://githubfast.com/suichentree/suichentree.github.io.git
+git remote add origin https://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@githubfast.com/suichentree/suichentree.github.io.git
 
 # 执行push方法
 push
