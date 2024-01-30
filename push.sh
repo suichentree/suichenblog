@@ -1,9 +1,7 @@
 # 该脚本主要分两个部分。
-# 第一个部分: 提交代码到博客源代码仓库 https://github.com/suichentree/suichenblog.git 
-# 或者  https://githubfast.com/suichentree/suichenblog.git
+# 第一个部分: 提交代码到博客源代码仓库 https://gitee.com/suichentree/suichenblog.git 
 
-# 第二个部分: 将源代码打包运行，生成博客页面代码后。将页面代码提交到博客页面仓库 https://github.com/suichentree/suichentree.github.io.git 
-# 或者  https://githubfast.com/suichentree/suichentree.github.io.git
+# 第二个部分: 将源代码打包运行，生成博客页面代码后。将页面代码提交到博客页面仓库 https://gitee.com/suichentree/suichentree.git 
 
 # 注意1: 在git终端中运行脚本。
 # 注意2: 使用 source push.sh 命令运行该文件。bash push.sh 命令无法执行脚本中的cd命令,source push.sh 命令可以。
@@ -19,7 +17,7 @@ function commit() {
 
 # 定义push方法
 function push(){
-    # 本地分支强制推送最新文件到远程分支
+    # 本地分支强制推送最新文件到远程仓库origin的master分支
     git push -f origin master
     # $?可以获取git push -f origin master命令是否运行成功，成功返回0，否则非0。
     if [ $? -eq 0 ] 
@@ -85,7 +83,7 @@ time3=$(date "+%Y-%m-%d %H:%M:%S")
 git commit -m "deploy blog $time3"
 
 # 添加远程库地址
-git remote add origin https://githubfast.com/suichentree/suichentree.github.io.git
+git remote add origin https://gitee.com/suichentree/suichentree.git
 
 # 执行push方法
 push
