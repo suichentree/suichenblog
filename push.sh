@@ -17,9 +17,9 @@ function commit() {
 
 # 定义push方法
 function push(){
-    # 本地分支强制推送最新文件到远程仓库origin的master分支
-    git push -f origin master
-    # $?可以获取git push -f origin master命令是否运行成功，成功返回0，否则非0。
+    # 本地分支推送文件到远程仓库origin的master分支
+    git push origin master
+    # $?可以获取git push 命令是否运行成功，成功返回0，否则非0。
     if [ $? -eq 0 ] 
     then
         # 上传成功，方法结束
