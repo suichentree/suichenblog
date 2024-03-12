@@ -11,6 +11,7 @@
 # 注意2: 使用 source push.sh 命令运行该文件。bash push.sh 命令无法执行脚本中的cd命令,source push.sh 命令可以。
 # 注意3: git remote -v  命令查询远程仓库
 
+
 # 定义commit方法
 function commit() {
     #定义变量commitMessage,并接受外部输入赋值
