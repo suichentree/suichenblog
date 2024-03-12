@@ -76,8 +76,8 @@ npm run build
 # 进入生成的文件夹
 cd public
 
-# 初始化为git仓库
-git init
+# 初始化为git仓库,默认分支为main分支
+git init -b main
 
 # 添加到暂存区
 git add -A
