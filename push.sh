@@ -42,6 +42,27 @@ function push(){
     fi
 }
 
+# 定义push方法
+function pushForce(){
+    # 本地分支推送文件到远程仓库origin的main分支, -f 强制提交
+    git push origin main -f
+    git push github-origin main -f
+    # $?可以获取git push 命令是否运行成功，成功返回0，否则非0。
+    if [ $? -eq 0 ] 
+    then
+        # 上传成功，方法结束
+        echo "SUCCESS , git push success"
+    else     
+        # 上传失败，重新执行上传命令
+        echo "ERROR , git push fail"
+        # 延迟5秒
+        sleep 5s
+        # 重新执行push方法
+        echo "PushForce Code to Remote Repository Again -------------------"
+        pushForce
+    fi
+}
+
 
 # 脚本从这里开始--------------
 echo "Start Run push.sh -------------------"
@@ -93,8 +114,8 @@ git commit -m "deploy blog $time3"
 git remote add origin https://gitee.com/suichentree/suichentree.git
 git remote add github-origin https://github.com/suichentree/suichentree.github.io.git
 
-# 执行push方法
-push
+# 执行pushForce方法
+pushForce
 
 # 回到上级目录中
 cd ..
