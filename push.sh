@@ -1,10 +1,16 @@
 # 该脚本主要分两个部分。
-# 第一个部分: 提交代码到博客源代码仓库 https://gitee.com/suichentree/suichenblog.git 
+# 第一个部分: 提交代码到博客源代码的远程仓库。远程分为gitee和github两个
+# gitee的博客源代码仓库 https://gitee.com/suichentree/suichenblog.git        main分支
+# github的博客源代码仓库 https://github.com/suichentree/suichenblog.git      main分支
 
-# 第二个部分: 将源代码打包运行，生成博客页面代码后。将页面代码提交到博客页面仓库 https://gitee.com/suichentree/suichentree.git 
+# 第二个部分: 将源代码打包运行，生成博客页面代码后。将页面代码提交到博客页面仓库。分为gitee和github两个
+# gitee的博客页面仓库 https://gitee.com/suichentree/suichentree.git                 main分支
+# github的博客页面仓库 https://github.com/suichentree/suichentree.github.io.git     main分支
+
 
 # 注意1: 在git终端中运行脚本。
 # 注意2: 使用 source push.sh 命令运行该文件。bash push.sh 命令无法执行脚本中的cd命令,source push.sh 命令可以。
+# 注意3: git remote -v  命令查询远程仓库
 
 # 定义commit方法
 function commit() {
@@ -17,8 +23,9 @@ function commit() {
 
 # 定义push方法
 function push(){
-    # 本地分支推送文件到远程仓库origin的master分支
-    git push origin master
+    # 本地分支推送文件到远程仓库origin的main分支
+    git push origin main
+    git push github-origin main
     # $?可以获取git push 命令是否运行成功，成功返回0，否则非0。
     if [ $? -eq 0 ] 
     then
@@ -82,8 +89,9 @@ time3=$(date "+%Y-%m-%d %H:%M:%S")
 # 提交到本地分支
 git commit -m "deploy blog $time3"
 
-# 添加远程库地址
+# 添加远程库地址,分为gitee和github两个
 git remote add origin https://gitee.com/suichentree/suichentree.git
+git remote add github-origin https://github.com/suichentree/suichentree.github.io.git
 
 # 执行push方法
 push
