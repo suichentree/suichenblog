@@ -22,9 +22,9 @@ function commit() {
 
 # 定义push方法
 function push(){
-    # 本地分支推送文件到远程仓库origin的main分支
-    git push origin main
-    git push github-origin main
+    # 本地分支推送文件到远程仓库origin的main分支, -f 强制提交
+    git push origin main -f
+    git push github-origin main -f
     # $?可以获取git push 命令是否运行成功，成功返回0，否则非0。
     if [ $? -eq 0 ] 
     then
