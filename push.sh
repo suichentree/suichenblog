@@ -7,7 +7,6 @@
 # gitee的博客页面仓库 https://gitee.com/suichentree/suichentree.git                 main分支
 # github的博客页面仓库 https://github.com/suichentree/suichentree.github.io.git     main分支
 
-
 # 注意1: 在git终端中运行脚本。
 # 注意2: 使用 source push.sh 命令运行该文件。bash push.sh 命令无法执行脚本中的cd命令,source push.sh 命令可以。
 # 注意3: git remote -v  命令查询远程仓库
