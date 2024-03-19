@@ -6,6 +6,7 @@ categories:
  - 数据库
 tags:
  - MinIO
+ - 对象存储
 ---
 
 [toc]
