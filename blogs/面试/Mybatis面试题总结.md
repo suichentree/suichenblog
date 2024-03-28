@@ -128,11 +128,11 @@ Mybatis 运行时会使用JDK动态代理为接口生成代理对象。当程序
 
 ## MyBatis实现一对一，一对多查询有几种方式，怎么操作的？
 
-主要有联合查询和嵌套查询两种方式。
+主要有联合查询和嵌套查询两种方式。联合查询就是把几个表联合起来查询。
 
-联合查询是把几个表联合起来查询。主要通过在`resultMap`标签里面配置`association`，`collection`子标签来配置一对一和一对多的映射关系；
+例如类A和类B是一对一或者一对多关系。那么当我们进行类A和类B进行联合查询的时候，在实体类方面上，需要先在类A中添加类B的成员变量。
 
-嵌套查询主要是先查一个表，根据查询结果的外键id，再去另外一个表里面查询数据,也是通过配置`association`，`collection`子标签，但去另外一个表的查询要配置`select`标签才行。
+然后再Mapper.xml文件中，针对这个联合查询的SQL的结果集处理，需要额外添加`association`，`collection`子标签来处理一对一和一对多的映射关系；
 
 ## Mybatis的动态sql是什么？
 
@@ -142,7 +142,12 @@ Mybatis 提供9种动态sql标签：trim,where,set,foreach,if,choose,when,otherw
 
 ## Mybatis的分页插件的原理是什么？
 
-分页插件的基本原理是拦截待执行的sql，然后重写sql，添加对应的limit分页语句
+原理有两种
+
+1. 第一种是直接拦截待执行的sql，然后重写sql。额外添加对应的limit分页语句。
 
 举例：`select * from student`，拦截 sql 后重写为：`select t.* from （select * from student）t limit 0，10;`
 
+2. 第二种是sql执行完毕后，通过后端代码的方式，将查询出来的结果集进行分页处理。
+
+例如 mybatis的pageHelper分页插件。

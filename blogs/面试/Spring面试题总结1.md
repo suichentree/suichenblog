@@ -123,7 +123,7 @@ IOC就是控制反转的意思。
 
 ### 什么是IOC的实现机制？
 
-Spring 中的 IoC 的实现原理就是工厂模式加反射机制。
+Spring 中的 IoC 的实现原理就是 简单工厂设计模式 + 反射机制。
 
 ```java
 //接口Fruit
@@ -441,17 +441,19 @@ Spring事务管理器的接口是PlatformTransactionManager根接口，通过这
 
 Spring事务的传播行为（propagation behavior）是指：当一个使用了@Transactional注解的方法调用另一个使用@Transactional注解的方法时，Spring如何对多个事务方法的执行方式进行管理。
 
+简而言之，事务的传播行为是指：当多个事务方法互相嵌套调用的时候，如何对多个事务方法的执行方式进行管理。
+
 Spring定义了七种事务传播行为。
 
 ```
-PROPAGATION_REQUIRED(默认，必需传播)：存在事务，加入事务；不存在事务，新建事务运行。
-PROPAGATION_SUPPORTS(支持传播): 存在事务，加入事务；不存在事务，非事务运行。
-PROPAGATION_MANDATORY(强制传播): 存在事务，加入事务，不存在事务，抛出异常。
+PROPAGATION_REQUIRED(默认，必需传播)：若已存在事务，加入事务；不存在事务，新建事务运行。
+PROPAGATION_SUPPORTS(支持传播): 若已存在事务，加入事务；不存在事务，非事务运行。
+PROPAGATION_MANDATORY(强制传播): 若已存在事务，加入事务，不存在事务，抛出异常。
 
-PROPAGATION_REQUIRES_NEW(新建需求传播): 存在事务，挂起当前事务并创建一个新事务；不存在事务，则新建事务。
+PROPAGATION_REQUIRES_NEW(新建需求传播): 若已存在事务，挂起当前事务并创建一个新事务；不存在事务，则新建事务。
 PROPAGATION_NOT_SUPPORTED(不支持传播): 总是以非事务方式执行，如果当前存在事务，则挂起事务。
 PROPAGATION_NEVER(从不传播): 总是以非事务方式执行，如果当前存在事务，则抛出异常。
-PROPAGATION_NESTED(嵌套传播): 存在事务，则嵌套事务;不存在事务，新建事务。
+PROPAGATION_NESTED(嵌套传播): 若已存在事务，则嵌套事务;不存在事务，新建事务。
 
 ```
 
@@ -685,25 +687,12 @@ Spring 有五大隔离级别，默认值为 ISOLATION_DEFAULT（使用数据库�
 
 注意：隔离级别不是设置的越高越好，隔离级别越高，spring事务执行越复杂，效率越低。
 
-### 不可重复读和幻读的区别
-
-不可重复读的重点是修改。即同样的条件, 你读取过的数据, 再次读取出来发现值不一样了。在一个事务中前后两次读取的结果并不一致，导致了不可重复读。
-
-幻读的重点在于新增或者删除。即同样的条件, 第1次和第2次读出来的记录数不一样。
-
-
-从总的结果来看, 似乎不可重复读和幻读都表现为两次读取的结果不一致。但如果你从控制的角度来看,两者的区别就比较大。
-- 对于不可重复读, 只需要锁住满足条件的记录。
-- 对于幻读, 要锁住满足条件及其相近的记录。
 
 ### 如何使用编程式事务？
 
-Spring提供两种方式的编程式事务管理。
+Spring提供两种方式的编程式事务使用方式。
 - 使用TransactionTemplate
 - 使用PlatformTransactionManager
-
-
-
 
 
 ## AOP部分

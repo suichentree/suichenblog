@@ -77,7 +77,7 @@ SQL思路：
 select * from t_student st,t_score sc,t_course c
 where st.sid = sc.sid and sc.cid = c.cid
 
--- 第二部：根据学生编号进行分组，并计算出总成绩
+-- 第二步：根据学生编号进行分组，并计算出总成绩
 select st.*, SUM(sc.score) from t_student st,t_score sc,t_course c
 where st.sid = sc.sid and sc.cid = c.cid GROUP BY st.sid 
 ```

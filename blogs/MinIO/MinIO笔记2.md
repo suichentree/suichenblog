@@ -38,7 +38,16 @@ minio:
 
 4. 自定义 minio 客户端类
 
-由于官方提供的 MinioClient 类，并没有把一些关于分片上传等方法暴露出来。因此我们需要自定义 MinioClient 类。这样才能使用分片上传等被隐藏的方法。
+如果想要实现分片文件上传。我们需要用到下面的方法。但是这几个方法，MinioClient类无法调用。我们必须自定义MinioClient类，让自定义MinioClient类去继承官方的MinioClient类之后，自定义MinioClient类才能主动调用这几个方法。
+
+<font color="red">注意此处用到的minio依赖包是8.2.2版本的。</font>
+
+```
+createMultipartUpload    //创建文件上传id
+listParts                //获取分片上传列表
+completeMultipartUpload  // 合并分片文件
+```
+
 
 ```java
 @Component
@@ -62,7 +71,7 @@ public class MyMinioClient extends MinioClient {
      * @param extraQueryParams 额外查询参数
      */
     @Override
-    public CreateMultipartUploadResponse createMultipartUpload(String bucketName, String region, String objectName, Multimap<String, String> headers, Multimap<String, String> extraQueryParams) throws ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, IOException, InvalidKeyException, XmlParserException, InvalidResponseException, InternalException {
+    public CreateMultipartUploadResponse createMultipartUpload(String bucketName, String region, String objectName, Multimap<String, String> headers, Multimap<String, String> extraQueryParams) {
         return super.createMultipartUpload(bucketName, region, objectName, headers, extraQueryParams);
     }
 
@@ -78,7 +87,7 @@ public class MyMinioClient extends MinioClient {
      * @param extraQueryParams 额外查询参数
      */
     @Override
-    public ObjectWriteResponse completeMultipartUpload(String bucketName, String region, String objectName, String uploadId, Part[] parts, Multimap<String, String> extraHeaders, Multimap<String, String> extraQueryParams) throws NoSuchAlgorithmException, InsufficientDataException, IOException, InvalidKeyException, ServerException, XmlParserException, ErrorResponseException, InternalException, InvalidResponseException {
+    public ObjectWriteResponse completeMultipartUpload(String bucketName, String region, String objectName, String uploadId, Part[] parts, Multimap<String, String> extraHeaders, Multimap<String, String> extraQueryParams)  {
         return super.completeMultipartUpload(bucketName, region, objectName, uploadId, parts, extraHeaders, extraQueryParams);
     }
 
@@ -91,7 +100,7 @@ public class MyMinioClient extends MinioClient {
      * @param extraHeaders     额外消息头
      * @param extraQueryParams 额外查询参数
      */
-    public ListPartsResponse listParts(String bucketName, String region, String objectName, Integer maxParts, Integer partNumberMarker, String uploadId, Multimap<String, String> extraHeaders, Multimap<String, String> extraQueryParams) throws NoSuchAlgorithmException, InsufficientDataException, IOException, InvalidKeyException, ServerException, XmlParserException, ErrorResponseException, InternalException, InvalidResponseException {
+    public ListPartsResponse listParts(String bucketName, String region, String objectName, Integer maxParts, Integer partNumberMarker, String uploadId, Multimap<String, String> extraHeaders, Multimap<String, String> extraQueryParams) {
         return super.listParts(bucketName, region, objectName, maxParts, partNumberMarker, uploadId, extraHeaders, extraQueryParams);
     }
 
