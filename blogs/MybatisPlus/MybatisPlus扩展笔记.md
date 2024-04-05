@@ -12,6 +12,35 @@ tags:
 
 # MybatisPlus扩展笔记
 
+## 更新字段为 null
+
+> 情景介绍
+
+在使用 mybatis-plus 进行开发时，默认情况下当 mybatis-plus 在更新数据时时会判断字段是否为 null，如果是 null 则不会更新该字段的值（update语句中没有该字段），也就是更新后的该字段数据依然是原数据。
+
+虽然说这种方式在一定程度上可以避免数据缺失等问题，但是在某些业务场景下我们就需要更新某些字段的数据为 null。
+
+> 解决方法
+
+可以在实体类上设置该字段的字段策略。将该字段的字段策略设置为忽略即可。
+
+```
+@TableField(updateStrategy = FieldStrategy.IGNORED)
+```
+
+```java
+public class Student {
+    @TableId(value = "id", type = IdType.AUTO)
+    private Long id;
+    @TableField(value = "name",updateStrategy = FieldStrategy.IGNORED) // 设置字段策略为忽略
+    private String name;
+    //....
+}
+```
+
+当设置策略之后，我们需要更新name字段为null的时候，就不会出现无法更新的情况。
+
+
 ## 分页
 
 分页可分为逻辑分页和物理分页。
