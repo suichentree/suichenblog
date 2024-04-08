@@ -20,7 +20,7 @@ SpringBoot是基于spring的框架，主要是简化了使用 Spring框架的难
 ## Spring Boot比Spring做了哪些改进？
 
 1. 内嵌tomcat服务器
-2. 简化了配置，提供了java方式的配置，从而不需要XML配置。
+2. 简化了配置方式，提供了yml的配置方式，也提供了java方式的配置，从而不需要XML配置。
 3. 提供了各种启动依赖，避免了Maven的各种版本冲突。
 
 ## SpringBoot的核心注解是哪个？由哪几个注解组成的？

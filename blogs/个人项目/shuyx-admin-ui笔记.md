@@ -1035,9 +1035,77 @@ function deleteUser(userId) {
 ```
 
 
+## 记住账号功能
 
+![vue_20240408203307.png](../blog_img/vue_20240408203307.png)
 
+> 功能介绍
 
+用户登录时若勾选“记住账号”功能选项，则将登录名和密码（加密后）存入本地缓存，下次登录页面加载时自动获取保存好的账号和密码（需解密），回显到登录输入框中。
+
+> 实现思路
+
+- 当用户登录成功的时候。
+  - 若用户已点击记住账号选项框。则把用户输入的账号，密码（加密）存储到cookie或localStorage中，假如是键值对A。
+  - 若用户没有点击记住账号选项。则把cookie或localStorage中的键值对A删除。
+- 当用户再次进入到登录页面的时候，会先判断cookie或localStorage中是否存在键值对A。若存在，则把键值对A的用户，密码（解密）赋值到输入框中。若不存在，则无动作。
+
+> 部分代码
+
+```js
+// 引入CryptoJS加密解密库
+import CryptoJS from 'crypto-js'
+// 引入Cookies
+import Cookies from 'js-cookie'
+
+//页面加载=========
+onMounted(()=>{
+  //获取cookie中的账号信息
+  let a = Cookies.get('shuyxAccountInfo-cookie');
+  if(a){
+    let accountinfo = JSON.parse(a);
+    //解密密码
+    let b = CryptoJS.AES.decrypt(accountinfo.passWord, 'my_secret_key').toString(CryptoJS.enc.Utf8)
+    loginform.value.userName = accountinfo.userName
+    loginform.value.passWord = b
+    isRemember.value = true
+  }
+})
+
+//登录相关=====================
+let loginform = ref({
+  userName: undefined,
+  passWord: undefined,
+  verifyCode: undefined
+})
+function onSubmit() {
+  //调用登录接口
+  LoginAPIResources.login(loginform.value)
+    .then((res) => {
+      //。。。登录成功操作
+    })
+    .finally(() => {
+      remeberAccount()
+    })
+}
+
+//记住账号相关 =================
+let isRemember = ref(false)
+function remeberAccount(){
+  if(isRemember.value){
+    //记住账号
+    let a = {
+      userName: loginform.value.userName,
+      passWord: CryptoJS.AES.encrypt(loginform.value.passWord, 'my_secret_key').toString(),  //对密码进行加密
+    }
+    //cookie保存登录信息，保存7天
+    Cookies.set('shuyxAccountInfo-cookie',JSON.stringify(a), { expires: 7 });
+  }else{
+    //不记住账号，如果cookie中保存了账号信息，那么需要删除
+    Cookies.remove("shuyxAccountInfo-cookie")
+  }
+}
+```
 
 
 
