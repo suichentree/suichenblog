@@ -89,3 +89,32 @@ minio客户端可以通过AccessKey来访问minio服务端。
 创建对象桶之后，再上传文件。文件会作为对象，存储再对象桶中。
 
 ![minio_20240317022834.png](../blog_img/minio_20240317022834.png)
+
+## 本地查看MinIO中上传的文件
+
+当我们把文件上传到minio中时。可以通过链接来本地查看上传的文件。
+
+链接格式：`http://${ip}:{port}/bucket-name/{resourceName}`
+
+注意：
+1. 如果你的minio是docker容器部署的，那么port应该是宿主机可以访问minio容器的端口。
+2. 如果你是远程访问，那么ip是宿主机的ip。并不是你本地服务器的ip。
+3. 你需要先把对象桶的访问权限设置为public。
+
+例如下图所示的图片
+![minio_20240413132758.png](../blog_img/minio_20240413132758.png)
+
+该图片的访问链接为：`http://localhost:39000/media-cover-bucket/1712730772556.ddd.jpg`
+
+- localhost是因为宿主机就是我本地的服务器。
+- 39000是宿主机访问minio容器的端口。
+
+> 对象桶访问权限问题
+
+如果你本地访问文件，minio确提示权限问题。大概率是因为没有给对象桶设置访问权限。你需要设置对象桶的权限为public才行。
+
+![minio_20240413133429.png](../blog_img/minio_20240413133429.png)
+![minio_20240413133530.png](../blog_img/minio_20240413133530.png)
+
+设置对象桶权限为public
+![minio_20240413133805.png](../blog_img/minio_20240413133805.png)

@@ -12,6 +12,7 @@ tags:
 
 # SpringBoot面试题总结
 
+下面记录SpringBoot面试题。用于快速记忆面试题。
 
 ## 什么是Spring Boot？
 
@@ -107,3 +108,25 @@ springboot项目打的jar包是可执行jar包，这种jar包可以直接通过j
 > 如何在不同微服务之间共享 session？
 
 常见的方案就是 将所有微服务的 session 统一保存在 Redis 上，当各个微服务对 session 有相关的读写操作时，都去操作 Redis 上的 session 。
+
+## SpringBoot的启动步骤是什么？
+
+1. 加载配置文件
+
+springboot会读取配置文件中的信息。
+
+2. 创建并启动Spring容器
+
+springboot会创建一个IOC容器，这个容器用来管理所有的bean对象。
+
+3. 扫描注解
+
+springboot会扫描代码中的所有注解，并将这些注解修饰的java类，转换为bean对象。
+
+对于@Controller等注解修饰的java类，实例化为bean对象后，放到IOC容器中进行管理。
+
+对于@Configuration等注解修饰的java类，实例化bean对象后，会作为配置，参与到springboot的启动中。
+
+4. 启动程序
+
+Springboot的web依赖内置了一个tomcat容器。可以用来快速开发web程序。
