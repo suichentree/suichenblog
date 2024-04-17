@@ -8,15 +8,17 @@ tags:
  - Axios
 ---
 
+[toc]
+
 # Axios基础
 
 Axios是一个HTTP库，可以用在浏览器和node.js中。Vue推荐使用axios来完成ajax请求。
 
 [axios官方教程](https://github.com/axios/axios)
 
-## 1. Http请求的相关知识
+## Http请求的相关知识
 
-> 1. Http请求报文：
+> Http请求报文：
 
 Http请求报文由请求行，多个请求头，请求体组成。
 
@@ -33,7 +35,7 @@ Content-Type:application/json ---> {"name":"tom","age":12}
 Content-Type:multipart/form-data ---> 主要用户文件上传
 ```
 
-> 2. Http响应报文
+> Http响应报文
 
 Http响应报文由响应状态行，多个响应头，响应体组成。
 
@@ -51,7 +53,7 @@ Http响应报文由响应状态行，多个响应头，响应体组成。
 
 **响应头中的Content-Type是用于描述响应体的数据格式**
 
-> 3. 不同类似的请求及其作用
+> 不同类似的请求及其作用
 
 GET : get请求常用于获取数据
 POST : post请求常用于添加数据
@@ -68,14 +70,14 @@ DELETE ：delete请求常用于删除数据
 例如： /user/1 ,对于该请求接口，若使用get请求方式调用时，是获取id=1的用户。若使用delete请求方式调用时，是删除id=1的用户。
 ```
 
-## 2. axios的使用
+## axios的使用
 
-### 1. 安装
+### 安装
 
 1. CDN：`<script src="https://unpkg.com/axios/dist/axios.min.js"></script>`
 2. NPM：`$ npm install axios`
 
-### 2. 使用aixos的写好的请求方法
+### 使用aixos的写好的请求方法
 
 ```js
 <script>
@@ -197,7 +199,7 @@ axios.get('/login')
 ```
 
 
-### 3. 使用aixos的自定义请求配置
+### 使用aixos的自定义请求配置
 
 ```js
 //默认为get请求
@@ -225,7 +227,7 @@ axios({
 ```
 
 
-## 3. axios的配置
+## axios的配置
 
 ```js
 <script>
@@ -356,7 +358,7 @@ onDownloadProgress:function(progressEvent){
 
 
 
-## 3. axios设置请求头中的Content-Type:application/x-www-form-urlencoded
+##  axios设置请求头中的Content-Type:application/x-www-form-urlencoded
 
 axios默认把请求头中的Content-Type设置为application/json;。但是后端常常要求的 'Content-Type':'application/x-www-form-urlencoded'
 
