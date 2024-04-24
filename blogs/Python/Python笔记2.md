@@ -585,7 +585,343 @@ x = lambda a, b : a * b
 print(x(5, 6))
 ```
 
+## 模块
 
-## 装饰器
+在Python中，模块就是一个包含所有你定义的函数和变量的文件，其后缀名是`.py`。模块可以被别的程序引入，从而使用该模块中的函数等功能。
 
-待定
+
+> 运行代码时Python解释器是怎样找到代码中引入的模块文件？
+
+<font color="red">注意：当代码运行的时候，Python解释器会在当前目录或者一些特定目录中找寻这些模块文件。从而将这些模块文件引入到代码中。</font>
+
+这些特定目录的路径存储在 sys 模块中的 path 变量中。不同的操作系统，这些目录的路径也不同。
+
+```python
+>>> import sys
+>>> sys.path
+# linux系统下的路径。''代表当前目录
+['', '/usr/lib/python3.4', '/usr/lib/python3.4/plat-x86_64-linux-gnu', '/usr/lib/python3.4/lib-dynload', '/usr/local/lib/python3.4/dist-packages', '/usr/lib/python3/dist-packages']
+```
+
+### import 语句
+
+可以使用 import 语句 来导入模块到代码中。
+
+1. 创建 a.py文件，该文件包含一个函数。
+```python
+def print_func( par ):
+    print ("Hello : ", par)
+    return
+```
+
+2. 在当前目录中，再创建test.py来导入a.py文件 
+```python
+# 导入当前目录中的模块a.py
+import a
+ 
+# 调用模块里包含的函数了
+a.print_func("Wellcome")
+# 输出结果 Hello : Wellcome
+```
+
+### from … import 语句
+
+```python
+# 把一个模块的所有内容全都导入到当前的命名空间。
+from modname import *
+
+# 导入模块a的特定方法f1,f2
+from a import f1, f2
+```
+
+### __name__属性
+
+由于模块本身就是一个.py文件。.py文件本身能够自己执行的，执行的就是.py文件中的主程序（非函数代码）。
+
+那么当模块被另一个程序引入时,模块中的主程序代码就会开始自动运行。如果想要模块中主程序代码不自动运行。则可以用`__name__`属性来使该某些程序块仅在该模块自身运行时执行。
+
+当`__name__`属性为`__main__`的时候，模块自身的主程序代码才会执行。
+
+```python
+# 该代码自己运行时，会打印上面部分
+# 该代码作为模块运行时，会打印下面部分
+if __name__ == '__main__':
+   print('该代码文件程序自身在运行')
+else:
+   print('该代码文件作为模块被导入')
+```
+
+测试例子
+
+1. 创建test.py文件，代码如下
+```python
+if __name__ == '__main__':
+   print('test.py文件程序自身在运行')
+else:
+   print('test.py文件被当作模块导入到其他文件中了')
+```
+
+2. 测试
+
+```python
+# python终端
+# 运行test.py文件
+>>> python test.py
+test.py文件程序自身在运行
+
+# 导入test模块
+>>> import test
+test.py文件被当作模块导入到其他文件中了
+```
+
+<font color="red">
+注意：每个模块都有一个__name__属性，当其值是'__main__'时，表明该模块自身在运行，否则是被引入。
+
+另外 `__name__` 与 `__main__` 底下是双下划线， `_ _ `是这样去掉中间的那个空格。
+
+</font>
+
+### dir() 函数
+
+函数 dir() 可以找到模块内定义的所有名称。以一个字符串列表的形式返回。
+
+例如当我们导入一个模块的时候，可以使用dir()函数来获取模块中所以变量和函数的名称，从而方便我们使用。
+
+```python
+# 导入模块fibo,sys
+>>> import fibo
+# 打印fibo模块中定义的属性列表
+>>> dir(fibo)
+['__name__', 'fib', 'fib2']
+```
+
+### 标准模块
+
+Python 本身带着一些标准的模块库，即Python官方提供的模块库。
+
+在 Python 库参考文档中有详细描述。
+
+## 包
+
+在某些情况下，为了实现一个大功能，往往需要多个模块.py文件互相搭配使用,并且这些模块.py文件通常会存储在同一个目录中。
+
+这种实现相同功能的一些模块.py文件组成的目录，可以称为包。
+
+包的目录结构如下：
+```
+packageA/            顶层包
+      __init__.py    初始化代码文件
+      demo1.py       功能文件1
+      demo2.py       功能文件2          
+      demo3.py       功能文件3
+      demo4.py       功能文件4
+      ...
+```
+
+目录只有包含一个叫做`__init__.py` 的文件。Python才会认作该目录是一个包。
+
+
+## 输入与输出
+
+### 读取键盘输入
+
+Python 提供了 input() 内置函数读取键盘的输入。
+
+```python
+str = input("请输入：")
+print ("你输入的内容是: ", str)
+
+# 运行结果：
+# 请输入：aaa
+# 你输入的内容是:  aaa
+```
+
+### 输出
+
+Python有两种输出的方式: 表达式语句和 print() 函数。
+
+- 使用 str.format() 函数可以来格式化输出值。
+- 使用 repr() 或 str() 函数可以实现将输出的值转成字符串。
+
+```python
+# python终端
+>>> s = 'Hello, Runoob'
+>>> str(s)
+'Hello, Runoob'
+>>> repr(s)
+"'Hello, Runoob'"
+>>> str(1/7)
+'0.14285714285714285'
+
+## {} 会被format() 中的参数替换
+>>> print('{}网址： "{}!"'.format('菜鸟教程', 'www.runoob.com'))
+菜鸟教程网址： "www.runoob.com!"
+
+## {}符号中的数字，对应参数的位置
+>>> print('{1} 和 {0}'.format('Google', 'Runoob'))
+Runoob 和 Google
+
+## {}中的关键字可以与format中的参数关键字一一对应
+>>> print('站点列表 {0}, {1}, 和 {other}。'.format('Google', 'Runoob', other='Taobao'))
+站点列表 Google, Runoob, 和 Taobao。
+
+## str输出
+>>> s = 'Hello, Runoob'
+>>> str(s)
+'Hello, Runoob'
+
+## repr输出
+>>> repr(s)
+"'Hello, Runoob'"
+# repr() 的参数可以是 Python 的任何对象
+>>> repr((x, y, ('Google', 'Runoob'))) 
+"(32.5, 40000, ('Google', 'Runoob'))"
+
+```
+
+
+## 文件
+
+Python提供了操作文件的方式。
+
+### open() 方法，返回一个文件对象
+
+Python提供open()方法来操作文件。open()方法将会返回一个 file 对象。
+
+<font color="red">注意：在对文件进行处理之前都需要使用到这个函数。通过该方法获取到文件对象。</font>
+
+```python
+#  open() 函数常用形式是接收两个参数：文件名(file)和模式(mode)。
+# filename  文件名称及其路径
+# mode      打开文件的模式：只读，写入，追加等
+open(filename, mode)
+
+# open()方法的完整语法格式为
+open(file, mode='r', buffering=-1, encoding=None, errors=None, newline=None, closefd=True, opener=None)
+```
+
+参数说明:
+- file: 必需，文件路径（相对或者绝对路径）。
+- mode: 可选，文件打开模式
+- buffering: 设置缓冲
+- encoding: 一般使用utf8
+- errors: 报错级别
+- newline: 区分换行符
+- closefd: 传入的file参数类型
+- opener: 设置自定义开启器，开启器的返回值必须是一个打开的文件描述符。
+
+
+> mode参数的部分取值
+
+模式    | 介绍 
+------ | ------
+r      | 默认模式。以只读方式打开文件。文件的指针将会放在文件的开头     
+rb     | 以二进制格式打开一个文件用于只读。文件指针将会放在文件的开头。
+r+     | 打开一个文件用于读写。文件指针将会放在文件的开头
+rb+    | 以二进制格式打开一个文件用于读写。文件指针将会放在文件的开头。
+w      | 打开一个文件只用于写入。如果该文件已存在则打开文件，并从开头开始编辑，即原有内容会被删除。如果该文件不存在，创建新文件。
+w+     | 打开一个文件用于读写。如果该文件已存在则打开文件，并从开头开始编辑，即原有内容会被删除。如果该文件不存在，创建新文件。
+a      | 打开一个文件用于追加。如果该文件已存在，文件指针将会放在文件的结尾。也就是说，新的内容将会被写入到已有内容之后。如果该文件不存在，创建新文件进行写入。
+a+     | 打开一个文件用于读写。如果该文件已存在，文件指针将会放在文件的结尾。文件打开时会是追加模式。如果该文件不存在，创建新文件用于读写。
+
+> 例子：将字符串写入到文件 foo.txt 中
+
+```python
+# 写入模式打开一个文件foo.txt。返回一个文件对象
+f = open("/tmp/foo.txt", "w")
+# 写入内容到文件对象
+f.write( "Python 是一个非常好的语言。\n是的，的确非常好!!\n" )
+# 关闭文件对象
+f.close()
+```
+
+运行结果
+```shell
+# 打印foo.txt 文件内容
+$ cat /tmp/foo.txt 
+Python 是一个非常好的语言。
+是的，的确非常好!!
+```
+
+
+### 文件对象的方法
+
+我们可以通过open()方法，来创建一个文件对象。对于文件对象，Python提供了一些方法，去操作文件对象。
+
+file 对象使用 open 函数来创建，下图列出了 file 对象常用的函数。
+
+![python_20240424020824.png](../blog_img/python_20240424020824.png)
+![python_20240424020901.png](../blog_img/python_20240424020901.png)
+
+> f.read()
+
+read()方法读取文件对象的内容,然后作为字符串或字节对象返回。
+
+`f.read(size)`也可以读取一定大小的文件数据, 然后作为字符串或字节对象返回。注意：当 size 被忽略了或者为负, 那么该文件的所有内容都将被读取并且返回。
+
+```python
+# 只读模式，打开文件foo.txt
+f = open("/tmp/foo.txt", "r")
+# 读取文件内容
+str = f.read()
+# 打印文件内容
+print(str)
+# 关闭打开的文件
+f.close()
+
+# 运行结果
+# Python 是一个非常好的语言。
+# 是的，的确非常好!!
+
+```
+
+> f.readline()
+
+f.readline() 会从文件中读取单独的一行。换行符为 '\n'。f.readline() 如果返回一个空字符串, 说明已经已经读取到最后一行。
+
+```python
+# 只读模式，打开文件foo.txt
+f = open("/tmp/foo.txt", "r")
+
+str = f.readline()
+print(str)
+
+# 关闭打开的文件
+f.close()
+
+```
+
+
+> f.write()
+
+f.write(string) 将 string 写入到文件中, 然后返回写入的字符数。
+
+```python
+# 写入模式，打开文件foo.txt
+f = open("/tmp/foo.txt", "w")
+# 写入文件内容，并返回写入字符数
+num = f.write( "Python 是一个非常好的语言。\n是的，的确非常好!!\n" )
+# 打印写入的字符数
+print(num)
+# 关闭打开的文件
+f.close()
+
+```
+
+
+>f.close()
+
+当你处理完一个文件对象后, 调用 f.close() 来关闭文件对象并释放系统的资源，如果尝试再调用该文件对象则会抛出异常。
+
+```python
+# 打开一个文件
+f = open("/tmp/foo.txt", "r")
+# 读取文件全部内容
+str = f.read()
+# 打印
+print(str)
+# 写入文件数据
+f.write( "Python 是一个非常好的语言。\n是的，的确非常好!!\n" )
+# 关闭文件
+f.close()
+```

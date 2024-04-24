@@ -16,178 +16,399 @@ tags:
 
 目前此笔记中的Python版本为3.12.3
 
-## 模块
+Python从设计之初就已经是一门面向对象的语言，正因为如此，在Python中创建一个类和对象是很容易的。
 
-在Python中，模块就是一个包含所有你定义的函数和变量的文件，其后缀名是`.py`。模块可以被别的程序引入，从而使用该模块中的函数等功能。
+面向对象常用名词解释
+- 类(Class): 一个描述属性和方法的集合。它定义了该集合中每个对象所共有的属性和方法。
+- 方法：类中定义的函数。
+- 类变量（公共类属性）：类变量在整个实例化的对象中是公用的。类变量定义在类中且在函数体之外。类变量通常不作为实例变量使用。
+- 实例变量（普通类属性）：在类的声明中，属性是用变量来表示的，这种变量就称为实例变量，实例变量就是一个用 self 修饰的变量。
+- 局部变量：定义在方法中的变量。
+- 继承：Python允许一个派生类（derived class）继承基类（base class）的字段和方法。
+- 实例化对象：创建一个类的实例，类的具体对象。
+- 对象：通过类定义的数据结构实例。对象包括两个数据成员（类变量和实例变量）和方法。
 
 
-<font color="red">Python解释器是怎样找到对应的模块文件？python会在当前目录或者一些特定目录中找寻这些模块文件。</font>
+## 类
 
-
-support.py
+类语法格式
 ```python
-#!/usr/bin/python3
-# Filename: support.py
- 
-def print_func( par ):
-    print ("Hello : ", par)
-    return
+class 类名:
+    代码块1
+    代码块2
+    .....
+```
+
+### 类的属性
+
+在类中，我们可以定义变量。这些变量就是类的属性。类的属性分为两种：基本属性和私有属性。
+
+基本属性就是类中的普通变量，基本属性可以在类外部被直接访问。
+
+私有属性的特点
+- 私有属性的属性名称以两个下划线`_ _`开头。这样python会将该属性声明为私有属性。
+- 私有属性不能在类的外部被其他代码使用或直接访问。
+
+```python
+# people 类定义
+class people:
+    # 定义基本属性name,age
+    name = ''
+    age = 0
+    # 定义私有属性weight
+    # 私有属性在类外部无法直接进行访问
+    __weight = 0
 
 ```
 
-test.py 
+
+### 类的方法
+
+在类中，我们可以定义函数。这些函数就是类的方法。
+
+在类的内部，使用 def 关键字来定义一个方法，与一般函数定义不同，类方法必须包含参数 self, 且为第一个参数。self 代表的是类的实例。
+
+<font color="red">self 的名字并不是规定死的，也可以使用 this，但是最好还是按照约定使用 self。</font>
+
+
+> 普通方法
+
 ```python
-#!/usr/bin/python3
-# Filename: test.py
+# people类定义
+class people:
+    name = ''
+    age = 0
+    # 定义普通方法speak
+    def speak(self,n,a):
+        self.name = n
+        self.age = a
+        print(self.name,self.age)
  
-# 导入模块
-import support
+# 实例化类
+p = people(10,30)
+# 调用普通方法speak
+p.speak()
+```
+
+> 私有方法
+
+私有方法的特点
+- 私有方法的方法名称以两个下划线`_ _`开头。这样python会将该方法声明为私有方法。
+- 私有方法只能在类的内部调用 ，不能在类的外部调用。
+
+```python
+# people 类定义
+class people:
+      # 定义私有方法__foo
+    def __foo(self):          
+        print('这是私有方法')
  
-# 现在可以调用模块里包含的函数了
-support.print_func("Runoob")
+x = people()
+x.__foo()      # 外部调用类的私有方法，会直接报错
+```
+
+> 类的构造方法
+
+类中可以有一个名为`__init__()` 的特殊方法（构造方法），该方法在类实例化为对象的时候会自动调用一次。
+
+```python
+class people:
+    name = ""
+    age = 0
+    # 定义people类的构造方法
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+
+# 实例化people类对象x。
+x = people("bob",10)
+print(x.name, x.age)   # 输出结果："bob",10
+```
+
+
+## 类对象
+
+当我们创建好一个类的时候，我们可以实例化类，将该类变为一个类对象。
+
+类对象可以访问类中的属性和方法。
+
+```python
+# 定义MyClass类
+class MyClass:
+    i = 12345
+    def f(self):
+        return 'hello world'
+ 
+# 实例化MyClass类，将其转换为类对象x
+x = MyClass()
+ 
+# 类对象x可以访问类的属性和方法
+print("MyClass 类的属性 i 为：", x.i)
+print("MyClass 类的方法 f 输出为：", x.f())
 
 ```
 
-> __name__属性
+## 继承
 
-1. 当模块被另一个程序引入时,模块的主程序会开始运行。若想模块中某些代码不运行。则可以用`__name__`属性来使该程序块仅在该模块自身运行时执行。
-2. 说明：`__name__ `与 `__main__` 底下是双下划线， `_ _ `是这样去掉中间的那个空格。
+Python 同样支持类的继承。子类会继承父类的属性和方法。
+
+### 单继承
+
+继承的语法格式如下
+```python
+class 子类名称(父类名称):
+    代码块1
+    代码块2
+    ....
+```
+
+例子
+```python
+# people类定义
+class people:
+    name = ''
+    age = 0
+    #定义构造方法
+    def __init__(self,n,a):
+        self.name = n
+        self.age = a
+ 
+#单继承示例
+# student类继承people类
+class student(people):
+    grade = ''
+    # 定义构造方法
+    def __init__(self,n,a,g):
+        #调用父类的构造方法
+        people.__init__(self,n,a)
+        self.grade = g
+
+# 实例化student类
+s = student('ken',10,60,3)
+```
+
+### 多继承
+
+Python同样支持多继承形式。
+
+多继承的语法格式如下
+```python
+class 子类名称(父类名称1,父类名称2,父类名称3):
+    代码块1
+    代码块2
+    ....
+```
+
+例子
+```python
+# people类定义
+class people:
+    name = ''
+    age = 0
+    #定义构造方法
+    def __init__(self,n,a):
+        self.name = n
+        self.age = a
+ 
+#另一个类，多继承之前的准备
+class speaker:
+    topic = ''
+    name = ''
+    def __init__(self,n,t):
+        self.name = n
+        self.topic = t
+
+#多继承示例
+class sample(speaker,people):
+    def __init__(self,n,a,w,g,t):
+        people.__init__(self,n,a)
+        speaker.__init__(self,n,t)
+ 
+# 实例化类sample
+test = sample("Tim",25,80,4,"Python")
+```
+
+### 方法重写
+
+如果你的父类方法的功能不能满足你的需求，你可以在子类重写你父类的方法。
 
 ```python
-# 该代码，当自己运行时，会打印上面部分
-# 该代码作为模块运行时，会打印下面部分
-if __name__ == '__main__':
-   print('程序自身在运行')
+# 定义父类
+class Parent:        
+   def myMethod(self):
+      print ('调用父类方法')
+
+# 定义子类
+class Child(Parent): 
+   def myMethod(self):
+      print ('调用子类方法')
+
+# 实例Child类对象c
+c = Child()          
+c.myMethod()               # 调用子类的重写方法
+super(Child,c).myMethod()  # 用子类对象调用父类已被覆盖的方法
+
+# 输出结果
+# 调用子类方法
+# 调用父类方法
+
+```
+
+super() 函数是用于调用父类的一个方法。
+
+## 异常和错误
+
+Python assert（断言）用于判断一个表达式，在表达式条件为 false 的时候触发异常。
+
+### 语法错误
+
+```python
+# while语句，此处有语法错误
+>>> while True print('Hello world')
+# 报错信息
+  File "<stdin>", line 1, in ?
+    while True print('Hello world')
+                   ^
+SyntaxError: invalid syntax
+```
+
+此处while语句没有冒号`:`，有语法错误。
+
+### 异常
+
+假如 Python 程序的语法是正确的，在运行它的时候，也有可能发生错误。这种语法没有错误，但是运行会出现的错误被称为异常。
+
+异常例子
+```python
+# python终端
+>>> 10 * (1/0)             # 0 不能作为除数，触发异常
+Traceback (most recent call last):
+  File "<stdin>", line 1, in ?
+ZeroDivisionError: division by zero
+>>> 4 + spam*3             # spam变量未定义，触发异常
+Traceback (most recent call last):
+  File "<stdin>", line 1, in ?
+NameError: name 'spam' is not defined
+>>> '2' + 2               # int 不能与 str 相加，触发异常
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+TypeError: can only concatenate str (not "int") to str
+```
+
+### 异常处理
+
+> `try/except` 语句
+
+对于代码中可能会发生异常的地方。我们可以通过 `try/except` 语句对可能出现的异常进行处理。
+
+![python_20240424130844.png](../blog_img/python_20240424130844.png)
+
+
+`try/except` 语句格式。
+```python
+try:
+   print("开始。。。。")
+   ## 此处是可能发生异常的代码
+   print("结束。。。。")
+except ValueError:
+   # 当代码发生异常的时候，会执行except中的代码块
+   print("发生ValueError异常！")
+except RuntimeError:
+   print("发生RuntimeError异常！")
+except (IOError, NameError):
+   print("发生NameError和IOError异常！")
+```
+
+<font color="red">一个 try 语句可能包含多个except子句，分别来处理不同的特定的异常。最多只有一个分支会被执行。</font>
+
+`try/except` 语句处理流程：
+1. 首先执行 try 语句块
+2. 如果没有异常发生，忽略 except 子句，try 子句执行后结束。
+3. 如果在执行 try 子句的过程中发生了异常，那么 try 子句余下的部分将被忽略。如果异常的类型和 except 之后的名称相符，那么对应的 except 子句将被执行。
+4. 如果一个异常没有与任何的 except 匹配，那么这个异常将会传递给上层的 try 中。
+
+
+> `try/except...else` 语句
+
+else 子句将在 try 子句没有发生任何异常的时候执行。
+
+这样的好处是避免一些意想不到，而 except 又无法捕获的异常。
+
+![python_20240424132450.png](../blog_img/python_20240424132450.png)
+
+`try/except...else` 语句格式。
+
+```python
+try:
+   print("开始。。。。")
+   ## 此处是可能发生异常的代码
+   print("结束。。。。")
+except ValueError:
+   # 当代码发生异常的时候，会执行except中的代码块
+   print("发生ValueError异常！")
+except (IOError, NameError):
+   print("发生NameError和IOError异常！")
 else:
-   print('我来自另一模块')
+   print("无异常时，执行else语句代码。")
 ```
 
-## 8.输入与输出
 
-### 读取键盘输入
+> `try-finally` 语句
+
+try-finally 语句无论是否发生异常都将执行最后的代码。
+
+![python_20240424133127.png](../blog_img/python_20240424133127.png)
+
+`try-finally` 语句格式。
 
 ```python
-str = input("请输入：");
-print ("你输入的内容是: ", str)
-
-# 运行结果：
-# 请输入：aaa
-# 你输入的内容是:  aaa
+try:
+   print("开始。。。。")
+   ## 此处是可能发生异常的代码
+   print("结束。。。。")
+except ValueError:
+   # 当代码发生异常的时候，会执行except中的代码块
+   print("发生ValueError异常！")
+else:
+   print("无异常时，执行else语句代码。")
+finally:
+    print('无论异常是否发生都会执行finally子句。')
 ```
 
 
-### 不同格式输出
+### 抛出异常
 
-1. 使用 str.format() 函数来格式化输出值。
-2. 使用 repr() 或 str() 函数来实现将输出的值转成字符串。
+Python 中可以使用 raise 语句手动抛出一个指定的异常。
 
-> str.format() 格式化输出值
+![python_20240424133720.png](../blog_img/python_20240424133720.png)
+
+例子
+```python
+x = 10
+if x > 5:
+    # raise手动抛出一个异常
+    raise Exception('x 不能大于 5。')
+```
+
+### 用户自定义异常
+
+我们可以通过创建一个新的异常类来拥有自己的异常处理方式。异常类继承自 Exception 类，可以直接继承，或者间接继承。
 
 ```python
-## {} 会被format() 中的参数替换
->>> print('{}网址： "{}!"'.format('菜鸟教程', 'www.runoob.com'))
-菜鸟教程网址： "www.runoob.com!"
+# 定义MyError类，继承Exception类
+class MyError(Exception):
+   # 构造方法
+   def __init__(self, value):
+      self.value = value
+   
 
-## {}符号中的数字，对应参数的位置
->>> print('{1} 和 {0}'.format('Google', 'Runoob'))
-Runoob 和 Google
+# 测试例子，手动抛出MyError异常
+try:
+   raise MyError(2*2)
+except MyError as e:
+   print('My exception occurred, value:', e.value)
 
-## {}中的关键字可以与format中的参数关键字一一对应
->>> print('站点列表 {0}, {1}, 和 {other}。'.format('Google', 'Runoob', other='Taobao'))
-站点列表 Google, Runoob, 和 Taobao。
-
+# 输出结果
+# My exception occurred, value: 4
 ```
 
->str()： 函数返回一个用户易读的表达形式。
->repr()： 产生一个解释器易读的表达形式。
-
-
-```python
->>> s = 'Hello, Runoob'
-## str输出
->>> str(s)
-'Hello, Runoob'
-
-## repr输出
->>> repr(s)
-"'Hello, Runoob'"
->>> # repr() 的参数可以是 Python 的任何对象
-... repr((x, y, ('Google', 'Runoob')))
-"(32.5, 40000, ('Google', 'Runoob'))"
-```
-
-
-## 9.文件
-
-### 打开文件
-
-```python
-# open() 将会返回一个 file 对象。 
-# filename 文件的绝对路径
-# mode 打开文件的模式：只读，写入，追加等
-open(filename, mode)
-```
-
-mode参数的部分取值：
-
-模式    | 介绍 
------- | ------
-r      | 默认模式。以只读方式打开文件。文件的指针将会放在文件的开头     
-rb     | 以二进制格式打开一个文件用于只读。文件指针将会放在文件的开头。
-r+     | 打开一个文件用于读写。文件指针将会放在文件的开头
-rb+    | 以二进制格式打开一个文件用于读写。文件指针将会放在文件的开头。
-w      | 打开一个文件只用于写入。如果该文件已存在则打开文件，并从开头开始编辑，即原有内容会被删除。如果该文件不存在，创建新文件。
-w+     | 打开一个文件用于读写。如果该文件已存在则打开文件，并从开头开始编辑，即原有内容会被删除。如果该文件不存在，创建新文件。
-a      | 打开一个文件用于追加。如果该文件已存在，文件指针将会放在文件的结尾。也就是说，新的内容将会被写入到已有内容之后。如果该文件不存在，创建新文件进行写入。
-a+     | 打开一个文件用于读写。如果该文件已存在，文件指针将会放在文件的结尾。文件打开时会是追加模式。如果该文件不存在，创建新文件用于读写。
-
-
-```python
-#!/usr/bin/python3
-
-# 打开一个文件
-f = open("/tmp/foo.txt", "w")
-f.write( "Python 是一个非常好的语言。\n是的，的确非常好!!\n" )
-
-# 关闭打开的文件
-f.close()
-```
-
-运行结果
-```shell
-$ cat /tmp/foo.txt 
-Python 是一个非常好的语言。
-是的，的确非常好!!
-```
-
-
-### 文件对象的方法
-
-> f.read(size)
-读取文件中一定数目的数据, 然后作为字符串或字节对象返回。
-size 是一个可选的数字类型的参数。 当 size 被忽略了或者为负, 那么该文件的所有内容都将被读取并且返回。
-
->f.write()
-f.write(string) 将 string 写入到文件中, 然后返回写入的字符数。
-
->f.close()
-关闭文件并释放系统的资源
-
-
-```python
-#!/usr/bin/python3
-
-# 打开一个文件
-f = open("/tmp/foo.txt", "r")
-
-# 读取文件全部内容
-str = f.read()
-print(str)
-
-# 写入文件数据
-num = f.write( "Python 是一个非常好的语言。\n是的，的确非常好!!\n" )
-print(num)
-
-# 关闭打开的文件
-f.close()
-```
