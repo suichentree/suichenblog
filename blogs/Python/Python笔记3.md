@@ -3,7 +3,7 @@ title: Python笔记3
 date: 2024-04-22
 sidebar: 'auto'
 categories: 
- - 后端
+ - Python
 tags:
  - Python
 ---
@@ -411,4 +411,3 @@ except MyError as e:
 # 输出结果
 # My exception occurred, value: 4
 ```
-

@@ -3,7 +3,7 @@ title: Python笔记1
 date: 2024-04-18
 sidebar: 'auto'
 categories: 
- - 后端
+ - Python
 tags:
  - Python
 ---

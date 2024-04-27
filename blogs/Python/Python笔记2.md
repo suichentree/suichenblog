@@ -3,7 +3,7 @@ title: Python笔记2
 date: 2024-04-21
 sidebar: 'auto'
 categories: 
- - 后端
+ - Python
 tags:
  - Python
 ---
@@ -701,25 +701,6 @@ Python 本身带着一些标准的模块库，即Python官方提供的模块库�
 
 在 Python 库参考文档中有详细描述。
 
-## 包
-
-在某些情况下，为了实现一个大功能，往往需要多个模块.py文件互相搭配使用,并且这些模块.py文件通常会存储在同一个目录中。
-
-这种实现相同功能的一些模块.py文件组成的目录，可以称为包。
-
-包的目录结构如下：
-```
-packageA/            顶层包
-      __init__.py    初始化代码文件
-      demo1.py       功能文件1
-      demo2.py       功能文件2          
-      demo3.py       功能文件3
-      demo4.py       功能文件4
-      ...
-```
-
-目录只有包含一个叫做`__init__.py` 的文件。Python才会认作该目录是一个包。
-
 
 ## 输入与输出
 
@@ -925,3 +906,80 @@ f.write( "Python 是一个非常好的语言。\n是的，的确非常好!!\n" )
 # 关闭文件
 f.close()
 ```
+
+
+## 包
+
+在某些情况下，为了实现一个大功能，往往需要多个模块.py文件互相搭配使用,并且这些模块.py文件通常会存储在同一个目录中。
+
+这种实现相同功能的一些模块.py文件组成的目录，可以称为包。
+
+包的目录结构如下：
+```
+packageA/            顶层包
+      __init__.py    初始化代码文件
+      demo1.py       功能文件1
+      demo2.py       功能文件2          
+      demo3.py       功能文件3
+      demo4.py       功能文件4
+      ...
+```
+
+目录只有包含一个叫做`__init__.py` 的文件。Python才会认作该目录是一个包。
+
+
+## pip
+
+pip 是 Python 包管理工具，该工具提供了对 Python 包的查找、下载、安装、卸载的功能。
+
+Python官方的包下载网站 [https://pypi.org/](https://pypi.org/)。
+
+![python_20240425210542.png](../blog_img/python_20240425210542.png)
+
+<font color="red">
+
+注意
+1. pip类似于JavaScript中的NPM包管理工具。
+2. 目前最新的 Python 版本已经预装了 pip。
+
+</font>
+
+
+> 查看是否已经安装 pip 可以使用以下命令。
+
+```shell
+pip --version
+```
+
+> 常用命令
+
+```shell
+# 下载软件包语法
+pip install 包名
+
+# 卸载软件包语法
+pip uninstall 包名
+
+# 查看已经安装的软件包语法
+pip list
+
+```
+
+> 导出当前 Python 环境的配置
+
+我们可以通过 pip freeze 命令。来导出当前 Python 环境的配置。
+
+```shell
+# pip freeze 命令列出当前环境中已安装的所有 Python 包及其版本信息 并保存到 py_eviorment.txt 中
+pip freeze > py_eviorment.txt
+```
+
+然后可以在其他地方使用该文件来重新创建相同的Python环境。
+
+```shell
+# 读取文件中的信息，重新安装所有必需的包，从而重建相同的环境
+pip install -r py_eviorment.txt
+```
+
+
+
