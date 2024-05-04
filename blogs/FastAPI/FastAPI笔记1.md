@@ -32,14 +32,14 @@ FastAPI 是一个用于构建 API 的现代、快速（高性能）的 web 框�
 
 FastAPI是建立在Starlette和Pydantic之上的。那么Starlette和Pydantic是什么？
 
-Starlette 是一个轻量级的异步Web框架，用于构建高性能、可扩展和易维护的Web应用程序。
+Starlette 是一个轻量级的异步Web库，用于构建高性能、可扩展和易维护的Web应用程序。
 - Starlette是基于Python的asyncio库构建的，因此完全支持异步编程。
 - Starlette的设计目标之一是保持简单和轻量级。
 - Starlette提供了灵活的路由系统，可以根据URL模式将请求路由到相应的处理函数。
 - Starlette内置了异常处理机制，可以捕获和处理应用程序中的异常。
 ....
 
-Pydantic 是一个Python库，用于数据验证和解析。它的主要目标是使数据验证变得简单且易于维护。
+Pydantic 是一个用于数据验证和解析的库。它的主要目标是使数据验证变得简单且易于维护。
 - Pydantic 使用Python的类型注解来定义数据模型，使得代码更具可读性和可维护性。
 - Pydantic 自动验证输入数据是否符合定义的模型规范。
 - Pydantic 能够将原始数据解析成Python对象。
@@ -48,6 +48,9 @@ Pydantic 是一个Python库，用于数据验证和解析。它的主要目标�
 > Starlette和Pydantic和FastAPI的关联。
 
 ![python_20240427185758.png](../blog_img/python_20240427185758.png)
+
+- Starlette是负责FastAPI中的web部分（异步web服务等）。
+- Pydantic是负责FastAPI中的数据模型部分（类型提示等）。
 
 
 ## FastAPI 安装
@@ -61,7 +64,7 @@ pip install fastapi
 
 另外通过FastAPI构建的web应用程序需要运行在web服务器上。因此我们还需要安装一个 ASGI 服务器，在生产环境上可以使用 Uvicorn。
 
-Uvicorn是一个基于ASGI的高性能Web服务器，专门用于运行ASGI应用程序。
+Uvicorn是一个基于ASGI的高性能Web服务器，专门用于运行ASGI应用程序，即FastAPI构造的应用程序。
 
 ```py
 # 使用 pip 命令来安装uvicorn
@@ -70,63 +73,49 @@ pip install "uvicorn[standard]"
 
 ## 第一个 FastAPI 应用
 
-① 创建一个 main.py 的文件。并进行编辑。
+① 创建一个 `main.py` 的文件,并进行编辑。
 
 ```py
-# 导入fastapi和typing模块中必要的
-from typing import Union
 # 导入fastapi包的FastAPI类
 from fastapi import FastAPI
-# 导入pydantic包的BaseModel类
-from pydantic import BaseModel
 
-# 创建 FastAPI 应用实例。用于定义和管理应用的各个组件
+# 创建 FastAPI 应用实例 app。用于定义和管理应用的各个组件
 app = FastAPI()
 
-# 定义Item类，该类继承BaseModel类
-# Item类的属性如下
-class Item(BaseModel):
-    name: str                           # name属性是字符串类型的
-    price: float                        # price属性是浮点数类型的
-    is_offer: Union[bool, None] = None  # is_offer属性可以是bool类型的，也可以是None
-
-# 定义根路径 / 的路由操作
+# 在app应用实例上添加一个根路径 / 的路由。get请求的
 @app.get("/")
 def read_root():
     return {"Hello": "World"}
 
-# 定义路径 /items/{item_id} 的路由操作
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: Union[str, None] = None):
-    return {"item_id": item_id, "q": q}
-
-# 定义路径 /newItem 的路由操作，put请求的
-@app.put("/newItem")
-def update_item(item: Item):
-    return {"item_name": item.name, "item_price": item.price}
+# 在app应用实例上添加一个路径为 /test 的异步路由。post请求的
+@app.post("/test")
+async def test():
+    return {"test": "test"}
 ```
 
 代码解析：
-1. `@app.get("xxx")`是一个装饰器。表示当请求路径匹配上路由路径时，将执行这个装饰器装饰的函数。函数返回值就是请求的响应数据。
-2. `item_id: int`意思是参数 item_id  的类型指定为int整数类型。
-3. `q: Union[str, None] = None`意思是参数 q 通过 `Union[str, None]` 表示可以是字符串类型或空。这样就允许在请求中可以不提供 q 参数。
-4. `item: Item`意思是参数item的类型是Item类。
+1. `@app.get("xxx")`这是一个装饰器。表示当请求路径匹配上路由的路径时，将执行这个装饰器装饰的函数。函数返回值就是请求的响应数据。
+2. `async def test():` 意思是该函数是一个异步函数。没有表示是一个同步函数。
 
 
 ② 在main.py文件的当前目录下，命令行中运行以下命令以启动FastAPI应用程序。
 
 ```sh
-# --reload 当文件修改后，会自动加载最新内容。
+# uvicorn 启动命令语法
+uvicorn 文件名称:app --reload
+
+# --reload 当文件修改后，会自动重写加载。
+# main是要执行的py文件的名称
 uvicorn main:app --reload
 ```
 
 ![python_20240427194303.png](../blog_img/python_20240427194303.png)
 
+默认情况下uvicorn服务器的启动端口为8000
 
 ③ 浏览器访问各个请求路径。
 
 ![python_20240427194510.png](../blog_img/python_20240427194510.png)
-![python_20240427194656.png](../blog_img/python_20240427194656.png)
 
 ④ 访问API文档
 
@@ -137,365 +126,637 @@ FastAPI 提供了内置的交互式 API 文档，使开发者能够轻松了解�
 - 你可以通过访问 `http://127.0.0.1:8000/docs` 来打开 Swagger UI 风格的文档。
 - 你也可以通过访问 `http://127.0.0.1:8000/redoc` 来打开 ReDoc 风格的文档。
 
+如下图所示是接口文档页面
 ![python_20240427212313.png](../blog_img/python_20240427212313.png)
 ![python_20240427212239.png](../blog_img/python_20240427212239.png)
 
 
-## FastAPI 路由
+## 路径操作装饰器
 
-在 FastAPI 中，每个路由都映射到应用程序中的一个函数，用于处理特定的 HTTP 请求，并返回相应的响应数据。
+`@something`语法在 Python 中被称为「装饰器」。
 
-> 普通路由
+而在 FastAPI 中，每个路由都通过路径操作装饰器来映射到程序中的一个函数中。
 
-创建 FastAPI 应用实例和路由。
+简而言之，路径操作装饰器用来绑定路由和函数。
 
+常见的路径操作装饰器如下
 ```py
-# 导入FastAPI类
 from fastapi import FastAPI
-# 通过FastAPI类创建FastAPI应用实例
 app = FastAPI()
 
-# 创建根路径路由
+## 四种HTTP请求方式的装饰器
+@app.get()
+@app.post()
+@app.put()
+@app.delete()
+## 请求参数相关的装饰器
+@app.options()
+@app.head()
+@app.patch()
+@app.trace()
+```
+
+> 路径操作装饰器的参数
+
+我们可以给路径操作装饰器中传入许多参数。从而实现不同的效果。
+
+常用的装饰器参数如下。更多的参数请查询文档。
+```py
+from fastapi import FastAPI
+app = FastAPI()
+# 此处以post请求的路径操作装饰器举例
+@app.post(
+    path,
+    response_model,
+    status_code,
+    tags,
+    summary="xxx",
+    description="xxx",
+    response_description="xxx",
+    responses,
+    deprecated=False
+    ....
+)
+```
+
+
+### tags,summary,description等参数
+
+tags,summary,description等参数主要用于给文档中的接口添加详细信息。
+
+例子
+```py
+@app.post("/test",tags=["这是test接口的tag"],
+          summary="这是test接口的summary",
+          description="这是test接口的description",
+          response_description="这是test接口的response_description")
+def test():
+    return {"Hello": "World"}
+```
+
+文档中的效果如下图所示。
+![python_20240430232411.png](../blog_img/python_20240430232411.png)
+
+
+## FastAPI 路由
+
+### APIRouter函数
+
+在上面的第一个 FastAPI 应用的代码中。我们是先通过FastAPI()函数创建出FastAPI应用实例，然后直接在FastAPI应用实例上添加路由。如下面代码所示。
+
+```py
+# 导入fastapi包的FastAPI类
+from fastapi import FastAPI
+# 创建 FastAPI 应用实例 app。用于定义和管理应用的各个组件
+app = FastAPI()
+
+# 在app应用实例上添加一个根路径 / 的路由
 @app.get("/")
 def read_root():
     return {"Hello": "World"}
+```
 
-# 创建/test路由
-@app.get("/test")
+但是这种方式不规范，这种方式是直接把FastAPI应用实例和路由进行绑定，从而导致无法区分不同种类路由。因此FastAPI提供了一个APIRouter函数，专门用于路由管理。
+
+如下面代码所示
+```py
+# 导入fastapi包的FastAPI类
+from fastapi import FastAPI,APIRouter
+
+# 创建 FastAPI 应用实例。用于定义和管理应用的各个组件
+app = FastAPI()
+
+# 创建路由实例
+router = APIRouter()
+
+# 创建根路由
+@router.get("/")
 def test():
+    return {"Hello": "World"}
+# 创建/test路由
+@router.get("/test")
+def test():
+    return {"test": "test"}
+
+
+# 通过include_router函数，把应用实例app与路由实例router绑定
+app.include_router(router)
+```
+
+1. `router = APIRouter()`APIRouter函数用来创建路由实例。之后再路由实例上添加具体的路由。
+2. `app.include_router(router)` 通过include_router函数，把应用实例app与路由实例router绑定在一起。
+
+通过这种方式，我们可以把FastAPI的应用实例和路由实例分离开来。从而降低代码之间的耦合度。
+
+### include_router函数
+
+如上面代码所示，include_router函数可以将应用实例与路由实例绑定。除此之外，include_router函数还可以给不同分类的路由添加前缀，标签，注释等信息。
+
+```py
+from fastapi import FastAPI,APIRouter
+app = FastAPI()
+
+router = APIRouter()
+@router.get("/test")
+def test():
+    return {"Hello": "World"}
+
+app.include_router(router,prefix="/module01",tags=["这是模块01的接口"])
+```
+
+![python_20240502000141.png](../blog_img/python_20240502000141.png)
+
+### 多个模块的路由管理
+
+在正式项目中，一个FastAPI应用通常由多个模块（多个包）组件的。每个模块都拥有自己的路由。
+
+假设一个FastAPI应用的工程目录结构如下所示。
+```
+├── fastapi-app
+│   ├── __init__.py
+│   ├── main.py
+│   └── module01
+│   │   ├── __init__.py
+│   │   └── module01Routers.py
+│   └── module02
+│   │   ├── __init__.py
+│   │   └── module02Routers.py
+```
+
+模块01的module01Routers.py文件代码如下
+```py
+from fastapi import APIRouter
+router = APIRouter()
+
+# 用户模块的测试接口
+@router.get("/user/test")
+async def usertest():
     return {"test": "test"}
 ```
 
-- `app = FastAPI()` 创建 FastAPI 应用实例。
-- `@app.get("xxx")` 使用 @app.get 装饰器创建一个处理GET请求的路由，并将路由与函数绑定。
-- `def read_root()` 路由处理函数，函数返回值就是请求响应数据。
-
-> 携带路径参数的路由
-
+模块02的module02Routers.py文件代码如下
 ```py
-from fastapi import FastAPI
-app = FastAPI()
+from fastapi import APIRouter
+router = APIRouter()
 
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: str = None):
-    return {"item_id": item_id, "q": q}
+# 订单模块的测试接口
+@router.get("/order/test")
+async def ordertest():
+    return {"test": "test"}
 ```
 
-- `@app.get("/items/{item_id}")` 定义了一个路由路径，其中{item_id} 是路径参数，对应于函数参数 item_id。
-- ` q: str = None` 表示参数q 是一个可选的字符串类型参数，默认值为 None。
 
-
-## FastAPI 请求和响应
-
-FastAPI 提供了强大的工具来解析请求数据，并根据需要生成规范的响应。
-
-> 请求参数默认值
-
-可以给函数设置默认的请求参数值
-
+main.py文件代码如下
 ```py
+# 导入FastAPI
 from fastapi import FastAPI
+# 创建FastAPI应用实例
 app = FastAPI()
 
-@app.get("/items/")
-def read_item(skip: int = 0, limit: int = 10):
-    return {"skip": skip, "limit": limit}
+# 导入各个模块
+from module01 import module01Routers
+from module02 import module02Routers
+
+# 通过include_router函数，把各个模块的路由实例加入到FastAPI应用实例中
+app.include_router(module01Routers.router,prefix="/module01",tags=["这是模块01的接口"])
+app.include_router(module02Routers.router,prefix="/module02",tags=["这是模块02的接口"])
 ```
 
-两个参数 skip 和 limit，它们的类型均为整数，默认值分别为 0 和 10。
+通过上面的方式，各个模块的路由分开编写，并且通过include_router函数整合到FastAPI应用实例中。
 
-> 请求体参数
+![python_20240502000027.png](../blog_img/python_20240502000027.png)
 
-我们可以使用pydantic包来创建数据模型。通过数据模型来接收请求体的参数。
+
+## FastAPI 请求
+
+FastAPI 提供了多种方式来解析请求中的数据，并根据需要生成规范的响应。
+
+### 请求参数
+
+通常情况下请求参数是指请求路径中`?`后面拼接的键值对字符串。
+
+假设请求的路径如：`http://127.0.0.1:8000/test?a=1&b=2`。那么请求中`?`后面的`a=1&b=2`键值对就是请求参数a和b。
+
+```py
+from fastapi import APIRouter
+router = APIRouter()
+
+@router.get("/test")
+def test(a,b):
+    return {"a": a, "b": b}
+
+# 给函数参数设置默认值
+@router.get("/test2")
+def test2(a: int = 0, b: int = 10):
+    return {"a": a, "b": b}
+
+# 将函数参数设置为可选参数
+@router.get("/test3")
+def test3(a: int = 0, b: int = None):
+    return {"a": a, "b": b}
+```
+
+- 函数形参需要与请求参数同名。这样函数形参才能接收到请求参数的数据。
+- `b: int = 10 `这种写法是把参数b的类型设置为整数类型。默认值为 10。
+- `b: int = None` 这种写法是把参数b设置为可选参数。
+
+![python_20240502184110.png](../blog_img/python_20240502184110.png)
+
+### 路径参数
+
+我们可以在请求路径上添加路径参数占位符。
+
+- 路径参数占位符用来代表路径中的动态参数的。
+- 当函数中的形参与路径参数同名的时候，函数形参才能接受到路径参数的数据。
+
+```py
+from fastapi import APIRouter
+router = APIRouter()
+
+@router.get("/items/{item_id}")
+def read_item(item_id: int):
+    return {"item_id": item_id}
+```
+
+- `/items/{item_id}` 定义了一个请求路径，其中{item_id} 是路径参数，对应于函数参数 item_id。
+- `item_id: int` 函数形参item_id,数据类型为int
+
+例子
+![python_20240502180157.png](../blog_img/python_20240502180157.png)
+
+### 请求体参数-form表单数据格式
+
+通常情况下，GET请求的请求参数是指请求路径中`?`后面携带的键值对字符串。而GET请求是没有请求体的。
+
+因此对于POST请求等。FastAPI如何接受POST请求中请求体的form表单数据？
+
+在FastAPI中可以使用Form表单组件包来处理表单数据。
+
+1. 先安装Form表单组件包
+
+```
+pip install python-multipart
+```
+
+2. 使用
+
+```py
+# 引入Form函数
+from fastapi import APIRouter,Form
+router = APIRouter()
+
+# post请求
+@router.post("/login")
+def login(username: str = Form(),password: str = Form()):
+    return {
+        "username":username,
+        "password":password
+    }
+```
+
+- Form()函数会拿到请求体中的表单数据。
+- `username: str = Form()`参数username，类型为字符串。参数数据通过Form()函数来获取。
+
+
+可以看到图中的Content-Type是`application/x-www-form-urlencoded`。这表示数据是Form表单数据。
+![python_20240502194448.png](../blog_img/python_20240502194448.png)
+
+
+### 请求体参数-json数据格式
+
+通常情况下，GET请求的请求参数是指请求路径中`?`后面携带的键值对字符串。而GET请求是没有请求体的。
+
+因此对于POST请求等。FastAPI如何接受POST请求中请求体的json数据？
+
+在FastAPI中我们可以使用pydantic包来创建数据模型。通过数据模型来接收请求体中的json数据。
+
+注意：只有自定义的数据模型类继承pydantic包中的BaseModel类。pydantic包才能帮我们将请求体的json数据进行校验并传递给模型类对象。
+
 
 ```py
 from pydantic import BaseModel
-from fastapi import FastAPI
+from fastapi import APIRouter
+router = APIRouter()
 
-app = FastAPI()
-# 定义数据模型Item类及其属性。该类继承BaseModel类
+# 定义Addr模型类型
+class Addr(BaseModel):
+    prpvince:str
+    city:str
+
+# 定义数据模型Item类及其属性。该类需要继承pydantic包中的BaseModel类
 class Item(BaseModel):
     name: str
-    description: str = None
+    age: int = 10               # age属性设置默认值10
+    description: str = None     # 设置为可选属性
     price: float
-    tax: float = None
+    tax: float = None           # 设置为可选属性
+    address: Addr               # 地址属性类型为Addr
 
 # post请求
-@app.post("/items/")
+@router.post("/items/")
 def create_item(item: Item):
     return item
 ```
 
 - `item: Item` 函数参数为Item类。该参数可以接收一个请求体数据，数据的格式需要与Item类相同。
 
+![python_20240502191747.png](../blog_img/python_20240502191747.png)
 
-> JSON响应数据
 
-若函数返回一个字典类型数据，FastAPI 会把函数的返回值自动转换为 JSON 格式，并作为响应数据发送给客户端。
+### 请求对象 Request
+
+有些情况下，我们希望可以访问Request请求对象。从而获取到请求中的一些信息。
+
+在FastAPI中我们可以使用Request类来接收请求对象。通过这种方式我们可以获取到请求中的一些信息。例如请求头 header,请求url,cookis等
 
 ```py
-from fastapi import FastAPI
-app = FastAPI()
+from fastapi import APIRouter,Request
+router = APIRouter()
 
-@app.get("/items/")
-def read_item(skip: int = 0, limit: int = 10):
-    return {"skip": skip, "limit": limit}  # 返回字典数据
+@router.post("/getRequest")
+# req参数类型为Request类型。用来接收请求信息。
+def getRequest(req: Request):
+    return {
+        "RequestURL":req.url,         
+        "RequestIP":req.client.host,
+        "RequestHeader":req.headers,
+        "user-agent":req.headers.get("user-agent")
+    }
+
 ```
 
+![python_20240502231623.png](../blog_img/python_20240502231623.png)
 
->  数据模型响应数据
 
-如果路由处理函数返回一个 Pydantic 数据模型实例，FastAPI 将自动将其转换为 JSON 格式，并作为响应发送给客户端。
+## FastAPI 响应
+
+### 响应 Json 数据
+
+如果路由处理函数返回一个字典类型数据，FastAPI 会把函数的返回值自动转换为 JSON 格式，并作为响应数据发送给客户端。
+
 
 ```py
-from pydantic import BaseModel
-from fastapi import FastAPI
+from fastapi import APIRouter
+router = APIRouter()
 
-app = FastAPI()
+@router.get("/test1/")
+def test1(a, b):
+    return {"a": a, "b": b}  # 返回字典数据
+```
+
+如果路由处理函数返回一个 Pydantic 数据模型实例，FastAPI 会自动将其转换为 JSON 格式，并作为响应发送给客户端。
+
+```py
+from fastapi import APIRouter
+from pydantic import BaseModel
+router = APIRouter()
 
 # 定义数据模型类
 class Item(BaseModel):
     name: str
     description: str = None
-    price: float
-    tax: float = None
 
-@app.post("/items/")
-def create_item(item: Item):
+@router.post("/items/")
+def get_item(item: Item):
     return item  # 返回数据模型类数据
 ```
 
-> 请求头和Cookie
+### response_model 响应模型
 
-路由函数可以使用 Header 和 Cookie 类型注解获取请求头和 Cookie 数据。
+FastAPI提供了response_model 响应模型。让我们可以在路径操作装饰器中使用response_model参数来定义响应模型数据的格式。
 
 ```py
-from fastapi import Header, Cookie
 from fastapi import FastAPI
-
 app = FastAPI()
 
-@app.get("/items/")
-def read_item(user_agent: str = Header(None), session_token: str = Cookie(None)):
-    return {"User-Agent": user_agent, "Session-Token": session_token}
+from pydantic import BaseModel
+from fastapi import APIRouter
+router = APIRouter()
+
+# 定义类ItemA
+class ItemA(BaseModel):
+    username: str
+    password: str
+    age: int
+
+# 定义类ItemB
+class ItemB(BaseModel):
+    username: str
+    age: int
+
+@router.post("/getItem",response_model=ItemB)
+def getItem(item: ItemA):
+    return item
+
+# app应用实例中添加路由实例
+app.include_router(router)
 ```
 
-> 重定向
+- `item: ItemA` 函数形参接收的是ItemA类对象。
+- `response_model=ItemB` 通过给路径操作装饰器添加response_model参数。来定义响应数据的格式。
+
+运行结果如图所示
+![python_20240503003311.png](../blog_img/python_20240503003311.png)
+
+在上面的代码中，定义了两个模型类ItemA和ItemB。路由处理函数getItem()接收并返回的都是ItemA类对象。但是最终的响应结果数据确是ItemB对象。
+
+<font color="red">简而言之，若路径操作装饰器中添加了response_model参数。那么FastAPI会把函数的返回值数据转换为response_model参数声明的数据类型。</font>
+
+
+> response_model_exclude_unset 参数
+
+除了response_model参数之外，我们还可以添加 response_model_exclude_unset 参数。
+
+response_model_exclude_unset 参数可以去除响应模型中未被赋值的字段。即响应模型中没有被赋值的字段，不会添加到响应数据中。
+
+
+```py
+@router.post("/getItem",response_model=ItemB,response_model_exclude_unset=True)
+def getItem(item: ItemA):
+    return item
+```
+
+函数返回的是ItemA类型的数据。但是当ItemA类型返回数据中没有被赋值的字段，不会添加到响应数据中。
+
+
+> response_model_include 参数
+
+response_model_include参数可以让你更精细地控制响应数据中包含哪些字段。
+
+```py
+@router.post("/getItem",response_model=ItemB,response_model_include={"username", "age"})
+def getItem(item: ItemA):
+    return item
+```
+
+函数返回的是ItemA类型（有三个属性字段）的数据。但是response_model_include参数可以控制响应数据中只包含两个字段（username,age）的数据。
+
+
+> response_model_exclude 参数
+
+response_model_include参数可以让你更精细地控制响应数据中不包含哪些字段。
+
+```py
+@router.post("/getItem",response_model=ItemB,response_model_exclude={"password"})
+def getItem(item: ItemA):
+    return item
+```
+
+函数返回的是ItemA类型（有三个属性字段）的数据。但是response_model_include参数可以控制响应数据中排除password字段数据。
+
+
+
+
+
+
+
+
+
+
+
+
+### 重定向
 
 使用 RedirectResponse 实现重定向，将客户端重定向到其他路由上。
 
 ```py
-from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
+from pydantic import BaseModel
+from fastapi import APIRouter
+router = APIRouter()
 
-app = FastAPI()
-
-@app.get("/a")
+@router.get("/a")
 def a():
     return {"a": "a"}
 
-@app.get("/redirect")
+@router.get("/redirect")
 def redirect():
     return RedirectResponse(url="/a")  # 重定向到/a路由上
 ```
 
 在浏览器访问`/redirect`路由的时候会自动跳转到 `/a`路由。
 
-> 请求状态码
+### 响应状态码
 
 使用 HTTPException 可以抛出异常，返回自定义的状态码和详细信息。
 
 ```py
 from fastapi import HTTPException
+from fastapi import APIRouter
+router = APIRouter()
 
-@app.get("/items")
+@router.get("/items")
 def read_item():
     # 抛出HTTPException异常，参数为异常信息
     raise HTTPException(status_code=404, detail="Item not found")
 ```
 
+### 自定义响应数据
 
-> 自定义响应头
-
-使用 JSONResponse 可以自定义响应头数据。
+使用 JSONResponse 可以自定义响应数据。
 
 ```py
-from fastapi import FastAPI
 from fastapi.responses import JSONResponse
+from fastapi import APIRouter
+router = APIRouter()
 
-app = FastAPI()
-
-@app.get("/items/{item_id}")
+@router.get("/items/{item_id}")
 def read_item(item_id: int):
     content = {"item_id": item_id}
     headers = {"X-Custom-Header": "custom-header-value"}
     return JSONResponse(content=content, headers=headers)
 ```
 
-## Pydantic 模型
 
-Pydantic 是一个用于数据验证和序列化的 Python 数据模型库。
+## 文件上传
 
-它在 FastAPI 中广泛使用，用于定义请求体、响应体和其他数据模型，提供了强大的类型检查和自动文档生成功能。
+当我们需要进行文件上传的时候，需要把请求的content-type设置为`multipart/form-data`格式。这个格式是表单文件上传格式。
 
-### 定义模型
+下面是文件上传的两种方式。
 
-使用 Pydantic 定义一个模型非常简单，只需创建一个继承自 pydantic.BaseModel 的类，并在其中定义字段。字段的类型可以是任何有效的 Python 类型，也可以是 Pydantic 内置的类型。
+### 小文件上传
+
+使用fastapi包中的File函数来获取文件对象
 
 ```py
-# 导入Pydantic包的 BaseModel类
-from pydantic import BaseModel
-# 定义Item模型类及其属性字段，继承BaseModel类
-class Item(BaseModel):
-    name: str
-    description: str = None
-    price: float
-    tax: float = None
+from fastapi import APIRouter,File
+router = APIRouter()
+
+# 单个文件上传请求 (适合小文件上传)
+@router.post("/uploadFile")
+def uploadFile(file: bytes = File()):
+    return {
+        "fileLength":len(file)      # 文件字节大小
+    }
+
+# 多个文件上传请求  (适合小文件上传)
+@router.post("/uploadFiles")
+def uploadFiles(files: list[bytes] = File()):
+    return {
+        "fileCount":len(files)      # 文件个数
+    }
 ```
 
-description 和 tax 是可选的字段，并且默认值都为 None。
+- File函数用来获取上传文件的数据。
+- `file: bytes = File()` 设置一个file参数，类型为字节数据类型。数据从File函数获取。
 
-### 使用模型
+注意：这种方式是一次性读取文件数据内存中，因此这种方式只适合小文件上传。对于大文件上传需要用其他方法。
 
-在 FastAPI 中，可以将 Pydantic 模型用作请求体（Request Body），以自动验证和解析客户端发送的数据。
 
+### 大文件上传 (推荐)
+
+使用fastapi包中的UploadFile函数来获取文件对象。
+
+```py
+from fastapi import APIRouter,UploadFile
+router = APIRouter()
+
+# 单个文件上传请求 
+@router.post("/uploadFile")
+def uploadFile(file: UploadFile):
+    return {
+        "fileSize":file.size,         # 文件大小
+        "fileName":file.filename        # 文件名称
+    }
+
+# 多个文件上传请求
+@router.post("/uploadFiles")
+def uploadFiles(files: list[UploadFile]):
+    # 打印文件其他信息
+    for i in files:
+        print("fileName",i.filename)
+        print("fileSize",i.size)
+    return {
+        "fileCount":len(files)      # 文件个数
+    }
+```
+
+- `file: UploadFile` 设置一个file参数，是UploadFile类型。
+
+通过UploadFile函数，我们还可以获取文件名称和大小等其他信息。
+
+![python_20240502222728.png](../blog_img/python_20240502222728.png)
+
+
+## FastAPI 访问静态文件
+
+我们可以在FastAPI应用中开放一个静态文件目录。通过这个目录来专门访问FastAPI应用中的静态文件。
+
+1. 在`main.py`文件编写如下代码
 ```py
 from fastapi import FastAPI
-from pydantic import BaseModel
-
+from fastapi.staticfiles import StaticFiles
 app = FastAPI()
 
-class Item(BaseModel):
-    name: str
-    description: str = None
-    price: float
-    tax: float = None
-
-@app.post("/items/")
-def create_item(item: Item):
-    return item
+# FastAPI应用实例对象 挂载静态目录
+app.mount("/statics",StaticFiles(directory="statics"))
 ```
 
-上面代码中，函数接受一个名为 item 的参数，其类型是 Item 模型。FastAPI 将自动验证传入的 JSON 数据是否符合模型的定义，并将其转换为 Item 类型的实例对象。
+- 先导入fastapi.staticfiles包中的StaticFiles类。
+- `StaticFiles(directory="statics")` 设置statics目录为静态文件目录。之后挂载到FastAPI应用实例对象app上。
+- 注意：静态文件目录和代码文件之间的相对路径。
 
-> 参数验证
+2. 然后创建statics目录。其中创建一个txt文件
+3. 浏览器访问静态文件。
 
-Pydantic 模型还可以用于验证查询参数、路径参数等。
-
-```py
-from fastapi import FastAPI, Query
-from pydantic import BaseModel
-
-app = FastAPI()
-
-class Item(BaseModel):
-    name: str
-    description: str = None
-    price: float
-    tax: float = None
-
-@app.get("/items/")
-def read_item(item: Item, q: str = Query(..., max_length=10)):
-    return {"item": item, "q": q}
-```
-
-通过使用 Query 函数，我们还可以为参数指定更多的验证规则，如最大长度限制。
-
-
-
-## FastAPI 路径操作依赖项
-
-FastAPI 提供了路径操作依赖项的机制，允许你在路由处理函数执行之前或之后运行一些额外的逻辑。
-
-### 依赖项
-
-依赖项是在路由操作函数执行前或后运行的可复用的函数或对象。它们被用于执行一些通用的逻辑，如验证、身份验证、数据库连接等。
-
-在 FastAPI 中，依赖项通常用于两个方面：
-- 预处理（Before）依赖项： 在路由操作函数执行前运行，用于预处理输入数据，验证请求等。
-- 后处理（After）依赖项： 在路由操作函数执行后运行，用于执行一些后处理逻辑，如日志记录、清理等。
-
-### 预处理（Before）依赖项
-
-```py
-from fastapi import Depends, FastAPI
-
-app = FastAPI()
-
-# 依赖项函数
-def common_parameters(q: str = None, skip: int = 0, limit: int = 100):
-    return {"q": q, "skip": skip, "limit": limit}
-
-# 路由操作函数
-@app.get("/items/")
-async def read_items(commons: dict = Depends(common_parameters)):
-    return commons
-
-```
-
-- 上面代码中依赖项函数接受参数 q、skip 和 limit，并返回一个包含这些参数的字典数据。
-- `commons: dict = Depends(common_parameters)`路由操作函数 接收 依赖项函数的返回值 作为参数。
-
-
-### 后处理（After）依赖项
-
-```py
-from fastapi import Depends, FastAPI
-app = FastAPI()
-
-# 后处理依赖项函数
-async def after_request():
-    # 这里可以执行一些后处理逻辑，比如记录日志
-    pass
-
-# 路由操作函数
-@app.get("/items/", response_model=dict)
-async def read_items_after(request: dict = Depends(after_request)):
-    return {"message": "Items returned successfully"}
-```
-
-### 多个依赖项函数组合使用
-
-```py
-from fastapi import Depends, FastAPI
-app = FastAPI()
-
-# 依赖项函数1
-def common_parameters(q: str = None, skip: int = 0, limit: int = 100):
-    return {"q": q, "skip": skip, "limit": limit}
-
-# 依赖项函数2, 依赖于依赖项函数common_parameters
-def verify_token(token: str = Depends(common_parameters)):
-    return token
-
-# 路由操作函数, 依赖于依赖项函数verify_token
-@app.get("/items/")
-async def read_items(token: dict = Depends(verify_token)):
-    return token
-```
-
-### 异步依赖项
-
-依赖项函数和路由处理函数可以是异步的，允许在它们内部执行异步操作。
-
-```py
-from fastapi import Depends, FastAPI
-from typing import Optional
-import asyncio
-
-app = FastAPI()
-
-# 异步依赖项函数
-async def get_token():
-    # 模拟异步操作
-    await asyncio.sleep(2)
-    return "fake-token"
-
-# 异步路由操作函数
-@app.get("/items/")
-async def read_items(token: Optional[str] = Depends(get_token)):
-    return {"token": token}
-```
-
-上面代码中，get_token 是一个异步的依赖项函数，模拟了一个异步操作。
-
+![python_20240502235451.png](../blog_img/python_20240502235451.png)
