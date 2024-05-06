@@ -288,20 +288,21 @@ $ git clone git@server-name:path/repo-name.git 克隆(不需要另建文件夹)
 方式1：
 git remote -v                       #查看远端地址
 git remote                          #查看远端仓库名
-git remote set-url origin 新地址    #更换远程仓库地址
+git remote set-url origin 新地址    #更换远程仓库地址，仓库别名origin
 方式2：
-git remote rm origin                 #删除远程的仓库
-git remote add origin 新地址         #重新添加远程仓库
+git remote rm origin                 #删除远程的仓库origin
+git remote add origin 新地址         #重新添加远程仓库,远程仓库别名为origin
 
 分支
-$ git branch -a 查看所有分支
-$ git branch -vv 查看分支关联
-$ git branch dev 创建分支
-$ git checkout dev 切换分支
-$ git merge dev 合并某分支到当前分支
-$ git merge --no-ff -m "msg" dev 普通模式合并，合并后的历史有分支
-$ git branch -d dev 删除分支
-$ git checkout -b dev 创建并切换分支
+$ git branch -a                         #查看所有分支
+$ git branch -vv                        #查看分支关联
+$ git branch dev                        #创建分支
+$ git checkout dev                      #切换分支
+$ git merge dev                         #合并某分支到当前分支
+$ git merge --no-ff -m "msg" dev        #普通模式合并，合并后的历史有分支
+$ git branch -d dev                     #删除分支
+$ git checkout -b dev                   #创建并切换分支
+$ git branch -m 旧分支名称 新分支名称    #更换当前本地分支名称
 
 合并分支,无法merge
 $ git stash save 名字 暂存工作状态
