@@ -505,6 +505,33 @@ f-string 格式化字符串以 f 开头，后面跟着字符串，字符串中�
 'Runoob: www.runoob.com'
 ```
 
+> 三重引号
+
+在Python中，可以使用三重引号（""" """）来创建多行字符串。这种语法允许您在三重引号之间书写多行文本，包括换行符和其他特殊字符，而无需使用转义字符。
+
+这个形式是以三重引号开始（单引号和双引号都可以），并紧跟任意行数的文本，以开始时同样的三重引号结尾。
+
+```py
+# 用三重引号来定义SQL字符串
+sql = """
+INSERT INTO t_user_watch_info(
+name,pwd,idCard,video_path,remark) 
+VALUES(?,?,?,?,?);
+"""
+print(sql)
+
+multi_line_string = """
+这是一个
+多行字符串的
+示例。
+它可以包含换行符和特殊字符。
+"""
+print(multi_line_string)
+
+```
+
+另外，三重引号的另一个常见用途是创建函数的文档注释，这对于编写函数的说明和文档非常有帮助。
+
 ### bool 布尔类型
 
 在 Python 中，True 和 False 都是关键字，表示布尔值。其中True代表1，False代表0。

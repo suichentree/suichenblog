@@ -269,6 +269,153 @@ t_user
 sqlite> DROP TABLE t_user;
 ```
 
+### 约束
+
+当我们在创建表的时候，我们可以给表的列添加一些约束，从而确保了数据库中数据的准确性和可靠性。
+
+约束可以是列级或表级。列级约束仅适用于列，表级约束被应用到整个表。
+
+以下是在 SQLite 中常用的约束。
+- NOT NULL 约束：确保某列不能有 NULL 值。
+- DEFAULT 约束：当某列没有指定值时，为该列提供默认值。
+- UNIQUE 约束：确保表中某列的所有值是不同的。
+- PRIMARY KEY 约束 用于标识数据库表中的主键。
+- CHECK 约束：CHECK 约束确保某列中的所有值满足一定条件。
+
+####  NOT NULL 约束
+
+默认情况下，列可以保存 NULL 值。如果您不想某列有 NULL 值，那么需要在该列上定义此约束，指定在该列上不允许 NULL 值。
+
+NULL 与没有数据是不一样的，NULL 代表着未知的数据。
+
+> 例子
+
+t_user表的NAME 和 AGE 列指定不接受 NULL 值：
+
+```sql
+CREATE TABLE t_user(
+   NAME           TEXT    NOT NULL,
+   AGE            INT     NOT NULL,
+   ADDRESS        CHAR(50),
+);
+```
+
+#### DEFAULT 约束
+
+DEFAULT 约束在 INSERT INTO 语句没有提供一个特定的值时，为列提供一个默认值。
+
+> 例子
+
+t_user表的 ADDRESS 列默认值为beijing
+
+```sql
+CREATE TABLE t_user(
+   NAME           TEXT    NOT NULL,
+   ADDRESS        CHAR(50) DEFAULT 'beijing'
+);
+
+```
+
+
+#### UNIQUE 约束
+
+UNIQUE 约束防止在一个列的不同记录中都存在相同的值。
+
+> 例子
+
+t_user表的 NAME 列有 UNIQUE 约束。意思是指表中不能有相同的名称。
+
+```sql
+CREATE TABLE t_user(
+   NAME TEXT UNIQUE,
+);
+
+```
+
+#### CHECK 约束
+
+CHECK 约束会检测记录中的数据是否符合条件。如果条件值为 false，则记录违反了约束，且不能输入到表。
+
+> 例子
+
+t_user表的 AGE 列有 CHECK 约束。因此 age 列的数值必须大于10,否则无法插入到表中。
+
+```sql
+CREATE TABLE t_user(
+   ID INT PRIMARY KEY     NOT NULL,
+   NAME           TEXT    NOT NULL,
+   AGE            INT     CHECK(AGE > 10),
+);
+
+```
+
+#### PRIMARY KEY 约束
+
+PRIMARY KEY 约束 用于标识数据库表中的主键。
+
+在一个表中可以有多个具有 UNIQUE约束 的列，但只能有一个主键。在设计数据库表时，主键是很重要的。
+
+主键是用来唯一标识数据库表中的各行/记录。主键必须包含唯一值。主键列不能有 NULL 值。
+
+<font color="red">注意在 SQLite 中，主键可以是 NULL，这是与其他数据库不同的地方。</font>
+
+> 例子
+
+t_user表的 ID列 为主键。
+
+```sql
+CREATE TABLE t_user(
+   ID             INT     PRIMARY KEY     NOT NULL,
+   NAME           TEXT    NOT NULL,
+   AGE            INT     NOT NULL
+);
+
+```
+
+
+#### 删除约束
+
+在 SQLite 中，要删除表的约束，通常需要使用 ALTER TABLE 语句，并指定要删除的约束类型。
+
+> 删除主键约束
+
+table_name 是你要操作的表名，primary_key_name 是要删除的主键约束的名称。
+
+```sql
+ALTER TABLE table_name DROP CONSTRAINT primary_key_name;
+```
+
+> 删除唯一约束
+
+```sql
+ALTER TABLE table_name DROP CONSTRAINT unique_constraint_name;
+```
+
+> 删除外键约束
+
+```sql
+ALTER TABLE table_name DROP CONSTRAINT foreign_key_constraint_name;
+```
+
+
+
+### Autoincrement（自动递增）
+
+SQLite 的 AUTOINCREMENT 是一个关键字，用于表中的字段值自动递增。我们可以在创建表时在特定的列名称上使用 AUTOINCREMENT 关键字实现该字段值的自动增加。
+
+关键字 AUTOINCREMENT 只能用于整型（INTEGER）字段。
+
+AUTOINCREMENT 关键字的基本用法如下
+
+```sql
+CREATE TABLE table_name(
+   column1 INTEGER AUTOINCREMENT,
+   column2 INTEGER AUTOINCREMENT,
+   ....
+);
+
+```
+
 
 ## 表中数据
 
@@ -461,15 +608,254 @@ sqlite> SELECT * FROM t_user WHERE age GLOB '2*';
 # 查询表中 address 中包含一个连字符（-）的所有记录
 sqlite> SELECT * FROM t_user WHERE address  GLOB '*-*';
 
-
+# 匹配以 "A" 或 "B" 开头的产品名称。
 sqlite> SELECT * FROM products WHERE product_name LIKE '[AB]%';
+
+# 匹配不以 "X" 或 "Y" 开头的产品代码。
+sqlite> SELECT * FROM products WHERE product_code LIKE '[^XY]%';
+```
+
+
+### limit 子句
+
+LIMIT 子句用于限制由 SELECT 语句返回的数据数量。
+
+> limit 子句语法如下
+```sql
+# 语法1：返回第一行到第num行的数据
+SELECT column1, column2, columnN FROM table_name LIMIT num
+
+# 语法2：返回从第(a+1)行后 num行数量的数据
+SELECT column1, column2, columnN FROM table_name LIMIT num OFFSET a
+
+```
+
+> 例子
+
+```bash
+# 查询表中 从第1行开始的6行数据记录
+sqlite> SELECT * FROM COMPANY LIMIT 6;
+
+# 查询表中 从第3行开始的3行数据记录
+sqlite> SELECT * FROM COMPANY LIMIT 3 OFFSET 2;
+```
+
+
+### order by 子句
+
+ORDER BY 子句是用来对查询出来的数据记录，根据某个列，按升序或降序顺序排列。
+
+> limit 子句语法如下
+```sql
+# ASC 默认值，可以不写，从小到大，升序排列
+# DESC 从大到小，降序排列
+SELECT column-list FROM table_name  [WHERE condition]  [ORDER BY column1, column2, .. columnN] [ASC | DESC];
+
+# 例子1：从表中根据条件查询数据，然后对查询的数据，先根据 列1 按升序排列，后根据列2 按降序排列
+SELECT select_list FROM table_name WHERE xxx ORDER BY column_1 ASC, column_2 DESC;
+
+```
+
+> 例子
+
+```bash
+# 查询t_user表的数据，先根据名称进行升序排列,后根据年龄进行降序排列
+sqlite> SELECT * FROM t_user ORDER BY name ASC , age desc;
 
 ```
 
 
+### Group By 子句
+
+SQLite 的 GROUP BY 子句用于与 SELECT 语句一起使用，对查询的数据进行分组处理。
+
+在 SELECT 语句中，GROUP BY 子句放在 WHERE 子句之后，放在 ORDER BY 子句之前。
+
+> Group By 子句语法如下
+
+GROUP BY 子句必须放在 WHERE 子句中的条件之后，必须放在 ORDER BY 子句之前。
+
+```sql
+SELECT xxx FROM table_name WHERE xxx GROUP BY column1, column2....columnN ORDER BY xxx
+```
+
+> 例子
+
+```bash
+# 查询t_course_score 课程分数表中每个人的课程总分
+sqlite> SELECT name, SUM(score) FROM t_course_score GROUP BY name;
+```
 
 
+### Having 子句
+
+WHERE 子句在所选列上设置条件，而 HAVING 子句则在由 GROUP BY 子句创建的分组上设置条件。
+
+因此 HAVING 子句允许指定条件来过滤  GROUP BY 子句的分组结果。
+
+> Having 子句语法如下
+
+在一个查询中，HAVING 子句必须放在 GROUP BY 子句之后，必须放在 ORDER BY 子句之前。
+
+```sql
+SELECT xxx FROM table1, table2 WHERE xxx GROUP BY xxx HAVING [ conditions ] ORDER BY xxx
+```
+
+> 例子
+
+```bash
+# 先根据 name 对 t_user的行记录进行分组，然后从分组结果中 筛选出 名称计数 < 2 的行记录
+sqlite > SELECT * FROM t_user GROUP BY name HAVING count(name) < 2;
+
+```
 
 
+### Join 子句
+
+SQLite 的 Join 子句用于结合两个或多个数据库中表的记录。
+
+SQLite 定义了三种类型的 Join 子句：
+- 交叉连接 - CROSS JOIN
+- 内连接 - INNER JOIN
+- 外连接 - OUTER JOIN
+
+#### 交叉连接 - CROSS JOIN
+
+交叉连接会把第一个表的每一行与第二个表的每一行进行匹配。如果两个表分别有 x 和 y 行，则交叉连接的结果记录有 x*y 行。
+
+<font color="red">由于交叉连接（CROSS JOIN）有可能产生非常大的表，使用时必须谨慎，只在适当的时候使用它们。</font>
+
+> 交叉连接（CROSS JOIN）的语法
+
+```sql
+SELECT xxx FROM table1 CROSS JOIN table2 xxx
+```
+
+> 例子
+
+对t_user表和t_department表进行交叉连接，返回查询结果
+```bash
+sqlite> SELECT ID, NAME, DEPT FROM t_user CROSS JOIN t_department;
+```
 
 
+#### 内连接 - INNER JOIN
+
+内连接根据连接条件，把两个表（table1 和 table2）的结合起来创建一个新的结果表。
+
+内连接查询会把 table1 中的每一行与 table2 中的每一行进行比较，找到所有满足连接条件的匹配行记录。当满足连接条件时，A 和 B 行的每个匹配对的列值会合并成一个结果行。
+
+<font color="red">内连接（INNER JOIN）是最常见的连接类型，是默认的连接类型。INNER 关键字是可选的。</font>
+
+
+>内连接（INNER JOIN）的语法
+
+```sql
+SELECT xxx FROM table1 [INNER] JOIN table2 ON 连接条件
+```
+
+> 例子
+
+对t_user表和t_department表进行内连接，查询出满足连接条件（ID相同）的行记录。
+```sql
+SELECT ID, NAME, DEPT FROM t_user INNER JOIN t_department ON t_user.ID = t_department.EMP_ID;
+
+```
+
+
+#### 外连接 - OUTER JOIN
+
+外连接（OUTER JOIN）是内连接（INNER JOIN）的扩展。
+
+虽然 SQL 标准定义了三种类型的外连接：LEFT、RIGHT、FULL，但 SQLite 只支持 左外连接（LEFT OUTER JOIN）。
+
+
+> 左外连接（LEFT OUTER JOIN）的语法
+
+```sql
+SELECT xxx FROM table1 LEFT OUTER JOIN table2 ON 连接条件 ...
+```
+
+> 例子
+
+对t_user表和t_department表进行左外连接，查询出满足连接条件（ID相同）的行记录。
+```sql
+SELECT ID, NAME, DEPT FROM t_user LEFT OUTER JOIN t_department
+        ON t_user.ID = t_department.EMP_ID;
+```
+
+
+## 索引
+
+索引（Index）是一种特殊的查找表，用来加快数据检索。简单地说，索引是一个指向表中数据的指针。一个数据库中的索引与一本书的索引目录是非常相似的。
+
+索引有助于加快 SELECT 查询和 WHERE 子句，但它会减慢使用 UPDATE 和 INSERT 语句时的数据输入。索引可以创建或删除，但不会影响数据。
+
+SQLite 使用 CREATE INDEX 语句创建索引。
+
+### 单列索引
+
+单列索引是一个只基于表的一个列上创建的索引。
+
+```sql
+# 为表的某个列创建一个单列索引
+CREATE INDEX index_name ON table_name (column_name);
+```
+
+### 唯一索引
+
+使用唯一索引不仅是为了性能，同时也为了数据的完整性。唯一索引不允许任何重复的值插入到表中。
+
+```sql
+# 为表的某个列创建一个唯一索引
+CREATE UNIQUE INDEX index_name on table_name (column_name);
+```
+
+### 组合索引
+
+组合索引是基于一个表的两个或多个列上创建的索引。
+
+```sql
+# 将表中的多个列组合在一起， 创建一个组合索引
+CREATE INDEX index_name on table_name (column1, column2);
+```
+
+### DROP INDEX 索引删除语句
+
+一个索引可以使用 DROP INDEX 语句删除。当删除索引时应特别注意，因为性能可能会下降或提高。
+
+```bash
+DROP INDEX index_name;
+```
+
+
+## 事务
+
+事务（Transaction）是一个完整的执行工作单元。这个工作单元通常可以包含多个数据库命令。
+
+> 事务的ACID属性
+
+- 原子性（Atomicity）：确保工作单位内的所有的数据库操作都成功完成，否则，事务会在出现故障时终止，之前的操作也会回滚到以前的状态。
+- 一致性（Consistency）：确保数据库在成功提交的事务上正确地改变状态。
+- 隔离性（Isolation）：使多个事务的操作相互独立和透明。
+- 持久性（Durability）：确保已提交事务的结果或效果在系统发生故障的情况下仍然存在。
+
+> 事务控制命令
+
+- BEGIN TRANSACTION 或 BEGIN：开始事务操作。
+- COMMIT：把事务中的数据操作更改保存到数据库中。
+- ROLLBACK：用于撤消尚未保存到数据库的事务操作。
+
+> 例子
+
+```sql
+# 开始一个事务，并从表中删除 age = 25 的记录，最后使用 ROLLBACK 命令撤消所有的更改。
+sqlite> BEGIN;
+sqlite> DELETE FROM t_user WHERE AGE = 25;
+sqlite> ROLLBACK;
+
+# 开始另一个事务，从表中删除 age = 25 的记录，最后使用 COMMIT 命令提交所有的更改。
+sqlite> BEGIN;
+sqlite> DELETE FROM t_user WHERE AGE = 25;
+sqlite> COMMIT;
+```
