@@ -1,6 +1,6 @@
 ---
-title: Python使用SQLite3模块笔记
-date: 2024-04-22
+title: Python使用SQLite3库笔记
+date: 2024-05-17
 sidebar: 'auto'
 categories: 
  - Python
@@ -12,17 +12,16 @@ tags:
 
 [toc]
 
-# Python使用SQLite3模块笔记
+# Python使用SQLite3库笔记
 
-Python2.5以上的版本，都内置了SQLite3模块。通过SQLite3模块，python可以很方便的使用SQLite数据库。
-
+Python2.5以上的版本，都内置了SQLite3库。通过SQLite3库，python可以很方便的使用SQLite数据库。
 
 ## 连接数据库
 
 ```py
 #!/usr/bin/python
 
-# 导入 sqlite3 模块
+# 导入 sqlite3 库
 import sqlite3
 
 # 如果当前目录没有test.db文件，否则在当前目录创建test.db文件。

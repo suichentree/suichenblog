@@ -291,7 +291,11 @@ git remote                          #查看远端仓库名
 git remote set-url origin 新地址    #更换远程仓库地址，仓库别名origin
 方式2：
 git remote rm origin                 #删除远程的仓库origin
-git remote add origin 新地址         #重新添加远程仓库,远程仓库别名为origin
+git remote add origin 新地址         #重新添加远程仓库,远程仓库别名为origin,注意 origin是默认的别名。
+
+git remote add github-origin 新地址     # github上的远程仓库地址 
+git remote add gitee-origin 新地址      # gitee上的远程仓库地址
+
 
 分支
 $ git branch -a                         #查看所有分支
