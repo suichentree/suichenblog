@@ -12,7 +12,17 @@ tags:
 
 # Python使用Loguru日志库笔记
 
-Loguru是目前最流行的python第三方日志库。
+Loguru是目前最流行的python第三方日志库。简单来说就是一个方便（且好看）的控制台+文件的日志库。
+
+> Loguru 特点如下
+1. 可以区分不同类型的日志：正常，警告，错误，严重等。
+2. 可以配置指定的日志文件名称。
+3. 可以配置指定的日志输出格式。
+4. 可以把不同的日志类型写到不同的文件中。
+5. 可以配置按照时间，文件大小等条件对日志文件进行滚动分割。
+6. 支持异步写日志。
+7. 支持线程安全和进程安全写入日志。
+8. 可以方便的记录，支持python的string format格式。
 
 ## 安装
 
@@ -41,9 +51,94 @@ logger.debug("This is log debug!")
 
 Loguru 会提前配置一些基础信息，自动输出时间、日志级别、模块名、行号等信息，而且根据等级的不同，还自动设置了不同的颜色，方便观察，真正做到了开箱即用。
 
+## 日志级别
+
+Loguru提供了七层日志层级，或者说七种日志类型。  
+
+每种类型的日志有一个整数值，表示日志层级。从小到大的日志级别排序如下
+- TRACE (5): 用于记录程序执行路径的细节信息，以进行诊断。  
+- DEBUG (10): 开发人员使用该工具记录调试信息。  
+- INFO (20): 用于记录描述程序正常操作的信息消息。  
+- SUCCESS (25): 类似于INFO，用于指示操作成功的情况。  
+- WARNING (30): 警告类型，用于指示可能需要进一步调查的不寻常事件。  
+- ERROR (40): 错误类型，用于记录影响特定操作的错误条件。  
+- CRITICAL (50): 严重类型，用于记录阻止核心功能正常工作的错误条件
+
+另外Loguru默认使用DEBUG作为其最低日志级别，因此任何严重性低于DEBUG的日志信息都会被忽略。
+
+意思就是说只有 大于等于 DEBUG 级别的日志消息才会输出。小于 DEBUG 级别的日志消息不会输出。
+
+## 自定义日志配置 add() 函数
+
+除了Loguru提供的默认日志配置之外，我们还可以自定义日志配置。
+
+通过 add() 函数，可以轻松定制 Loguru 的内部配置，该函数可处理从日志格式化到日志文件设置等一切配置操作。
+
+下面是add()方法的完整参数：
+
+```py
+from loguru import logger
+
+logger.add(sink, *, level='DEBUG', 
+format='<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>', 
+filter=None, colorize=None, serialize=False, backtrace=True, 
+diagnose=True, enqueue=False, catch=True, **kwargs)
+```
+
+基本参数
+- sink：默认情况下，它设置为 sys.stderr。 它可以是一个file对象，也可以是一个文件路径，也可以是一个方法名称。
+    - 当sink是一个file对象的时候，日志信息会传输给该文件对象。
+    - 当sink是一个文件路径的时候，loguru会根据这个文件路径，创建一个日志文件，然后将日志信息写入到日志文件中。
+    - 当sink是一个方法的时候，日志信息会传递给方法参数。从而可以在方法中自定义日志输出方式。
+- level：最低日志级别。
+- format：日志格式模板。
+- filter：一个可选的指令，用于确定一条记录是否应该被记录。 
+- colorize: 采用布尔值并确定是否应启用终端是否显示颜色。 
+- serialize：如果设置为 True，则日志记录以 JSON 格式呈现。 
+- backtrace：显示生成错误的完整堆栈跟踪，以便于调试。
+- diagnose：确定变量值是否应在异常跟踪中显示。在生产环境中应将其设置为 False，以避免泄露敏感信息。
+- enqueue：启用此选项会将日志记录放入队列中，以避免多个进程记录到同一目的地时发生冲突。 
+- catch：如果在记录到指定的接收器时发生意外错误，您可以通过将此选项设置为 True 来捕获该错误。错误将打印到标准错误。
+- **kwargs：更多的附加参数（见下文）。
+
+
+当且仅当 sink 是文件路径时，可以有以下附加参数：
+- rotation：一种条件，指示何时关闭当前日志文件并开始使用新的日志文件。
+    - 如果是整数，表示日志文件保留的最大字节数，如果超过则重新创建新的日志文件。
+    - 如果是时间字符串，则表示当达到该时间的时候，重新创建新的日志文件。
+- retention：日志文件保留条件。
+- compression：日志文件在关闭时应转换为的压缩或存档格式。
+- delay：是在配置 sink 后立即创建文件，还是延迟到第一条记录的消息时再创建。默认为 False。
+- mode：内置 open() 函数的打开模式，默认为 a（以追加模式打开文件）。
+- buffering：内置 open() 函数的缓冲策略，默认为1（行缓冲文件）。
+- encoding：内置 open() 函数的文件编码，如果 None，则默认为 `locale.getpreferredencoding()`。
+- \kwargs：其他传递给内置 open() 函数的参数。
+
+
+当且仅当 sink 是函数时，可以有以下附加参数：
+- loop：将在其中调度和执行异步日志记录任务的事件循环。如果为 None，将使用 asyncio.get_event_loop() 返回的循环。
+
+
+## 自定义日志默认级别
+
+自定义日志默认级别为INFO
+
+```py
+from loguru import logger
+
+# 先去除Loguru提供的默认日志配置
+logger.remove(0)
+# 设置默认日志级别为INFO
+logger.add(level="INFO")
+
+```
+
+- remove()方法被首先调用，以删除默认配置（其ID为0）。
+
+
 ## 自定义日志文件
 
-通过 add() 函数。我们可以自定义日志文件配置，从而将日志保存到文件上。
+自定义日志文件配置，从而将日志保存到文件上。
 
 ```py
 # 导入loguru模块
@@ -60,58 +155,43 @@ logger.debug("This is log debug!")
 
 程序运行结束后，不光会在控制台上输出日志信息。同时也会在当前目录中创建一个test01.log日志文件，并把日志信息输出到日志文件中。
 
-## add()方法完整参数
 
-我们可以通过add()方法来进行各种自定义日志配置。下面是add()方法的完整参数：
+> 将不同类型的日志记录到不同的文件中
 
 ```py
-add(sink, *, level='DEBUG', 
-format='<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>', 
-filter=None, colorize=None, serialize=False, backtrace=True, 
-diagnose=True, enqueue=False, catch=True, **kwargs)
+from loguru import logger
+
+# 设置不同级别的日志输出文件
+logger.add("./logs/debug.log", level="DEBUG", rotation="10 MB", filter=lambda record: record["level"].name == "DEBUG")
+logger.add("./logs/info.log", level="INFO", rotation="10 MB", filter=lambda record: record["level"].name == "INFO")
+logger.add("./logs/warning.log", level="WARNING", rotation="10 MB", filter=lambda record: record["level"].name == "WARNING")
+logger.add("./logs/error.log", level="ERROR", rotation="10 MB", filter=lambda record: record["level"].name == "ERROR")
+logger.add("./logs/critical.log", level="CRITICAL", rotation="10 MB", filter=lambda record: record["level"].name == "CRITICAL")
+
+# 输出不同级别的日志消息
+logger.debug("This is a debug message")
+logger.info("This is an info message")
+logger.warning("This is a warning message")
+logger.error("This is an error message")
+logger.critical("This is a critical message")
 ```
-
-基本参数
-- sink：可以是一个file对象，也可以是一个文件路径，也可以是一个方法名称。
-    - 当sink是一个file对象的时候，日志信息会传输给该文件对象。
-    - 当sink是一个文件路径的时候，loguru会根据这个文件路径，创建一个日志文件，然后将日志信息写入到日志文件中。
-    - 当sink是一个方法的时候，日志信息会传递给方法参数。从而可以在方法中自定义日志输出方式。
-- level：日志输出和保存级别。
-- format：日志格式模板。
-- filter：一个可选的指令，用于决定每个记录的消息是否应该发送到 sink。
-- serialize：在发送到 sink 之前，是否应首先将记录的消息转换为 JSON 字符串。
-- backtrace：格式化的异常跟踪是否应该向上扩展，超出捕获点，以显示生成错误的完整堆栈跟踪。
-- diagnose：异常跟踪是否应显示变量值以简化调试。建议在生产环境中设置 False，避免泄露敏感数据。
-- enqueue：要记录的消息是否应在到达 sink 之前首先通过多进程安全队列，这在通过多个进程记录到文件时很有用，这样做的好处还在于使日志记录调用是非阻塞的。
-- catch：是否应自动捕获 sink 处理日志消息时发生的错误，如果为 True，则会在 sys.stderr 上显示异常消息，但该异常不会传播到 sink，从而防止应用程序崩溃。
-- **kwargs：附加参数（见下文）。
-
-
-当且仅当 sink 是文件路径时，可以有以下附加参数：
-- rotation：一种条件，指示何时关闭当前日志文件并开始使用新的日志文件。
-- compression：日志文件在关闭时应转换为的压缩或存档格式。
-- delay：是在配置 sink 后立即创建文件，还是延迟到第一条记录的消息时再创建。默认为 False。
-- mode：内置 open() 函数的打开模式，默认为 a（以追加模式打开文件）。
-- buffering：内置 open() 函数的缓冲策略，默认为1（行缓冲文件）。
-- encoding：内置 open() 函数的文件编码，如果 None，则默认为 `locale.getpreferredencoding()`。
-- \kwargs：其他传递给内置 open() 函数的参数。
-
-当且仅当 sink 是函数时，可以有以下附加参数：
-- loop：将在其中调度和执行异步日志记录任务的事件循环。如果为 None，将使用 asyncio.get_event_loop() 返回的循环。
 
 ### format 日志格式模板
 
-当我们需要自定义日志格式的时候，我们需要先移除默认的日志格式，然后再添加自定义的日志格式。
+在日常使用中，如果默认的输出内容不够，我们还可以自定义日志的输出内容和格式。  
+
+可以通过add()方法中的格式选项对Loguru生成的日志记录进行重新格式化。 
+
+注意：当我们自定义日志格式的时候，我们需要先移除默认的日志格式，然后再添加自定义的日志格式。
 
 ```py
 from loguru import logger
 import sys
 
-# 移除默认的控制台日志格式
+# 移除默认配置
 logger.remove(0)
 
-# 自定义日志信息格式
-# 里面添加了process和thread记录，方便查看多进程和线程的信息
+# 自定义的日志输出格式 。 里面添加了process和thread记录，方便查看多进程和线程的信息
 log_format= '<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level}</level> ' \
             '| <magenta>{process}</magenta>:<yellow>{thread}</yellow> ' \
             '| <cyan>{name}</cyan>:<cyan>{function}</cyan>:<yellow>{line}</yellow> - <level>{message}</level>'
@@ -124,6 +204,13 @@ logger.add(sys.stdout,colorize=True,format=log_format)
 logger.add("./log/run_info_log_{time:YYYY-MM-DD}.log",format=log_format,level="INFO",rotation="07:00")
 logger.add("./log/run_warning_log_{time:YYYY-MM-DD}.log",format=log_format,level="WARNING",rotation="07:00")
 ```
+
+- {time:YYYY-MM-DD HH:mm:ss.SSS}：时间戳  
+- {level}：日志级别  
+- {message}：日志消息  
+- {process} {thread} ： 进程信息 和 线程信息
+- {line} 日志在代码中的行号信息
+
 
 ### rotation 日志文件分割
 
