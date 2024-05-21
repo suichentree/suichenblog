@@ -12,11 +12,11 @@ tags:
 
 # Python使用selenium库笔记
 
-Selenium 是一个用于 Web 应用程序测试的工具。常用于网站的自动化测试。
+selenium 是一个用于 Web 应用程序的自动化测试工具 , 能够通过代码完全模拟人使用浏览器自动访问目标站点并操作。常用于网站的自动化测试。
 
-Selenium 本质上是通过驱动浏览器，彻底模拟浏览器的操作，好比跳转、输入、点击、下拉等，来拿到网页渲染之后的结果。
+selenium 本质上是通过驱动浏览器，彻底模拟浏览器的操作，好比跳转、输入、点击、下拉等，然后拿到网页渲染之后的结果。
 
-有人用python编写了一个使用selenium的第三方库。从而可以很方便的通过python语言来使用selenium。
+python有一个 selenium 第三方库。从而可以很方便的通过python语言来使用selenium。
 
 ## 安装
 
@@ -26,7 +26,7 @@ Selenium 本质上是通过驱动浏览器，彻底模拟浏览器的操作，�
 pip install selenium
 ```
 
-## Selenium的使用
+## Selenium的基本使用
 
 ```py
 # 导入selenium库的webdriver类
@@ -37,11 +37,12 @@ browser = webdriver.Edge()
 url = 'https://www.baidu.com'
 # 访问网站
 browser.get(url)
+# 关闭浏览器
+browser.close()
 ```
 
 运行代码，得到下面的效果。
 ![python_20240518230359.png](../blog_img/python_20240518230359.png)
-
 
 
 ## Selenium的元素操作
@@ -67,12 +68,19 @@ browser.get(url)
 button = browser.find_element(By.ID, 'head')
 print(button)
 
+# 通过标签id属性进行定位
+button = browser.find_element_by_id('head')
+print(button)
 ```
 
 > 根据标签 name 属性的值获取元素
 
 ```py
 button = browser.find_element(By.NAME, 'bsToken')
+print(button)
+
+# 通过标签name属性进行定位
+button = browser.find_element_by_name('bsToken')
 print(button)
 ```
 
@@ -81,12 +89,20 @@ print(button)
 ```py
 button = browser.find_element(By.CLASS_NAME, 'wrapper_new')
 print(button)
+
+# 通过class名称进行定位
+button = browser.find_elements_by_class_name('wrapper_new')
+print(button)
 ```
 
 > 根据标签名获取元素
 
 ```py
 button = browser.find_elements(By.TAG_NAME, 'input')
+print(button)
+
+# 通过标签名称进行定位
+button = browser.find_element_by_tag_name('input')
 print(button)
 ```
 
@@ -95,6 +111,9 @@ print(button)
 ```py
 button = browser.find_elements(By.LINK_TEXT, '地图')
 print(button)
+
+# 通过搜索 页面中 链接进行定位
+browser.find_element_by_link_text("地图")
 ```
 
 > 根据标签的文本获取元素（模糊定位）
@@ -247,5 +266,5 @@ data_info = "aaaa"
 browser.execute_script("return decode(" + data_info + ");")
 
 time.sleep(5)
-
 ```
+
