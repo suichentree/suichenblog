@@ -28,7 +28,6 @@ Python从设计之初就已经是一门面向对象的语言，正因为如此�
 - 实例化对象：创建一个类的实例，类的具体对象。
 - 对象：通过类定义的数据结构实例。对象包括两个数据成员（类变量和实例变量）和方法。
 
-
 ## 类
 
 类语法格式
@@ -66,10 +65,9 @@ class people:
 
 在类中，我们可以定义函数。这些函数就是类的方法。
 
-在类的内部，使用 def 关键字来定义一个方法，与一般函数定义不同，类方法必须包含参数 self, 且为第一个参数。self 代表的是类的实例。
+在类的内部，使用 def 关键字来定义一个方法，与一般函数定义不同，类方法必须包含参数 self, 且为第一个参数。self 代表的是类的实例化对象。
 
 <font color="red">self 的名字并不是规定死的，也可以使用 this，但是最好还是按照约定使用 self。</font>
-
 
 > 普通方法
 
@@ -85,9 +83,9 @@ class people:
         print(self.name,self.age)
  
 # 实例化类
-p = people(10,30)
+p = people()
 # 调用普通方法speak
-p.speak()
+p.speak(10,30)
 ```
 
 > 私有方法
@@ -147,6 +145,49 @@ print("MyClass 类的属性 i 为：", x.i)
 print("MyClass 类的方法 f 输出为：", x.f())
 
 ```
+
+## @staticmethod 和 @classmethod 装饰器
+
+### @staticmethod 装饰器
+
+@staticmethod用于标记类中的一个方法为静态方法。
+
+静态方法不接收类的实例对象（self）或类本身（cls）作为第一个参数。因此不需要对类实例化，就可以直接被调用，但静态方法内部不能访问类或实例属性。
+
+```py
+class AClass:
+    @staticmethod
+    def add(x, y):
+        return x + y
+
+# 不需要创建类的实例化对象，直接通过类名使用静态方法
+result = AClass.add(3, 4)
+```
+
+
+### @classmethod 装饰器
+
+@classmethod 用于标记类中的一个方法为类方法。
+
+类方法无需实例化可以被类直接调用，但是类方法需要接受类本身（cls）作为第一个参数传入。
+
+在类方法中不能调用实例属性和实例方法，只能调用类属性和类方法。但是，在实例方法中可以调用类属性和类方法。
+
+```py
+class AClass:
+    @classmethod
+    def add(cls, x, y):
+        return x + y
+
+# 不需要创建类的实例化对象，直接通过类名使用类方法
+result = AClass.add(3, 4)
+```
+
+## cls 和 self 的区别
+
+- self 通常是指类的实例化对象。
+- cls 通常是指类本身。
+
 
 ## 继承
 
