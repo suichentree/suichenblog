@@ -550,3 +550,104 @@ getExistingDirectory(parent, caption, directory)
 getSaveFileName(parent, caption, directory, filter)
 ```
 
+
+## QTableWidget 表格组件
+
+```py
+from PySide6.QtWidgets import QApplication, QPushButton, QTableWidget,QTableWidgetItem
+
+class MyTableWidget(QTableWidget):
+    def __init__(self):
+        super().__init__()
+
+    def init(self,array_data):
+
+        # 计算出数组的元素个数
+        row_num = len(array_data)
+        # 设置行数
+        self.setRowCount(row_num)
+        # 表头列
+        header_cloumn = ["姓名", "身份证", "密码", "人脸视频路径", "备注","操作"]
+        # 设置列数
+        self.setColumnCount(len(header_cloumn))
+        # 设置表头
+        self.setHorizontalHeaderLabels(header_cloumn)
+
+        # 遍历数组数据，添加到表格组件中
+        for i,user in enumerate(array_data):
+            self.setItem(i,0,QTableWidgetItem(user['name']))
+            self.setItem(i, 1, QTableWidgetItem(user['idCard']))
+            self.setItem(i, 2, QTableWidgetItem(user['pwd']))
+            self.setItem(i, 3, QTableWidgetItem(user['video_path']))
+            self.setItem(i, 4, QTableWidgetItem(user['remark']))
+
+            # 创建按钮控件，设置文本并连接槽函数
+            button = QPushButton("无效按钮", self)
+            button.clicked.connect(self.button_clicked)  # 按钮点击事件处理函数
+            # 将按钮控件添加到单元格中
+            self.setCellWidget(i, 5, button)
+
+    def button_clicked(self):
+        # 按钮点击事件处理函数
+        button = self.sender()  # 获取发送信号的按钮
+        cell_widget = self.indexAt(button.pos())  # 获取按钮所在的单元格
+        row = cell_widget.row()  # 获取单元格的行号
+        col = cell_widget.column()  # 获取单元格的列号
+        print(f"按钮位于第 {row + 1} 行，第 {col + 1} 列被点击")  # 打印按钮被点击的位置信息
+
+# 单独运行，用于查看效果
+if __name__ == '__main__':
+    app = QApplication([])
+    table = MyTableWidget()
+
+    # 自定义数据
+    current_user_list = [
+        {'idCard': '1111111111', 'name': '蔡11', 'remark': '5月', 'pwd': 'Dp111111','video_path': 'C:/Users/18271/Desktop/face_video\\蔡11.mp4'},
+        {'idCard': '2222222222', 'name': '曾22', 'remark': '5月', 'pwd': 'Dp111111','video_path': 'C:/Users/18271/Desktop/face_video\\曾22.mp4'}]
+
+    # 把数据填充到表格组件中
+    table.init(current_user_list)
+    table.show()
+    app.exec()
+```
+
+运行结果如下
+![python_20240527180805.png](../blog_img/python_20240527180805.png)
+
+## QTimer 定时器
+
+QTimer是一个定时器类，用于在指定的时间间隔内执行某个操作。
+
+QTimer提供了一种简单的方法来实现定时任务，例如自动更新界面数据等。
+
+```py
+from PySide6.QtWidgets import QApplication,QWidget
+from PySide6.QtCore import QTimer
+
+class MyWidget(QWidget):
+    def __init__(self):
+        super().__init__()
+
+        # 创建一个定时器
+        self.timer = QTimer()
+        # 将定时器与函数绑定
+        self.timer.timeout.connect(self.timer_task)
+        # 设置定时器的触发时间，单位为毫秒。 1000毫秒为1秒
+        self.timer.start(1000)
+
+    def timer_task(self):
+        print(111)
+
+if __name__ == "__main__":
+    app = QApplication([])
+    example = MyWidget()
+    example.show()
+    app.exec()
+```
+
+1. 创建了一个MyWidget类，继承自QWidget类。
+2. 在MyWidget类的构造函数中，创建了一个QTimer对象，并将其timeout信号连接到timer_task槽函数。
+3. 最后启动了定时器，并设置了时间间隔为1000毫秒(即1秒)。
+4. 运行结果如下，每隔1秒定时执行一次timer_task方法，在终端打印111
+
+![python_20240527180839.png](../blog_img/python_20240527180839.png)
