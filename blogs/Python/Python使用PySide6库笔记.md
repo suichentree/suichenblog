@@ -651,3 +651,70 @@ if __name__ == "__main__":
 4. 运行结果如下，每隔1秒定时执行一次timer_task方法，在终端打印111
 
 ![python_20240527180839.png](../blog_img/python_20240527180839.png)
+
+## QMessageBox 消息框
+
+消息框，常用于显示普通、警告和错误消息。
+
+```py
+from PySide6.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QMessageBox
+
+class MyQWidget(QWidget):
+    def __init__(self):
+        super().__init__()
+        # 创建窗口标题
+        self.setWindowTitle("MessageBox Example")
+
+        # 设置窗口布局为垂直布局
+        layout = QVBoxLayout()
+        self.setLayout(layout)
+
+        # 创建按钮
+        self.show_info_button = QPushButton("Show Info Message")
+        self.show_warning_button = QPushButton("Show Warning Message")
+        self.ask_question_button = QPushButton("Ask Question")
+
+        # 将按钮添加到布局
+        layout.addWidget(self.show_info_button)
+        layout.addWidget(self.show_warning_button)
+        layout.addWidget(self.ask_question_button)
+
+        # 连接按钮的点击信号到槽函数
+        self.show_info_button.clicked.connect(self.show_info_message)
+        self.show_warning_button.clicked.connect(self.show_warning_message)
+        self.ask_question_button.clicked.connect(self.ask_question)
+
+    def show_info_message(self):
+        # 创建信息消息框
+        QMessageBox.information(self, "Info", "This is an information message.")
+        print("this is info message")
+
+    def show_warning_message(self):
+        # 创建警告消息框
+        QMessageBox.warning(self, "Warning", "This is a warning message.")
+        print("this is warning message")
+
+    def ask_question(self):
+        # 创建询问消息框
+        result = QMessageBox.question(self, "Question", "Do you want to proceed?", QMessageBox.Yes | QMessageBox.No)
+
+        if result == QMessageBox.Yes:
+            print("User clicked Yes.")
+        else:
+            print("User clicked No.")
+
+        print("this is question message")
+
+if __name__ == "__main__":
+    app = QApplication([])
+    example = MyQWidget()
+    example.show()
+    app.exec()
+```
+
+运行效果如图所示
+![python_20240528163203.png](../blog_img/python_20240528163203.png)
+![python_20240528163251.png](../blog_img/python_20240528163251.png)
+![python_20240528163321.png](../blog_img/python_20240528163321.png)
+![python_20240528163351.png](../blog_img/python_20240528163351.png)
+
