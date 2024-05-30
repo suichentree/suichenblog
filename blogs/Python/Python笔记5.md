@@ -145,6 +145,25 @@ print(os.getcwd())
 # C:\Users\18271\Desktop\xdj-watchvideo-demo1\test
 ```
 
+### os.system() 执行系统命令
+
+os库的system()函数，主要作用是执行系统命令。即执行python程序所在的操作系统的各种命令。
+
+例子
+```py
+import os
+post = input("请输入一个IP：")
+# 在终端中执行 ping 命令
+os.system("ping " + post)
+
+# 在终端中执行start cmd.exe 命令 ，作用是打开一个终端窗口
+os.system('start cmd.exe')
+
+# 作用是先打开一个终端窗口，然后再该终端窗口中执行 python main.py 命令
+# 效果就是：打开一个终端窗口，然后执行main.py 程序文件 
+os.system('start cmd.exe /K python main.py')
+
+```
 
 ## os.path 模块
 
