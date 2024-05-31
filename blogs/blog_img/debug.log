@@ -12,3 +12,4 @@
 [0530/175119:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
 [0530/175119:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
 [0530/175443:ERROR:CONSOLE(1)] "Uncaught (in promise) TypeError: Cannot read property 'ButtonProvider' of undefined", source: chrome-devtools://devtools/inspector.html (1)
+[0530/180350:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank

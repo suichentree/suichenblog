@@ -626,6 +626,8 @@ a.print_func("Wellcome")
 
 ### from … import 语句
 
+> 情况一
+
 ```python
 # 把一个模块的所有内容全都导入到当前的命名空间。
 from modname import *
@@ -633,6 +635,18 @@ from modname import *
 # 导入模块a的特定方法f1,f2
 from a import f1, f2
 ```
+
+> 情况二。 使用相对路径导入模块
+
+在同一个目录中，同时存在 a.py 和 b.py。在b.py文件中导入a.py文件中某一个特定的方法或类。
+
+```py
+# 在b.py文件中导入a.py文件中某一个特定的方法或类。
+from .a import method_a2
+```
+
+在上面的代码中，`.a` 表示从当前目录中导入 a 模块。
+
 
 ### __name__属性
 
