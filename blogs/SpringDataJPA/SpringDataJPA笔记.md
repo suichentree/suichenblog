@@ -87,10 +87,15 @@ JPA是一种规范，Hibernate是一个实现了JPA规范的框架，Spring Data
 
 ## Spring Boot 整合 Spring Data jpa 
 
-1. 新建一个spring boot 工程
+1. 新建一个spring boot 工程。
 2. 在pom文件中导入JPA依赖,数据库驱动依赖
 
 ```xml
+<!--web 依赖-->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
 <!--JPA依赖-->
 <dependency>
 	<groupId>org.springframework.boot</groupId>
@@ -101,6 +106,12 @@ JPA是一种规范，Hibernate是一个实现了JPA规范的框架，Spring Data
 	<groupId>com.mysql</groupId>
 	<artifactId>mysql-connector-j</artifactId>
 </dependency>
+<!--测试依赖（可选）-->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-test</artifactId>
+    <scope>test</scope>
+</dependency>
 ```
 
 此处没有添加依赖版本号，主要是因为Spring Boot 内部已经指定了JPA依赖,数据库驱动依赖的版本号了。
@@ -109,13 +120,14 @@ JPA是一种规范，Hibernate是一个实现了JPA规范的框架，Spring Data
 
 spring-data-JPA依赖内部默认使用了 Hibernate依赖 作为 JPA规范的实现。因此导入spring-data-JPA依赖，相当于也导入了 Hibernate 依赖。
 
+<font color="red">注意：目前最新的springboot，hibernate等依赖包都是基于JDK17的，因此最好将项目工程中依赖的JDK版本调整到JDK17以上。</font>
 
-3. 在配置文件中添加配置
+3. 在application.properties配置文件中添加配置
 
 ```properties
 #数据库配置
 spring.datasource.driverClassName=com.mysql.cj.jdbc.Driver
-spring.datasource.url=jdbc:mysql://127.0.0.1:3306/test?useUnicode=true&characterEncoding=utf8&serverTimezone=UTC
+spring.datasource.url=jdbc:mysql://127.0.0.1:3306/shuyx_website_db?useUnicode=true&characterEncoding=utf8&serverTimezone=UTC
 spring.datasource.username=root
 spring.datasource.password=123456
 
@@ -129,7 +141,19 @@ spring.jpa.hibernate.ddl-auto=update
 
 ```
 
-4. 创建实体类，并用注解配置实体类
+`spring.jpa.hibernate.ddl-auto`表生成策略配置比较重要。可选值如下。
+- create: 不管表是否存在，每次启动都会重新建表（会导致数据丢失）。
+- none：每次启动程序，不进行任何操作。
+- update：每次启动程序，若表不存在则创建。若表存在，则检查表是否更新（不会删除已经存在的数据）。
+- validate：启动的时候验证数据表的结构。验证不通过，启动不成功。
+
+
+在开发阶段中，通常使用update。在生产阶段建议使用 none，手动维护数据表结构，以避免不小心修改了实体对象后导致表结构被修改，甚至是数据丢失。
+
+
+4. 创建实体类，并用注解配置实体类 (相当于 Entity 层)
+
+创建entity包，并创建SysUserEntity类
 
 ```java
 import jakarta.persistence.*;
@@ -162,13 +186,93 @@ public class SysUserEntity implements Serializable {
 ```
 
 
-- @Entity 注解用于表示这个类是一个实体类。
+- @Entity 注解用于表示这个类一个受 EntityManager 管理的实体类。
 - @Table 注解用于指定了实体在数据库中所对应的表名称。
 - @Id 注解用于指定 ID 主键字段
 - @GeneratedValue(strategy = GenerationType.IDENTITY) 注解指定了 ID 主键字段值的生成方式，其中 GenerationType.IDENTITY 表示主键由数据库自动生成（自增）。
 - @Column 注解表示类的属性和表的字段列的映射关系。
 
+5. 创建Repository 接口 (相当于 Dao 层)
 
+创建repository包，并创建SysUserRepository接口，并且继承JpaRepository接口。
+
+```java
+@Repository
+public interface SysUserRepository extends JpaRepository<SysUserEntity, Long> {
+
+}
+```
+
+- 使用@Repository注解表示这是一个 Repository 接口。
+- 通过继承 JpaRepository接口。可以获得已经预定义的各种 CRUD 方法。
+
+6. 配置启动类
+
+之后需要在启动类上定义 `@EnableJpaRepositories`注解和`@EntityScan` 注解，分别指定 repository接口 和实体类所在的包。
+
+```java
+@SpringBootApplication
+// 实体所在的包
+@EntityScan(basePackages = "com.example.hibernatedemo.entity") 
+// repository 所在的包
+@EnableJpaRepositories(basePackages = "com.example.hibernatedemo.repository")  
+public class HibernateDemoApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(HibernateDemoApplication.class, args);
+    }
+}
+```
+
+
+7. 编写单元测试
+```java
+@SpringBootTest
+class HibernateDemoApplicationTests {
+
+    @Autowired
+    private SysUserRepository sysUserRepository;
+
+    @Test
+    void contextLoads() {
+        SysUserEntity one = new SysUserEntity();
+        one.setUserName("xiaohong");
+        one.setPassWord("123456");
+        one.setCreateTime(new Date());
+
+        //新增操作
+        SysUserEntity save = sysUserRepository.save(one);
+        System.out.println("save="+save);
+
+        //通过save方法来实现更新操作
+        one.setEmail("xxx@xxx.com");
+        one.setPassWord("456789");
+        sysUserRepository.save(one);
+        System.out.println("save2="+save);
+
+        //查询操作
+        Optional<SysUserEntity> s = sysUserRepository.findById(one.getId());
+        System.out.println("s="+s);
+
+        //删除操作
+        sysUserRepository.delete(one);
+    }
+}
+
+```
+
+在单元测试类中，创建一个SysUserEntity对象，然后调用SysUserRepository的各个方法，将对象作为方法参数传入其中。
+
+Spring Data JPA 会把Repository接口的各个方法会转换为对应的SQL语句，并让数据库表去执行。
+
+执行日志如图所示。
+
+![spring_data_jpa_20240603234433.png](../blog_img/spring_data_jpa_20240603234433.png)
+
+8. 总结
+
+- 当程序启动后,由于配置中的表生成策略是update,因此Spring Data JPA 或者说 Hibernate 会自动在对应的数据库中创建/更新表。
+- Repository接口的各种方法，Spring data jpa 会将其转换为对应的SQL语句，然后传递给数据库执行。因此执行各种CRUD方法，就相当于在执行各种SQL语句。
 
 
 
