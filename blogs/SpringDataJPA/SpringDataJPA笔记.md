@@ -285,6 +285,17 @@ Spring Data JPA 会把Repository接口的各个方法会转换为对应的SQL语
 
 - Repository接口的各种方法，Spring data jpa 会将其转换为对应的SQL语句，然后传递给数据库执行。因此执行各种CRUD方法，就相当于在执行各种SQL语句。
 
+## Repository 接口
+
+Repository 接口是Spring Data JPA的核心概念。Repository 接口的作用是减少
+数据持久层（dao层）的代码量。
+
+常用的 Repository 接口如下
+- CrudRepository接口
+- 
+
+
+
 如下是CrudRepository接口中的方法
 
 ```java
@@ -326,5 +337,3 @@ void deleteAll(Iterable<? extends T> entities);
 //删除所有数据
 void deleteAll();
 ```
-
-
