@@ -718,3 +718,14 @@ if __name__ == "__main__":
 ![python_20240528163321.png](../blog_img/python_20240528163321.png)
 ![python_20240528163351.png](../blog_img/python_20240528163351.png)
 
+## PySide6 UI 组件库
+
+记录几个比较好看的UI 组件库。
+
+### QFluentWidgets
+
+QFluentWidgets 是一个基于 C++ Qt/PyQt/PySide 的 Fluent Design 风格组件库，包含数以百计的流畅设计组件，为简化开发、提高效率而生。
+
+[QFluentWidgets 官网地址https://qfluentwidgets.com/zh/](https://qfluentwidgets.com/zh/)
+
+![python_20240604120408.png](../blog_img/python_20240604120408.png)

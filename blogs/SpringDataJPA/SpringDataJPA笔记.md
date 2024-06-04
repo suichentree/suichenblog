@@ -32,7 +32,7 @@ Spring Data JPA 是 Spring Data 框架中的一个子模块。
 
 JPA规范的作用：
 1. 简化数据持久层的操作，让开发者从JDBC的SQL语句脱离出来，以面向对象的方式来操作数据库。
-2. SUN公司希望通过JPA规范，来将数据持久层的代码和数据库解耦，从而做到代码可以无损切换数据库。
+2. SUN公司希望通过JPA规范，把数据持久层的代码和数据库解耦，从而做到不改变代码就可以无损切换数据库。
 
 > JPA的特性
 
@@ -40,7 +40,7 @@ JPA规范的作用：
 2. JPA规范提供了一系列API接口。通过这些接口，可以很方便的执行CRUD操作。
 3. JPA规范提供了JPQL查询语言。该语言可以使用面向对象的方式来查询数据。
 
-> JPA 和 JDBC的区别？
+> JPA 和 JDBC 的区别？
 
 相同点：
 1. JDBC和JPA 都是一组规范接口。
@@ -76,16 +76,22 @@ JPA规范的出现，其目的是统一各种ORM框架，包括著名的Hibernat
 ![spring_data_jpa_1.png](../blog_img/springdata_img_spring_data_jpa_1.png)
 
 
-> Spring Data JPA 与 JPA 的关系
+> 什么是 Spring Data JPA ？
 
-JPA是一种规范，Hibernate是一个实现了JPA规范的框架，Spring Data JPA是对JPA规范的Repository层的再次封装，并实现了更多可用的接口。最后底层具体实现用了Hibernate。
+Spring Data JPA 是 spring公司提供的一套简化JPA开发的框架。如果按照约定好的JPA规范去写数据持久层（Repository层，Dao层）的接口代码。就可以在不写接口实现的情况下，实现对数据库的访问和操作。同时提供很多额外功能，如分页，排序，复杂查询等。
 
-另外不同的ORM框架实现JPA规范的代码还是有一些差异的。如果我们要更换ORM框架，那么还是需要更改一些代码的。而<font color="red">Spring Data Jpa能够方便大家在不同的ORM框架中间进行切换而不要更改代码。并且Spring Data Jpa 对 Repository层封装的很好，可以省去不少的麻烦。</font>
+简而言之，Spring Data JPA 可以让我们不用写数据持久层的具体实现代码。极大的提高开发者的工作效率。
+
+推荐使用 Spring Data JPA + ORM框架 (Hibernate) 组合。
+
+> Spring Data JPA 与 JPA 与 Hibernate 的关系
+
+JPA是一种规范，Hibernate是一个实现了JPA规范的ORM框架，Spring Data JPA是对JPA规范的再次封装的框架，并实现了更多可用的功能。
 
 如图所示
 ![spring_data_jpa_2.png](../blog_img/springdata_img_spring_data_jpa_2.png)
 
-## Spring Boot 整合 Spring Data jpa 
+## Spring Boot 整合 Spring Data JPA
 
 1. 新建一个spring boot 工程。
 2. 在pom文件中导入JPA依赖,数据库驱动依赖
@@ -167,7 +173,7 @@ public class SysUserEntity implements Serializable {
     @Column
     @GeneratedValue(strategy = GenerationType.IDENTITY)     // id字段使用数据库自增
     private Long id;                        //用户id
-    @Column
+    @Column("user_name")
     private String userName;                //用户名称
     @Column
     private String passWord;                //密码
@@ -180,17 +186,19 @@ public class SysUserEntity implements Serializable {
     @Column
     private String status;                 //用户状态 正常0 禁用1
 	
+    // 无参，有参构造函数等
 	// get set 等方法....
 }
 
 ```
 
-
-- @Entity 注解用于表示这个类一个受 EntityManager 管理的实体类。
+- 注意实体类中必须包含无参构造函数。
+- @Entity 注解用于表示这个类是一个实体类。
 - @Table 注解用于指定了实体在数据库中所对应的表名称。
 - @Id 注解用于指定 ID 主键字段
 - @GeneratedValue(strategy = GenerationType.IDENTITY) 注解指定了 ID 主键字段值的生成方式，其中 GenerationType.IDENTITY 表示主键由数据库自动生成（自增）。
-- @Column 注解表示类的属性和表的字段列的映射关系。
+- @Column 注解表示类的属性和表的字段列的映射关系。如果@Column 注解设置了name属性，则表的列名是name属性的值。
+
 
 5. 创建Repository 接口 (相当于 Dao 层)
 
@@ -238,7 +246,6 @@ class HibernateDemoApplicationTests {
         SysUserEntity one = new SysUserEntity();
         one.setUserName("xiaohong");
         one.setPassWord("123456");
-        one.setCreateTime(new Date());
 
         //新增操作
         SysUserEntity save = sysUserRepository.save(one);
@@ -272,8 +279,52 @@ Spring Data JPA 会把Repository接口的各个方法会转换为对应的SQL语
 8. 总结
 
 - 当程序启动后,由于配置中的表生成策略是update,因此Spring Data JPA 或者说 Hibernate 会自动在对应的数据库中创建/更新表。
+
+如图所示，是Hibernate自动创建的表
+![spring_data_jpa_20240604111656.png](../blog_img/spring_data_jpa_20240604111656.png)
+
 - Repository接口的各种方法，Spring data jpa 会将其转换为对应的SQL语句，然后传递给数据库执行。因此执行各种CRUD方法，就相当于在执行各种SQL语句。
 
+如下是CrudRepository接口中的方法
 
+```java
+// save方法用来新增和更新。
+//当实体对象参数没有主键id值的时候，就是新增。插入数据库后，新增的主键id字段值会与返回值一起返回。
+//当实体对象参数有主键id值的时候，就是更新。
+<S extends T> S save(S entity);
+
+//传入实体对象集合，批量插入数据到数据库中
+<S extends T> Iterable<S> saveAll(Iterable<S> entities);
+
+//通过主键字段查询数据
+Optional<T> findById(ID id);
+
+// 通过主键字段查询数据是否存在
+boolean existsById(ID id);
+
+//查询所有数据
+Iterable<T> findAll();
+
+//传入实体对象集合，批量查询数据
+Iterable<T> findAllById(Iterable<ID> ids);
+
+//查询表的数据总量
+long count();
+
+//根据主键字段id，删除数据
+void deleteById(ID id);
+
+//传入实体对象，删除数据
+void delete(T entity);
+
+//传入id集合，批量删除多个数据
+void deleteAllById(Iterable<? extends ID> ids);
+
+//传入实体对象集合，批量删除多个数据
+void deleteAll(Iterable<? extends T> entities);
+
+//删除所有数据
+void deleteAll();
+```
 
 

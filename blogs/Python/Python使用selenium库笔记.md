@@ -41,7 +41,7 @@ browser.get(url)
 browser.close()
 ```
 
-运行代码，得到下面的效果。
+如图所示，运行代码，会自动打开浏览器，加载目标网址。
 ![python_20240518230359.png](../blog_img/python_20240518230359.png)
 
 
@@ -245,7 +245,7 @@ time.sleep(5)
 ![python_20240518234132.png](../blog_img/python_20240518234132.png)
 
 
-## selenium加载本地的html文件
+## Selenium加载本地的html文件
 
 在上面的例子中，我们可以通过网址来加载网页。我们也可以通过本地的html文件，来加载本地的网页。
 
@@ -268,3 +268,47 @@ browser.execute_script("return decode(" + data_info + ");")
 time.sleep(5)
 ```
 
+## Selenium的自定义设置
+
+在某些情况下，我们通过Selenium获取到浏览器对象的时候，可以设置一些自定义配置。
+
+```py
+import time
+from selenium import webdriver
+
+# Selenium获取到Edge浏览器设置选项
+options = webdriver.EdgeOptions()
+
+# 指定浏览器分辨率
+options.add_argument('window-size=1920x3000')
+
+# 隐藏浏览器滚动条, 应对一些特殊页面
+options.add_argument('--hide-scrollbars')
+
+# 设置浏览器编码格式
+options.add_argument('lang=zh_CN.UTF-8')
+
+# 浏览器启动时最大化窗口
+options.add_argument('--start-maximized')
+
+# 浏览器不加载图片, 提升浏览器的速度
+options.add_argument('blink-settings=imagesEnabled=false')
+
+# 浏览器不提供可视化页面. linux下如果系统不支持可视化不加这条会启动失败
+options.add_argument('--headless')
+
+# 谷歌浏览器需要加上这个属性来规避bug
+options.add_argument('--disable-gpu')
+
+# 浏览器以最高权限运行
+options.add_argument('--no-sandbox')
+
+# 设置浏览器的代理，请求头等，以列表的形式传入多个参数
+options.add_argument("--proxy-server=http://110.52.235.176:9999") 
+
+# 传入Edge浏览器设置，获取Edge浏览器对象
+browser = webdriver.Edge(options=options)
+
+# 浏览器对象访问目标网址或目标网页
+browser.get("C:\\Users\\86182\\Desktop\\a.html")
+```
