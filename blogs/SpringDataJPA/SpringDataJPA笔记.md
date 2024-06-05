@@ -285,18 +285,21 @@ Spring Data JPA 会把Repository接口的各个方法会转换为对应的SQL语
 
 - Repository接口的各种方法，Spring data jpa 会将其转换为对应的SQL语句，然后传递给数据库执行。因此执行各种CRUD方法，就相当于在执行各种SQL语句。
 
-## Repository 接口
+## Repository 接口中的数据持久化操作
 
-Repository 接口是Spring Data JPA的核心概念。Repository 接口的作用是减少
-数据持久层（dao层）的代码量。
+Repository 接口是Spring Data JPA的核心概念。
 
-常用的 Repository 接口如下
-- CrudRepository接口
-- 
+Repository 接口提供了许多封装好的CRUD方法。Repository 接口的作用是减少数据持久层（dao层）的代码量。
+
+> 常用的Repository 接口
+
+- CrudRepository : 继承自Repository，内部实现了一套CRUD的方法。
+- PagingAndSortingRepository : 继承自CrudRepository， 内部实现了一套分页排序的CRUD方法。
+- JpaRepository : 继承自PagingAndSortingRepository ，实现了一组jpa规范的方法 。
+- 自定义的 XxxRepository : 需要继承JpaRepository,这样该自定义的接口，就具备通用的数据访问控制层的能力。
 
 
-
-如下是CrudRepository接口中的方法
+如下是CrudRepository接口中的CRUD方法
 
 ```java
 // save方法用来新增和更新。
@@ -337,3 +340,151 @@ void deleteAll(Iterable<? extends T> entities);
 //删除所有数据
 void deleteAll();
 ```
+
+### 自定义 Repository 接口
+
+自定义 Repository 接口的使用方法
+1. 通常情况下，每当我们创建好一个实体类后，还需要创建对应的一个自定义Repository接口。
+2. 自定义 Repository 接口需要继承一个Spring Data JPA提供的Repository 接口。
+3. 当继承后，自定义 Repository 接口就会拥有各种封装好的CRUD方法。
+4. 然后我们再Service层或者Controller层的代码中，调用自定义 Repository 接口中的方法。
+5. Spring Data JPA 会将这些CRUD方法转换为各个SQL，并让数据库去执行。
+
+
+如下是SysUser实体类对应的SysUserRepository接口。
+```java
+//自定义SysUserRepository接口，泛型参数为实体类，实体类中的主键ID字段类型
+@Repository
+public interface SysUserRepository extends CrudRepository<SysUserEntity, Long> {
+    //....内置了许多CRUD方法
+}
+```
+
+然后在Service层或者Controller层的代码中，调用自定义 Repository 接口中的方法。
+```java
+@Service
+public class SysUserServiceImpl {
+    //依赖注入SysUserRepository接口
+    @Autowired
+    private SysUserRepository repository;
+
+    //添加数据
+    public void add(SysUserEntity entity){
+        repository.save(entity);
+    }
+    //更新数据
+    public void update(SysUserEntity entity){
+        repository.save(entity);
+    }
+    //删除数据
+    public void delete(SysUserEntity entity){
+        repository.delete(entity);
+    }
+    //根据id查询数据
+    public Object findById(Long id){
+        return repository.findById(id);
+    }
+}
+```
+
+注意：自定义的Repository 接口无需编写实现类。调用自定义的Repository 接口中的CRUD方法时，Spring Data JPA 会自动将这些CRUD方法转换为SQL语句，并让数据库去执行。
+
+
+## 自定义的数据持久化操作
+
+当我们自定义Repository 接口，并且继承Spring Data JPA提供的Repository 接口。可以实现一些CRUD操作，但是这些方法是固定的，无法定制。
+
+因此我们可以通过以下几种方法 实现自定义的数据持久化操作。
+
+1. JPQL 或 原生SQL语句
+2. 规定方法名称。
+
+
+### JPQL
+
+JPQL（JavaPersistence Query Language）是一种面向对象的查询语言，它在框架中最终会翻译成为sql进行查询。
+
+JPQL的核心就是@Query注解
+
+> @Query注解使用示例
+
+```java
+//自定义SysUserRepository接口
+@Repository
+public interface SysUserRepository extends CrudRepository<SysUserEntity, Long> {
+
+    //根据参数位置索引进行绑定
+    @Query(value =" from SysUserEntity s where s.userName=?1 and s.password=?2 ")
+    SysUserEntity find_by_username_password(String userName, String password);
+
+    //根据参数名称进行绑定
+    @Query(value = "from SysUserEntity s where s.userName=:name1 and s.email=:email1")
+    SysUserEntity find_by_NameAndEmail(@Param("name1") String name, @Param("email1")String email);
+
+    //like模糊查询
+    @Query(value = "from SysUserEntity s where s.userName like %:nameLike%")
+    List<SysUserEntity> find_by_NameLike(@Param("nameLike") String nameLike);
+
+    //between间隔查询
+    @Query(value = "from SysUserEntity s where s.id between :start and :end")
+    List<SysUserEntity> find_by_IdBetween(@Param("start")Long start, @Param("end")Long end);
+
+    //传入集合参数查询,in 用法
+    @Query(value = "from SysUserEntity s where s.userName in :nameList")
+    List<SysUserEntity> find_by_NameIn(@Param("nameList") Collection<String> nameList);
+
+    //传入Bean对象进行查询
+    @Query(value = "from SysUserEntity s where s.userName=:#{#usr.userName} and s.password=:#{#usr.password}")
+    SysUserEntity find_by_NameAndPassword(@Param("usr")SysUserEntity usr);
+
+    //使用Spring自带分页查询
+    @Query("from SysUserEntity s")
+    Page<SysUserEntity> findAllPage(Pageable pageable);
+
+    //带有条件的分页查询
+    @Query(value = "from SysUserEntity s where s.userName=:name1 ")
+    Page<SysUserEntity> findByEmailLike(Pageable pageable, @Param("name1")String name1);
+}
+
+```
+
+在@Query注解中填写的就是JPQL语句，JPQL语句与SQL语句有一些不同，例如其中的表名是实体类的类名。
+
+注意：当Repository接口的方法中含有Pageable参数时，那么SpringData认为该查询是需要分页的。
+
+
+### 原生SQL语句
+
+有些时候，在特定场合还是需要用到原生SQL查询的。我们也可以在@Query注解编写原生的SQL语句。
+
+只需要把@Query注解中的nativeQuery属性设置为true。此时就可以在@Query注解中填写原生SQL语句。
+
+> 使用示例
+
+```java
+//自定义SysUserRepository接口
+@Repository
+public interface SysUserRepository extends CrudRepository<SysUserEntity, Long> {
+
+    //原生SQL语句。select 普通查询
+    @Query(value = "select * from sys_user su where su.id=:id",nativeQuery = true)
+    SysUserEntity findByIdNative(@Param("id")Long id);
+
+    //原生SQL语句。select 普通查询
+    @Query(value = "select * from sys_user", nativeQuery = true)
+    List<SysUserEntity> findAllNative();
+
+    //原生SQL语句，关联查询
+    @Query(value = "select * from sys_user su left join sys_dept sd on su.department_id = sd.id group by su.id limit :start,:size",nativeQuery = true)
+    List<Object[]> find_limit_user_dept(@Param("start")int start, @Param("size")int size);
+
+    //原生SQL语句，count语句
+    @Query(value = "select count(u.id) from sys_user u", nativeQuery = true)
+    long count_ById();
+
+}
+```
+
+
+
+

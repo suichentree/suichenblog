@@ -616,9 +616,37 @@ if __name__ == '__main__':
 
 ## QTimer 定时器
 
-QTimer是一个定时器类，用于在指定的时间间隔内执行某个操作。
+QTimer是PySide6中提供的定时器类，它可以用来实现定时触发特定槽函数的功能。
 
-QTimer提供了一种简单的方法来实现定时任务，例如自动更新界面数据等。
+定时器类提供了start()、stop()、setInterval()等方法，可以用来控制定时器的启动、停止和间隔时间设置。
+
+在GUI应用程序中，定时器通常用来实现定时刷新界面、定时处理数据等功能。
+
+> QTimer提供了一些定时器的常用方法
+
+```py
+# 启动定时器，并设置定时器触发的时间间隔为msec毫秒。
+start(msec)
+# 停止定时器，定时器不再触发。
+stop()
+# 设置定时器触发的时间间隔为msec毫秒。
+setInterval(msec)
+# 判断定时器是否处于活动状态。
+isActive()
+# 返回定时器还剩余多少时间才会触发，单位为毫秒。
+remainingTime()
+
+```
+
+> 定时器的注意事项
+
+在使用定时器时，需要注意以下几点
+1. 定时器是单线程的，如果槽函数执行时间过长，可能会导致定时器信号的阻塞。
+2. 定时器应该在主线程中使用，不要在子线程中创建和操作定时器。
+3. 定时器需要手动启动，可以在构造函数中调用start()方法启动定时器。
+
+
+> 基本示例
 
 ```py
 from PySide6.QtWidgets import QApplication,QWidget
@@ -633,10 +661,18 @@ class MyWidget(QWidget):
         # 将定时器与函数绑定
         self.timer.timeout.connect(self.timer_task)
         # 设置定时器的触发时间，单位为毫秒。 1000毫秒为1秒
-        self.timer.start(1000)
+        self.timer.setInterval(1000)
+        # 开始运行定时器
+        self.timer.start()
 
     def timer_task(self):
         print(111)
+
+
+    def stop(self):
+        # 停止运行定时器
+        self.timer.stop()
+    
 
 if __name__ == "__main__":
     app = QApplication([])
@@ -647,7 +683,7 @@ if __name__ == "__main__":
 
 1. 创建了一个MyWidget类，继承自QWidget类。
 2. 在MyWidget类的构造函数中，创建了一个QTimer对象，并将其timeout信号连接到timer_task槽函数。
-3. 最后启动了定时器，并设置了时间间隔为1000毫秒(即1秒)。
+3. 最后设置了时间间隔为1000毫秒(即1秒)，并启动了定时器。
 4. 运行结果如下，每隔1秒定时执行一次timer_task方法，在终端打印111
 
 ![python_20240527180839.png](../blog_img/python_20240527180839.png)
