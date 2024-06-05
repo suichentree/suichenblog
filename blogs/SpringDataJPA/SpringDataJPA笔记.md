@@ -392,21 +392,47 @@ public class SysUserServiceImpl {
 
 ## 自定义的数据持久化操作
 
-当我们自定义Repository 接口，并且继承Spring Data JPA提供的Repository 接口。可以实现一些CRUD操作，但是这些方法是固定的，无法定制。
+当我们自定义Repository 接口，并且继承官方提供的Repository 接口。可以实现一些CRUD操作，但是这些CRUD方法是有限的，无法实现全部的CRUD操作。
 
-因此我们可以通过以下几种方法 实现自定义的数据持久化操作。
+因此我们可以通过以下几种方法，自已实现自定义的数据持久化操作。
 
-1. JPQL 或 原生SQL语句
-2. 规定方法名称。
+1. @Query注解（JPQL 或 原生SQL语句）
+2. 自定义方法名称。
 
-
-### JPQL
+### @Query注解（JPQL语句 或 原生SQL语句）
 
 JPQL（JavaPersistence Query Language）是一种面向对象的查询语言，它在框架中最终会翻译成为sql进行查询。
 
-JPQL的核心就是@Query注解
+JPQL的核心就是@Query注解。我们需要在@Query注解中编写JPQL语句。来实现CRUD操作。
+
+> @Query注解
+
+```java
+//@Query注解源代码
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ ElementType.METHOD, ElementType.ANNOTATION_TYPE })
+@QueryAnnotation
+@Documented
+public @interface Query {
+	String value() default "";
+	String countQuery() default "";
+	String countProjection() default "";
+	boolean nativeQuery() default false;
+	String name() default "";
+	String countName() default "";
+}
+```
+
+@Query注解中有6个参数。
+- value参数是需要填入的JPQL/SQL查询语句；
+- nativeQuery参数是标识，填写的语句是否为原生SQL语句，默认为false；
+- ....
 
 > @Query注解使用示例
+
+在@Query注解中填写的就是JPQL语句，JPQL语句与SQL语句有一些不同，例如其中的表名是实体类的类名。
+
+注意：当Repository接口的方法中含有Pageable参数时，那么SpringData认为该查询是需要分页的。
 
 ```java
 //自定义SysUserRepository接口
@@ -448,18 +474,16 @@ public interface SysUserRepository extends CrudRepository<SysUserEntity, Long> {
 
 ```
 
-在@Query注解中填写的就是JPQL语句，JPQL语句与SQL语句有一些不同，例如其中的表名是实体类的类名。
+- 主要是通过两种方式，将参数赋值到SQL语句中。一种是通过索引的方式，另一种就是通过指定参数名称的方式。
+- 另外@Query注解中通常用于进行查询操作的。对于非查询操作，不建议使用JPQL语句。使用官方Repository接口中提供的CRUD方法即可。
 
-注意：当Repository接口的方法中含有Pageable参数时，那么SpringData认为该查询是需要分页的。
-
-
-### 原生SQL语句
+> 原生SQL语句
 
 有些时候，在特定场合还是需要用到原生SQL查询的。我们也可以在@Query注解编写原生的SQL语句。
 
 只需要把@Query注解中的nativeQuery属性设置为true。此时就可以在@Query注解中填写原生SQL语句。
 
-> 使用示例
+> 使用示例如下
 
 ```java
 //自定义SysUserRepository接口
@@ -485,6 +509,32 @@ public interface SysUserRepository extends CrudRepository<SysUserEntity, Long> {
 }
 ```
 
+### 自定义持久化方法名称
 
+当我们自定义Repository 接口，并且继承官方提供的Repository 接口。可以实现一些CRUD操作，但是这些CRUD方法是有限的，无法实现全部的CRUD操作。
+
+除了官方提供的Repository 接口中的CRUD方法之外。我们还可以在Repository 接口中自定义持久化方法名称。
+
+只要自定义后的方法名称，符合Spring Data JPA的规则。就能够将该方法转换为对于的SQL语句。
+
+规则如图所示：
+![spring_data_jpa_3.png](../blog_img/springdata_img_spring_data_jpa_3.png)
+![spring_data_jpa_4.png](../blog_img/springdata_img_spring_data_jpa_4.png)
+
+
+> 示例如下
+
+```java
+//自定义SysUserRepository接口
+@Repository
+public interface SysUserRepository extends CrudRepository<SysUserEntity, Long> {
+
+
+    
+
+}
+
+
+```
 
 
