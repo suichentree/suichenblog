@@ -392,20 +392,80 @@ public class SysUserServiceImpl {
 
 ## 自定义的数据持久化操作
 
-当我们自定义Repository 接口，并且继承官方提供的Repository 接口。可以实现一些CRUD操作，但是这些CRUD方法是有限的，无法实现全部的CRUD操作。
+当我们自定义Repository 接口，并且继承官方提供的Repository 接口。可以实现一些CRUD操作，但是这些CRUD方法是有限的，无法满足所有的需求。
 
 因此我们可以通过以下几种方法，自已实现自定义的数据持久化操作。
 
-1. @Query注解（JPQL 或 原生SQL语句）
-2. 自定义方法名称。
+1. 自定义方法名称。
+2. @Query注解（JPQL语句）
+3. @Query注解（原生SQL语句）
+4. Query by Example （支持动态条件查询）
+5. Specifications
+6. QueryDSL
 
-### @Query注解（JPQL语句 或 原生SQL语句）
+### 自定义持久化方法名称
+
+除了官方提供的Repository 接口中的CRUD方法之外。我们还可以在Repository 接口中自定义持久化方法名称。
+
+只要自定义后的方法名称，符合Spring Data的规范的规定。Spring Data JPA就能够将该方法转换为对应的SQL语句。
+
+规则如下：
+1. 按照Spring Data的规范的规定，方法名称以find、findBy、read、readBy、get、getBy 等前缀关键字开头。
+2. 方法名称中实体类的属性名称就是查询条件，只不过属性名称要以大写字母开头。
+3. 拼接多个查询条件的时候，需要用关键字进行连接。
+
+如图 关键字所示：
+
+前缀关键字
+![spring_data_jpa_20240606105710.png](../blog_img/spring_data_jpa_20240606105710.png)
+
+中间和后缀关键字
+![spring_data_jpa_20240606110112.png](../blog_img/spring_data_jpa_20240606110112.png)
+![spring_data_jpa_20240606110203.png](../blog_img/spring_data_jpa_20240606110203.png)
+
+
+> 示例如下
+
+```java
+//自定义SysUserRepository接口
+@Repository
+public interface SysUserRepository extends CrudRepository<SysUserEntity, Long> {
+
+    // findByUserName 根据userName查询数据
+    List<SysUserEntity> findByUserName(String userName);
+
+    // findByUserNameAAndPassword 根据userName和password查询数据
+    List<SysUserEntity> findByUserNameAndPassword(String userName,String password);
+    
+    // findOrderByIdDesc 根据userName查询,然后根据id倒序
+    List<SysUserEntity> findByUserNameOrderByIdAsc(String userName);
+    
+    // 传入Pageable参数 分页全查
+    List<SysUserEntity> findAll(Pageable pageable);
+
+    //...........
+
+    //删除操作
+    void deleteById(Long id);
+
+}
+
+```
+
+> 自定义持久化方法名称 不适合动态查询
+
+自定义持久化方法名称 这种方式适合简单查询。
+
+如果方法传入的查询条件为null的时候，例如 `dao.findByUserNameAndSex(null, "男");` 会被转换为SQL为 `where (user_name is null) and sex=男 `。
+
+因此方法传入的查询条件为null的时候，数据库中只有该字段是null的记录才符合条件，并不是说忽略这个条件。
+
+
+### @Query注解（JPQL语句）
 
 JPQL（JavaPersistence Query Language）是一种面向对象的查询语言，它在框架中最终会翻译成为sql进行查询。
 
-JPQL的核心就是@Query注解。我们需要在@Query注解中编写JPQL语句。来实现CRUD操作。
-
-> @Query注解
+JPQL的核心就是@Query注解。我们可以在@Query注解中编写JPQL语句。来实现CRUD操作。
 
 ```java
 //@Query注解源代码
@@ -470,14 +530,47 @@ public interface SysUserRepository extends CrudRepository<SysUserEntity, Long> {
     //带有条件的分页查询
     @Query(value = "from SysUserEntity s where s.userName=:name1 ")
     Page<SysUserEntity> findByEmailLike(Pageable pageable, @Param("name1")String name1);
+    
+    // 修改操作
+    // @Modifying注解的作用是告诉spring data jpa 这是一个增删改的操作
+    @Modifying
+    @Query(value =" UPDATE SysUserEntity su set su.password=?2 WHERE su.userName=?1 ")
+    int update_sysuser_password(String userName, String password);
+
+    // 删除操作
+    // @Modifying注解的作用是告诉spring data jpa 这是一个增删改的操作
+    @Modifying
+    @Query(value =" DELETE FROM SysUserEntity su WHERE su.id=?1 ")
+    int delete_sysuser(Long id);
+
 }
+
+//测试类
+@SpringBootTest
+class HibernateDemoApplicationTests {
+
+	@Autowired
+	private SysUserRepository sysUserRepository;
+	
+    //测试增删改操作，需要在方法上添加@Transactional，表示这是一个事务方法才行。
+	@Test
+	@Transactional
+	void test02(){
+		int i = sysUserRepository.delete_sysuser(2L);
+		System.out.println("i="+i);
+	}
+}
+
 
 ```
 
 - 主要是通过两种方式，将参数赋值到SQL语句中。一种是通过索引的方式，另一种就是通过指定参数名称的方式。
 - 另外@Query注解中通常用于进行查询操作的。对于非查询操作，不建议使用JPQL语句。使用官方Repository接口中提供的CRUD方法即可。
+- 另外如果在@Query注解中填写增删改的SQL语句，还需要加上@Modifying和@Transactional注解，告诉Spring Data JPA 这是一个增删改的事务操作。
 
-> 原生SQL语句
+
+
+### @Query注解（原生SQL语句）
 
 有些时候，在特定场合还是需要用到原生SQL查询的。我们也可以在@Query注解编写原生的SQL语句。
 
@@ -509,32 +602,23 @@ public interface SysUserRepository extends CrudRepository<SysUserEntity, Long> {
 }
 ```
 
-### 自定义持久化方法名称
 
-当我们自定义Repository 接口，并且继承官方提供的Repository 接口。可以实现一些CRUD操作，但是这些CRUD方法是有限的，无法实现全部的CRUD操作。
+### Query by Example（支持动态条件查询）
 
-除了官方提供的Repository 接口中的CRUD方法之外。我们还可以在Repository 接口中自定义持久化方法名称。
+不建议在Spring Data JPA 中 使用 Query by Example 方法进行复杂的动态条件查询。
 
-只要自定义后的方法名称，符合Spring Data JPA的规则。就能够将该方法转换为对于的SQL语句。
+太麻烦了,直接弃用。
 
-规则如图所示：
-![spring_data_jpa_3.png](../blog_img/springdata_img_spring_data_jpa_3.png)
-![spring_data_jpa_4.png](../blog_img/springdata_img_spring_data_jpa_4.png)
+### Specifications （支持动态条件查询）
 
+太麻烦了,直接弃用。
 
-> 示例如下
+### QueryDSL （支持动态条件查询）
 
-```java
-//自定义SysUserRepository接口
-@Repository
-public interface SysUserRepository extends CrudRepository<SysUserEntity, Long> {
+太麻烦了,直接弃用。
 
 
-    
+## 多表关联
 
-}
-
-
-```
-
+### 一对一关联
 
