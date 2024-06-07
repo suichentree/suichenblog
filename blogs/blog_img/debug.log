@@ -21,3 +21,13 @@
 [0606/130952:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
 [0606/133243:WARNING:quota_manager.cc(1833)] Create directory failed for path
 [0606/133243:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0606/133246:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
+[0606/133916:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0606/140916:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0606/143916:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0606/150916:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0606/153916:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0606/160916:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0606/163916:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0606/170916:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0606/173916:WARNING:quota_manager.cc(1833)] Create directory failed for path

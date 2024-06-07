@@ -16,7 +16,14 @@ tags:
 
 Python2.5以上的版本，都内置了SQLite3库。通过SQLite3库，python可以很方便的使用SQLite数据库。
 
-## 连接数据库
+> 使用SQLite3数据的步骤过程
+
+![python_20240607102517.png](../blog_img/python_20240607102517.png)
+
+- 查询操作不需要执行事务提交方法。
+- 增删改操作需要执行事务提交方法。
+
+## 创建/连接数据库
 
 ```py
 #!/usr/bin/python
@@ -24,13 +31,60 @@ Python2.5以上的版本，都内置了SQLite3库。通过SQLite3库，python可
 # 导入 sqlite3 库
 import sqlite3
 
-# 如果当前目录没有test.db文件，否则在当前目录创建test.db文件。
+# 如果当前目录没有test.db文件，否则会在当前目录创建test.db文件。
 # 然后程序连接test.db文件中的main数据库，并返回一个数据库连接对象
 conn = sqlite3.connect('test.db')
 print ("数据库打开成功")
 ```
 
-sqlite3.connect 方法会在当前目录中，创建一个db文件，。并且python会连接到这个db文件中的main数据库，并返回一个数据库连接对象。
+sqlite3.connect 方法会在当前目录中，创建一个db文件。并且python会连接到这个db文件中的main数据库，并返回一个数据库连接对象。
+
+> 数据库连接对象conn中包含了以下方法
+- conn.cursor()	    创建一个游标对象
+- conn.commit()	    处理事务提交
+- conn.rollback()	处理事务回滚
+- conn.close()	    关闭一个数据库连接
+
+> 创建/连接数据库的其他写法
+
+```py
+# 在一个绝对路径下，创建或打开数据库
+conn = sqlite3.connect("C:\\Test.db")
+
+# 或者在内存中创建一个数据库
+conn = sqlite3.connect("memory")
+```
+
+## 创建游标
+
+游标对象有以下方法支持数据库操作。
+
+```py
+# 创建游标对象
+cursor = conn.cursor()
+
+# 用来执行sql语句
+cursor.execute()	
+
+# 用来执行多条sql语句
+cursor.executemany()	
+
+# 用来关闭游标
+cursor.close()	
+
+# 用来从结果中取一条记录，并将游标指向下一条记录
+cursor.fetchone()	
+
+# 用来从结果中取多条记录。
+cursor.fetchmany()	
+
+# 用来从结果中取出所以记录。
+cursor.fetchall()	
+
+# 用于游标滚动。
+cursor.scroll()	
+
+```
 
 ## 创建表
 
