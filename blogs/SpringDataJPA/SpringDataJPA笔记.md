@@ -620,5 +620,6 @@ public interface SysUserRepository extends CrudRepository<SysUserEntity, Long> {
 
 ## 多表关联
 
-### 一对一关联
+Spring Data JPA的多表关联。是基于Hibernate实现的。
 
+因此直接看Hibernate的多表关联的具体内容即可。
