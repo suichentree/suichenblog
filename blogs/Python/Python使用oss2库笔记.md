@@ -23,6 +23,8 @@ pip install oss2
 
 ## 上传文件到阿里云的面向对象存储OSS 方式1
 
+方式1主要是通过access_key来调用OSS接口。
+
 ```py
 import oss2
 import random
@@ -59,6 +61,8 @@ if __name__ == '__main__':
 ```
 
 ## 上传文件到阿里云的面向对象存储OSS 方式2
+
+方式1主要是通过 临时access_key 和 stsToken 来调用OSS接口。
 
 ```py
 def test_oss2():
