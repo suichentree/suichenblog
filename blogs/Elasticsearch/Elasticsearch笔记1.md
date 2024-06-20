@@ -43,6 +43,12 @@ ELK 技术栈目前广泛的应用在各个系统中的日志数据分析、实�
 - elasticsearch是ELK技术栈的核心，负责存储、搜索、分析数据。
 - kibana 负责数据的可视化。
 
+在安装部署Elasticsearch 和 kibana容器之前。我们先创建一个docker网络。这样才能很方便的让Elasticsearch 和 kibana容器互相通信。
+
+```bash
+docker network create my-elk-net
+```
+
 ### Docker环境下安装部署Elasticsearch容器
 
 > 步骤① 先安装docker环境，自行百度。
@@ -70,7 +76,7 @@ docker images
 
 ```shell
 # 创建容器并启动
-docker run -d --name="myES" --privileged=true -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" -e "discovery.type=single-node" -p 39200:9200 -p 39300:9300 -v /e/DockerVolumes/Elasticsearch/data:/usr/share/elasticsearch/data -v /e/DockerVolumes/Elasticsearch/plugins:/usr/share/elasticsearch/plugins -v /e/DockerVolumes/Elasticsearch/logs:/usr/share/elasticsearch/logs  elasticsearch:7.12.1
+docker run -d --name="my-es" --network="my-elk-net" --privileged=true -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" -e "discovery.type=single-node" -p 39200:9200 -p 39300:9300 -v /e/DockerVolumes/Elasticsearch/data:/usr/share/elasticsearch/data -v /e/DockerVolumes/Elasticsearch/plugins:/usr/share/elasticsearch/plugins -v /e/DockerVolumes/Elasticsearch/logs:/usr/share/elasticsearch/logs  elasticsearch:7.12.1
 
 # 查询容器日志，看是否成功启动。
 docker logs myES
@@ -83,6 +89,7 @@ docker logs myES
 --privileged=true：授予逻辑卷访问权
 -p 39200:9200：端口映射配置,宿主机的39200端口映射到容器的9200端口
 -p 39300:9300：端口映射配置,宿主机的39300端口映射到容器的9300端口
+--network="my-elk-net" ：把容器加入一个名为my-elk-net的docker网络中
 
 -v /e/DockerVolumes/Elasticsearch/data:/usr/share/elasticsearch/data：挂载逻辑卷，绑定es的数据目录
 -v /e/DockerVolumes/Elasticsearch/logs:/usr/share/elasticsearch/logs：挂载逻辑卷，绑定es的日志目录
@@ -103,7 +110,7 @@ elasticsearch并没有提供可视化界面，因此我们需要通过调用elas
 
 ### Docker环境下安装部署kibana容器
 
-kibana可以提供一个elasticsearch的可视化界面。方便我们可视化操作elasticsearch。
+kibana可以给elasticsearch提供一个可视化界面。方便我们可视化操作elasticsearch。
 
 > 步骤① 下载 kibana 镜像文件。最新版或某个版本
 
@@ -115,24 +122,32 @@ docker pull kibana:7.12.1
 docker images
 ```
 
-> 步骤③ 创建并启动kibana容器
+> 步骤② 创建并启动kibana容器
 
 ```shell
 # 创建容器并启动
-docker run -d --name="myKibana" -e "ELASTICSEARCH_HOSTS=http://localhost:39200" -p 35601:5601 kibana:7.12.1
+docker run -d --name="myKibana" --network="my-elk-net" -e "ELASTICSEARCH_HOSTS=http://my-es:39200" -p 35601:5601 kibana:7.12.1
 
 # 查询容器日志，看是否成功启动。
 docker logs myKibana
 ```
 
-> 步骤⑤ 测试
+命令解释：
+```
+--network="my-elk-net" 把容器加入一个名为my-elk-net的docker网络中
+-e "ELASTICSEARCH_HOSTS=http://my-es:39200" 设置访问elasticsearch的地址，因为kibana容器已经与elasticsearch容器在一个网络，因此可以用elasticsearch容器的名称直接访问elasticsearch容器。
+-p 35601:5601 端口映射
 
-elasticsearch并没有提供可视化界面，因此我们需要通过调用elasticsearch的API接口，来测试elasticsearch是否成功运行。
+```
 
-在浏览器中输入：`http://localhost:39200/` 即可看到elasticsearch的响应结果。
+> 步骤③ 测试
+
+浏览器输入地址访问：`http://localhost:35601`，访问Kibana的控制台界面。
 
 
 ## Elasticsearch的基本概念
+
+
 
 
 
