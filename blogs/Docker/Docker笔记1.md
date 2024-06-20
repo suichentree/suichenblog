@@ -86,7 +86,35 @@ Docker客户端是与Docker服务端进行交互的主要方式。当使用docke
 
 直接在docker官网上搜索Docker Desktop on Windows应用程序安装到本机即可。其他自行百度。
 
+Docker Desktop on Windows应用程序的首页截图
+![docker_20240620171350.png](../blog_img/docker_20240620171350.png)
+
 Docker Desktop on Windows这个应用程序会在windows环境上虚拟一个linux环境，然后在linux环境中再安装docker。
+
+打开windows的CMD终端。输入`docker -v`命令，可以看到安装的docker的版本
+
+![docker_20240620171538.png](../blog_img/docker_20240620171538.png)
+
+### Docker Desktop on Windows中添加镜像仓库
+
+目前（20240620）由于国内的网络环境，我们从dockerhub上下载各个docker镜像，很慢。
+
+在docker中添加镜像仓库配置，可以加快镜像下载速度。因此记录一下目前可用的镜像仓库。
+
+```js
+{
+  "registry-mirrors": [
+    "https://ustc-edu-cn.mirror.aliyuncs.com/",
+    "https://ccr.ccs.tencentyun.com/",
+    "https://docker.m.daocloud.io/"
+  ]
+}
+```
+
+我们也可以在Docker Desktop on Windows应用程序中手动添加上面的镜像仓库。从而大大加快docker镜像的下载速度。
+
+如图所示
+![docker_20240620172000.png](../blog_img/docker_20240620172000.png)
 
 ### windows中设置容器数据卷
 

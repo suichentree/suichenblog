@@ -47,7 +47,7 @@ print(add(1,2))
 pip3 install pyexecjs2
 ```
 
-> 例子1
+> 例子1 直接执行JS代码
 
 ```py
 import execjs
@@ -66,7 +66,7 @@ print(result)  # 输出 7
 
 ```
 
-> 例子2
+> 例子2 执行JS文件中的JS代码
 
 a.js文件中的js代码如下
 ```js
@@ -79,6 +79,7 @@ function add(num1, num2) {
 
 同目录下的py代码如下所示
 ```py
+# 导入execjs库
 import execjs
 
 # 读取js文件
