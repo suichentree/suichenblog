@@ -12,8 +12,8 @@ tags:
 
 # Elasticsearch笔记1
 
-- Elasticsearch版本为7.12.1
-- kibana版本为7.12.1
+- Elasticsearch版本为8.8.1
+- kibana版本为8.8.1
 
 ## Elasticsearch介绍
 
@@ -60,8 +60,8 @@ docker network create my-elk-net
 > 步骤② 下载Elasticsearch镜像文件。最新版或某个版本
 
 ```shell
-# 下载Elasticsearch镜像文件。版本为7.12.1
-docker pull elasticsearch:7.12.1
+# 下载Elasticsearch镜像文件。版本为8.8.1
+docker pull elasticsearch:8.8.1
 
 # 查询镜像
 docker images
@@ -70,6 +70,8 @@ docker images
 > 步骤③ 创建Elasticsearch容器的存储目录
 
 如果是windows系统，则可以在E:\DockerVolumes\Elasticsearch目录中创建data和plugins和logs目录。
+
+当然你也可以自己选择其他位置创建这些目录。
 
 - data目录存储Elasticsearch容器产生的数据。
 - logs目录存储Elasticsearch容器的日志数据。
@@ -80,7 +82,7 @@ docker images
 
 ```shell
 # 创建容器并启动
-docker run -d --name="myElasticsearch" --network="my-elk-net" --privileged=true -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" -e "discovery.type=single-node" -p 39200:9200 -p 39300:9300 -v /e/DockerVolumes/Elasticsearch/data:/usr/share/elasticsearch/data -v /e/DockerVolumes/Elasticsearch/plugins:/usr/share/elasticsearch/plugins -v /e/DockerVolumes/Elasticsearch/logs:/usr/share/elasticsearch/logs  elasticsearch:7.12.1
+docker run -d --name="myElasticsearch" --network="my-elk-net" --privileged=true -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" -e "discovery.type=single-node" -p 39200:9200 -p 39300:9300 -v /e/DockerVolumes/Elasticsearch/data:/usr/share/elasticsearch/data -v /e/DockerVolumes/Elasticsearch/plugins:/usr/share/elasticsearch/plugins -v /e/DockerVolumes/Elasticsearch/logs:/usr/share/elasticsearch/logs  elasticsearch:8.8.1
 
 # 查询容器日志，看是否成功启动。
 docker logs myES
@@ -108,10 +110,33 @@ docker logs myES
 
 elasticsearch并没有提供可视化界面，因此我们需要通过调用elasticsearch的API接口，来测试elasticsearch是否成功运行。
 
-在浏览器中输入：`http://localhost:39200/` 即可看到elasticsearch的响应结果。
+注意：elasticsearch8.0以上的版本默认开启了 ssl 认证。
 
-如图所示
-![es_20240620175036.png](../blog_img/es_20240620175036.png)
+有两种方式来访问elasticsearch8.0以上的版本。
+- 默认（开启SSL认证），我们需要访问`https://localhost:39200/`地址，并且输入用户名密码，才能访问。
+- 关闭SSL认证，我们需要访问`http://localhost:39200/`地址。关闭SSL之后就可以无需用户密码进行访问。
+
+> 步骤⑥ 关闭SSL认证访问。
+
+1. 进入到Elasticsearch容器。找到/usr/share/elasticsearch/config目录。
+2. 修改 elasticsearch.yml 配置文件 把 xpack.security.enabled 属性值改为 false。
+3. 之后重启Elasticsearch容器，访问`http://localhost:39200/`地址即可看到elasticsearch的响应结果。
+
+建议：在测试环境下用这种方式，在生产环境下还是开启 https和账号密码鉴权。
+
+> 步骤⑦ 默认方式（开启SSL认证）访问。
+
+1. 进入es容器的bash终端中。
+2. 输入重置密码命令。`bin/elasticsearch-reset-password -u elastic`
+3. 记住重置的新密码。
+
+![es_20240623004557.png](../blog_img/es_20240623004557.png)
+
+4. 访问`https://localhost:39200/`地址。输入用户名elastic，密码为重置的新密码。之后即可看到elasticsearch的响应结果。
+
+
+如图所示，为elasticsearch的响应结果
+![es_20240623005415.png](../blog_img/es_20240623005415.png)
 
 ### Docker环境下安装部署kibana容器
 
@@ -120,8 +145,8 @@ kibana可以给elasticsearch提供一个可视化界面。方便我们可视化�
 > 步骤① 下载 kibana 镜像文件。最新版或某个版本
 
 ```shell
-# 下载 kibana 镜像文件。版本为7.12.1
-docker pull kibana:7.12.1
+# 下载 kibana 镜像文件。版本为8.8.1
+docker pull kibana:8.8.1
 
 # 查询镜像
 docker images
@@ -131,7 +156,7 @@ docker images
 
 ```shell
 # 创建容器并启动
-docker run -d --name="myKibana" --network="my-elk-net" -e "ELASTICSEARCH_HOSTS=http://myElasticsearch:9200" -p 35601:5601 kibana:7.12.1
+docker run -d --name="myKibana" --network="my-elk-net" -e "ELASTICSEARCH_HOSTS=http://myElasticsearch:9200" -p 35601:5601 kibana:8.8.1
 
 # 查询容器日志，看是否成功启动。
 docker logs myKibana
@@ -430,7 +455,9 @@ IK分词器也提供了强大的停用词功能，让我们在进行分词处理
 
 ### 索引库的CRUD
 
-这里统一使用Kibana编写DSL语句的方式来演示。
+这里在Kibana中的Dev Tools界面中，使用DSL语句来请求Elasticsearch的API接口,从而操作Elasticsearch。
+
+![es_20240621233727.png](../blog_img/es_20240621233727.png)
 
 #### 创建索引库
 
@@ -562,5 +589,124 @@ DELETE /goods
 
 ## 文档操作
 
-当索引库创建好后。我们需要开始向操作索引库中的数据，即文档数据。
+当索引库创建好后。我们就需要操作索引库中的数据，即文档数据。
 
+这里在Kibana中的Dev Tools界面中，使用DSL语句来请求Elasticsearch的API接口,从而操作Elasticsearch。
+
+![es_20240621233727.png](../blog_img/es_20240621233727.png)
+
+### 文档的CRUD
+
+- 创建文档：POST /{索引库名}/_doc/文档id
+- 查询文档：GET /{索引库名}/_doc/文档id
+- 删除文档：DELETE /{索引库名}/_doc/文档id
+- 修改文档：
+  - 全量修改：PUT /{索引库名}/_doc/文档id
+  - 增量修改：POST /{索引库名}/_update/文档id
+
+
+> 新增文档数据
+
+```js
+//新增文档数据 语法如下
+POST /索引库名/_doc/文档id
+{
+    "字段1": "值1",
+    "字段2": "值2",
+    "字段3": {
+        "子属性1": "值3",
+        "子属性2": "值4"
+    },
+    // ...
+}
+
+//例子，新增id为1的文档数据
+POST /goods/_doc/1
+{
+  "id":1,
+  "goods_name": "小米手机",
+    "goods_price": 1999,
+  "goods_extend_info": {
+        "goods_size": 100,
+        "goods_origin": "湖北"
+  }
+}
+```
+
+如图所示，运行结果
+![es_20240622000707.png](../blog_img/es_20240622000707.png)
+
+
+> 查询文档数据
+
+```js
+//查询文档数据 语法如下
+GET /{索引库名称}/_doc/{id}
+
+//批量查询：查询该索引库下的全部文档
+GET /{索引库名称}/_search
+
+//例子,查询id为1的商品文档数据
+GET /goods/_doc/1
+//查询所有的商品文档数据
+GET /goods/_search
+```
+
+如图所示，运行结果
+![es_20240622001023.png](../blog_img/es_20240622001023.png)
+
+> 修改文档数据
+
+修改文档数据有两种方式：
+- 全量修改：会直接覆盖原来的文档数据。相当于先删除，后新增。
+- 增量修改：直接修改文档中的部分字段数据。
+
+```js
+// 全量修改文档数据 语法如下
+PUT /{索引库名}/_doc/文档id
+{
+    "字段1": "值1",
+    "字段2": "值2",
+    // ... 略
+}
+
+// 增量修改文档数据，语法如下
+POST /{索引库名}/_update/文档id
+{
+    "doc": {
+         "字段名": "新的值",
+    }
+}
+
+//例子 全量修改 id为1的商品文档数据
+PUT /goods/_doc/1
+{
+    "id":1,
+    "goods_name": "华为手机",
+      "goods_price": 3999,
+    "goods_extend_info": {
+          "goods_size": 100,
+          "goods_origin": "北京"
+    }
+}
+
+//例子 增量修改 id为1的商品文档数据中的goods_name字段
+POST /goods/_update/1
+{
+    "doc": {
+         "goods_name": "华为手机Mate20"
+    }
+}
+
+```
+
+> 删除文档数据
+
+```js
+// 删除文档数据 语法如下
+DELETE /{索引库名}/_doc/id值
+
+//例子 删除id为1的商品文档数据
+DELETE /goods/_doc/1
+
+```
