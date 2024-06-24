@@ -12,8 +12,8 @@ tags:
 
 # Elasticsearch笔记1
 
-- Elasticsearch版本为8.8.1
-- kibana版本为8.8.1
+- Elasticsearch版本为8.13.4
+- kibana版本为8.13.4
 
 ## Elasticsearch介绍
 
@@ -55,77 +55,76 @@ docker network create my-elk-net
 
 ### Docker环境下安装部署Elasticsearch容器
 
-> 步骤① 先安装docker环境，自行百度。
+> 步骤① 先安装docker环境，自行百度。若已安装，则直接下一步。
 
 > 步骤② 下载Elasticsearch镜像文件。最新版或某个版本
 
 ```shell
-# 下载Elasticsearch镜像文件。版本为8.8.1
-docker pull elasticsearch:8.8.1
+# 下载Elasticsearch镜像文件
+docker pull docker.elastic.co/elasticsearch/elasticsearch:8.13.4
 
 # 查询镜像
 docker images
 ```
 
-> 步骤③ 创建Elasticsearch容器的存储目录
+> 步骤③ 创建并启动Elasticsearch容器
 
-如果是windows系统，则可以在E:\DockerVolumes\Elasticsearch目录中创建data和plugins和logs目录。
+有两种方式来创建es容器。
 
-当然你也可以自己选择其他位置创建这些目录。
+>>方式1：禁用xpack安全认证（非默认情况）
 
-- data目录存储Elasticsearch容器产生的数据。
-- logs目录存储Elasticsearch容器的日志数据。
-- plugins目录存储Elasticsearch容器的插件。
+禁用 xpack 安全性，就可以不需要账户密码，以及SSL的方式来访问 Elasticsearch 服务器。 
 
-
-> 步骤④ 创建并启动Elasticsearch容器
+建议：在本地环境下可以用这种方式，在生产环境下还是开启xpack安全认证。
 
 ```shell
 # 创建容器并启动
-docker run -d --name="myElasticsearch" --network="my-elk-net" --privileged=true -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" -e "discovery.type=single-node" -p 39200:9200 -p 39300:9300 -v /e/DockerVolumes/Elasticsearch/data:/usr/share/elasticsearch/data -v /e/DockerVolumes/Elasticsearch/plugins:/usr/share/elasticsearch/plugins -v /e/DockerVolumes/Elasticsearch/logs:/usr/share/elasticsearch/logs  elasticsearch:8.8.1
+docker run -d --name="myElasticsearch" --network="my-elk-net" -e ES_JAVA_OPTS="-Xms512m -Xmx512m" -e xpack.security.enabled=false  -e discovery.type="single-node" -p 39200:9200 -p 39300:9300 docker.elastic.co/elasticsearch/elasticsearch:8.13.4
 
-# 查询容器日志，看是否成功启动。
-docker logs myES
+# 查询es容器日志，看是否成功启动。
+docker logs myElasticsearch
+
+# 命令解释
+# --network="my-elk-net" ：把容器加入一个名为my-elk-net的docker网络中
+# -e "ES_JAVA_OPTS=-Xms512m -Xmx512m"：由于es是运行在JVM中的，此处设置JVM内存大小。
+# -e "discovery.type=single-node"：非集群模式，单点模式
+# -p 39200:9200：端口映射配置,9200是访问端口。
+# -p 39300:9300：端口映射配置,9300是集群节点之间的通信端口。
+# xpack.security.enabled=false 禁用xpack安全认证
 ```
 
-命令解释
+>>方式2：启用xpack安全认证（默认情况）
+
+elasticsearch8.0以上的版本是默认开启xpack安全认证。开启xpack安全认证后，我们需要用账户密码，以及SSL的方式来访问 Elasticsearch 服务器。 
+
+```shell
+# 创建容器并启动
+docker run -d --name="myElasticsearch" --network="my-elk-net" -e ES_JAVA_OPTS="-Xms512m -Xmx512m" -e ELASTIC_PASSWORD="elastic" -e discovery.type="single-node" -p 39200:9200 -p 39300:9300 docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+
+# 查询es容器日志，看是否成功启动。
+docker logs myElasticsearch
+
+# 命令解释
+# -e ELASTIC_PASSWORD="elastic" 设置密码为elastic。默认的账户就是elastic
 ```
---name="myElasticsearch" 设置容器名称
---network="my-elk-net" ：把容器加入一个名为my-elk-net的docker网络中
--e "ES_JAVA_OPTS=-Xms512m -Xmx512m"：由于es是运行在JVM中的，此处设置JVM内存大小
--e "discovery.type=single-node"：非集群模式，单点模式
---privileged=true：授予逻辑卷访问权
--p 39200:9200：端口映射配置,9200是访问端口。
--p 39300:9300：端口映射配置,9300是集群节点之间的通信端口。
-
--v /e/DockerVolumes/Elasticsearch/data:/usr/share/elasticsearch/data：挂载逻辑卷，绑定es的数据目录
--v /e/DockerVolumes/Elasticsearch/logs:/usr/share/elasticsearch/logs：挂载逻辑卷，绑定es的日志目录
--v /e/DockerVolumes/Elasticsearch/plugins:/usr/share/elasticsearch/plugins：挂载逻辑卷，绑定es的插件目录
-```
-
-- 注意：/e/DockerVolumes/... 是windows环境下E盘的DockerVolumes目录。如果宿主机是linux系统，可以设置其他目录。
 
 
-> 步骤⑤ 测试
+> 步骤④ 测试
 
 elasticsearch并没有提供可视化界面，因此我们需要通过调用elasticsearch的API接口，来测试elasticsearch是否成功运行。
 
-注意：elasticsearch8.0以上的版本默认开启了 ssl 认证。
+有两种方式来访问测试elasticsearch8.0以上的版本。
+- 若es容器开启了xpack安全认证，需要访问`https://localhost:39200/`地址，并且输入用户名密码，才能访问。（之前在创建es容器的时候，设置了密码为elastic，账户默认为elastic）
+- 若es容器禁用了xpack安全认证，直接访问`http://localhost:39200/`地址。
 
-有两种方式来访问elasticsearch8.0以上的版本。
-- 默认（开启SSL认证），我们需要访问`https://localhost:39200/`地址，并且输入用户名密码，才能访问。
-- 关闭SSL认证，我们需要访问`http://localhost:39200/`地址。关闭SSL之后就可以无需用户密码进行访问。
 
-> 步骤⑥ 关闭SSL认证访问。
+开启xpack安全认证的访问截图
+![es_20240624163732.png](../blog_img/es_20240624163732.png)
 
-1. 进入到Elasticsearch容器。找到/usr/share/elasticsearch/config目录。
-2. 修改 elasticsearch.yml 配置文件 把 xpack.security.enabled 属性值改为 false。
-3. 之后重启Elasticsearch容器，访问`http://localhost:39200/`地址即可看到elasticsearch的响应结果。
 
-建议：在测试环境下用这种方式，在生产环境下还是开启 https和账号密码鉴权。
+#### 重置密码
 
-> 步骤⑦ 默认方式（开启SSL认证）访问。
-
+当es容器开启了xpack安全认证后，如果我们想要重置密码。可以使用以下方式。
 1. 进入es容器的bash终端中。
 2. 输入重置密码命令。`bin/elasticsearch-reset-password -u elastic`
 3. 记住重置的新密码。
@@ -134,9 +133,16 @@ elasticsearch并没有提供可视化界面，因此我们需要通过调用elas
 
 4. 访问`https://localhost:39200/`地址。输入用户名elastic，密码为重置的新密码。之后即可看到elasticsearch的响应结果。
 
+#### 创建访问令牌token
 
-如图所示，为elasticsearch的响应结果
-![es_20240623005415.png](../blog_img/es_20240623005415.png)
+当es容器开启了xpack安全认证后，如果kibana想要访问es，那么需要先在es容器内部创建一个访问令牌token才行。
+
+1. 进入es容器的bash终端中。
+2. 输入创建令牌命令。`/usr/share/elasticsearch/bin/elasticsearch-create-enrollment-token -s kibana`
+3. 记住创建好的token。
+
+![es_20240624165431.png](../blog_img/es_20240624165431.png)
+
 
 ### Docker环境下安装部署kibana容器
 
@@ -145,40 +151,41 @@ kibana可以给elasticsearch提供一个可视化界面。方便我们可视化�
 > 步骤① 下载 kibana 镜像文件。最新版或某个版本
 
 ```shell
-# 下载 kibana 镜像文件。版本为8.8.1
-docker pull kibana:8.8.1
-
-# 查询镜像
-docker images
+# 下载 kibana 镜像文件。
+docker pull docker.elastic.co/kibana/kibana:8.13.4
 ```
 
 > 步骤② 创建并启动kibana容器
 
 ```shell
 # 创建容器并启动
-docker run -d --name="myKibana" --network="my-elk-net" -e "ELASTICSEARCH_HOSTS=http://myElasticsearch:9200" -p 35601:5601 kibana:8.8.1
+docker run -d --name="myKibana" --network="my-elk-net" -p 35601:5601 docker.elastic.co/kibana/kibana:8.13.4
 
 # 查询容器日志，看是否成功启动。
 docker logs myKibana
-```
 
-命令解释：
-```
---network="my-elk-net" 把容器加入一个名为my-elk-net的docker网络中
-
--e "ELASTICSEARCH_HOSTS=http://myElasticsearch:9200" 设置kibana容器访问es容器的地址，其中端口是es容器端口9200，网址是es容器的名称。
-
-因为kibana容器已经与es容器在同一个网络中，因此kibana容器可以用es容器的名称直接访问es容器。
-
--p 35601:5601 端口映射。格式为宿主机端口：容器端口
-
+# 命令解释
+# --network="my-elk-net" 把容器加入一个名为my-elk-net的docker网络中
 ```
 
 > 步骤③ 测试
 
-浏览器输入地址访问：`http://localhost:35601`，访问Kibana的控制台界面。
+当kibana容器第一次启动后，查询容器日志。可以看到日志中有一个带有验证码的链接。我们需要访问带有这个验证码的地址才行。否则后续还需要填入这个验证码。
 
-![es_20240621091829.png](../blog_img/es_20240621091829.png)
+![es_20240624170117.png](../blog_img/es_20240624170117.png)
+
+浏览器输入地址访问：`http://localhost:35601/?code=176566`，访问Kibana的界面。
+
+![es_20240624170233.png](../blog_img/es_20240624170233.png)
+
+1. 我们需要先在es容器中，创建访问令牌token。然后将token，填入到输入框中。kibana会自动识别到es的访问地址。
+![es_20240624170444.png](../blog_img/es_20240624170444.png)
+
+2. 然后填入es的账户密码。此处是elastic/elastic
+![es_20240624170553.png](../blog_img/es_20240624170553.png)
+
+3. 最后就进入到了kibana的首页了。
+![es_20240624170717.png](../blog_img/es_20240624170717.png)
 
 ## Elasticsearch的基本概念
 
@@ -283,9 +290,36 @@ SQL | DSL | DSL是elasticsearch提供的JSON风格的请求语句，用来操作
 
 分词器的作用就是将文档内容，进行分词处理。从而得到一个个词条。
 
-elasticsearch内置的分词器，对于中文分词不好用。因此我们需要额外安装中文分词器插件，通过这个插件来进行中文分词处理。
+
+
+### 默认分词器
+
+Elasticsearch内置了默认分词器。默认分词器对于英文分词好用,对于中文分词不好用。
+
+> 测试默认分词器
+
+```js
+GET /_analyze
+{
+  "analyzer": "standard",
+  "text": "java and python"
+}
+
+GET /_analyze
+{
+  "analyzer": "standard",
+  "text": "华为手机"
+}
+```
+
+英文分词效果
+![es_20240624175212.png](../blog_img/es_20240624175212.png)
+中文分词效果
+![es_20240624175353.png](../blog_img/es_20240624175353.png)
 
 ### IK分词器
+
+默认分词器对于中文分词不太友好。因此我们需要额外安装中文分词器插件，通过这个中文分词器来进行中文分词处理。
 
 #### 什么是IK分词器？
 
@@ -300,6 +334,8 @@ docker exec -it myElasticsearch /bin/bash
 
 # 在线下载并安装IK分词器插件
 ./bin/elasticsearch-plugin  install https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v7.12.1/elasticsearch-analysis-ik-7.12.1.zip
+
+./bin/elasticsearch-plugin  install https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v8.12.2/elasticsearch-analysis-ik-8.12.2.zip
 
 #退出容器
 exit
