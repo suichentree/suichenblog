@@ -71,7 +71,7 @@ docker images
 
 有两种方式来创建es容器。
 
->>方式1：禁用xpack安全认证（非默认情况）
+>>方式1：禁用xpack安全认证（非默认情况下,本地测试环境下）
 
 禁用 xpack 安全性，就可以不需要账户密码，以及SSL的方式来访问 Elasticsearch 服务器。 
 
@@ -90,7 +90,7 @@ docker logs myElasticsearch
 # -e "discovery.type=single-node"：非集群模式，单点模式
 # -p 39200:9200：端口映射配置,9200是访问端口。
 # -p 39300:9300：端口映射配置,9300是集群节点之间的通信端口。
-# xpack.security.enabled=false 禁用xpack安全认证
+# -e xpack.security.enabled=false 禁用xpack安全认证
 ```
 
 >>方式2：启用xpack安全认证（默认情况）
@@ -121,10 +121,14 @@ elasticsearch并没有提供可视化界面，因此我们需要通过调用elas
 开启xpack安全认证的访问截图
 ![es_20240624163732.png](../blog_img/es_20240624163732.png)
 
+禁用xpack安全认证的访问截图
+![es_20240625153617.png](../blog_img/es_20240625153617.png)
 
 #### 重置密码
 
-当es容器开启了xpack安全认证后，如果我们想要重置密码。可以使用以下方式。
+当es容器开启了xpack安全认证后，我们需要账户密码，才能访问es。一般情况下账户默认为elastic。
+
+如果我们想要重置密码。可以使用以下方式。
 1. 进入es容器的bash终端中。
 2. 输入重置密码命令。`bin/elasticsearch-reset-password -u elastic`
 3. 记住重置的新密码。
@@ -143,6 +147,16 @@ elasticsearch并没有提供可视化界面，因此我们需要通过调用elas
 
 ![es_20240624165431.png](../blog_img/es_20240624165431.png)
 
+#### 禁用ES的xpack安全认证
+
+有两种方式可以禁用ES的xpack安全认证。
+
+方式1：在创建ES容器的时候，添加`-e xpack.security.enabled=false`环境变量来禁用xpack安全认证。
+
+方式2：当ES容器运行后，可以在容器内找到配置文件elasticsearch.yml。然后修改配置文件中的`xpack.security.enabled=false`属性。最后重启ES容器即可。
+
+配置文件elasticsearch.yml的位置一般在`/usr/share/elasticsearch/config/elasticsearch.yml`
+
 
 ### Docker环境下安装部署kibana容器
 
@@ -155,7 +169,7 @@ kibana可以给elasticsearch提供一个可视化界面。方便我们可视化�
 docker pull docker.elastic.co/kibana/kibana:8.13.4
 ```
 
-> 步骤② 创建并启动kibana容器
+> 步骤② 创建并启动kibana容器。
 
 ```shell
 # 创建容器并启动
@@ -168,23 +182,41 @@ docker logs myKibana
 # --network="my-elk-net" 把容器加入一个名为my-elk-net的docker网络中
 ```
 
-> 步骤③ 测试
+> 步骤③ 访问
 
-当kibana容器第一次启动后，查询容器日志。可以看到日志中有一个带有验证码的链接。我们需要访问带有这个验证码的地址才行。否则后续还需要填入这个验证码。
+有两种方式使用kibana容器。
+
+>> 方式1：如果我们的ES容器开启了xpack安全认证。那么可以按照下面步骤来。
+
+1. 当kibana容器第一次启动后，查询容器日志。可以看到日志中有一个带有验证码的链接。我们需要访问带有这个验证码的地址才行。否则后续还需要填入这个验证码。
 
 ![es_20240624170117.png](../blog_img/es_20240624170117.png)
 
-浏览器输入地址访问：`http://localhost:35601/?code=176566`，访问Kibana的界面。
+2. 浏览器输入地址访问：`http://localhost:35601/?code=176566`，访问Kibana的界面。
 
 ![es_20240624170233.png](../blog_img/es_20240624170233.png)
 
-1. 我们需要先在es容器中，创建访问令牌token。然后将token，填入到输入框中。kibana会自动识别到es的访问地址。
+3. 之后我们需要先在es容器中，创建访问令牌token（具体方法在上面）。然后将token，填入到输入框中。kibana会自动识别到es的访问地址。
 ![es_20240624170444.png](../blog_img/es_20240624170444.png)
 
-2. 然后填入es的账户密码。此处是elastic/elastic
+4. 然后填入es的账户密码。此处是elastic/elastic
 ![es_20240624170553.png](../blog_img/es_20240624170553.png)
 
-3. 最后就进入到了kibana的首页了。
+5. 最后就进入到了kibana的首页了。
+![es_20240624170717.png](../blog_img/es_20240624170717.png)
+
+>> 方式2：如果我们的ES容器关闭了xpack安全认证。那么可以按照下面步骤来。
+
+1. 如果ES容器关闭了xpack安全认证，那么就无法在ES容器中创建令牌token。
+2. 进入到Kibana容器中，找到配置文件。一般位置在/usr/share/kibana/config/kibana.yml
+3. 修改配置文件中的es容器访问地址。
+
+ip地址可以改为es容器的ip地址，如果es容器和kibana容器在同一个docker网络中，那么ip地址可以改为es容器的名称。
+
+![es_20240625160120.png](../blog_img/es_20240625160120.png)
+
+4. 之后重启kibana容器即可。重新访问`http://localhost:35601`地址。
+
 ![es_20240624170717.png](../blog_img/es_20240624170717.png)
 
 ## Elasticsearch的基本概念
@@ -296,7 +328,7 @@ SQL | DSL | DSL是elasticsearch提供的JSON风格的请求语句，用来操作
 
 Elasticsearch内置了默认分词器。默认分词器对于英文分词好用,对于中文分词不好用。
 
-> 测试默认分词器
+> 测试 默认分词器standard
 
 ```js
 GET /_analyze
@@ -325,6 +357,10 @@ GET /_analyze
 
 免费开源的java分词器，目前比较流行的中文分词器之一，简单、稳定。如果想要特别好的效果，需要自行维护词库，支持自定义词典。
 
+IK分词器的开源地址：[https://github.com/infinilabs/analysis-ik](https://github.com/infinilabs/analysis-ik)
+
+IK分词器各个版本的安装包下载地址：[https://release.infinilabs.com/analysis-ik/stable/](https://release.infinilabs.com/analysis-ik/stable/)
+
 #### 安装IK分词器
 
 在线安装IK分词器插件
@@ -333,9 +369,7 @@ GET /_analyze
 docker exec -it myElasticsearch /bin/bash
 
 # 在线下载并安装IK分词器插件
-./bin/elasticsearch-plugin  install https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v7.12.1/elasticsearch-analysis-ik-7.12.1.zip
-
-./bin/elasticsearch-plugin  install https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v8.12.2/elasticsearch-analysis-ik-8.12.2.zip
+./bin/elasticsearch-plugin  install https://release.infinilabs.com/analysis-ik/stable/elasticsearch-analysis-ik-8.13.4.zip
 
 #退出容器
 exit
@@ -344,9 +378,9 @@ docker restart myElasticsearch
 ```
 
 安装截图
-![es_20240621111131.png](../blog_img/es_20240621111131.png)
+![es_20240625104443.png](../blog_img/es_20240625104443.png)
 
-注意IK分词器插件的版本需要与Elasticsearch版本一致。
+注意IK分词器的版本需要与Elasticsearch版本一致。
 
 #### 测试IK分词器
 
@@ -371,7 +405,7 @@ GET /_analyze
 - text参数是需要进行分词处理的文档内容。
 
 如果所示，右边是分词处理的结果
-![es_20240621113017.png](../blog_img/es_20240621113017.png)
+![es_20240625105252.png](../blog_img/es_20240625105252.png)
 
 #### 自定义扩展词字典
 
@@ -418,7 +452,7 @@ GET /_analyze
 
 5. 测试效果
 
-针对`一键三连`这个词汇进行分析。使用ik_smart 智能切分模式。
+针对`一键三连`这个词汇进行分词处理。使用ik_smart 智能切分模式。
 
 添加扩展词字典文件之前的分词效果。
 ![es_20240621120213.png](../blog_img/es_20240621120213.png)
@@ -462,287 +496,3 @@ IK分词器也提供了强大的停用词功能，让我们在进行分词处理
 
 如图所示。针对停止词`啊`，不进行分词处理。
 ![es_20240621145332.png](../blog_img/es_20240621145332.png)
-
-
-## 索引操作
-
-在elasticsearch中，索引相当于传统数据库中的表格，映射相当于传统数据库中定义的表结构定义。
-
-索引：即相同类型的文档数据的集合。
-映射：即文档数据中的各个字段定义，约束。 
-
-我们要向elasticsearch中存储数据，必须先创建索引（表格）和映射（表结构定义）。
-
-### Mapping 映射属性
-
-在elasticsearch中，Mapping 映射属性相当于文档数据中的各个字段的定义。例如字段数据类型，字段约束。
-
-因此下面介绍一些，常见的Mapping 映射属性有哪些。
-
-- type：字段数据类型，常见的类型有：
-    - 字符串：text（可分词的文本）、keyword（精确值，例如：品牌、国家、ip地址）。keyword类型只能整体搜索，不支持搜索部分内容
-    - 数值：long、integer、short、byte、double、float、
-    - 布尔：boolean
-    - 日期：date
-    - 对象：object
-- index：是否创建索引，默认为true。如果某个字段需要搜索，排序。就添加该属性。
-- analyzer：使用哪种分词器。如果某个字段需要分词处理，就可以添加该属性。
-- properties：该字段的子字段。如果某个字段需要子字段，就可以添加该属性。
-
-### 索引库的CRUD
-
-这里在Kibana中的Dev Tools界面中，使用DSL语句来请求Elasticsearch的API接口,从而操作Elasticsearch。
-
-![es_20240621233727.png](../blog_img/es_20240621233727.png)
-
-#### 创建索引库
-
-创建索引库的语法如下。
-
-```js
-// 下面的DSL语句的含义是，PUT请求，接口名称为索引库名称，请求数据为索引中的映射定义。
-
-PUT /索引库名称
-{
-  "mappings": {                 //该索引的映射属性mappings
-    "properties": {             //properties 表示为mappings字段的子字段
-      "字段名1":{
-        "type": "text",         //字段1的数据类型为text
-        "analyzer": "ik_smart"  //字段1的使用ik_smart分词器
-      },
-      "字段名2":{
-        "type": "keyword",      //字段2的数据类型为keyword
-        "index": "false"        //不创建字段2的索引
-      },        
-      "字段名3":{
-        "properties": {         //properties 表示为字段名3的子字段
-          "子字段1": {          //子字段1 是 字段3的子属性字段。
-            "type": "keyword"       //子字段1的数据类型为keyword
-          }
-        }
-      },
-      // ...略
-    }
-  }
-}
-
-```
-
-例子：创建一个商品索引库。商品索引包含各个映射属性字段（id，goods_name，goods_price，goods_extend_info等）。
-
-```js
-PUT /goods
-{
-  "mappings": {
-    "properties": {
-      "id":{                     //商品id字段
-        "type": "integer"       //数据类型为integer           
-      },
-      "goods_name":{                //商品名称字段
-        "type": "text",             //数据类型为文本
-        "analyzer": "ik_smart"      //使用ik分词器，进行分词处理
-      },
-      "goods_price":{           //商品价格字段
-        "type": "double",       //数据类型为浮点数
-         "index": "false"       //该字段不使用索引
-      },
-      "goods_extend_info":{        //商品额外信息字段
-        "type":"object",             // 数据类型为object
-        "properties": {             
-            "goods_size":{          //商品尺寸字段
-                "type": "integer" 
-            },
-            "goods_origin":{        //商品产地字段
-                "type": "text" 
-            }
-        }
-      }
-      // ...略
-    }
-  }
-}
-```
-
-如图所示，商品索引库创建成功
-![es_20240621172425.png](../blog_img/es_20240621172425.png)
-
-#### 查询索引库
-
-查询索引库的语法如下。
-
-```js
-// 语法格式： GET /索引库名称
-GET /goods
-```
-
-如图所示，查询商品索引库。
-
-![es_20240621172833.png](../blog_img/es_20240621172833.png)
-
-#### 修改索引库
-
-在elasticsearch中，无法修改索引库中已经存在的mapping映射属性。只能增加新的mapping映射属性到索引中。
-
-修改索引库的语法如下。
-
-```js
-// 语法格式
-PUT /索引库名/_mapping
-{
-  "properties": {
-    "新字段名":{
-      "type": "integer"
-    }
-  }
-}
-
-//例子,给商品索引库，新增商品日期字段
-PUT /goods/_mapping
-{
-  "properties": {
-    "goods_date":{
-      "type": "date"
-    }
-  }
-}
-```
-
-如图所示
-![es_20240621173517.png](../blog_img/es_20240621173517.png)
-
-#### 删除索引库
-
-删除索引库的语法如下。
-
-```js
-// 语法格式： DELETE  /索引库名称
-// 例子 删除商品索引库
-DELETE /goods
-```
-
-如图所示
-![es_20240621173910.png](../blog_img/es_20240621173910.png)
-
-## 文档操作
-
-当索引库创建好后。我们就需要操作索引库中的数据，即文档数据。
-
-这里在Kibana中的Dev Tools界面中，使用DSL语句来请求Elasticsearch的API接口,从而操作Elasticsearch。
-
-![es_20240621233727.png](../blog_img/es_20240621233727.png)
-
-### 文档的CRUD
-
-- 创建文档：POST /{索引库名}/_doc/文档id
-- 查询文档：GET /{索引库名}/_doc/文档id
-- 删除文档：DELETE /{索引库名}/_doc/文档id
-- 修改文档：
-  - 全量修改：PUT /{索引库名}/_doc/文档id
-  - 增量修改：POST /{索引库名}/_update/文档id
-
-
-> 新增文档数据
-
-```js
-//新增文档数据 语法如下
-POST /索引库名/_doc/文档id
-{
-    "字段1": "值1",
-    "字段2": "值2",
-    "字段3": {
-        "子属性1": "值3",
-        "子属性2": "值4"
-    },
-    // ...
-}
-
-//例子，新增id为1的文档数据
-POST /goods/_doc/1
-{
-  "id":1,
-  "goods_name": "小米手机",
-    "goods_price": 1999,
-  "goods_extend_info": {
-        "goods_size": 100,
-        "goods_origin": "湖北"
-  }
-}
-```
-
-如图所示，运行结果
-![es_20240622000707.png](../blog_img/es_20240622000707.png)
-
-
-> 查询文档数据
-
-```js
-//查询文档数据 语法如下
-GET /{索引库名称}/_doc/{id}
-
-//批量查询：查询该索引库下的全部文档
-GET /{索引库名称}/_search
-
-//例子,查询id为1的商品文档数据
-GET /goods/_doc/1
-//查询所有的商品文档数据
-GET /goods/_search
-```
-
-如图所示，运行结果
-![es_20240622001023.png](../blog_img/es_20240622001023.png)
-
-> 修改文档数据
-
-修改文档数据有两种方式：
-- 全量修改：会直接覆盖原来的文档数据。相当于先删除，后新增。
-- 增量修改：直接修改文档中的部分字段数据。
-
-```js
-// 全量修改文档数据 语法如下
-PUT /{索引库名}/_doc/文档id
-{
-    "字段1": "值1",
-    "字段2": "值2",
-    // ... 略
-}
-
-// 增量修改文档数据，语法如下
-POST /{索引库名}/_update/文档id
-{
-    "doc": {
-         "字段名": "新的值",
-    }
-}
-
-//例子 全量修改 id为1的商品文档数据
-PUT /goods/_doc/1
-{
-    "id":1,
-    "goods_name": "华为手机",
-      "goods_price": 3999,
-    "goods_extend_info": {
-          "goods_size": 100,
-          "goods_origin": "北京"
-    }
-}
-
-//例子 增量修改 id为1的商品文档数据中的goods_name字段
-POST /goods/_update/1
-{
-    "doc": {
-         "goods_name": "华为手机Mate20"
-    }
-}
-
-```
-
-> 删除文档数据
-
-```js
-// 删除文档数据 语法如下
-DELETE /{索引库名}/_doc/id值
-
-//例子 删除id为1的商品文档数据
-DELETE /goods/_doc/1
-
-```
