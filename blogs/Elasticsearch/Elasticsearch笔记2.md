@@ -40,6 +40,23 @@ tags:
 - analyzer：使用哪种分词器。如果某个字段需要分词处理，就可以添加该属性。
 - properties：该字段的子字段。如果某个字段需要子字段，就可以添加该属性。
 
+### 动态映射
+
+在Elasticsearch8.x以上的版本中，出现了一个新的动态映射的概念。
+
+动态映射是指，当索引不存在或者索引没有设置Mapping 映射属性的时候。如果文档数据插入到索引库中，那么Elasticsearch会根据文档数据，自动为索引设置Mapping 映射属性。
+
+动态映射的默认规则如下所示
+
+![es_20240626095311.png](../blog_img/es_20240626095311.png)
+
+
+- 日期检测默认的格式："yyyy/MM/dd HH:mm:ss 或 yyyy/MM/dd"
+- 数值检测默认是关闭的， 不建议开启， 正确的解决方案是显式映射这些字段。
+
+
+
+
 ### 索引库的CRUD
 
 这里在Kibana中的Dev Tools界面中，使用DSL语句来请求Elasticsearch的API接口,从而操作Elasticsearch。
@@ -385,6 +402,10 @@ public class ElasticSearchConfig {
 ### 索引操作
 
 创建测试类进行测试。
+
+注意：在elasticSearch8.x版本中。如果索引没有设置好映射Mapping属性。当文档数据插入到索引库中的时候，es会自动根据文档数据，自动给索引创建映射Mapping属性。
+
+因此我们无需提前设置好索引的映射Mapping属性
 
 ```java
 @SpringBootTest
