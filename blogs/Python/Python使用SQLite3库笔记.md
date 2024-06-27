@@ -232,3 +232,25 @@ print("查询结果列表为：",list_data)
 
 ```
 
+## 判断表是否存在
+
+```py
+import sqlite3
+
+# 判断表是否存在
+def isExistTable(tableName):
+    conn = sqlite3.connect("test.db")
+    cursor = conn.cursor()
+    sql = f"SELECT name FROM sqlite_master WHERE type='table' AND name='{tableName}';"
+    results = cursor.execute(sql).fetchall()
+    if len(results) == 0:
+        return False
+    else:
+        return True
+
+# 测试
+if __name__ == '__main__':
+    a = isExistTable('t_job_info')
+    print(a)
+
+```
