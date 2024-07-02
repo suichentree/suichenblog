@@ -57,3 +57,4 @@
 [0626/105803:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
 [0626/105810:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
 [0626/110038:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
+[0701/175457:WARNING:quota_manager.cc(1833)] Create directory failed for path

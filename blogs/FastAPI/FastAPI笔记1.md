@@ -130,6 +130,20 @@ FastAPI 提供了内置的交互式 API 文档，使开发者能够轻松了解�
 ![python_20240427212313.png](../blog_img/python_20240427212313.png)
 ![python_20240427212239.png](../blog_img/python_20240427212239.png)
 
+## FastAPI应用的启动端口和启动IP
+
+默认情况下uvicorn服务器的启动端口为8000,启动IP为127.0.0.1
+
+下面代码可以进行更改
+
+```sh
+# --reload 当文件修改后，会自动重写加载。
+# main是要执行的py文件的名称
+# --host 启动ip
+# --port 启动端口
+uvicorn main:app --host 0.0.0.0 --port 38080 --reload
+```
+
 
 ## 路径操作装饰器
 

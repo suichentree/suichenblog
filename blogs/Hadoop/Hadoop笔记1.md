@@ -68,11 +68,31 @@ Hadoop是Apache软件基金会下的顶级开源项目。Hadoop的主要功能�
 ![hadoop_20240701173106.png](../blog_img/hadoop_20240701173106.png)
 
 
-## Hadoop HDFS 分布式文件系统
+## HDFS 分布式文件系统
 
+HDFS 分布式文件系统 是 Hadoop 的三大组件之一。
 
+- HDFS 全称是 Hadoop Distribued File System (Hadoop 分布式文件系统)
+- HDFS 是 Hadoop内部的分布式数据存储解决方案。
+- HDFS 可以在多台服务器上进行集群部署，并且存储海量的数据。
 
+> 为什么需要分布式文件存储？
 
+由于单个服务器的数据存储能力是有上限的，因此当数据量大到一定程度的时候，需要多台服务器一起存储数据才行。
+
+### HDFS的集群架构
+
+HDFS的集群架构是主从模式的，即有一个主节点，多个从节点，共同组成的集群。
+
+在HDFS的集群架构中，主要有三种不同的角色。
+- 主角色 NameNode ：主角色是一个独立进程。主要负责管理整个HDFS系统，管理DataNode从角色。
+- 从角色 DataNode ：从角色也是一个独立进程。主要负责数据存储。
+- 辅助角色 SecondaryNameNode ：辅助角色也是一个独立进程。主要负责辅助主角色，帮助主角色完成元数据整理工作。
+
+HDFS的集群架构如下图所示
+![hadoop_20240702165036.png](../blog_img/hadoop_20240702165036.png)
+
+## Hadoop的安装和部署
 
 
 
