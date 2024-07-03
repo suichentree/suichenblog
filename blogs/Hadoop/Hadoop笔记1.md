@@ -94,5 +94,111 @@ HDFS的集群架构如下图所示
 
 ## Hadoop的安装和部署
 
+下面是在docker环境中安装和部署Hadoop的。
+
+由于目前dockerhub中的Hadoop镜像都是旧的镜像格式，最新版本的docker无法下载该镜像。
+
+当尝试下载官方的Hadoop镜像时，会提示该Hadoop镜像是旧的镜像格式，不建议下载使用。
+![hadoop_20240703161546.png](../blog_img/hadoop_20240703161546.png)
+
+因此下面的笔记是先在centos镜像的基础上安装部署java和hadoop。从而构建出Hadoop镜像。
+
+### 制作镜像
+
+1. 先下载centos镜像
+
+```bash
+docker pull centos:7
+docker images #查看镜像
+```
+
+2. 构建Hadoop镜像
+
+通过Dockerfile，在centos镜像的基础上安装SSH服务,java环境，hadoop环境。
+
+步骤1：创建Dockerfile文件。该文件名称就是Dockerfile，注意该文件没有后缀名。
+
+步骤2：编辑Dockerfile文件。内容如下所示。
+
+注意：在Dockerfile所在目录下提前准备好 jdk-8u202-linux-x64.tar.gz 与 hadoop-3.3.6.tar.gz 安装包。你也可以准备其他版本的安装包。
+
+```docker
+# FROM:基于什么镜像来制作自己的镜像
+FROM centos:7
+# MAINTAINER:表示该镜像的作者（维护者）
+MAINTAINER shuyx
+
+# 配置yum源，包括修改仓库地址、提速、更新
+RUN cd /etc/yum.repos.d/
+RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+RUN sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://mirrors.aliyun.com|g' /etc/yum.repos.d/CentOS-*
+RUN yum makecache
+RUN yum update -y
+
+# 安装ssh服务和ssh客户端。
+RUN yum install -y openssh-server sudo
+RUN sed -i 's/UsePAM yes/UsePAM no/g' /etc/ssh/sshd_config
+RUN yum install -y openssh-clients
+
+# 生成ssh密钥，注意此处设置了root用户的密码为root
+RUN echo "root:root" | chpasswd
+RUN echo "root   ALL=(ALL)       ALL" >> /etc/sudoers
+RUN ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key
+RUN ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key
+
+# 开启ssh服务，暴露SSH的默认端口22。
+RUN mkdir /var/run/sshd
+EXPOSE 22
+CMD ["/usr/sbin/sshd", "-D"]
+
+# 将本地的jdk安装包，复制到容器的/usr/local/目录中。并进行解压，配置环境变量
+ADD jdk-8u202-linux-x64.tar.gz /usr/local/
+RUN mv /usr/local/jdk1.8.0_202 /usr/local/jdk1.8
+ENV JAVA_HOME /usr/local/jdk1.8
+ENV PATH $JAVA_HOME/bin:$PATH
+
+# 将本地的hadoop安装包，复制到容器的/usr/local/目录中。并进行解压，配置环境变量
+ADD hadoop-3.3.6.tar.gz /usr/local
+RUN mv /usr/local/hadoop-3.3.6 /usr/local/hadoop
+ENV HADOOP_HOME /usr/local/hadoop
+ENV PATH $HADOOP_HOME/bin:$PATH
+ 
+# 安装 which 和 sudo 这两个命令行工具
+RUN yum install -y which sudo
+
+```
+
+步骤3：在Dockerfile文件的同目录中，使用下面的命令，创建新镜像my-hadoop-image
+
+```docker
+# "."表示当前目录，即Dockerfile所在的位置
+# my-hadoop-image 为新镜像的名称
+docker build -t my-hadoop-image .
+```
+
+### 创建容器
+
+1. 先创建一个docker网络。这样才能很方便的让多个Hadoop容器之间互相通信。
+
+```bash
+# 创建一个docker网络
+docker network create my-hadoop-net
+# 查询网络
+docker network ls
+```
+
+2. 创建多个Hadoop容器
+
+```bash
+docker run -itd --network my-hadoop-net --name hadoop01 -p 50070:50070 -p 38088:8088 my-hadoop-image
+
+docker run -itd --network my-hadoop-net --name hadoop02 my-hadoop-image
+
+docker run -itd --network my-hadoop-net --name hadoop03 my-hadoop-image
+```
+
+
+
+
 
 
