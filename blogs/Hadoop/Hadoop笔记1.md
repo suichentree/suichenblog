@@ -171,7 +171,7 @@ RUN yum install -y which sudo
 
 步骤3：在Dockerfile文件的同目录中，使用下面的命令，创建新镜像my-hadoop-image
 
-```docker
+```sh
 # "."表示当前目录，即Dockerfile所在的位置
 # my-hadoop-image 为新镜像的名称
 docker build -t my-hadoop-image .
@@ -260,6 +260,7 @@ hadoop03 容器 | DataNode从角色
 
 方式2：<font color="red">先配置hadoop01容器，然后将hadoop01容器中的配置文件复制到其他容器中即可。下面是在配置hadoop01容器</font>
 
+下面采用的是方式2
 
 > 当hadoop容器部署成功后,HDFS集群配置需要对如下文件的修改
 
@@ -372,15 +373,17 @@ mkdir -p /usr/local/hadoop/hdfs/datanode
 
 ```sh
 # 在hadoop02容器终端中，删除/user/local/hadoop目录
-rm -r /user/local/hadoop
+rm -r /usr/local/hadoop
 # 在hadoop03容器终端中，删除/user/local/hadoop目录
-rm -r /user/local/hadoop
+rm -r /usr/local/hadoop
 
 # 在 hadoop01 容器的终端中把 /usr/local/hadoop 目录复制到 hadoop02容器的 /usr/local 目录中
 scp -r /usr/local/hadoop hadoop02:/usr/local
 # 在 hadoop01 容器的终端中把 /usr/local/hadoop 目录复制到 hadoop03容器的 /usr/local 目录中
 scp -r /usr/local/hadoop hadoop03:/usr/local
 ```
+
+scp命令需要输入root用户的密码，此处root用户密码为root。
 
 以上关于Hadoop容器中的HDFS集群配置就完成了。
 
