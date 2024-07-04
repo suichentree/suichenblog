@@ -58,3 +58,11 @@
 [0626/105810:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
 [0626/110038:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
 [0701/175457:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0704/090620:INFO:http_cache_transaction.cc(72)] IgnoreZeroCacheError: 0
+[0704/090621:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0704/090621:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0704/090622:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0704/090623:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0704/090628:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
+[0704/093621:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0704/100621:WARNING:quota_manager.cc(1833)] Create directory failed for path
