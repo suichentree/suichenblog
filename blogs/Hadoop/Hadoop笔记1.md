@@ -451,13 +451,13 @@ stop-dfs.sh
 
 通过jps命令。我们可以看到hadoop01容器启动了NameNode，DataNode，SecondaryNameNode进程。hadoop02容器启动了DataNode进程。hadoop03容器启动了DataNode进程。
 
-
-
 > 浏览器中访问`http://localhost:50070`
 
 如图是Hadoop中HDFS文件服务系统的管理页面。该网页是在NameNode主角色节点所在的容器（即Hadoop01容器）中。
 ![hadoop_20240705104632.png](../blog_img/hadoop_20240705104632.png)
 
+如图是三个DataNode节点信息
+![hadoop_20240705174750.png](../blog_img/hadoop_20240705174750.png)
 
 
 ### PS:Hadoop服务授权给普通用户
@@ -518,42 +518,3 @@ export YARN_NODEMANAGER_USER=hadoop
 
 ```
 
-
-## HDFS文件系统的使用
-
-### 命令行操作HDFS集群
-
-当我们在Hadoop容器中配置好HDFS集群后，便可以操作HDFS集群。
-
-> 启动HDFS集群/关闭HDFS集群
-
-在NameNode主角色节点的容器中，执行下面命令。
-```sh
-# 启动hdfs集群
-start-dfs.sh
-# 关闭hdfs集群
-stop-dfs.sh
-```
-
-> 单独启动或关闭某个角色的进程
-
-在某一个容器中执行下面命令
-
-```sh
-# 语法格式
-hdfs --daemon (start|status|stop) (namenode|secondarynamenode|datanode)
-
-# 例如关闭namenode进程
-hdfs --daemon stop namenode
-# 启动datanode进程
-hdfs --daemon start datanode
-# 查询secondarynamenode进程信息
-hdfs --daemon status secondarynamenode
-
-```
-
-### HDFS文件系统的目录结构
-
-HDFS文件系统的目录结构与Linux系统的目录结构是相似的。
-
-![hadoop_20240705114751.png](../blog_img/hadoop_20240705114751.png)

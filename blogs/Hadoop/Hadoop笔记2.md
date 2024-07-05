@@ -175,7 +175,5 @@ hdfs dfs -rm -r /shuyx/aaa
 
 注意：界面上操作是有权限限制的，无法新增，删除，修改文件。
 
-### HDFS客户端：Big Data Tools 插件
-
-在JetBrains的产品中，都可以支持安装Big Data Tools 插件。
+## HDFS文件系统存储原理
 
