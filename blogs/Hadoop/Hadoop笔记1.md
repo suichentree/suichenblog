@@ -332,7 +332,7 @@ export HADOOP_LOG_DIR=/usr/local/hadoop/logs
 
 ```xml
 <configuration>
-    <!-- 设置hdfs文件系统中，默认创建的文件权限-->
+    <!-- 设置hdfs文件系统中，默认创建的文件权限 -->
     <property>
         <name>dfs.datanode.data.dir.perm</name>
         <value>700</value>
@@ -352,11 +352,6 @@ export HADOOP_LOG_DIR=/usr/local/hadoop/logs
     <property>
         <name>dfs.datanode.data.dir</name>
         <value>file:/usr/local/hadoop/hdfs/datanode</value>
-    </property>
-    <!-- 数据块副本数量 -->
-    <property>
-        <name>dfs.replication</name>
-        <value>2</value>
     </property>
     <!-- hdfs数据块大小（以字节为单位，默认为128MB）-->
     <property>
@@ -515,6 +510,5 @@ export HDFS_DATANODE_USER=hadoop
 export HDFS_SECONDARYNAMENODE_USER=hadoop
 export YARN_RESOURCEMANAGER_USER=hadoop
 export YARN_NODEMANAGER_USER=hadoop
-
 ```
 
