@@ -67,8 +67,7 @@ Hadoop是Apache软件基金会下的顶级开源项目。Hadoop的主要功能�
 
 ![hadoop_20240701173106.png](../blog_img/hadoop_20240701173106.png)
 
-
-## HDFS 分布式文件系统
+### HDFS文件系统介绍
 
 HDFS 分布式文件系统 是 Hadoop 的三大组件之一。
 
@@ -80,7 +79,7 @@ HDFS 分布式文件系统 是 Hadoop 的三大组件之一。
 
 由于单个服务器的数据存储能力是有上限的，因此当数据量大到一定程度的时候，需要多台服务器一起存储数据才行。
 
-### HDFS的集群架构
+> HDFS的集群架构
 
 HDFS的集群架构是主从模式的，即有一个主节点，多个从节点，共同组成的集群。
 
@@ -103,7 +102,7 @@ HDFS的集群架构如下图所示
 
 因此下面的笔记是先在centos镜像的基础上安装部署java和hadoop。从而构建出Hadoop镜像。
 
-### 制作Hadoop镜像
+### 1.构建Hadoop镜像
 
 1. 先下载centos镜像
 
@@ -114,13 +113,13 @@ docker images #查看镜像
 
 2. 构建Hadoop镜像
 
-在centos镜像的基础上安装SSH服务,java环境，hadoop环境。然后通过Dockerfile构建出一个新镜像。
+在centos镜像的基础上安装SSH服务,java，hadoop。然后通过Dockerfile构建出一个新镜像。
 
 步骤1：创建Dockerfile文件。该文件名称就是Dockerfile，注意该文件没有后缀名。
 
 步骤2：编辑Dockerfile文件。内容如下所示。
 
-注意：在Dockerfile所在目录下提前准备好 jdk-8u202-linux-x64.tar.gz 与 hadoop-3.3.6.tar.gz 安装包。你也可以准备其他版本的安装包。
+注意：在Dockerfile所在目录下提前准备好 jdk-8u202-linux-x64.tar.gz 与 hadoop-3.3.6.tar.gz 安装包。当然你也可以准备其他版本的安装包。
 
 ```docker
 # FROM:基于什么镜像来制作自己的镜像
@@ -164,9 +163,15 @@ ENV HADOOP_HOME /usr/local/hadoop
 ENV PATH $HADOOP_HOME/bin:$PATH
 ENV PATH $HADOOP_HOME/sbin:$PATH
 
-# 安装 which 和 sudo 这两个命令行工具
-RUN yum install -y which sudo
+# 指定root用户访问
+ENV HDFS_NAMENODE_USER root
+ENV HDFS_DATANODE_USER root
+ENV HDFS_SECONDARYNAMENODE_USER root
+ENV YARN_RESOURCEMANAGER_USER root
+ENV YARN_NODEMANAGER_USER root
 
+# 安装 which,sudo,vim 命令行工具
+RUN yum install -y which sudo vim
 ```
 
 步骤3：在Dockerfile文件的同目录中，使用下面的命令，创建新镜像my-hadoop-image
@@ -175,9 +180,12 @@ RUN yum install -y which sudo
 # "."表示当前目录，即Dockerfile所在的位置
 # my-hadoop-image 为新镜像的名称
 docker build -t my-hadoop-image .
+
+# 查询新镜像my-hadoop-image
+docker images
 ```
 
-### 创建Hadoop容器
+### 2.部署Hadoop容器
 
 1. 先创建一个docker网络。这样能很方便的让多个Hadoop容器之间互相通信。
 
@@ -191,56 +199,63 @@ docker network ls
 2. 创建多个Hadoop容器
 
 ```bash
+# 创建hadoop01容器
 docker run -itd --network my-hadoop-net --name hadoop01 -p 50070:50070 -p 38088:8088 my-hadoop-image
-
+# 创建hadoop02容器
 docker run -itd --network my-hadoop-net --name hadoop02 my-hadoop-image
-
+# 创建hadoop03容器
 docker run -itd --network my-hadoop-net --name hadoop03 my-hadoop-image
 ```
 
 50070和8088端口，主要是用来在浏览器中访问hadoop WEB界面的。
 
-3. 在每个Hadoop容器中配置环境变量
+3. 测试容器内的java，hadoop是否安装成功
 
-在每一个Hadoop容器终端中,执行下面步骤。
-
-```sh
-# 1. 如果没有vim命令,可以通过下面的命令安装vim
-yum install vim 
-
-# 2. 编辑/etc/profile文件，添加环境变量。
-vim /etc/profile
-# 添加这行内容
-export PATH=$PATH:/usr/local/hadoop/bin:/usr/local/hadoop/sbin
-export PATH=$PATH:/usr/local/hadoop/bin:/usr/local/hadoop/sbin
-
-export PATH=$PATH:/usr/local/jdk1.8/bin
-
-# 3.保存退出
-```
-
-4. 测试容器内的java，hadoop是否安装成功
-
+在每一个容器终端中执行下面命令
 ```bash
-# 进入到hadoop容器内
-docker exec -it hadoop01 /bin/bash
-docker exec -it hadoop02 /bin/bash
-docker exec -it hadoop03 /bin/bash
-
 # 查询安装的java,hadoop版本
 java -version
 hadoop version
-
 ```
 
-如下图所示
+安装结果如下图所示
 ![hadoop_20240704093254.png](../blog_img/hadoop_20240704093254.png)
 
-4. hadoop中的目录结构
+4. hadoop安装包中的目录结构
 
 ![hadoop_20240704102116.png](../blog_img/hadoop_20240704102116.png)
 
-### Hadoop容器中的HDFS集群配置
+### 3.Hadoop容器之间互相配置SSH免密登录
+
+在每个Hadoop容器中，配置免密码互相SSH登录。方便多个Hadoop容器之间互相登录访问。
+
+1. 在每一个Hadoop容器终端中,执行下面几条命令
+```sh
+# 先生成SSH密钥
+ssh-keygen -t rsa -b 4096
+
+# 设置SSH免密登录。注意 hadoop01,hadoop02,hadoop03 是各个hadoop容器的名称。
+# 该命令会让你输入root用户的密码。
+ssh-copy-id hadoop01
+ssh-copy-id hadoop02
+ssh-copy-id hadoop03
+```
+
+由于多个hadoop容器在同一个网络中，因此hadoop容器互相可以通过容器名称找到其他hadoop容器。
+
+2. 执行命令完毕后，hadoop01,hadoop02,hadoop03 三个容器之间就可以完成root用户之间的免密登录。
+3. 在Hadoop容器终端中进行测试
+
+```sh
+# 通过ssh登录到hadoop01容器中
+ssh hadoop01
+# 通过ssh登录到hadoop02容器中
+ssh hadoop02
+# 通过ssh登录到hadoop03容器中
+ssh hadoop03
+```
+
+### 4.Hadoop容器中的HDFS集群配置
 
 由于HDFS分布式存储系统有三个角色，NameNode主角色，DataNode从角色，辅助角色SecondaryNameNode。
 
@@ -252,28 +267,21 @@ hadoop01 容器 | NameNode主角色，DataNode从角色，辅助角色SecondaryN
 hadoop02 容器 | DataNode从角色 
 hadoop03 容器 | DataNode从角色
 
-每个角色都是一个进程或者一个节点，因此可以理解为三个Hadoop容器中存在5个进程节点。其中一个主进程节点NameNode，三个从进程节点DataNode，以及一个辅助进程节点SecondaryNameNode。
+每个角色都相当于是一个进程或者一个节点，因此可以理解为三个Hadoop容器中存在5个进程节点。其中一个主进程节点NameNode，三个从进程节点DataNode，以及一个辅助进程节点SecondaryNameNode。
 
-> 配置方式有两种：
+> 配置方式
 
-方式1：给每个hadoop容器，进行单独配置。
-
-方式2：<font color="red">先配置hadoop01容器，然后将hadoop01容器中的配置文件复制到其他容器中即可。下面是在配置hadoop01容器</font>
-
-下面采用的是方式2
-
-> 当hadoop容器部署成功后,HDFS集群配置需要对如下文件的修改
-
+HDFS集群配置需要对如下文件的修改
 - workers 配置DataNode从角色是哪些。
 - hadoop-env.sh 配置hadoop的环境变量文件，需要将jdk的路径配置进去。
 - core-site.xml 是hadoop的核心配置，需要指定hadoop的基本配置信息。
 - hdfs-site.xml 是hadoop中的HDFS组件的配置文件。
 
-> 配置 workers 文件
+<font color="red">先配置hadoop01容器，然后将hadoop01容器中的hadoop目录整体复制到其他hadoop容器中即可。下面是在hadoop01容器中进行HDFS集群配置</font>
 
-编辑/usr/local/hadoop/etc/hadoop/workers文件。配置三个DataNode从角色，所在的hadoop容器名称。
+> ① 配置 workers 文件
 
-由于三个hadoop容器都是在一个网络my-hadoop-net下，因此容器可以用容器名称来找到其他hadoop容器。
+编辑/usr/local/hadoop/etc/hadoop/workers文件。配置三个DataNode从角色所在的hadoop容器名称。
 
 ```
 hadoop01
@@ -281,12 +289,14 @@ hadoop02
 hadoop03
 ```
 
-> 配置 `hadoop-env.sh`
+由于三个hadoop容器都是在同一个网络my-hadoop-net下，容器可以用容器名称来找到其他hadoop容器。因此直接在workers文件中直接填写容器名称即可。
 
-编辑 /usr/local/hadoop/etc/hadoop/hadoop-env.sh
+> ② 配置 `hadoop-env.sh`
+
+编辑 /usr/local/hadoop/etc/hadoop/hadoop-env.sh文件。
 
 ```sh
-# 指定hadoop使用java的安装路径
+# 指定hadoop使用的java环境的路径
 export JAVA_HOME=/usr/local/jdk1.8
 # 指定hadoop的安装目录位置
 export HADOOP_HOME=/usr/local/hadoop
@@ -296,15 +306,13 @@ export HADOOP_CONF_DIR=/usr/local/hadoop/etc/hadoop
 export HADOOP_LOG_DIR=/usr/local/hadoop/logs
 ```
 
-> 配置core-site.xml
+> ③ 配置core-site.xml
 
-编辑 /usr/local/hadoop/etc/hadoop/core-site.xml。
-
-由于三个hadoop容器都是在一个网络my-hadoop-net下，因此容器可以用容器名称来找到其他hadoop容器。
+编辑 /usr/local/hadoop/etc/hadoop/core-site.xml
 
 ```xml
 <configuration>
-    <!-- 指定NameNode主角色，hadoop01为NameNode主角色所在的容器名称。8020为通讯端口，端口可以随意指定，默认为8020端口-->
+    <!-- 访问NameNode主角色的地址路径，hadoop01为NameNode主角色所在的容器名称。8020为通讯端口，端口可以随意指定，默认为8020端口 -->
     <property>
         <name>fs.defaultFS</name>
         <value>hdfs://hadoop01:8020</value>
@@ -315,10 +323,10 @@ export HADOOP_LOG_DIR=/usr/local/hadoop/logs
         <value>131702</value>
     </property>
 </configuration>
-
 ```
 
-> HDFS配置文件 hdfs-site.xml
+
+> ④ HDFS配置文件 hdfs-site.xml
 
 编辑 /usr/local/hadoop/etc/hadoop/hdfs-site.xml
 
@@ -335,6 +343,7 @@ export HADOOP_LOG_DIR=/usr/local/hadoop/logs
         <value>file:/usr/local/hadoop/hdfs/namenode</value>
     </property>
     <!-- NameNode主角色节点允许哪些DataNode从角色节点进行授权连接 -->
+    <!-- 此处填写DataNode从角色节点所在的容器名称即可 -->
     <property>
         <name>dfs.namenode.hosts</name>
         <value>hadoop01,hadoop02,hadoop03</value>
@@ -362,116 +371,46 @@ export HADOOP_LOG_DIR=/usr/local/hadoop/logs
 </configuration>
 ```
 
-由于我们在hdfs-site.xml配置文件中，指定了namenode目录和datanode目录。因此我们需要在NameNode主角色所在的hadoop容器中（即hadoop01容器），创建这两个目录。 
+由于我们在hdfs-site.xml配置文件中，指定了namenode目录和datanode目录。因此我们还需要在NameNode主角色所在的hadoop容器中（即hadoop01容器），创建这两个目录。 
 
 ```sh
 mkdir -p /usr/local/hadoop/hdfs/namenode
 mkdir -p /usr/local/hadoop/hdfs/datanode
 ```
 
-> 将hadoop01容器中的hadoop目录，复制到其他hadoop容器中
+> ⑤ 将hadoop01容器中的hadoop目录，复制到其他hadoop容器中
 
 ```sh
-# 在hadoop02容器终端中，删除/user/local/hadoop目录
-rm -r /usr/local/hadoop
-# 在hadoop03容器终端中，删除/user/local/hadoop目录
-rm -r /usr/local/hadoop
-
 # 在 hadoop01 容器的终端中把 /usr/local/hadoop 目录复制到 hadoop02容器的 /usr/local 目录中
 scp -r /usr/local/hadoop hadoop02:/usr/local
 # 在 hadoop01 容器的终端中把 /usr/local/hadoop 目录复制到 hadoop03容器的 /usr/local 目录中
 scp -r /usr/local/hadoop hadoop03:/usr/local
 ```
 
-scp命令需要输入root用户的密码，此处root用户密码为root。
+scp命令需要输入root用户的密码，之前构建镜像的时候，设置了root用户密码为root。
 
 以上关于Hadoop容器中的HDFS集群配置就完成了。
 
-### 在Hadoop容器中创建普通用户hadoop
+### 5.启动HDFS集群
 
-通常在生产环境中，强烈建议避免以 root 用户身份直接操作 Hadoop 的组件，这有助于减少安全风险。
+<font color="red">注意：下面只需要在NameNode主角色节点的Hadoop容器（即hadoop01容器）终端中执行下面命令即可。</font>
 
-因此为了确保数据安全，hadoop系统不以root用户启动，我们需要创建普通用户hadoop，并且以普通用户hadoop来启动整个hadoop服务。
+> 格式化HDFS集群
 
-在每一个Hadoop容器终端中,执行下面几条命令
-```sh
-# 创建普通用户hadoop
-useradd hadoop
-# 设置hadoop用户的密码为123456
-passwd hadoop
-# 将当前用户从root用户切换到hadoop用户
-su - hadoop
-```
-
-### 在Hadoop容器中配置SSH免密登录
-
-之前我们在每个容器中创建了hadoop用户。现在在每个Hadoop容器中，配置免密码互相SSH登录。
-
-1. 在每一个Hadoop容器终端中,执行下面几条命令
-```sh
-# 将当前用户从root用户切换到hadoop用户
-su - hadoop
-
-# 生成SSH密钥
-ssh-keygen -t rsa -b 4096
-
-# 设置SSH免密登录。注意 hadoop01,hadoop02,hadoop03 是各个hadoop容器的名称。
-# 该命令会让你输入hadoop用户的密码。
-ssh-copy-id hadoop01
-ssh-copy-id hadoop02
-ssh-copy-id hadoop03
-```
-
-由于多个hadoop容器在同一个网络中，因此hadoop容器互相可以通过容器名称找到其他hadoop容器。
-
-2. 执行命令完毕后，hadoop01,hadoop02,hadoop03 三个容器之间就可以完成hadoop用户之间的免密登录。
-3. 测试
+先格式化HDFS集群,清除现有的文件数据和元数据。这个命令在第一次启动 HDFS 集群时使用，从而确保 NameNode 和 DataNode 存储的数据是干净的。
 
 ```sh
-# 通过ssh登录到hadoop01容器中
-ssh hadoop01
-# 通过ssh登录到hadoop02容器中
-ssh hadoop02
-# 通过ssh登录到hadoop03容器中
-ssh hadoop03
-```
-
-### Hadoop容器中的hadoop相关目录文件授权给普通用户hadoop
-
-我们需要把Hadoop容器中的hadoop相关目录文件授权给之前创建的普通用户hadoop
-
-在每一个Hadoop容器终端中,执行下面命令。注意需要用root用户来执行该命令
-```sh
-# 先切换到root用户，该命令需要输入root用户密码
-su - root
-# 执行授权命令
-chown -R hadoop:hadoop /usr/local/hadoop
-```
-
-上面命令需要输入root用户密码，在构建hadoop镜像的时候，就设置了root用户密码为root。
-
-
-### 格式化整个HDFS系统
-
-先格式化整个HDFS系统，清除现有的文件系统数据和元数据。这个命令在第一次启动 HDFS 时使用，从而确保 NameNode 和 DataNode 存储数据是干净的。
-
-注意：只需要在NameNode主角色节点的Hadoop容器上执行下面命令即可。
-
-```sh
-# 先切换到hadoop用户
-su - hadoop
-
 # 格式化namenode
 hdfs namenode -format
 
-# 假如格式化，遇到命令未找到的错误。表示环境变量可能未配置好。可以用绝对路径来运行该命令。
+# 假如遇到命令未找到的错误。表示环境变量可能未配置好。可以用绝对路径来运行该命令。
 /usr/local/hadoop/bin/hdfs namenode -format
 ```
 
 如图所示表示格式化成功
 ![hadoop_20240704170512.png](../blog_img/hadoop_20240704170512.png)
 
-### 启动HDFS系统
+> 启动HDFS集群/关闭HDFS集群
 
 ```sh
 # 启动hdfs集群
@@ -485,54 +424,136 @@ stop-dfs.sh
 /usr/local/hadoop/sbin/stop-dfs.sh
 ```
 
+如图所示启动HDFS集群成功
+![hadoop_20240705092922.png](../blog_img/hadoop_20240705092922.png)
+
+> 查询各个hadoop容器的java进程
+
+```sh
+# hadoop01
+> jps
+# 如果jps命令，提示找不到。可以用绝对路径的jps命令。
+> /usr/local/jdk1.8/bin/jps
+1170 NameNode
+1371 DataNode
+2044 Jps
+1629 SecondaryNameNode
+# hadoop02
+> jps
+247 DataNode
+394 Jps
+# hadoop03
+> jps
+993 Jps
+599 DataNode
+701 NodeManager
+```
+
+通过jps命令。我们可以看到hadoop01容器启动了NameNode，DataNode，SecondaryNameNode进程。hadoop02容器启动了DataNode进程。hadoop03容器启动了DataNode进程。
 
 
 
+> 浏览器中访问`http://localhost:50070`
+
+如图是Hadoop中HDFS文件服务系统的管理页面。该网页是在NameNode主角色节点所在的容器（即Hadoop01容器）中。
+![hadoop_20240705104632.png](../blog_img/hadoop_20240705104632.png)
 
 
 
+### PS:Hadoop服务授权给普通用户
+
+通常在测试环境中，我们可以使用root用户来操作 Hadoop 中的服务组件。但是在生产环境中，强烈建议避免以 root 用户身份直接操作 Hadoop 的组件，这有助于减少安全风险。
+
+因此为了确保数据安全，生产环境中的hadoop系统不以root用户启动。我们可以创建普通用户hadoop，并且以普通用户hadoop来操作整个hadoop服务。
+
+> 在Hadoop容器中创建普通用户hadoop
+
+在每一个Hadoop容器终端中,执行下面几条命令
+```sh
+# 创建普通用户hadoop
+useradd hadoop
+# 设置hadoop用户的密码为123456
+passwd hadoop
+# 将当前用户从root用户切换到hadoop用户
+su - hadoop
+```
+
+> Hadoop容器中的hadoop相关目录文件授权给普通用户hadoop
+
+我们需要把Hadoop容器中的hadoop相关目录授权给之前创建的普通用户hadoop
+
+在每一个Hadoop容器终端中,执行下面命令。注意需要用root用户来执行该命令
+```sh
+# 先切换到root用户，该命令需要输入root用户的密码root
+su - root
+# 执行授权命令
+chown -R hadoop:hadoop /usr/local/hadoop
+```
+
+> 如果想要普通用户hadoop，也能有权限使用hadoop的服务。
+
+需要在构建hadoop镜像的时候，将下面环境变量删除。并且在每一个hadoop容器中，进行环境变量的配置。
+
+在Dockerfile文件中删除下面内容。
+```sh
+# 指定root用户访问
+ENV HDFS_NAMENODE_USER root
+ENV HDFS_DATANODE_USER root
+ENV HDFS_SECONDARYNAMENODE_USER root
+ENV YARN_RESOURCEMANAGER_USER root
+ENV YARN_NODEMANAGER_USER root
+```
+
+在容器的环境变量文件中，进行编辑下面内容。
+```sh
+# 编辑环境变量文件
+vim /etc/profile
+
+# 指定hadoop用户访问
+export HDFS_NAMENODE_USER=hadoop
+export HDFS_DATANODE_USER=hadoop
+export HDFS_SECONDARYNAMENODE_USER=hadoop
+export YARN_RESOURCEMANAGER_USER=hadoop
+export YARN_NODEMANAGER_USER=hadoop
+
+```
 
 
+## HDFS文件系统的使用
 
+### 命令行操作HDFS集群
 
+当我们在Hadoop容器中配置好HDFS集群后，便可以操作HDFS集群。
 
+> 启动HDFS集群/关闭HDFS集群
 
+在NameNode主角色节点的容器中，执行下面命令。
+```sh
+# 启动hdfs集群
+start-dfs.sh
+# 关闭hdfs集群
+stop-dfs.sh
+```
 
+> 单独启动或关闭某个角色的进程
 
+在某一个容器中执行下面命令
 
+```sh
+# 语法格式
+hdfs --daemon (start|status|stop) (namenode|secondarynamenode|datanode)
 
+# 例如关闭namenode进程
+hdfs --daemon stop namenode
+# 启动datanode进程
+hdfs --daemon start datanode
+# 查询secondarynamenode进程信息
+hdfs --daemon status secondarynamenode
 
+```
 
+### HDFS文件系统的目录结构
 
+HDFS文件系统的目录结构与Linux系统的目录结构是相似的。
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-- yarn-site.xml 是hadoop中的Yarn组件的配置文件。
-- mapred-site.xml 是hadoop中的MapReduce组件的配置文件。
-
-
+![hadoop_20240705114751.png](../blog_img/hadoop_20240705114751.png)
