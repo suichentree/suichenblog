@@ -177,3 +177,42 @@ hdfs dfs -rm -r /shuyx/aaa
 
 ## HDFS文件系统存储原理
 
+当文件上传到HDFS系统的时候。HDFS将文件分割成固定大小的块（默认64MB或128MB），并将这些块存储在不同的DataNode上。每个块会被复制到多个DataNode（默认3个副本），以确保数据的可靠性。
+
+> 客户端向HDFS写入数据时。数据写入流程如下
+1. 客户端向NameNode发起请求，客户端向NameNode请求写入文件。
+2. NameNode会对这个请求进行判断。若满足条件后，NameNode会向客户端告诉DataNode的地址。
+3. 客户端会把数据分割成块，并向指定的DataNode发送数据块。
+4. 被写入数据的DataNode会同时进行数据块的副本复制工作，并发接收的数据块分发给其他DataNode。
+5. 如图所示，客户端将数据块写入第一个DataNode，第一个DataNode再将数据块复制到第二个DataNode，依此类推。
+6. 写入完成后客户端会通知NameNode，NameNode会进行元数据记录。
+
+![hadoop_20240707204830.png](../blog_img/hadoop_20240707204830.png)
+
+关键点注意：
+
+1. NameNode节点是不负责数据的写入工作，只负责元数据记录和权限审批工作。
+2. 客户端会直接向距离自己最近的DataNode，写入数据。不会同时与多个DataNode交互。
+3. 数据的副本赋值工作，由DataNode之间自行完成。与客户端和NameNode无关。
+
+> 客户端向HDFS系统读取数据时，数据读取流程如下
+1. 客户端向NameNode请求读取文件。
+2. NameNode判断客户端的权限后，若允许，则向客户端返回该文件的各个文件块所在的DataNode列表。
+3. 客户端直接从各个DataNode读取文件块数据，并在本地合并这些数据块，恢复成完整的文件。
+
+![hadoop_20240707204939.png](../blog_img/hadoop_20240707204939.png)
+
+## HDFS系统中自定义文件副本数量
+
+在HDFS系统中文件会被复制成多个副本来保障文件的数据安全。默认情况下一个文件会被复制成3个副本，保存至HDFS系统中。但是我们也可以自己自定义设置这个副本数量。
+
+在hdfs-site.xml中配置下面的属性。
+```xml
+<!-- 设置hdfs文件系统中，文件的副本数量。默认为3 -->
+<property>
+    <name>dfs.replication</name>
+    <value>3</value>
+</property>
+```
+
+注意如果需要修改这个属性，我们需要在每一台Hadoop的服务器上的hdfs-site.xml中配置该属性。
