@@ -129,3 +129,4 @@
 [0705/150733:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
 [0705/153625:WARNING:quota_manager.cc(1833)] Create directory failed for path
 [0705/160625:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0709/175233:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
