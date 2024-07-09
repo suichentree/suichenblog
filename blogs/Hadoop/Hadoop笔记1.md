@@ -444,30 +444,12 @@ scp命令需要输入root用户的密码，之前构建镜像的时候，设置�
 
 以上关于Hadoop容器中的HDFS集群配置就完成了。
 
-### 4.2 Hadoop容器中的YARN集群配置
-
-由于YARN的架构中有二个角色，主角色ResourceManager，从角色 NodeManager。
-
-因此我们需要给每个hadoop容器去分配这些角色。分配结果如下表所示。
-
-节点容器 | 所分配的角色
------------- | -------------
-hadoop01 容器 | ResourceManager主角色节点，NodeManager从角色节点，ProxyServer代理服务器JobHistoryServer日志记录。
-hadoop02 容器 | NodeManager从角色节点。
-hadoop03 容器 | NodeManager从角色节点。
-
-> 配置方式
-1. 启动主角色ResourceManager节点。
-2. 启动从角色NodeManager节点。
-3. 开启ProxyServer代理服务器，从而给YARN提供安全性，和WEB界面。
-4. 开启JobHistoryServer记录各个YARN节点的日志信息。
-
-
-
-### 4.3 Hadoop容器中的MapReduce配置
+### 4.2 Hadoop容器中的MapReduce配置
 
 > 配置方式
 1. 无需启动任何进程。只需修改对应配置文件即可。
+
+先修改hadoop01主节点容器中的配置，然后复制给其他hadoop容器中。
 
 > ① 编辑mapred-env.sh文件
 
@@ -531,7 +513,120 @@ export HADOOP_MAPRED_ROOT_LOGGER=INFO,RFA
 
 - ${HADOOP_HOME} 的值为/usr/local/hadoop。在构建Hadoop镜像的时候，就设置了该环境变量。
 
+> ③ 文件转发
 
+将hadoop01容器中的修改好的配置文件，都复制到其他hadoop容器中。
+
+```sh
+# 在 hadoop01 容器的终端中把 /usr/local/hadoop 目录复制到 hadoop02容器的 /usr/local 目录中
+scp -r /usr/local/hadoop hadoop02:/usr/local
+# 在 hadoop01 容器的终端中把 /usr/local/hadoop 目录复制到 hadoop03容器的 /usr/local 目录中
+scp -r /usr/local/hadoop hadoop03:/usr/local
+```
+
+### 4.3 Hadoop容器中的YARN集群配置
+
+由于YARN的架构中有二个角色，主角色ResourceManager，从角色 NodeManager。
+
+因此我们需要给每个hadoop容器去分配这些角色。分配结果如下表所示。
+
+节点容器 | 所分配的角色
+------------ | -------------
+hadoop01 容器 | ResourceManager主角色节点，NodeManager从角色节点，ProxyServer代理服务器JobHistoryServer日志记录。
+hadoop02 容器 | NodeManager从角色节点。
+hadoop03 容器 | NodeManager从角色节点。
+
+> 配置方式
+1. 启动主角色ResourceManager节点。
+2. 启动从角色NodeManager节点。
+3. 开启ProxyServer代理服务器，从而给YARN提供安全性，和WEB界面。
+4. 开启JobHistoryServer记录各个YARN节点的日志信息。
+
+先修改hadoop01主节点容器中的配置，然后复制给其他hadoop容器中。
+
+> ① 编辑yarn-env.sh文件
+
+在hadoop01容器中，编辑 /usr/local/hadoop/etc/hadoop/yarn-env.sh文件
+
+```sh
+# 配置JAVA_HOME环境变量
+export JAVA_HOME=/usr/local/jdk1.8
+# 配置hadoop_home环境变量
+export HADOOP_HOME=/user/local/hadoop
+# 配置hadoop配置文件路径
+export HADOOP_CONF_DIR=/user/local/hadoop/etc/hadoop
+# 配置hadoop日志文件路径
+export HADOOP_LOG_DIR=/user/local/hadoop/logs
+```
+
+> ② 编辑yarn-site.xml文件
+
+在hadoop01容器中，编辑 /usr/local/hadoop/etc/hadoop/yarn-site.xml文件
+
+```xml
+<configuration>
+    <!-- 设置ResourceManager主角色节点的位置 -->
+    <property>
+        <name>yarn.resourcemanager.hostname</name>
+        <value>hadoop01</value>
+    </property>
+    <!-- 设置yarn的resourcemanager的调度器为公平调度器 -->
+    <property>
+        <name>yarn.resourcemanager.scheduler.class</name>
+        <value>org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair.FairSecheduler</value>
+    </property>
+    <!-- 设置NodeManager从角色产生中间数据的本地存储目录 -->
+    <!-- 注意本地存储目录是指linux系统的目录，而不是hdfs系统中的目录 -->
+    <property>
+        <name>yarn.nodemanager.local-dirs</name>
+        <value>/data/hadoop/nm-local</value>
+    </property>
+    <!-- 设置NodeManager从角色日志的本地存储目录 -->
+    <property>
+        <name>yarn.nodemanager.log-dirs</name>
+        <value>/data/hadoop/nm-log</value>
+    </property>
+    <!-- 为MapReduce程序开启shuffle服务 -->
+    <property>
+        <name>yarn.nodemanager.aux-services</name>
+        <value>mapreduce_shuffle</value>
+    </property>
+    <!-- 设置nodemanger的日志的HDFS系统中的存储路径 -->
+    <!-- 把nodemanager产生的日志，都存储在hdfs系统的该目录下 -->
+    <property>
+        <name>yarn.nodemanager.remote-app-log-dir</name>
+        <value>/tmp/logs</value>
+    </property>
+    <!-- 设置历史服务器的访问url -->
+    <property>
+        <name>yarn.log.server.url</name>
+        <value>http://hadoop01:19888/jobhistory/logs</value>
+    </property>
+    <!-- 设置代理服务器的ip端口 -->
+    <property>
+        <name>yarn.web-proxy.address</name>
+        <value>hadoop01:8089</value>
+    </property>
+    <!-- 开启日志聚合功能 -->
+    <property>
+        <name>yarn.log-aggregation-enable</name>
+        <value>true</value>
+    </property>
+</configuration>
+```
+
+> ③ 文件转发
+
+将hadoop01容器中修改好的配置文件，都复制到其他hadoop容器中。
+
+```sh
+# 在 hadoop01 容器的终端中把 /usr/local/hadoop 目录复制到 hadoop02容器的 /usr/local 目录中
+scp -r /usr/local/hadoop hadoop02:/usr/local
+# 在 hadoop01 容器的终端中把 /usr/local/hadoop 目录复制到 hadoop03容器的 /usr/local 目录中
+scp -r /usr/local/hadoop hadoop03:/usr/local
+```
+
+> ④ 
 
 
 ### 5.启动HDFS集群
@@ -601,6 +696,30 @@ stop-dfs.sh
 
 如图是三个DataNode节点信息
 ![hadoop_20240705174750.png](../blog_img/hadoop_20240705174750.png)
+
+
+### 6.启动YARN集群
+
+> 一键启动YARN集群命令 `/user/local/hadoop/sbin/start-yarn.sh`
+
+该命令会根据yarn-site.xml配置文件中的`yarn.resourcemanager.hostname`属性来选择在那台服务器上作为ResourceManager主角色启动。也会根据worker文件配置的服务器来作为NodeManager从角色启动。
+
+> 一键停止YARN集群命令 `/user/local/hadoop/sbin/stop-yarn.sh`
+
+
+在某台服务器上，单独启动/停止该服务器的ResourceManager进程，NodeManager和proxyserver 进程。
+
+```sh
+# 单独启动/关闭进程命令如下
+/user/local/hadoop/bin/yarn --daemon start|stop resourcemanager|nodemanager|proxyserver
+```
+
+单独启动/停止历史服务器，命令如下
+```sh
+/user/local/hadoop/bin/mapred --daemon start|stop historyserver
+```
+
+
 
 
 ### PS:Hadoop服务授权给普通用户
