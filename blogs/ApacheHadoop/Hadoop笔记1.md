@@ -50,7 +50,9 @@ tags:
 
 ## Hadoop介绍
 
-Hadoop的全称应该是Apache Hadoop。
+Hadoop的全称是Apache Hadoop。
+
+当前使用版本为： hadoop-3.3.6
 
 Hadoop是Apache软件基金会下的顶级开源项目。Hadoop的主要功能如下。
 - 分布式数据存储
@@ -283,13 +285,71 @@ hadoop version
 
 ![hadoop_20240704102116.png](../blog_img/hadoop_20240704102116.png)
 
+
+### Hadoop服务授权给普通用户（可选）
+
+通常在测试环境中，我们可以使用root用户来操作 Hadoop 中的服务组件。但是在生产环境中，强烈建议避免以 root 用户身份直接操作 Hadoop 的组件，这有助于减少安全风险。
+
+因此为了确保数据安全，生产环境中的hadoop系统不以root用户启动。我们可以创建普通用户hadoop，并且以普通用户hadoop来操作整个hadoop服务。
+
+> 在Hadoop容器中创建普通用户hadoop
+
+在每一个Hadoop容器终端中,执行下面几条命令
+```sh
+# 创建普通用户hadoop
+useradd hadoop
+# 设置hadoop用户的密码为123456
+passwd hadoop
+# 将当前用户从root用户切换到hadoop用户
+su - hadoop
+```
+
+> Hadoop容器中的hadoop相关目录文件授权给普通用户hadoop
+
+我们需要把Hadoop容器中的hadoop相关目录授权给之前创建的普通用户hadoop
+
+在每一个Hadoop容器终端中,执行下面命令。注意需要用root用户来执行该命令
+```sh
+# 先切换到root用户，该命令需要输入root用户的密码root
+su - root
+# 执行授权命令
+chown -R hadoop:hadoop /usr/local/hadoop
+```
+
+> 如果想要普通用户hadoop，也能有权限使用hadoop的服务。
+
+方式1： 在构建hadoop镜像的时候，将下面环境变量设定为hadoop用户访问
+
+在Dockerfile文件中编辑下面内容。
+```sh
+# 指定 hadoop 用户访问
+ENV HDFS_NAMENODE_USER hadoop
+ENV HDFS_DATANODE_USER hadoop
+ENV HDFS_SECONDARYNAMENODE_USER hadoop
+ENV YARN_RESOURCEMANAGER_USER hadoop
+ENV YARN_NODEMANAGER_USER hadoop
+```
+
+方式2：在每一个hadoop容器中，进行环境变量的配置。
+
+```sh
+# 编辑环境变量文件
+vim /etc/profile
+# 指定hadoop用户访问
+export HDFS_NAMENODE_USER=hadoop
+export HDFS_DATANODE_USER=hadoop
+export HDFS_SECONDARYNAMENODE_USER=hadoop
+export YARN_RESOURCEMANAGER_USER=hadoop
+export YARN_NODEMANAGER_USER=hadoop
+```
+
 ### 3.Hadoop容器之间互相配置SSH免密登录
 
-在每个Hadoop容器中，配置免密码互相SSH登录。方便多个Hadoop容器之间互相登录访问。
+在每个Hadoop容器中，配置免密码互相SSH登录。方便多个Hadoop容器之间互相登录访问。也方便多个Hadoop容器之间互相传输文件。
 
 1. 在每一个Hadoop容器终端中,执行下面几条命令
 ```sh
-# 先生成SSH密钥
+# 先生成SSH密钥，一路回车即可
 ssh-keygen -t rsa -b 4096
 
 # 设置SSH免密登录。注意 hadoop01,hadoop02,hadoop03 是各个hadoop容器的名称。
@@ -341,7 +401,9 @@ HDFS集群配置需要对如下文件的修改
 
 编辑/usr/local/hadoop/etc/hadoop/workers文件。配置三个DataNode从角色所在的hadoop容器名称。
 
-```
+```sh
+# 注释默认的localhost
+# localhost
 hadoop01
 hadoop02
 hadoop03
@@ -469,46 +531,48 @@ export HADOOP_MAPRED_ROOT_LOGGER=INFO,RFA
 在hadoop01容器中，编辑 /usr/local/hadoop/etc/hadoop/mapred-site.xml文件
 
 ```xml
-<!-- 设置MapReduce的运行框架为YARN -->
-<property>
-    <name>mapreduce.framework.name</name>
-    <value>yarn</value>
-</property>
-<!-- 设置jobhistory进程的通信端口 -->
-<property>
-    <name>mapreduce.jobhistory.address</name>
-    <value>hadoop01:10020</value>
-</property>
-<!-- 设置jobhistory进程的web端口 -->
-<property>
-    <name>mapreduce.jobhistory.webapp.address</name>
-    <value>hadoop01:19888</value>
-</property>
-<!-- 设置jobhistory进程的信息记录的路径 -->
-<property>
-    <name>mapreduce.jobhistory.intermediate-done-dir</name>
-    <value>file:/usr/local/hadoop/mr-history/tmp</value>
-</property>
-<!-- 设置jobhistory进程的信息记录路径 -->
-<property>
-    <name>mapreduce.jobhistory.done-dir</name>
-    <value>file:/usr/local/hadoop/mr-history/done</value>
-</property>
-<!-- 设置HADOOP_MAPRED_HOME环境变量 -->
-<property>
-    <name>yarn.app.mapreduce.am.env</name>
-    <value>HADOOP_MAPRED_HOME=${HADOOP_HOME}</value>
-</property>
-<!-- 设置HADOOP_MAPRED_HOME环境变量 -->
-<property>
-    <name>mapreduce.map.env</name>
-    <value>HADOOP_MAPRED_HOME=${HADOOP_HOME}</value>
-</property>
-<!-- 设置HADOOP_MAPRED_HOME环境变量 -->
-<property>
-    <name>mapreduce.reduce.env</name>
-    <value>HADOOP_MAPRED_HOME=${HADOOP_HOME}</value>
-</property>
+<configuration>
+    <!-- 设置MapReduce的运行框架为YARN -->
+    <property>
+        <name>mapreduce.framework.name</name>
+        <value>yarn</value>
+    </property>
+    <!-- 设置jobhistory进程的通信端口 -->
+    <property>
+        <name>mapreduce.jobhistory.address</name>
+        <value>hadoop01:10020</value>
+    </property>
+    <!-- 设置jobhistory进程的web端口 -->
+    <property>
+        <name>mapreduce.jobhistory.webapp.address</name>
+        <value>hadoop01:19888</value>
+    </property>
+    <!-- 设置jobhistory进程的信息记录的路径 -->
+    <property>
+        <name>mapreduce.jobhistory.intermediate-done-dir</name>
+        <value>file:/usr/local/hadoop/mr-history/tmp</value>
+    </property>
+    <!-- 设置jobhistory进程的信息记录路径 -->
+    <property>
+        <name>mapreduce.jobhistory.done-dir</name>
+        <value>file:/usr/local/hadoop/mr-history/done</value>
+    </property>
+    <!-- 设置HADOOP_MAPRED_HOME环境变量 -->
+    <property>
+        <name>yarn.app.mapreduce.am.env</name>
+        <value>HADOOP_MAPRED_HOME=${HADOOP_HOME}</value>
+    </property>
+    <!-- 设置HADOOP_MAPRED_HOME环境变量 -->
+    <property>
+        <name>mapreduce.map.env</name>
+        <value>HADOOP_MAPRED_HOME=${HADOOP_HOME}</value>
+    </property>
+    <!-- 设置HADOOP_MAPRED_HOME环境变量 -->
+    <property>
+        <name>mapreduce.reduce.env</name>
+        <value>HADOOP_MAPRED_HOME=${HADOOP_HOME}</value>
+    </property>
+</configuration>
 ```
 
 - ${HADOOP_HOME} 的值为/usr/local/hadoop。在构建Hadoop镜像的时候，就设置了该环境变量。
@@ -523,6 +587,8 @@ scp -r /usr/local/hadoop hadoop02:/usr/local
 # 在 hadoop01 容器的终端中把 /usr/local/hadoop 目录复制到 hadoop03容器的 /usr/local 目录中
 scp -r /usr/local/hadoop hadoop03:/usr/local
 ```
+
+以上MapReduce配置就完成了
 
 ### 4.3 Hadoop容器中的YARN集群配置
 
@@ -552,11 +618,11 @@ hadoop03 容器 | NodeManager从角色节点。
 # 配置JAVA_HOME环境变量
 export JAVA_HOME=/usr/local/jdk1.8
 # 配置hadoop_home环境变量
-export HADOOP_HOME=/user/local/hadoop
+export HADOOP_HOME=/usr/local/hadoop
 # 配置hadoop配置文件路径
-export HADOOP_CONF_DIR=/user/local/hadoop/etc/hadoop
+export HADOOP_CONF_DIR=/usr/local/hadoop/etc/hadoop
 # 配置hadoop日志文件路径
-export HADOOP_LOG_DIR=/user/local/hadoop/logs
+export HADOOP_LOG_DIR=/usr/local/hadoop/logs
 ```
 
 > ② 编辑yarn-site.xml文件
@@ -570,47 +636,29 @@ export HADOOP_LOG_DIR=/user/local/hadoop/logs
         <name>yarn.resourcemanager.hostname</name>
         <value>hadoop01</value>
     </property>
-    <!-- 设置yarn的resourcemanager的调度器为公平调度器 -->
+    <!-- 设置resourcemanager的IP端口 -->
     <property>
-        <name>yarn.resourcemanager.scheduler.class</name>
-        <value>org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair.FairSecheduler</value>
-    </property>
-    <!-- 设置NodeManager从角色产生中间数据的本地存储目录 -->
-    <!-- 注意本地存储目录是指linux系统的目录，而不是hdfs系统中的目录 -->
-    <property>
-        <name>yarn.nodemanager.local-dirs</name>
-        <value>/data/hadoop/nm-local</value>
-    </property>
-    <!-- 设置NodeManager从角色日志的本地存储目录 -->
-    <property>
-        <name>yarn.nodemanager.log-dirs</name>
-        <value>/data/hadoop/nm-log</value>
+            <name>yarn.resourcemanager.webapp.address</name>
+            <value>hadoop01:8088</value>
     </property>
     <!-- 为MapReduce程序开启shuffle服务 -->
     <property>
         <name>yarn.nodemanager.aux-services</name>
         <value>mapreduce_shuffle</value>
     </property>
-    <!-- 设置nodemanger的日志的HDFS系统中的存储路径 -->
-    <!-- 把nodemanager产生的日志，都存储在hdfs系统的该目录下 -->
     <property>
-        <name>yarn.nodemanager.remote-app-log-dir</name>
-        <value>/tmp/logs</value>
-    </property>
-    <!-- 设置历史服务器的访问url -->
-    <property>
-        <name>yarn.log.server.url</name>
-        <value>http://hadoop01:19888/jobhistory/logs</value>
-    </property>
-    <!-- 设置代理服务器的ip端口 -->
-    <property>
-        <name>yarn.web-proxy.address</name>
-        <value>hadoop01:8089</value>
-    </property>
-    <!-- 开启日志聚合功能 -->
-    <property>
-        <name>yarn.log-aggregation-enable</name>
-        <value>true</value>
+        <name>yarn.application.classpath</name>
+        <value>
+            ${HADOOP_HOME}/etc/hadoop,
+            ${HADOOP_HOME}/share/hadoop/common/*,
+            ${HADOOP_HOME}/share/hadoop/common/lib/*,
+            ${HADOOP_HOME}/share/hadoop/hdfs/*,
+            ${HADOOP_HOME}/share/hadoop/hdfs/lib/*,
+            ${HADOOP_HOME}/share/hadoop/mapreduce/*,
+            ${HADOOP_HOME}/share/hadoop/mapreduce/lib/*,
+            ${HADOOP_HOME}/share/hadoop/yarn/*,
+            ${HADOOP_HOME}/share/hadoop/yarn/lib/*
+        </value>
     </property>
 </configuration>
 ```
@@ -626,8 +674,7 @@ scp -r /usr/local/hadoop hadoop02:/usr/local
 scp -r /usr/local/hadoop hadoop03:/usr/local
 ```
 
-> ④ 
-
+以上YARN集群配置就完成了
 
 ### 5.启动HDFS集群
 
@@ -668,7 +715,7 @@ stop-dfs.sh
 > 查询各个hadoop容器的java进程
 
 ```sh
-# hadoop01
+# hadoop01容器终端
 > jps
 # 如果jps命令，提示找不到。可以用绝对路径的jps命令。
 > /usr/local/jdk1.8/bin/jps
@@ -676,11 +723,13 @@ stop-dfs.sh
 1371 DataNode
 2044 Jps
 1629 SecondaryNameNode
-# hadoop02
+
+# hadoop02容器终端
 > jps
 247 DataNode
 394 Jps
-# hadoop03
+
+# hadoop03容器终端
 > jps
 993 Jps
 599 DataNode
@@ -700,82 +749,71 @@ stop-dfs.sh
 
 ### 6.启动YARN集群
 
-> 一键启动YARN集群命令 `/user/local/hadoop/sbin/start-yarn.sh`
+> 一键启动/停止YARN集群命令
+
+```sh
+# 一键启动
+start-yarn.sh
+# 或者
+/usr/local/hadoop/sbin/start-yarn.sh
+
+# 一键停止
+stop-yarn.sh
+# 或者
+/usr/local/hadoop/sbin/stop-yarn.sh
+```
 
 该命令会根据yarn-site.xml配置文件中的`yarn.resourcemanager.hostname`属性来选择在那台服务器上作为ResourceManager主角色启动。也会根据worker文件配置的服务器来作为NodeManager从角色启动。
 
-> 一键停止YARN集群命令 `/user/local/hadoop/sbin/stop-yarn.sh`
+如图启动ResourceManager进程和NodeManager进程。
+![hadoop_20240710155943.png](../blog_img/hadoop_20240710155943.png)
 
+> 查询各个hadoop容器的java进程
 
-在某台服务器上，单独启动/停止该服务器的ResourceManager进程，NodeManager和proxyserver 进程。
+```sh
+# hadoop01容器终端
+> jps
+5861 Jps
+4487 DataNode
+4744 SecondaryNameNode
+5325 NodeManager
+4285 NameNode
+5134 ResourceManager
+
+# hadoop02容器终端
+> jps
+1158 NodeManager
+1320 Jps
+1022 DataNode
+
+# hadoop03容器终端
+> jps
+1158 NodeManager
+1320 Jps
+1022 DataNode
+```
+
+通过jps命令。我们可以看到hadoop01容器还额外启动了ResourceManager，NodeManager进程。hadoop02容器额外启动了NodeManager进程。hadoop03容器额外启动了NodeManager进程。
+
+这表示YARN集群正常启动了。
+
+> 单独启动/停止YARN进程
+
+我们还可以在某台服务器上，单独启动/停止该服务器的ResourceManager进程，NodeManager和proxyserver 进程。
 
 ```sh
 # 单独启动/关闭进程命令如下
-/user/local/hadoop/bin/yarn --daemon start|stop resourcemanager|nodemanager|proxyserver
+/usr/local/hadoop/bin/yarn --daemon start|stop resourcemanager|nodemanager|proxyserver
 ```
 
-单独启动/停止历史服务器，命令如下
+> 单独启动/停止历史服务器，命令如下
+
 ```sh
-/user/local/hadoop/bin/mapred --daemon start|stop historyserver
+/usr/local/hadoop/bin/mapred --daemon start|stop historyserver
 ```
 
+> 浏览器中访问`http://localhost:38088`
 
+如图是Hadoop中YARN集群的管理页面。
 
-
-### PS:Hadoop服务授权给普通用户
-
-通常在测试环境中，我们可以使用root用户来操作 Hadoop 中的服务组件。但是在生产环境中，强烈建议避免以 root 用户身份直接操作 Hadoop 的组件，这有助于减少安全风险。
-
-因此为了确保数据安全，生产环境中的hadoop系统不以root用户启动。我们可以创建普通用户hadoop，并且以普通用户hadoop来操作整个hadoop服务。
-
-> 在Hadoop容器中创建普通用户hadoop
-
-在每一个Hadoop容器终端中,执行下面几条命令
-```sh
-# 创建普通用户hadoop
-useradd hadoop
-# 设置hadoop用户的密码为123456
-passwd hadoop
-# 将当前用户从root用户切换到hadoop用户
-su - hadoop
-```
-
-> Hadoop容器中的hadoop相关目录文件授权给普通用户hadoop
-
-我们需要把Hadoop容器中的hadoop相关目录授权给之前创建的普通用户hadoop
-
-在每一个Hadoop容器终端中,执行下面命令。注意需要用root用户来执行该命令
-```sh
-# 先切换到root用户，该命令需要输入root用户的密码root
-su - root
-# 执行授权命令
-chown -R hadoop:hadoop /usr/local/hadoop
-```
-
-> 如果想要普通用户hadoop，也能有权限使用hadoop的服务。
-
-需要在构建hadoop镜像的时候，将下面环境变量删除。并且在每一个hadoop容器中，进行环境变量的配置。
-
-在Dockerfile文件中删除下面内容。
-```sh
-# 指定root用户访问
-ENV HDFS_NAMENODE_USER root
-ENV HDFS_DATANODE_USER root
-ENV HDFS_SECONDARYNAMENODE_USER root
-ENV YARN_RESOURCEMANAGER_USER root
-ENV YARN_NODEMANAGER_USER root
-```
-
-在容器的环境变量文件中，进行编辑下面内容。
-```sh
-# 编辑环境变量文件
-vim /etc/profile
-
-# 指定hadoop用户访问
-export HDFS_NAMENODE_USER=hadoop
-export HDFS_DATANODE_USER=hadoop
-export HDFS_SECONDARYNAMENODE_USER=hadoop
-export YARN_RESOURCEMANAGER_USER=hadoop
-export YARN_NODEMANAGER_USER=hadoop
-```
-
+![hadoop_20240710164433.png](../blog_img/hadoop_20240710164433.png)

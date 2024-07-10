@@ -220,5 +220,66 @@ hdfs dfs -rm -r /shuyx/aaa
 
 ## YARN资源调度组件的使用
 
-### YARN的架构
+当我们成功部署并启动YARN集群后，可以在YARN集群中运行各种程序。
+
+YARN作为资源调度框架，其本身提供资源提供给各种程序运行。常见程序如下
+- MapReduce程序
+- Spark程序
+- Flink程序
+
+### 在YARN中执行单词计数程序wordcount
+
+单词计数程序wordcount是MapReduce内置的一些模板程序。我们直接使用即可。
+
+这个模板程序都存储在hadoop安装目录中的share/hadoop/mapeduce/hadoop-mapreduce-example-3.3.6.jar包中。
+
+执行模板程序的命令如下
+```sh
+# 语法如下
+hadoop jar 程序包文件 java类名 [参数1]...[参数2]....
+```
+
+> 执行单词计数程序wordcount 流程如下
+
+1. 准备一个单词计数文件 test.txt 内容如下
+
+```
+hello jack julia michael
+hello michael bob apple
+hello julia banana
+```
+
+2. 将该文件上传到hadoop的hdfs文件系统的/wordcount/input目录中
+
+```sh
+# 在hdfs系统中创建/wordcount/input目录
+hdfs dfs -mkdir -p /wordcount/input
+# 将本地的文件上传到该目录中
+hdfs dfs -put test.txt /wordcount/input/
+# 查询/wordcount/input/目录
+hdfs dfs -ls -R /wordcount
+```
+
+3. 运行单词计数程序wordcount 
+
+```sh
+# 运行 hadoop-mapreduce-examples-3.3.6.jar 包中的wordcount程序
+# 源目录是/wordcount/input，结果目录是/wordcount/output
+hadoop jar /usr/local/hadoop/share/hadoop/mapreduce/hadoop-mapreduce-examples-3.3.6.jar wordcount /wordcount/input /wordcount/output
+```
+
+4. 查询单词计数结果
+
+```sh
+# 打开/wordcount/output/part-r-00000文件
+> hadoop fs -cat /wordcount/output/part-r-00000
+apple 1
+banana 1
+bob 1
+hello 3
+jack 1
+julia 2
+michael 2
+```
+
 
