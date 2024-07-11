@@ -132,3 +132,8 @@
 [0709/175233:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
 [0709/175319:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
 [0710/031404:ERROR:browser_gpu_channel_host_factory.cc(119)] Failed to launch GPU process.
+[0711/180801:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
+[0711/180811:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
+[0711/180838:ERROR:CONSOLE(1)] "Uncaught (in promise) TypeError: Cannot read property 'ButtonProvider' of undefined", source: chrome-devtools://devtools/inspector.html (1)
+[0711/180924:ERROR:CONSOLE(1)] "Uncaught (in promise) TypeError: Cannot read property 'ButtonProvider' of undefined", source: chrome-devtools://devtools/inspector.html (1)
+[0711/180933:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
