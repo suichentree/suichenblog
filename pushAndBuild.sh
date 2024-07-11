@@ -18,10 +18,13 @@
 # 定义commit方法
 function commit() {
     #定义变量commitMessage,并接受外部输入赋值
-    read -p "输入 commit 备注: " commitMessage 
-    echo "commit 备注 is  $commitMessage"
+    # read -p "输入 commit 备注: " commitMessage 
+    # echo "commit 备注 is  $commitMessage"
+
+    # 获取当前时间
+    time1=$(date "+%Y-%m-%d %H:%M:%S")
     #将本地暂存区的文件提交到本地分支中
-    git commit -m $commitMessage
+    git commit -m "up$time1"
 }
 
 # 定义push方法
