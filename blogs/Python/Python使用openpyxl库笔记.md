@@ -389,3 +389,35 @@ wb.close()
 程序运行后，会在桌面创建一个test.xlsx文件。打开如下所示。
 
 ![python_20240520175920.png](../blog_img/python_20240520175920.png)
+
+### 读取每一行的D到J列的单元格
+
+```py
+from openpyxl import load_workbook
+
+# 加载现有的 Excel 文件
+wb = load_workbook('example.xlsx')
+
+# 选择要操作的工作表
+ws = wb.active  # 或者通过名称选择工作表： ws = wb['Sheet1']
+
+# 获取每一行的 D 到 J 列的单元格值
+for row in ws.iter_rows(min_row=1, min_col=4, max_col=10, values_only=True):
+    cell_values = row  # row 是一个元组，包含了 D 到 J 列的值
+    print(f'Values in D to J: {cell_values}')
+    print(f"""
+    A、{cell_values[0]}
+    B、{cell_values[1]}
+    C、{cell_values[2]}
+    D、{cell_values[3]}
+    E、{cell_values[4]}
+    F、{cell_values[5]}
+    G、{cell_values[6]}""")
+
+
+# 如果要获取除了标题行之外的数据，可以从第二行开始迭代
+for row in ws.iter_rows(min_row=2, min_col=4, max_col=10, values_only=True):
+    cell_values = row  # row 是一个元组，包含了 D 到 J 列的值
+    print(f'Values in D to J: {cell_values}')
+    
+```
