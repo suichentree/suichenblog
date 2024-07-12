@@ -181,7 +181,7 @@ docker images #查看镜像
 
 注意：在Dockerfile所在目录下提前准备好 jdk-8u202-linux-x64.tar.gz 与 hadoop-3.3.6.tar.gz 安装包。当然你也可以准备其他版本的安装包。
 
-```docker
+```shell
 # FROM:基于什么镜像来制作自己的镜像
 FROM centos:7
 # MAINTAINER:表示该镜像的作者（维护者）
