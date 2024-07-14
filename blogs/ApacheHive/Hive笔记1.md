@@ -18,23 +18,17 @@ Hive版本为4.0.0，而hadoop的版本为3.3.6。
 
 ## Hive介绍
 
+[Hive官网 https://hive.apache.org/](https://hive.apache.org/)
+
 > Hive是什么?
 
 Hive 全称是Apache Hive。
 
-Hive 是一个建立在 Hadoop 上的数据仓库基础设施，它提供了类似于 SQL 的查询语言（称为 HiveQL 或 HQL），是用于分析存储在 Hadoop 分布式文件系统（HDFS）中的大规模数据。
+Apache Hive 是一个建立在 Hadoop 上的数据仓库基础架构，用于提供数据汇总、查询和分析。它提供了类似于SQL的查询语言——HiveQL（或 HQL），用于查询和分析存储在Hadoop分布式文件系统（HDFS）中的大数据集。
 
-[Hive官网 https://hive.apache.org/](https://hive.apache.org/)
-
-> Hive的功能和特性
-1. HQL 是 Hive 提供的查询语言，类似于传统的 SQL。允许用户使用类似 SQL 的语法进行数据查询、分析和操作。
-2. Hive 被用作数据仓库，用于存储和管理大数据集。它支持对结构化数据（如表格数据）和半结构化数据（如日志文件）的处理和分析。
-3. Hive 建立在 Hadoop 的 MapReduce 框架之上，利用其高度的扩展性和容错性来处理大规模数据集。
-4. Hive 使用 Hadoop HDFS 来存储数据，并通过 MapReduce 进行数据的处理和分析。
-5. Hive 提供了用户界面，方便用户与 Hive 交互和管理。此外，Hive 还管理和存储了关于表结构、列类型等元数据信息，使得用户可以轻松地管理和查询数据。
+Hive 是为了支持结构化数据分析而设计的，可以处理大规模数据，并且可以与其他Hadoop生态系统工具集成，如Hadoop MapReduce、HDFS、Apache Spark等。它的查询语言类似于传统的SQL，因此熟悉SQL的开发人员可以很快上手。
 
 总体来说，Hive 是一个基于 Hadoop 的数据仓库解决方案。
-
 
 > Hive的执行流程
 
@@ -44,9 +38,17 @@ Hive 是一个建立在 Hadoop 上的数据仓库基础设施，它提供了类�
 
 ![hive_20240711162718.png](../blog_img/hive_20240711162718.png)
 
-> Hive 内部有两大组件
-- 元数据存储：Hive中的元数据，通常是指表名，列名，表的属性，表数据所在目录等。可以使用第三方数据库来进行数据存储。
-- SQL解析器：该解析器用于对HQL查询语句的解析。并将解析的结果存储在Hadoop的HDFS文件系统中。
+> Hive的主要组件
+
+Apache Hive 是一个大数据仓库基础架构，它由多个组件组成，每个组件负责不同的功能和任务。以下是 Apache Hive 的主要组件。
+
+- Hive Metastore：是 Hive 的元数据存储和管理组件。它保存了关于 Hive 表、分区、列和分布式存储的元数据信息。Metastore 通常与关系型数据库（如MySQL、PostgreSQL等）配合使用，用于持久化存储元数据。
+- Hive Server: 该组件提供了与 Hive 进行交互的接口，允许用户和客户端通过 JDBC 或 Thrift API客户端 提交 HiveQL 查询和命令。
+- Hive CLI: 该组件是一个命令行工具，允许用户直接在终端中输入 HiveQL 查询和命令，并与 Hive 交互。
+- Hive Driver: 是连接 Hive 到执行引擎（如MapReduce）的桥梁。它负责将用户提交的 HiveQL 查询转换为任务，并通过执行引擎执行并获取结果。
+- Hive Execution Engine: 是负责实际执行 HiveQL 查询的组件。Apache Hive 支持多种执行引擎，包括 MapReduce、Spark等。选择不同的执行引擎可以根据查询类型、性能需求和环境进行优化。 
+....
+
 
 ## Hive的安装部署
 
@@ -181,3 +183,20 @@ docker build -t my-hadoop-image .
 # 查询新镜像my-hadoop-image
 docker images
 ```
+
+## 11
+
+下面是部署单节点的Hive容器。
+
+> 创建Docker容器
+
+```shell
+docker run  --name myHive --network my-hadoop-net -p 10000:10000 -p 10002:10002 -p 39083:9083 apache/hive:4.0.0
+
+# 10002端口 Hive 提供了一个 Web UI 界面，用于通过浏览器进行交互和管理 Hive 服务。可以通过10002端口来访问UI界面。
+# 10000端口 Hive允许客户端通过10000端口与 Hive 进行交互，执行查询和管理作业等操作。
+# 9083端口：9083端口是Hive的元数据存储端口，从而管理 Hive中的元数据信息，如表的结构、位置等。
+```
+
+
+
