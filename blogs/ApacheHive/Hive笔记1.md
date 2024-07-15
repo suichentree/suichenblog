@@ -10,7 +10,7 @@ tags:
 
 [toc]
 
-# Hive笔记1
+# Hive笔记1 (未完成)
 
 Hive版本为4.0.0，而hadoop的版本为3.3.6。
 
@@ -54,149 +54,156 @@ Apache Hive 是一个大数据仓库基础架构，它由多个组件组成，�
 
 注意事项
 1. Hive需要依赖Hadoop。因此Hive容器要与Hadoop容器互相通信。即两个容器之间要在用一个网络中。
-2. Hive的元数据需要存储在数据库中，因此我们可以先搭建了Mysql容器，然后再Mysql容器的基础上安装Hive。
+2. 部署Hive集群和部署单节点的Hive是不一样的。下面是部署单节点的Hive容器。
 
-> ① 搭建Mysql容器
-
-之前Hadoop笔记中hadoop容器都是在my-hadoop-net网络中，因此也需要把该容器添加到my-hadoop-net网络中。
+> 下载Hive镜像
 
 ```shell
-# 下载mysql 8.0.20版本的镜像
-docker pull mysql:8.0.20
-
-# 运行容器
-docker run -d --name="myHive" --network my-hadoop-net -p 33306:3306 -e MYSQL_ROOT_PASSWORD=123456 -v /e/DockerVolumes/Hive/data:/var/lib/mysql mysql:8.0.20 --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+docker pull apache/hive:4.0.0
 ```
 
-- `/e/DockerVolumes/Hive/data`是windows系统中E盘的DockerVolumes目录...
-
-
-> ② 安装Hive
-
-现在windows系统的终端中，执行下面命令。
-```shell
-# 将windwos系统中的hive安装包，复制到myHive容器中
-docker cp apache-hive-4.0.0-bin.tar.gz myHive:/usr/local
-```
-
-进入到myHive容器的终端中，执行下面命令
-```shell
-# 进入到/usr/local目录
-cd /usr/local
-# 解压hive安装包到当前目录中
-tar -zxvf apache-hive-4.0.0-bin.tar.gz
-# 进入到解压后的hive安装包
-cd apache-hive-4.0.0-bin
-
-# 编辑环境变量
-vim /etc/profile
-
-```
-
-### 1.构建Hive镜像
-
-1. 先下载centos镜像
-
-```bash
-docker pull centos:7
-docker images #查看镜像
-```
-
-2. 构建Hadoop镜像
-
-在centos镜像的基础上安装SSH服务,mysql服务,hive服务。然后通过Dockerfile构建出一个新镜像。
-
-步骤1：创建Dockerfile文件。该文件名称就是Dockerfile，注意该文件没有后缀名。
-
-步骤2：编辑Dockerfile文件。内容如下所示。
-
-注意：在Dockerfile所在目录下提前准备好 jdk-8u202-linux-x64.tar.gz 与 hadoop-3.3.6.tar.gz 安装包。当然你也可以准备其他版本的安装包。
+> 创建和运行Hive容器
 
 ```shell
-# FROM:基于什么镜像来制作自己的镜像
-FROM centos:7
-# MAINTAINER:表示该镜像的作者（维护者）
-MAINTAINER shuyx
+docker run -d --name myHive-hiveserver2 --network my-hadoop-net -p 10000:10000 -p 10002:10002 --env SERVICE_NAME=hiveserver2 apache/hive:4.0.0
 
-# 配置yum源，包括修改仓库地址、提速、更新
-RUN cd /etc/yum.repos.d/
-RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
-RUN sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://mirrors.aliyun.com|g' /etc/yum.repos.d/CentOS-*
-RUN yum makecache
-RUN yum update -y
-
-# 安装ssh服务和ssh客户端。
-RUN yum install -y openssh-server sudo
-RUN sed -i 's/UsePAM yes/UsePAM no/g' /etc/ssh/sshd_config
-RUN yum install -y openssh-clients
-
-# 生成ssh密钥，注意此处设置了root用户的密码为root
-RUN echo "root:root" | chpasswd
-RUN echo "root   ALL=(ALL)       ALL" >> /etc/sudoers
-RUN ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key
-RUN ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key
-
-# 开启ssh服务，暴露SSH的默认端口22。
-RUN mkdir /var/run/sshd
-EXPOSE 22
-CMD ["/usr/sbin/sshd", "-D"]
-
-# 在线下载mysql8
-RUN yum -y install https://dev.mysql.com/get/mysql80-community-release-el7-3.noarch.rpm
-RUN yum -y install mysql-community-server
-# 设置 MySQL root 密码（你可以根据需要自定义密码）
-ENV MYSQL_ROOT_PASSWORD=123456
-# 修改 MySQL 配置文件以允许远程连接
-RUN sed -i 's/127.0.0.1/0.0.0.0/' /etc/my.cnf
-
-# 将本地的jdk安装包，复制到容器的/usr/local/目录中。并进行解压，配置环境变量
-ADD jdk-8u202-linux-x64.tar.gz /usr/local/
-RUN mv /usr/local/jdk1.8.0_202 /usr/local/jdk1.8
-ENV JAVA_HOME /usr/local/jdk1.8
-ENV PATH $JAVA_HOME/bin:$PATH
-
-# 将本地的hadoop安装包，复制到容器的/usr/local/目录中。并进行解压，配置环境变量
-ADD hadoop-3.3.6.tar.gz /usr/local
-RUN mv /usr/local/hadoop-3.3.6 /usr/local/hadoop
-ENV HADOOP_HOME /usr/local/hadoop
-ENV PATH $HADOOP_HOME/bin:$PATH
-ENV PATH $HADOOP_HOME/sbin:$PATH
-
-# 指定root用户访问
-ENV HDFS_NAMENODE_USER root
-ENV HDFS_DATANODE_USER root
-ENV HDFS_SECONDARYNAMENODE_USER root
-ENV YARN_RESOURCEMANAGER_USER root
-ENV YARN_NODEMANAGER_USER root
-
-# 安装 which,sudo,vim 命令行工具
-RUN yum install -y which sudo vim
-```
-
-步骤3：在Dockerfile文件的同目录中，使用下面的命令，创建新镜像my-hadoop-image
-
-```sh
-# "."表示当前目录，即Dockerfile所在的位置
-# my-hadoop-image 为新镜像的名称
-docker build -t my-hadoop-image .
-
-# 查询新镜像my-hadoop-image
-docker images
-```
-
-## 11
-
-下面是部署单节点的Hive容器。
-
-> 创建Docker容器
-
-```shell
-docker run  --name myHive --network my-hadoop-net -p 10000:10000 -p 10002:10002 -p 39083:9083 apache/hive:4.0.0
+docker run -d --name myHive-metastore --network my-hadoop-net -p 39083:9083 --env SERVICE_NAME=metastore apache/hive:4.0.0
 
 # 10002端口 Hive 提供了一个 Web UI 界面，用于通过浏览器进行交互和管理 Hive 服务。可以通过10002端口来访问UI界面。
 # 10000端口 Hive允许客户端通过10000端口与 Hive 进行交互，执行查询和管理作业等操作。
 # 9083端口：9083端口是Hive的元数据存储端口，从而管理 Hive中的元数据信息，如表的结构、位置等。
 ```
+
+
+
+## Hive客户端
+
+Beeline 是Hive内置的一个命令行客户端。Beeline通过JDBC协议和HiveServer2服务进行互相通信。
+
+HiveServer2 是Hive内置的一个服务，提供接口给其他客户端连接。可以连接HiveServer2服务的客户端有。
+- Hive内置的beelne客户端工具（命令行工具）。
+- 第三方的图形化SQL工具。如果DataGrip，DBeaver等
+
+![hive_20240715153744.png](../blog_img/hive_20240715153744.png)
+
+简而言之，客户端必须通过 HiveServer2 服务，才能使用Hive。
+
+> 启动 HiveServer2 服务
+
+
+## Hive的使用
+
+下面先通过Beeline客户端，连接HiveServer2服务。
+
+```shell
+# 启动beeline客户端
+bin/beeline
+# 连接HiveServer2服务
+beeline> !connect jdbc:hive2://myHive:10000: root
+```
+
+之后都是通过Beeline客户端操作Hive。
+
+### 数据库操作
+
+> 创建数据库
+
+```shell
+# 创建数据库，名字为db_name
+create database [if not exists] db_name;
+
+# 创建数据库并指定存储位置
+create database [if not exists] db_name location '/usr/xxx';
+
+# 查询所有数据库
+show databases;
+
+# 切换数据库
+use db_name;
+
+# 查询某个数据库详细信息
+desc database db_name;
+
+# 删除空数据库,若库中包含表，则无法删除
+drop database db_name;
+
+# 强制删除数据库，库中的表一并删除。
+drop database db_name cascade;
+
+```
+
+注意：在Hive中数据库的本质就是HDFS文件系统中的某个.db后缀文件夹。
+
+默认数据库的存放路径是在HDFS的`/usr/hive/warehouse`目录中。也可以通过location关键字指定数据库的存储位置。
+
+### 表操作
+
+```shell
+# 创建一个基础表，示例如下
+create table table_name(
+    id INT,
+    name STRING,
+    gender String
+);
+
+# 删除表
+drop table table_name;
+
+## 清空表
+truncate table table_name;
+
+## 表重命名
+alter table old_name rename to new_name;
+
+## 修改表属性，例如注释等
+alter table table_name set TBLproperties('comment'='new_comment');
+
+## 添加列名
+alter table table_name add columns(column1 int , column2 string);
+
+## 修改列名,此处把column1列改为new_column1列。注意类型无法更改
+alter table table_name change column1 new_column1 int;
+
+```
+
+### 基本查询
+
+Hive的查询语句,基本上与SQL的查询语句类似
+
+```shell
+# 查询语法
+select 查询列1,查询列2... 
+from table_name
+[where 查询条件] 
+[Group 分组条件]
+[Having 聚合条件]
+[order 排序条件]
+[limit 分页条件]
+
+# 例如
+
+# 查询全表数据
+select * from table_name;
+
+# 查询特定列信息
+select id,name,gender from table_name;
+
+# 查询表有多少条数据
+select count(*) from table_name;
+
+# 根据id>10条件查询
+select * from table_name where id > 10;
+
+# 模糊查询
+select * from table_name where name like '%广东%';
+
+# 分组查询
+select * from table_name Group by id;
+
+```
+
+
+
 
 
 
