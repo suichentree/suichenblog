@@ -82,14 +82,38 @@ Spark GraphX 是 Spark 的图形计算库。它提供了一种分布式图形处
 
 Spark 支持多种运行模式，包括 local 本地模式、standalone 独立集群模式、Mesos 模式、YARN 模式和 Kubernetes 模式。
 
-- local 本地模式：在本地模式下，Spark 应用程序会在单个机器上运行，不需要连接到集群。这种模式适用于开发和测试，但不适用于生产环境。
-- standalone 独立集群模式：在独立模式下，Spark 应用程序会连接到一个独立的 Spark 集群，并在集群中运行。这种模式适用于小型集群，但不支持动态资源分配。
-- Mesos 模式：在 Mesos 模式下，Spark 应用程序会连接到一个 Apache Mesos 集群，并在集群中运行。这种模式支持动态资源分配和细粒度资源共享，目前国内使用较少。
-- YARN 模式：在 YARN 模式下，Spark 应用程序会连接到一个 Apache Hadoop YARN 集群，并在集群中运行。这种模式支持动态资源分配和与其他 Hadoop 生态系统组件的集成，Spark在Yarn模式下是不需要Master和Worker的。
-- Kubernetes 模式：在 Kubernetes 模式下，Spark 应用程序会连接到一个 Kubernetes 集群，并在集群中运行。这种模式支持动态资源分配和容器化部署。
+1. local 本地模式（又称单机模式）
 
+在本地模式下，Spark 应用程序会在单个机器上运行。这种模式适用于开发和测试，但不适用于生产环境。
 
+2. standalone 独立集群模式。（国内不常用）
 
+在 Standalone 模式下，Spark 自带了一个简单的集群管理器，可以独立运行在一个 Spark-only 的集群上。
 
+这种模式下，Spark 的 Driver 和 Executor 进程都运行在 Spark 管理的节点上。Standalone 模式适合于简单的开发、测试和小规模部署。
 
+3. YARN 模式
 
+YARN 是 Apache Hadoop 的资源管理器，Spark 可以使用 Apache Hadoop的 YARN 组件来进行资源和任务调度。Spark 的 Driver 和 Executor 都作为 YARN 的应用程序来执行。
+
+这种模式下，Spark 可以与其他 Hadoop 生态系统的应用程序共享同一集群资源。
+
+4. Mesos 模式 
+
+Mesos 是一个通用的集群管理器，Spark 可以作为 Mesos 上的一个框架运行。
+
+在 Mesos 模式下，Spark 应用程序会连接到一个 Apache Mesos 集群，并在集群中运行。这种模式支持动态资源分配和细粒度资源共享，目前国内使用较少。
+
+5. Kubernetes 模式
+
+在 Kubernetes 模式下，Spark 应用程序会连接到一个 Kubernetes 集群，并在集群中运行。每个 Spark Executor 都作为一个 Kubernetes Pod 运行。
+
+这种模式对于在云原生环境中运行 Spark 应用程序非常有用，可以有效地利用 Kubernetes 提供的弹性和资源管理能力。
+
+> 如何选择Spark的运行模式？
+
+- 如果你已经在使用 Hadoop 的 YARN 或 Mesos 作为集群管理器，那么将 Spark 部署为这些平台的应用程序可能是最方便的选择。
+- 如果你正在寻求简单的部署和管理，可以考虑使用 Standalone 模式。
+- 如果你的环境是基于 Kubernetes ，那么 Kubernetes 模式可能是最合适的选择
+
+每种模式都有其特定的优势和适用场景，因此根据具体需求进行选择是非常重要的。
