@@ -32,12 +32,12 @@ tags:
 - Apache Hadoop框架的HDFS组件是大数据技术体系中使用最广泛的分布式存储技术。
 - Apache HBase是大数据技术体系中使用最广泛的NoSQL，K-V键值对数据库技术。HBase是在HDFS的基础上构建的。
 - Apache KUDU 也是大数据技术系统中使用较多的分布式存储引擎。
-- 除此之外，还有各个云平台提供的大数据存储服务。例如阿里云的OSS等。
+- 除此之外，还有各个云平台提供的大数据存储服务。例如阿里云的OSS,亚马逊的S3云存储等都可以替代。
 
 对于数据计算方面：
 
 - Apache Hadoop框架的MapReduce组件是最早的大数据分布式计算引擎。
-- Apache Hive 是一款以SQL为开发语言的分布式计算框架。其底层使用了Hadoop框架的MapReduce组件技术。至今有许多公司使用它。
+- Apache Hive 框架是一款以SQL为开发语言的分布式计算框架。其底层使用了Hadoop框架的MapReduce组件技术。
 - Apache Spark 是目前全球内最火热的分布式内存计算引擎技术。
 - Apache Flink 同样也是一款大数据分布式内存计算引擎，主要在实时计算（流计算）领域，Flink占据主流。
 

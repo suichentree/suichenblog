@@ -203,7 +203,30 @@ select * from table_name Group by id;
 ```
 
 
+### 数据类型
 
+Hive中的基本数据类型如下
+```shell
+# 数值型
+TINYINT — 微整型，只占用1个字节，只能存储0-255的整数。
+SMALLINT – 小整型，占用2个字节，存储范围–32768 到 32767。
+INT – 整型，占用4个字节，存储范围-2147483648到2147483647。
+BIGINT – 长整型，占用8个字节，存储范围-2^63到2^63-1。
+
+# 布尔型
+BOOLEAN — TRUE/FALSE
+
+# 浮点型
+FLOAT – 单精度浮点数。
+DOUBLE – 双精度浮点数。
+
+# 字符串型
+STRING – 不设定长度。
+
+# 日期类型
+timestamp - 时间戳
+date - 日期
+```
 
 
 

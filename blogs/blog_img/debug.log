@@ -137,3 +137,20 @@
 [0711/180838:ERROR:CONSOLE(1)] "Uncaught (in promise) TypeError: Cannot read property 'ButtonProvider' of undefined", source: chrome-devtools://devtools/inspector.html (1)
 [0711/180924:ERROR:CONSOLE(1)] "Uncaught (in promise) TypeError: Cannot read property 'ButtonProvider' of undefined", source: chrome-devtools://devtools/inspector.html (1)
 [0711/180933:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
+[0716/151847:INFO:http_cache_transaction.cc(72)] IgnoreZeroCacheError: 0
+[0716/151848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0716/151848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0716/151848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0716/151848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0716/151854:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
+[0716/154848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0716/155443:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0716/155443:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0716/155445:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
+[0716/155506:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0716/155506:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0716/155509:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
+[0716/161848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0716/164848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0716/165936:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0716/165936:WARNING:quota_manager.cc(1833)] Create directory failed for path
