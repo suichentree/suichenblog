@@ -170,12 +170,14 @@ $ /opt/spark/bin/spark-submit --class org.apache.spark.examples.SparkPi --master
 
 RDD（Resilient Distributed Dataset，弹性分布式数据集）是 Apache Spark 中的基本抽象概念，它代表了可以并行操作的、可容错的数据集合。
 
-RDD 也是 Spark 提供的一种基础数据结构，它具有以下特性和优势：
+RDD 是 Spark 提供的一种基础数据结构，它具有以下特性和优势：
 1. 分布式数据集：RDD 会把数据集合分成多个分区（partitions），这些分区可以分布在集群的不同节点上进行并行处理。
 2. 容错性：RDD 具备容错特性，即在节点发生故障时，能够自动恢复数据并保持计算的一致性。
 3. 不可变性：RDD 的数据结构是不可变的，一旦创建就不能修改。这样的设计使得RDD更容易进行并行处理，因为每个分区的数据都可以独立处理，而不会影响其他分区。
 4. 惰性计算：RDD 支持惰性计算（lazy evaluation），只有在需要计算结果时才会真正执行计算操作，这种延迟计算的机制有助于优化整体的执行流程和性能。
 5. 可操作性：RDD 提供了多种操作（transformations 和 actions），可以对数据进行转换（如 map、filter、reduce 等）和获取结果（如 collect、count 等），支持复杂的数据处理任务。
+
+<font color="red">简而言之，RDD相当于java中的一个集合。RDD这个集合底层使用了特殊的数据结构，从而实现了各种特性。并且RDD这个集合也封装了一些方法，用来处理RDD中的数据。</font>
 
 > RDD 支持两类操作：
 1. Transformations（转换操作）：转换操作会从一个 RDD 创建一个新的 RDD，常见的转换操作有 map、filter、flatMap、reduceByKey 等。这些操作不会立即计算出结果，而是定义一个计算流程。
@@ -200,15 +202,25 @@ RDD 也是 Spark 提供的一种基础数据结构，它具有以下特性和优
 4. 缓存和持久化：可以选择将RDD缓存在内存中或持久化到磁盘，以便在多次使用中提高计算性能和计算效率。
 5. 销毁和回收：在 RDD 不再需要时，Spark 会自动管理RDD内部数据的销毁和资源的回收。
 
+### RDD的内部
+
+当集合数据或者第三方的数据源的数据，转换为RDD的时候。这些数据会存储在RDD的不同分区当中。
+
+除此之外，RDD内部也存在方法逻辑，这些方法逻辑用于数据计算处理。
+
+![spark_20240718164142.png](../blog_img/spark_20240718164142.png)
+
+如图所示，一个数据源转换为RDD。这个RDD中存在两个分区，每个分区存储两个元素数据。并且RDD中存在方法逻辑sum。
+
+当需要对RDD的数据进行方法计算的时候，RDD会把分区数据和方法逻辑打包为Task任务。执行器会对每个任务中的数据和方法进行并行计算处理。
+
+
 ### RDD的使用
 
-#### RDD的创建
-
 创建RDD的多种方式
-- 从外部数据源创建：可以从文件（如文本文件、JSON 文件）、HDFS、数据库（如Hive、HBase）、现有的 Scala 集合等数据源中创建 RDD。
+- 从外部数据源创建：可以从文件（如文本文件、JSON 文件）、HDFS、数据库（如Hive、HBase）、现有的集合等数据源中创建 RDD。
 - 通过转换操作创建：可以通过对现有的 RDD 执行转换操作（如 map、filter、reduceByKey 等）来创建新的 RDD。
-- 并行化集合：可以通过在驱动程序中并行化现有的 Scala 集合来创建 RDD。
-
+- 并行化集合：可以通过在驱动程序中并行化现有的集合来创建 RDD。
 
 > ① java代码如下
 
@@ -226,38 +238,60 @@ RDD 也是 Spark 提供的一种基础数据结构，它具有以下特性和优
 </dependency>
 ```
 
-java代码如下
+代码
 ```java
 package org.example;
 import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import java.util.Arrays;
+import java.util.List;
+
 public class Spark01 {
     public static void main(String[] args) {
 
         //构建spark配置
-        final SparkConf sparkConf = new SparkConf();
+        SparkConf sparkConf = new SparkConf();
         sparkConf.setMaster("local");
         sparkConf.setAppName("mySparkAPP-01");
         //构建spark的运行环境
-        final JavaSparkContext javaSparkContext = new JavaSparkContext(sparkConf);
+        JavaSparkContext javaSparkContext = new JavaSparkContext(sparkConf);
 
+        //1 创建集合(内存中的数据)
         List<String> list = Arrays.asList("xiaoming", "zhangsan", "tiantian");
-        JavaRDD<String> rdd = javaSparkContext.parallelize(list);
+        //把集合转换为RDD对象,设置分片数量为3
+        //Spark在读取集合数据的时候，设置分区有3种可能
+        // 1. 优先使用方法参数
+        // 2. 可以通过配置spark.default.parallelism 来设置分区数量
+        // 3. 最后使用当前系统的cpu核心数
+        JavaRDD<String> rdd1 = javaSparkContext.parallelize(list,3);
+        //打印rdd1中的数据
+        List<String> collect1 = rdd1.collect();
+        collect1.forEach(System.out::println);
 
-        List<String> collect = rdd.collect();
-        for (String str : collect) {
-            System.out.println(str);
-        }
+        //2 把文件（磁盘中的数据）转换为RDD对象,设置最小分区数量为2
+        JavaRDD<String> rdd2 = javaSparkContext.textFile("C:\\Users\\18271\\Desktop\\test.txt",2 );
+        //打印rdd2中的数据
+        rdd2.collect().forEach(System.out::println);
 
+        //暂停100s,在程序结束之前可以访问Spark的监控页面。
+        Thread.sleep(1000000L);
         //关闭环境
         javaSparkContext.close();
-
     }
 }
 
+//运行结果
+//xiaoming zhangsan tiantian
+
 ```
 
-运行该程序需要设置JVM参数（IDEA对该程序添加JVM option）。参数如下
+
+运行该程序需要设置JVM参数（）。需要在IDEA中对Spark01.java程序添加JVM option。如图所示
+
+![spark_20240718144408.png](../blog_img/spark_20240718144408.png)
+
+参数如下
 ```
 -XX:+IgnoreUnrecognizedVMOptions
 --add-opens=java.base/java.lang=ALL-UNNAMED
@@ -274,5 +308,202 @@ public class Spark01 {
 --add-opens=java.base/sun.security.action=ALL-UNNAMED
 --add-opens=java.base/sun.util.calendar=ALL-UNNAMED
 --add-opens=java.security.jgss/sun.security.krb5=ALL-UNNAMED
+```
+
+另外当程序在运行过程中的时候。我们可以访问`http://localhost:4040`可以看到Spark的监控页面。
+
+![spark_20240718173140.png](../blog_img/spark_20240718173140.png)
+
+### RDD的方法
+
+RDD中内置了许多方法，方便我们对RDD中的数据进行各种各样的处理。
+
+RDD方法主要分为两大类：转换算子和动作算子两类。
+1. 转换算子（转换方法）：用于把原始 RDD 进行转换来生成新的 RDD。转换方法不会立即执行，只有遇到 动作方法 时才会触发执行。
+2. 动作算子（动作方法）：对RDD进行实际计算，并把计算结果返回给程序或写入外部存储系统。
+
+RDD方法中处理数据的种类分为两类：单值数据和键值数据两类。
+1. 单值数据：类似字符串，对象，集合等数据。
+2. 键值数据：类似 K-V 键值对数据。
+
+#### 转换算子（转换方法）
+
+下面是常用的转换方法。
+
+> map(func)方法: 对RDD中的每个元素数据，用函数func进行处理。最终返回一个新的RDD。
+
+```java
+public class Spark01 {
+    public static void main(String[] args) {
+        //构建spark配置
+        SparkConf sparkConf = new SparkConf();
+        sparkConf.setMaster("local");
+        sparkConf.setAppName("mySparkAPP-01");
+        //构建spark的运行环境
+        JavaSparkContext javaSparkContext = new JavaSparkContext(sparkConf);
+
+        //创建集合(内存中的数据)
+        List<Integer> list = Arrays.asList(1,2,3,4);
+        //将集合转换为RDD对象
+        JavaRDD<Integer> rdd1 = javaSparkContext.parallelize(list);
+
+        //打印旧的RDD的数据
+        System.out.println("旧的RDD为");
+        rdd1.collect().forEach(System.out::println);
+
+        //调用map方法，把旧RDD转换为新RDD
+        //转换方法：将RDD的每个元素*2
+        Function<Integer, Integer> f = new Function<>() {
+            @Override
+            public Integer call(Integer integer) throws Exception {
+                return integer*2;
+            }
+        };
+        JavaRDD<Integer> rdd2 = rdd1.map(f);
+
+        //打印新的RDD的数据
+        System.out.println("新的RDD为");
+        rdd2.collect().forEach(System.out::println);
+
+        //关闭spark环境
+        javaSparkContext.close();
+    }
+}
+
+//运行结果如下
+// 旧的RDD为1234
+// 新的RDD为2468
 
 ```
+
+> filter(func)方法: 根据给定的函数 func 对 RDD 进行过滤，返回一个包含符合条件元素的新 RDD。如果满足过滤条件（返回true或1）则数据保留。不满足（返回false或0）则数据清除。
+
+```java
+// ............
+//将集合转换为RDD对象
+JavaRDD<Integer> rdd1 = javaSparkContext.parallelize(Arrays.asList(1,2,3,4));
+
+//调用filter方法，把旧RDD过滤转换为新RDD
+//过滤方法：过滤奇数. lamda表达式
+JavaRDD<Integer> rdd2 =rdd1.filter(
+        (x)->{
+            //偶数返回true，奇数返回false
+            return x % 2 == 0 ? true: false;
+        }
+);
+
+
+// ............
+//运行结果
+// 旧的RDD为1234
+// 新的RDD为24
+```
+
+> flatMap(func)方法: 与 map 方法类似，但每个输入元素可以映射到多个输出元素。
+
+flat是扁平化的意思。flatMap方法是将RDD的数据进行扁平化处理。 
+
+例如:对于集合，扁平化处理就是把集合中的元素单独处理。对于数组，扁平化处理就是把数组中的元素单独处理。
+
+```java
+//....
+//将多个List集合转换为RDD
+JavaRDD<List<Integer>> rdd1 = javaSparkContext.parallelize(Arrays.asList(Arrays.asList(1,2),Arrays.asList(3,4)));
+
+//调用flatMap 扁平化处理方法，把旧RDD的数据拆分为单个数据，并返回。最终转换为一个新的RDD
+// 写法一： 
+JavaRDD<Integer> rdd2 =rdd1.flatMap(new FlatMapFunction<List<Integer>, Integer>() {
+    @Override
+    public Iterator<Integer> call(List<Integer> integers) throws Exception {
+        //通过迭代方法，将集合的元素返回
+        return integers.iterator();
+    }
+});
+
+//写法二： lamda表达式
+JavaRDD<Integer> rdd3 =rdd1.flatMap(list -> list.iterator());
+
+//打印新的RDD的数据
+System.out.print("新的RDD为");
+rdd2.collect().forEach(System.out::print);
+
+//运行结果
+// 新的RDD为1234
+
+```
+
+写法一与写法二效果相同。
+
+> groupBy(func)方法：按照指定规则对RDD中的数据进行分组，生成 `(key, Iterable[values])` 形式的新 RDD。
+
+groupBy方法的逻辑：给每一个数据添加与一个标记(返回值，分组名称)，相同标记的数据会放置到同一个组中。从而实现分组的效果。
+
+```java
+//........
+//集合数据转换为RDD
+JavaRDD<Integer> rdd1 = javaSparkContext.parallelize(Arrays.asList(1,2,3,4));
+
+// groupBy方法 对RDD的数据进行分组
+JavaPairRDD<Object, Iterable<Integer>> rdd2 = rdd1.groupBy(new Function<Integer, Object>() {
+    //分组逻辑，返回值是分组名称。
+    @Override
+    public Object call(Integer num) throws Exception {
+        //将偶数分为A组，奇数分为B组
+        return num % 2 == 0 ? "A组" : "B组";
+    }
+});
+
+//打印新的RDD的数据
+System.out.print("新的RDD为");
+rdd2.collect().forEach(System.out::print);
+
+//运行结果
+// 新的RDD为(B组,[1, 3])(A组,[2, 4])
+
+```
+
+> distinct()方法：去除RDD中重复的元素，返回一个新的RDD。
+
+```java
+//......
+//集合数据转换为RDD
+JavaRDD<Integer> rdd1 = javaSparkContext.parallelize(Arrays.asList(1,2,2,2,3,3,4));
+
+// distinct方法 对RDD的数据进行去重
+JavaRDD<Integer> rdd2 = rdd1.distinct();
+System.out.print("新的RDD为");
+rdd2.collect().forEach(System.out::print);
+
+//运行结果
+//新的RDD为4132
+
+```
+
+distinct方法的底层有分区+shuffle（洗牌）的实现方式。
+
+一般情况下，不同分区有相同数据的时候，单纯的去重无法去除。即不同分区之间的数据是独立的。
+
+但是当通过shuffle操作，将各个分区的数据先聚合在一起，然后进行去重操作。最后再把去重后的数据分配到各个分区中。这种情况下才能实现数据去重的效果。
+
+
+> sortBy(func,ascending,numPartitions)方法：对RDD中的数据按照指定规则进行排序，返回一个新的RDD。
+
+sortBy方法接受三个参数:
+- func 函数为排序逻辑。
+- ascending 为true是升序，false为降序。
+- numPartitions为分区数量
+
+```java
+//......
+JavaRDD<Integer> rdd1 = javaSparkContext.parallelize(Arrays.asList(1,2,6,2,3,3,4));
+// sortBy方法 对RDD的数据进行排序
+JavaRDD<Integer> rdd2 = rdd1.sortBy(num-> num,true,2);
+
+System.out.print("新的RDD为");
+rdd2.collect().forEach(System.out::print);
+
+//运行结果
+// 新的RDD为1223346
+```
+
+由于RDD中的不同分区的数据是互相独立的，为了实现RDD内各个分区的数据都进行排序。因此sortBy方法的底层实现了shuffle（洗牌）。即先把分区中的数据聚合再一起，再排序，最后把排好序的数据分配给各个分区。
