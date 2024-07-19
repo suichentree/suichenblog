@@ -318,17 +318,17 @@ public class Spark01 {
 
 RDD中内置了许多方法，方便我们对RDD中的数据进行各种各样的处理。
 
-RDD方法主要分为两大类：转换算子和动作算子两类。
-1. 转换算子（转换方法）：用于把原始 RDD 进行转换来生成新的 RDD。转换方法不会立即执行，只有遇到 动作方法 时才会触发执行。
-2. 动作算子（动作方法）：对RDD进行实际计算，并把计算结果返回给程序或写入外部存储系统。
+RDD方法主要分为两大类：转换算子和动作算子两类。它们在处理RDD时具有不同的作用和行为。
+1. 转换算子（转换方法）：用于把原始 RDD 进行转换来生成新的 RDD。Spark不会立即执行转换算子，而是等到执行 行动算子 时才会执行转换算子。
+2. 行动算子（行动方法）：对RDD进行实际计算操作。Spark会立即执行 行动算子，并且会产生一个输出结果到驱动程序或者写入外部存储系统（比如HDFS、数据库等）。
 
 RDD方法中处理数据的种类分为两类：单值数据和键值数据两类。
 1. 单值数据：类似字符串，对象，集合等数据。
 2. 键值数据：类似 K-V 键值对数据。
 
-#### 转换算子（转换方法）
+#### 转换算子（转换方法）- 单值数据
 
-下面是常用的转换方法。
+下面是处理单值数据的常用转换方法。
 
 > map(func)方法: 对RDD中的每个元素数据，用函数func进行处理。最终返回一个新的RDD。
 
@@ -363,6 +363,7 @@ public class Spark01 {
 
         //打印新的RDD的数据
         System.out.println("新的RDD为");
+        //collect方法将RDD转换为集合
         rdd2.collect().forEach(System.out::println);
 
         //关闭spark环境
@@ -444,6 +445,7 @@ groupBy方法的逻辑：给每一个数据添加与一个标记(返回值，分
 JavaRDD<Integer> rdd1 = javaSparkContext.parallelize(Arrays.asList(1,2,3,4));
 
 // groupBy方法 对RDD的数据进行分组
+// 此处的JavaRDD类转换为JavaPairRDD类。即单值数据的RDD，转换为键值对数据的RDD。
 JavaPairRDD<Object, Iterable<Integer>> rdd2 = rdd1.groupBy(new Function<Integer, Object>() {
     //分组逻辑，返回值是分组名称。
     @Override
@@ -461,6 +463,10 @@ rdd2.collect().forEach(System.out::print);
 // 新的RDD为(B组,[1, 3])(A组,[2, 4])
 
 ```
+
+注意：groupBy方法会将单值数据的RDD，转换为键值对数据的RDD。即JavaRDD类转换为JavaPairRDD类。
+
+并且groupBy方法的底层是groupByKey方法
 
 > distinct()方法：去除RDD中重复的元素，返回一个新的RDD。
 
@@ -507,3 +513,328 @@ rdd2.collect().forEach(System.out::print);
 ```
 
 由于RDD中的不同分区的数据是互相独立的，为了实现RDD内各个分区的数据都进行排序。因此sortBy方法的底层实现了shuffle（洗牌）。即先把分区中的数据聚合再一起，再排序，最后把排好序的数据分配给各个分区。
+
+
+#### 转换算子（转换方法）- 键值对数据
+
+下面是处理键值对数据的常用转换方法。这些转换方法大多是处理键值对数据中的value,而key保持不变。
+
+在java语言中，元组类相当于键值对数据。
+
+> mapValues(func)方法：对RDD中的每个键值对数据的value，用函数func进行处理。最终返回一个新的RDD。
+
+```java
+public class Spark01 {
+    public static void main(String[] args) throws InterruptedException {
+        //构建spark配置
+        SparkConf sparkConf = new SparkConf();
+        sparkConf.setMaster("local");
+        sparkConf.setAppName("mySparkAPP-01");
+        //构建spark的运行环境
+        JavaSparkContext javaSparkContext = new JavaSparkContext(sparkConf);
+
+        //构建元组对象
+        Tuple2<String, Integer> a = new Tuple2<String, Integer>("a", 1);
+        Tuple2<String, Integer> b = new Tuple2<String, Integer>("b", 2);
+        Tuple2<String, Integer> c = new Tuple2<String, Integer>("c", 3);
+        List<Tuple2<String, Integer>> list = Arrays.asList(a, b, c);
+        //将元组集合转换为 键值对数据RDD
+        JavaPairRDD<String, Integer> pairRDD1 = javaSparkContext.parallelizePairs(list);
+        System.out.println("旧的RDD为：");
+        pairRDD1.collect().forEach(System.out::println);
+
+        //mapValues方法，让每个键值对数据的value*2
+        //lamda表达式
+        JavaPairRDD<String, Integer> pairRDD2 = pairRDD1.mapValues(value -> value * 2);
+        System.out.println("新的RDD为");
+        pairRDD2.collect().forEach(System.out::println);
+
+        //关闭spark环境
+        javaSparkContext.close();
+    }
+
+}
+
+//运行结果
+// 旧的RDD为：
+// (a,1)
+// (b,2)
+// (c,3)
+// 新的RDD为
+// (a,2)
+// (b,4)
+// (c,6)
+
+```
+
+> mapToPair(func)方法：可以将RDD中的单值数据转化为键值对数据。
+
+在某些情况下，我们通常需要先将单值数据转化为键值对数据，然后再进行下一步处理。
+
+除了mapToPair方法，groupBy方法也会将单值数据的RDD，转换为键值对数据的RDD。
+
+```java
+public class Spark01 {
+    public static void main(String[] args) throws InterruptedException {
+        //构建spark配置
+        SparkConf sparkConf = new SparkConf();
+        sparkConf.setMaster("local");
+        sparkConf.setAppName("mySparkAPP-01");
+        //构建spark的运行环境
+        JavaSparkContext javaSparkContext = new JavaSparkContext(sparkConf);
+
+        //将集合数据转换为RDD
+        JavaRDD<Integer> rdd = javaSparkContext.parallelize(Arrays.asList(1, 2, 3, 4));
+        System.out.println("旧的RDD为");
+        rdd.collect().forEach(System.out::println);
+        
+        //把单值数据的RDD 转换为 键值对数据的RDD，其中key为字符串，value为整数
+        JavaPairRDD<String, Integer> pairRDD = rdd.mapToPair(num -> new Tuple2<>(String.valueOf(num), num * 2));
+        System.out.println("新的RDD为");
+        pairRDD.collect().forEach(System.out::println);
+        //关闭spark环境
+        javaSparkContext.close();
+    }
+}
+
+//运行结果
+// 旧的RDD为
+// 1
+// 2
+// 3
+// 4
+// 新的RDD为
+// (1,2)
+// (2,4)
+// (3,6)
+// (4,8)
+
+```
+
+> groupByKey()方法：把键值对RDD中有相同key的value进行分组。返回一个新的RDD。
+
+```java
+//。。。。。。。。
+//构建元组集合
+List<Tuple2<String, Integer>> list = Arrays.asList(
+        new Tuple2<String, Integer>("a", 1),
+        new Tuple2<String, Integer>("b", 2),
+        new Tuple2<String, Integer>("b", 4),
+        new Tuple2<String, Integer>("c", 3),
+        new Tuple2<String, Integer>("c", 3));
+
+//将元组集合转换为 键值对数据RDD
+JavaPairRDD<String, Integer> pairRDD1 = javaSparkContext.parallelizePairs(list);
+System.out.println("旧的RDD为：");
+pairRDD1.collect().forEach(System.out::println);
+
+//groupByKey方法，把键值对RDD中有相同key的value进行分组。返回一个新的RDD。
+JavaPairRDD<String, Iterable<Integer>> pairRDD2 = pairRDD1.groupByKey();
+System.out.println("新的RDD为");
+pairRDD2.collect().forEach(System.out::println);
+//。。。。。。。。
+
+//运行结果
+// 旧的RDD为：
+// (a,1)
+// (b,2)
+// (b,4)
+// (c,3)
+// (c,3)
+// 新的RDD为
+// (a,[1])
+// (b,[2, 4])
+// (c,[3, 3])
+
+```
+
+> reduceByKey(func)方法：把键值对RDD中有相同key的value按照指定函数进行两两聚合处理。
+
+两两聚合处理是指把多个数据依次两个两个处理。
+
+```java
+//构建元组集合
+List<Tuple2<String, Integer>> list = Arrays.asList(
+        new Tuple2<String, Integer>("a", 1),
+        new Tuple2<String, Integer>("b", 2),
+        new Tuple2<String, Integer>("b", 4),
+        new Tuple2<String, Integer>("c", 3),
+        new Tuple2<String, Integer>("c", 3));
+
+//将元组集合转换为 键值对数据RDD
+JavaPairRDD<String, Integer> pairRDD1 = javaSparkContext.parallelizePairs(list);
+System.out.println("旧的RDD为：");
+pairRDD1.collect().forEach(System.out::println);
+
+//reduceByKey，把键值对RDD中有相同key的value都相加。
+JavaPairRDD<String, Integer> pairRDD2 = pairRDD1.reduceByKey(new Function2<Integer, Integer, Integer>() {
+    @Override
+    public Integer call(Integer v1, Integer v2) throws Exception {
+        //将多个value进行相加操作
+        return v1 + v2;
+    }
+});
+System.out.println("新的RDD为");
+pairRDD2.collect().forEach(System.out::println);
+
+//运行结果
+// 旧的RDD为：
+// (a,1)
+// (b,2)
+// (b,4)
+// (c,3)
+// (c,3)
+// 新的RDD为
+// (a,1)
+// (b,6)
+// (c,6)
+
+```
+
+> sortByKey()方法：把键值对RDD中的键值对数据，按照key进行排序。默认为升序。
+
+```java
+//构建元组集合
+List<Tuple2<String, Integer>> list = Arrays.asList(
+        new Tuple2<String, Integer>("a", 1),
+        new Tuple2<String, Integer>("b", 2),
+        new Tuple2<String, Integer>("b", 4),
+        new Tuple2<String, Integer>("c", 3),
+        new Tuple2<String, Integer>("c", 5));
+
+//将元组集合转换为 键值对数据RDD
+JavaPairRDD<String, Integer> pairRDD1 = javaSparkContext.parallelizePairs(list);
+System.out.println("旧的RDD为：");
+pairRDD1.collect().forEach(System.out::println);
+
+//sortByKey方法，对RDD进行排序
+JavaPairRDD<String, Integer> pairRDD2 = pairRDD1.sortByKey();
+System.out.println("新的RDD为");
+pairRDD2.collect().forEach(System.out::println)
+
+//运行结果
+// 旧的RDD为：
+// (a,1)
+// (b,2)
+// (b,4)
+// (c,3)
+// (c,5)
+// 新的RDD为
+// (a,1)
+// (b,2)
+// (b,4)
+// (c,3)
+// (c,5)
+```
+
+#### 行动算子（动作方法）
+
+Spark 中的行动算子（Action）是用来触发对 RDD 的实际计算操作并返回结果的操作。行动算子会导致 Spark 作业的执行，因此它们是导致实际计算发生的触发点。
+
+下面是常见的行动算子及其作用。
+
+> collect()方法：将RDD中的所有元素作为一个数组或列表返回。适用于小数据集，不适合大规模数据集，因为会将数据存储在内存中。
+
+```java
+public class Spark01 {
+    public static void main(String[] args) throws InterruptedException {
+        //构建spark配置
+        SparkConf sparkConf = new SparkConf();
+        sparkConf.setMaster("local");
+        sparkConf.setAppName("mySparkAPP-01");
+        //构建spark的运行环境
+        JavaSparkContext javaSparkContext = new JavaSparkContext(sparkConf);
+        //将集合转换为RDD对象
+        JavaRDD<Integer> rdd1 = javaSparkContext.parallelize(Arrays.asList(1,2,3,4));
+
+        //collect方法将RDD转换为集合
+        List<Integer> collect = rdd1.collect();
+
+        //打印RDD的数据
+        System.out.println("RDD为");
+        collect.forEach(System.out::println);
+        //关闭spark环境
+        javaSparkContext.close();
+    }
+}
+
+```
+
+> count()方法：获取 RDD 在执行操作后的元素个数。
+
+```java
+//将集合转换为RDD对象
+JavaRDD<Integer> rdd1 = javaSparkContext.parallelize(Arrays.asList(1,2,3,4));
+//count方法
+long count = rdd1.count();
+System.out.println("RDD中数据的数量为 "+count);
+```
+
+> first()方法：返回 RDD 中的第一个元素。
+
+```java
+//将集合转换为RDD对象
+JavaRDD<Integer> rdd1 = javaSparkContext.parallelize(Arrays.asList(1,2,3,4));
+//first方法
+Integer first = rdd1.first();
+System.out.println("RDD的第一个元素为 "+first);
+```
+
+> take()方法：返回 RDD 中的前 n 个元素作为数组。
+
+```java
+//将集合转换为RDD对象
+JavaRDD<Integer> rdd1 = javaSparkContext.parallelize(Arrays.asList(1,2,3,4));
+//take方法
+List<Integer> take = rdd1.take(3);
+//打印
+take.forEach(System.out::println);
+```
+ 
+> saveAsTextFile()方法：将 RDD 的数据保存为文本文件或者存储在指定路径下。
+
+```java
+//将集合转换为RDD对象
+JavaRDD<Integer> rdd1 = javaSparkContext.parallelize(Arrays.asList(1,2,3,4));
+//saveAsTextFile方法
+rdd1.saveAsTextFile("C:\\Users\\18271\\Desktop\\a.txt");
+```
+
+> foreach(func)方法：对 RDD 中的每个元素用指定的函数进行处理。
+
+```java
+//将集合转换为RDD对象
+JavaRDD<Integer> rdd1 = javaSparkContext.parallelize(Arrays.asList(1,2,3,4));
+//foreach方法 lambda表达式
+rdd1.foreach(num-> System.out.println(num));
+
+//运行结果
+// 1
+// 2
+// 3
+// 4
+
+```
+
+> countByKey()方法：统计键值对RDD中的各个key的个数。
+
+```java
+//构建元组集合
+List<Tuple2<String, Integer>> list = Arrays.asList(
+        new Tuple2<String, Integer>("a", 1),
+        new Tuple2<String, Integer>("b", 2),
+        new Tuple2<String, Integer>("b", 4),
+        new Tuple2<String, Integer>("c", 3),
+        new Tuple2<String, Integer>("c", 5));
+
+//将元组集合转换为 键值对数据RDD
+JavaPairRDD<String, Integer> pairRDD1 = javaSparkContext.parallelizePairs(list);
+//countByKey方法
+Map<String, Long> stringLongMap = pairRDD1.countByKey();
+System.out.println("RDD为："+stringLongMap);
+
+//运行结果
+//RDD为：{a=1, b=2, c=2}
+
+```
+
