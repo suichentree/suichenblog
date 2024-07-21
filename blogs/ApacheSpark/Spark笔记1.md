@@ -838,3 +838,65 @@ System.out.println("RDD为："+stringLongMap);
 
 ```
 
+### 缓存cache
+
+Spark缓存是指将RDD、DataFrame或Dataset等Spark数据集持久化到内存中，以便在后续的计算中能够快速访问。
+
+Spark的数据缓存，特别适用于需要多次访问同一数据集的场景，能够显著提升作业的执行效率和整体的计算速度。
+
+> 为什么需要缓存？
+
+由于RDD本身无法存储数据。如果一个RDD经过多次转换算子或动作算子处理之后。都会生成一个新的RDD。当我们想要直接使用中间过程的RDD的时候，此时这些旧的RDD都会重复计算之后才能使用。
+
+因此如果我们想要使用旧的RDD，那么需要先把旧RDD缓存起来（持久化起来），才能在有新的RDD的情况，直接拿来使用缓存后的旧RDD。
+
+此外Apache Spark需要缓存数据主要出于以下几个重要原因。
+1. 重复使用：在大多数Spark应用程序中，RDD数据集会被多次使用，例如迭代算法、多个操作链中的重复步骤等。如果每次使用都重新计算或重新加载数据，会导致大量的IO操作和计算开销。通过缓存RDD数据集，Spark能够在内存中保留数据副本，避免重复加载和计算，从而显著提高运行速度。
+2. 容错性增强：Spark的RDD数据集是不可变的，即一旦创建就不能修改。如果数据集在计算过程中丢失，必须重新计算。通过缓存RDD数据，即使发生节点故障或任务失败，可以从缓存中快速恢复数据。
+3. 资源管理：通过在内存中缓存RDD数据，Spark可以更有效地利用集群资源。内存中的数据可以被多个任务共享，而不需要每个任务都单独加载一份数据，从而降低了资源竞争和冗余数据加载。
+
+> 缓存的类型
+
+Spark支持两种类型的缓存：
+- 内存缓存（MEMORY_ONLY）：将数据存储在Executor的JVM堆内存中。这是最快速的缓存方式，但受限于内存大小。
+- 序列化缓存（MEMORY_ONLY_SER）：将数据以序列化的方式存储在内存中，节省内存空间，但需要在使用时反序列化。适用于内存较小的情况。
+
+> 缓存方法
+
+在Spark中，可以使用cache()或persist()方法来缓存数据集：
+- cache()：将数据集缓存在内存中，默认使用MEMORY_ONLY缓存类型。
+- persist(storageLevel)：可以指定缓存类型，如MEMORY_ONLY、MEMORY_ONLY_SER等，也可以选择数据持久化到磁盘。   
+
+> 缓存的注意事项
+
+- 缓存的时机：最佳的缓存时机是RDD在业务过程中间的计算步骤。如果一个RDD在某个计算步骤之后会被多次使用，那么可以给该RDD进行缓存。
+- 缓存的成本：缓存需要占用内存资源，并且需要额外的序列化和反序列化开销，因此需要权衡数据集大小和内存空间。
+
+```java
+public class Spark01 {
+    public static void main(String[] args) throws InterruptedException {
+        //构建spark配置
+        SparkConf sparkConf = new SparkConf();
+        sparkConf.setMaster("local");
+        sparkConf.setAppName("mySparkAPP-01");
+        //构建spark的运行环境
+        JavaSparkContext javaSparkContext = new JavaSparkContext(sparkConf);
+        //将集合转换为RDD对象
+        JavaRDD<Integer> rdd1 = javaSparkContext.parallelize(Arrays.asList(1,2,3,4));
+
+        //将RDD数据进行缓存
+        rdd1.cache();
+        //将RDD数据进行持久化   
+        rdd1.persist(StorageLevel.MEMORY_ONLY());
+
+        //关闭spark环境
+        javaSparkContext.close();
+    }
+}
+```
+
+
+
+
+
+
