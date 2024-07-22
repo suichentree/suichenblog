@@ -164,7 +164,7 @@ $ /opt/spark/bin/spark-submit --class org.apache.spark.examples.SparkPi --master
 ![spark_20240717120219.png](../blog_img/spark_20240717120219.png)
 
 
-## Spark Core
+## Spark Core 核心模块
 
 ### RDD介绍
 
@@ -231,6 +231,7 @@ RDD 是 Spark 提供的一种基础数据结构，它具有以下特性和优势
     <artifactId>spark-core_2.12</artifactId>
     <version>3.5.1</version>
 </dependency>
+<!--下面是可选依赖，主要是为了解决程序无法运行的问题-->
 <dependency>
     <groupId>org.slf4j</groupId>
     <artifactId>slf4j-nop</artifactId>
@@ -838,7 +839,7 @@ System.out.println("RDD为："+stringLongMap);
 
 ```
 
-### 缓存cache
+### RDD的缓存
 
 Spark缓存是指将RDD、DataFrame或Dataset等Spark数据集持久化到内存中，以便在后续的计算中能够快速访问。
 
@@ -894,6 +895,18 @@ public class Spark01 {
     }
 }
 ```
+
+### RDD的局限性
+
+虽然RDD具有许多优点，如容错性和高效的数据并行处理，但也存在一些局限性：
+1. 内存需求高: RDD在计算过程中需要将数据存储在内存中，这对于大规模数据集可能会带来较高的内存需求。如果内存不足，可能会影响性能或导致执行失败。
+2. 缺乏优化机制: RDD中的动作算子和转换算子（如map、filter、reduce等），对于复杂的数据场景可能存在局限性。
+3. 编程复杂性: RDD的编程模型更加底层和复杂，需要开发人员手动管理数据的分区和持久化，这可能增加开发和维护的复杂性。
+
+因此Spark SQL便诞生了。Spark SQL本质上是对RDD的封装。
+
+
+
 
 
 
