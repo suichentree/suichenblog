@@ -147,8 +147,9 @@ public class SparkSQL01 {
 
 ```
 
-运行该程序需要设置JVM参数（）。需要在IDEA中对Spark01.java程序添加JVM option。如图所示
+运行该程序需要设置JVM参数（）。需要在IDEA中对SparkSQL01.java程序添加JVM option。
 
+类似的如图所示
 ![spark_20240718144408.png](../blog_img/spark_20240718144408.png)
 
 参数如下
@@ -416,8 +417,104 @@ CREATE TABLE `sys_user_test` (
 暂时不写
 
 
-## Spark Streaming 实时数据流处理模块
+## Spark Streaming 实时数据处理模块
 
-Spark Streaming模块本质上将没有范围的实时数据流，切分成有范围的数据流。然后对有范围的数据流进行计算处理。
+> 什么是实时数据处理？
 
+- 实时数据处理是指数据处理的延迟以毫秒为单位。
+- 准实时数据处理是指数据的处理的延迟以秒，分钟为单位。
+- 离线数据处理是指数据的处理的延迟以小时，天为单位。
+
+> 什么是Spark Streaming
+
+Spark Streaming 是 Apache Spark 提供的一个组件模块,用于处理实时数据流。它允许开发者使用 Spark 的强大计算能力来处理连续的实时数据，而不是传统的静态数据集。
+
+> Spark Streaming的功能和特性如下
+1. 实时数据处理: Spark Streaming 可以从多种数据源（如 Kafka、Flume等）接收数据流，并以微批处理的方式进行实时计算和处理。
+2. 灵活的数据操作: 支持对数据流进行复杂的数据操作，如窗口操作、状态管理等，使得开发者可以进行更复杂的实时分析和处理。
+3. 与 Spark 生态的集成: 可以与 Spark 的各个组件模块等无缝集成。
+
+> Spark Streaming的应用场景
+- 实时数据分析和监控: 可以用于监控系统状态、实时报警、实时指标计算等。
+- 实时数据清洗和转换: 可以对数据进行清洗、格式化、转换，使其适合后续的分析和存储。
+- 实时推荐系统: 可以基于用户实时行为数据进行实时推荐。
+
+> Spark Streaming的工作原理
+
+Spark Streaming 将实时数据流划分为小的微批次，每个微批次都作为一个 RDD 来处理。并且 Spark Streaming 运行在 Spark 的集群上，因此每个微批次的数据会被分布式处理，最终生成的结果可以存储到文件系统、数据库或输出到外部系统。
+
+因此 Spark Streaming 提供了一个强大的框架和工具集，使得开发者能够高效地处理和分析实时数据流，从而在实时数据处理领域提供了广泛的应用可能性。
+
+> Spark Streaming的架构图
+
+![spark_20240722230650.png](../blog_img/spark_20240722230650.png)
+
+### Spark Streaming的使用
+
+> ① 添加依赖
+
+```xml
+<dependency>
+    <groupId>org.apache.spark</groupId>
+    <artifactId>spark-streaming_2.12</artifactId>
+    <version>3.5.1</version>
+</dependency>
+<!--下面是可选依赖，主要是为了解决程序无法运行的问题-->
+<dependency>
+    <groupId>org.slf4j</groupId>
+    <artifactId>slf4j-nop</artifactId>
+    <version>1.7.2</version>
+</dependency>
+```
+
+> ② 代码如下
+
+```java
+import org.apache.spark.SparkConf;
+import org.apache.spark.streaming.Duration;
+import org.apache.spark.streaming.api.java.JavaStreamingContext;
+
+public class SparkStreaming01 {
+    public static void main(String[] args) throws InterruptedException {
+        //配置spark
+        SparkConf sparkConf = new SparkConf();
+        sparkConf.setMaster("local");
+        sparkConf.setAppName("mySparkStreaming_App");
+
+        JavaStreamingContext jsc = new JavaStreamingContext(sparkConf,new Duration(3*1000L));
+
+        //启动数据采集器
+        jsc.start();
+
+        //等待数据采集器的结束，如果数据采集器停止运行，则main线程会执行后面的代码。（若后面无代码，则main线程停止运行）
+        jsc.awaitTermination();
+    }
+
+}
+
+```
+
+运行该程序需要设置JVM参数（）。需要在IDEA中对SparkStreaming01.java程序添加JVM option。
+
+类似的如图所示
+![spark_20240718144408.png](../blog_img/spark_20240718144408.png)
+
+参数如下
+```
+-XX:+IgnoreUnrecognizedVMOptions
+--add-opens=java.base/java.lang=ALL-UNNAMED
+--add-opens=java.base/java.lang.invoke=ALL-UNNAMED
+--add-opens=java.base/java.lang.reflect=ALL-UNNAMED
+--add-opens=java.base/java.io=ALL-UNNAMED
+--add-opens=java.base/java.net=ALL-UNNAMED
+--add-opens=java.base/java.nio=ALL-UNNAMED
+--add-opens=java.base/java.util=ALL-UNNAMED
+--add-opens=java.base/java.util.concurrent=ALL-UNNAMED
+--add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED
+--add-opens=java.base/sun.nio.ch=ALL-UNNAMED
+--add-opens=java.base/sun.nio.cs=ALL-UNNAMED
+--add-opens=java.base/sun.security.action=ALL-UNNAMED
+--add-opens=java.base/sun.util.calendar=ALL-UNNAMED
+--add-opens=java.security.jgss/sun.security.krb5=ALL-UNNAMED
+```
 
