@@ -449,6 +449,42 @@ Spark Streaming 将实时数据流划分为小的微批次，每个微批次都�
 
 ![spark_20240722230650.png](../blog_img/spark_20240722230650.png)
 
+### DStream 
+
+Apache Spark Streaming中的DStream（Discretized Stream，离散化流）是一种高级抽象类。主要用于处理实时数据流。
+
+在DStream的内部，每个时间区间内收到的数据都会转换为RDD存在，而DStream就是由这些RDD组成的数据流。
+
+并且 DStream 可以从各个数据源（如Kafka、Flume、Kinesis等）中获取数据，并根据时间区间将其切分成一个个RDD。每个RDD包含特定时间段（默认为3秒）内接收到的数据。
+
+如图所示
+![spark_20240723101653.png](../blog_img/spark_20240723101653.png)
+
+> DStream类提供了一系列方法，用于对实时数据流进行操作和转换。
+
+1. 基本转换操作：
+    - map(func)：对DStream中的每个元素应用函数func，生成一个新的DStream。
+    - flatMap(func)：对DStream中的每个元素应用函数func，将每个元素映射为多个元素，生成一个新的DStream。
+    - filter(func)：对DStream中的每个元素应用函数func，返回结果为true的元素，生成一个新的DStream。
+    - reduce(func)：对DStream中的元素应用函数func进行聚合操作，生成一个新的DStream。
+
+2. 输出操作：
+    - foreachRDD(func)：对DStream中的每个RDD应用函数func，可以用来将RDD中的数据写入外部系统或执行自定义的操作。
+    - saveAsTextFiles(prefix)：将DStream中的数据保存为文本文件。
+    - print(): 打印DStream中的数据，通常用于开发或调试。
+3. 窗口操作：
+    - window(windowLength, slideInterval)：定义一个滑动窗口来对DStream中的数据进行处理。windowLength表示窗口的长度（以时间单位表示），slideInterval表示窗口之间滑动的时间间隔。
+4. 状态操作：
+    - updateStateByKey(func)：通过给定的状态更新函数func，为每个键（key）维护一个状态，用来跨批次执行状态管理。
+5. 连接操作：
+    - union(otherStream)：将当前DStream与另一个DStream连接起来，生成一个新的DStream，包含两个DStream的数据。
+6. 输入源操作：
+    - transform(func)：使用给定的函数func转换DStream中的数据，func接收原始DStream并返回新的DStream。
+7. 停止操作：
+    - stop()：停止接收新数据，并停止处理现有数据。
+
+<font color="red">注意：这些方法看起来是处理整个DStream流，但是每个DStream流的内部是由许多RDD批次组成的，因此这些方法实际上是处理到每个RDD的。</font>
+
 ### Spark Streaming的使用
 
 > ① 添加依赖
@@ -480,7 +516,7 @@ public class SparkStreaming01 {
         SparkConf sparkConf = new SparkConf();
         sparkConf.setMaster("local");
         sparkConf.setAppName("mySparkStreaming_App");
-
+        //创建Spark Streaming 上下文对象，3秒为一个周期
         JavaStreamingContext jsc = new JavaStreamingContext(sparkConf,new Duration(3*1000L));
 
         //启动数据采集器
@@ -518,3 +554,47 @@ public class SparkStreaming01 {
 --add-opens=java.security.jgss/sun.security.krb5=ALL-UNNAMED
 ```
 
+### Socket网络数据流处理
+
+使用Spark Streaming去处理网络数据流Socket。每3秒从网络数据流中获取数据，转换为数据模型，并进行计算处理。
+
+```java
+public class SparkStereaming01 {
+    public static void main(String[] args) throws InterruptedException {
+        //配置spark
+        SparkConf sparkConf = new SparkConf();
+        sparkConf.setMaster("local");
+        sparkConf.setAppName("mySparkStreaming_App");
+
+        //设置spark Streaming 上下文 每3秒为一个周期
+        JavaStreamingContext jsc = new JavaStreamingContext(sparkConf,new Duration(3*1000));
+
+        //监听 localhost:8080 的网络数据流socket，转换为数据模型
+        JavaReceiverInputDStream<String> socketDs = jsc.socketTextStream("localhost", 8080);
+        //将数据模型中的数据打印出来
+        socketDs.print();
+
+        //启动数据采集器
+        jsc.start();
+
+        //等待数据采集器的结束，如果数据采集器停止运行，则main线程会执行后面的代码。（若后面无代码，则main线程停止运行）
+        jsc.awaitTermination();
+
+    }
+}
+
+//运行结果,每3秒监听一次
+// -------------------------------------------
+// Time: 1721698266000 ms
+// -------------------------------------------
+
+// -------------------------------------------
+// Time: 1721698269000 ms
+// -------------------------------------------
+
+// -------------------------------------------
+// Time: 1721698272000 ms
+// -------------------------------------------
+// .......
+
+```
