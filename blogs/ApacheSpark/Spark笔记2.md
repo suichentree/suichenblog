@@ -12,6 +12,8 @@ tags:
 
 # Spark笔记1
 
+当前使用Spark版本为： spark-3.5.1
+
 ## Spark SQL 结构化数据处理模块
 
 > 什么是Spark SQL？
