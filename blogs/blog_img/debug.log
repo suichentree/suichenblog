@@ -157,3 +157,6 @@
 [0716/165944:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
 [0716/171848:WARNING:quota_manager.cc(1833)] Create directory failed for path
 [0716/174848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0723/180717:ERROR:browser_gpu_channel_host_factory.cc(119)] Failed to launch GPU process.
+[0724/150820:INFO:http_cache_transaction.cc(72)] IgnoreZeroCacheError: 0
+[0724/150826:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
