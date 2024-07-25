@@ -14,6 +14,8 @@ tags:
 
 当前使用Flink版本为： Flink-1.17.2
 
+先暂停，感觉大数据目前用不上，后续再学。。。。。
+
 ## Flink介绍
 
 [Apache Flink官网 https://flink.apache.org/](https://flink.apache.org/)
@@ -121,6 +123,16 @@ Flink的单作业模式，需要依赖一些资源管理框架才能运行。例
 
 ![flink_20240724153748.png](../blog_img/flink_20240724153748.png)
 
+### Flink的API分层设计
+
+如图所示是Flink的API分层设计
+
+![flink_20240725114333.png](../blog_img/flink_20240725114333.png)
+
+- 状态流处理API：该API对最原始的状态流进行加工处理。提供了底层函数。
+- DataStream API (流处理) 和 DataSet API（批处理）：封装了底层的处理函数，提供通用模块。例如map,faltmap，joins,windows等算子。
+- Table API: 以表为中心的api，可以把数据转换为表，也提供了操作表的方法。例如 select,join,group-by等。
+- SQL：可通过SQL表达式的方式。实现各种对数据的操作。
 
 ### Flink集群的部署模式
 
@@ -176,9 +188,6 @@ Flink中的每一个TaskManager 都是一个JVM进程。它可以启动多个独
 为了控制TaskManager并行执行任务的数量，我们需要在TaskManager上对每个任务运行时所占用的资源做出了划分。即任务槽。
 
 每个任务槽 就是 TaskManager 上的资源的一个固定大小的小资源。这个小资源用来独立执行一个子任务的。
-
-
-
 
 
 ## Flink的安装和部署 
@@ -268,7 +277,321 @@ DataStream API 是 Flink 的核心层API。一个Flink应用程序，其实就�
 具体来说，Flink的应用程序的代码，主要包括以下几个步骤：
 1. 获取执行环境。
 2. 读取数据源。
-3. 进行数据处理。
+3. 进行数据处理（调用DataStream API对数据进行转换，处理）。
 4. 输出计算结果。
-5. 开始执行。
- 
+5. 开始触发执行。
+
+### 执行环境相关API
+
+> getExecutionEnvironment()方法
+
+getExecutionEnvironment()方法会根据当前运行的上下文环境，来返回出当前运行环境。
+
+如果程序是独立运行，则返回本地执行环境。如果是创建了jar包后运行，则返回集群的执行环境。
+
+```java
+public class flink01 {
+    public static void main(String[] args) throws Exception {
+        //创建运行环境
+        //getExecutionEnvironment() 方法会自动识别是本地环境还是远程集群环境。都是默认配置
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+    }
+}
+```
+
+> createLocalEnvironment() 方法
+
+该方法返回一个本地执行环境，可传入参数，参数是并行度。默认并行度为本地环境的CPU核心数。
+
+```java
+StreamExecutionEnvironment env = StreamExecutionEnvironment.createLocalEnvironment();
+```
+
+> createRemoteEnvironment() 方法
+
+该方法返回一个集群执行环境。调用时指定JobManager的ip和端口号，以及在集群中执行jar包。 
+
+```java
+StreamExecutionEnvironment env = StreamExecutionEnvironment.createRemoteEnvironment("host",IP,"jar包路径");
+```
+
+
+> excute()方法
+
+当调用执行环境的excute()方法后，会触发程序的执行。当时程序只有等到数据到来的时候，才会触发真正的计算，因此可以被成为`懒执行`。
+
+```java
+public class flink01 {
+    public static void main(String[] args) throws Exception {
+        //创建运行环境
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+
+        //。。。。。。中间过程省略
+
+        //开始触发执行程序 
+        env.execute();
+    }
+}
+```
+
+### 数据源相关API
+
+Flink可以从各种数据源中获取数据，然后构建为DataStream。
+
+> fromCollection()方法：从集合中获取数据 
+
+代码如下
+```java
+public class flink01 {
+    public static void main(String[] args) throws Exception {
+        //创建流处理运行环境
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        //从集合创建流处理数据流
+        List<Tuple2<String, Integer>> data = new ArrayList<>();
+        data.add(new Tuple2<>("a", 1));
+        data.add(new Tuple2<>("b", 2));
+        data.add(new Tuple2<>("c", 3));
+        DataStreamSource<Tuple2<String, Integer>> dstream = env.fromCollection(data);
+        //打印流处理数据流
+        dstream.print();
+        //开始触发执行
+        env.execute();
+    }
+}
+//运行结果， 9>，8>，10> 是指 CPU的核心
+// 9> (b,2)
+// 8> (a,1)
+// 10> (c,3)
+
+```
+
+> readTextFile()方法：从文件中获取数据 
+
+```java
+DataStreamSource<String> ds = env.readTextFile("C:\\Users\\18271\\Desktop\\words.txt");
+```
+
+> socketTextStream()方法：从socket流中获取数据
+
+```java
+DataStreamSource<String> ds =env.socketTextStream("localhost",8080);
+```
+
+### 数据处理 API （转换算子和聚合算子）
+
+从数据源获取数据后，我们可以使用各种转换算子，将一个或多个 DataStream 转换为新的 DataStream
+
+> 映射方法 map(func) 
+
+map方法会对DataStream中的元素，依次调用函数进行一一处理。
+
+```java
+public class flink01 {
+    public static void main(String[] args) throws Exception {
+        //创建运行环境
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        //把集合数据转换为DataStream
+        DataStreamSource<Integer> ds = env.fromCollection(Arrays.asList(1, 2, 3, 4));
+        //对 DataStream 调用 map方法进行转换
+        SingleOutputStreamOperator<Integer> mapDs = ds.map(new MapFunction<Integer, Integer>() {
+            @Override
+            public Integer map(Integer value) throws Exception {
+                //把处理数据乘以10并返回
+                System.out.println("处理数据为 = "+value+",将其乘以10，并返回。");
+                return value*10;
+            }
+        });
+        //输出结果
+        mapDs.print();
+        //开始触发执行
+        env.execute();
+    }
+}
+//运行结果
+// 处理数据为 = 1,将其乘以10，并返回。
+// 处理数据为 = 4,将其乘以10，并返回。
+// 17> 10
+// 20> 40
+// 处理数据为 = 3,将其乘以10，并返回。
+// 处理数据为 = 2,将其乘以10，并返回。
+// 19> 30
+// 18> 20
+
+```
+
+
+> 过滤方法 filter(func) 
+
+根据给定的函数 func 对 DataStream 进行过滤，返回一个包含符合条件元素的新 DataStream。如果满足过滤条件（返回true或1）则数据保留。不满足（返回false或0）则数据清除。
+
+```java
+public class flink01 {
+    public static void main(String[] args) throws Exception {
+        //创建运行环境
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        //把集合数据转换为DataStream
+        DataStreamSource<Integer> ds = env.fromCollection(Arrays.asList(1, 2, 3, 4));
+
+        //对 DataStream 调用 filter 方法进行转换
+        SingleOutputStreamOperator<Integer> filterDS = ds.filter(new FilterFunction<Integer>() {
+            @Override
+            public boolean filter(Integer value) throws Exception {
+                //偶数返回true，奇数返回false
+                return value % 2 == 0 ? true: false;
+            }
+        });
+        //输出结果
+        filterDS.print("偶数流");
+
+        //对 DataStream 调用 filter 方法进行转换
+        SingleOutputStreamOperator<Integer> filterDS2 = ds.filter(new FilterFunction<Integer>() {
+            @Override
+            public boolean filter(Integer value) throws Exception {
+                //偶数返回true，奇数返回false
+                return value % 2 == 0 ? false: true;
+            }
+        });
+        //输出结果
+        filterDS2.print("奇数流");
+
+        //开始触发执行
+        env.execute();
+    }
+}
+
+//运行结果
+// 偶数流:10> 4
+// 偶数流:8> 2
+// 奇数流:16> 1
+// 奇数流:18> 3
+
+```
+
+
+> 扁平映射方法 flatMap() 
+
+flat是扁平化的意思。flatMap方法是将 DataStream 中的数据进行扁平化处理。 例如 DataStream 中的数据是集合，则扁平化是将集合中的数据拆分为一个个单独使用。
+
+```java
+public class flink01 {
+    public static void main(String[] args) throws Exception {
+        //创建运行环境
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        //多个集合转换为DataStream
+        DataStreamSource<List<Integer>> listDS = env.fromCollection(Arrays.asList(Arrays.asList(1, 2), Arrays.asList(3, 4)));
+        //调用 flatMap 方法进行转换
+        SingleOutputStreamOperator<Integer> outDS = listDS.flatMap(new FlatMapFunction<List<Integer>, Integer>() {
+            @Override
+            public void flatMap(List<Integer> value, Collector<Integer> out) throws Exception {
+                Integer next = value.iterator().next();
+                out.collect(next);
+            }
+        });
+        //输出结果
+        outDS.print();
+        //开始触发执行
+        env.execute();
+    }
+}
+//运行结果
+// 5> 3
+// 4> 1
+```
+
+
+> 按键分区方法 keyBy()
+
+在Flink中 DataStream 是没有直接进行聚合的API的。因此要做聚合，需要先对DataStream中的数据进行分区分组处理。
+
+keyBy()方法通过指定key，把DataStream中数据进行分区。
+
+```java
+public class flink01 {
+    public static void main(String[] args) throws Exception {
+        //创建运行环境
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        //把集合数据转换为DataStream
+        DataStreamSource<Integer> ds = env.fromCollection(Arrays.asList(1, 2, 3, 4));
+
+        //对 DataStream 调用 keyBy 方法进行分组处理
+        KeyedStream<Integer, String> keyDS = ds.keyBy(new KeySelector<Integer, String>() {
+            @Override
+            public String getKey(Integer value) throws Exception {
+                //将偶数分为A组，奇数分为B组
+                return value % 2 == 0 ? "A组" : "B组";
+            }
+        });
+        //输出结果
+        keyDS.print();
+        //开始触发执行
+        env.execute();
+    }
+}
+//运行结果
+// 3> 2
+// 5> 1
+// 3> 4
+// 5> 3
+```
+
+
+> 简单聚合方法 sum(),min(),max(),minBy() 等
+
+这些简单聚合方法，都是需要通过KeyedStream对象进行调用。
+
+```java
+//对 DataStream 调用 keyBy 方法进行分组处理,获取KeyedStream对象
+KeyedStream<Integer, String> keyDS = ds.keyBy(.....);
+SingleOutputStreamOperator<Integer> sum = keyDS.sum(0);
+
+SingleOutputStreamOperator<Integer> max = keyDS.max(0);
+
+```
+
+> 归约聚合方法 reduce()
+
+把DataStream中的数据，按照指定函数进行两两聚合处理。
+
+```java
+//对 DataStream 调用 keyBy 方法进行分组处理,获取KeyedStream对象
+KeyedStream<Integer, String> keyDS = ds.keyBy(.....);
+SingleOutputStreamOperator<Tuple2<String, Integer>> reduce = keyDS.reduce(new ReduceFunction<Tuple2<String, Integer>>() {
+    @Override
+    public Tuple2<String, Integer> reduce(Tuple2<String, Integer> value1, Tuple2<String, Integer> value2) throws Exception {
+        //。。。。。。。。
+        return null;
+    }
+});
+
+```
+
+## 窗口
+
+窗口一般是指一段时间范围，也就是时间窗口。窗口计算是指对这时间范围内的数据进行处理。
+
+Flink为了更高效的处理无界数据流，一种方式是用窗口把无界数据流切割成多个有界数据流，然后进行分批处理。
+
+在Flink中，窗口可以把无界数据流切割为多个数据桶，不同时间范围的数据流入到不同的桶中。当窗口时间结束后，就对这个桶中收集的数据进行计算处理。
+
+![flink_20240725170559.png](../blog_img/flink_20240725170559.png)
+
+### 窗口分类
+
+在Flink中，窗机有很多种类。
+
+> 时间窗口
+
+时间窗口以时间点来定义窗口的开始和结束。即时间窗口是某一时间段的数据。当时间窗口到达结束时间后，时间窗口不会再收集数据，开始触发计算并输出结果。最后将时间窗口销毁。
+
+> 计数窗口
+
+计数窗口是根据元素个数来截取数据流中的数据，当截取个数到达指定个数的时候，就会触发计算，并输出结果。最后计数窗口销毁。
+
+![flink_20240725172856.png](../blog_img/flink_20240725172856.png)
+
+> 滚动窗口
+
+
+
+
+
