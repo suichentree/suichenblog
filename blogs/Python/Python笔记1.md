@@ -45,6 +45,7 @@ Python 是一种解释型语言，这意味着开发过程中没有了编译这�
 
 <font color="red">Add python.exe to PATH 是把python添加到环境变量中。</font>
 
+
 ### vscode 搭配 Python
 
 我们可以通过vscode来编写Python的代码。
@@ -76,6 +77,8 @@ window系统进入Python终端的方法。
 
 如图进入到Python终端，并执行了打印命令。
 ![python_20240419201921.png](../blog_img/python_20240419201921.png)
+
+如图所示就表示Python安装成功。
 
 ## 基础语法
 
