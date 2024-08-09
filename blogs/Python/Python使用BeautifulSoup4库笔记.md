@@ -65,7 +65,11 @@ print(soup)
 ```
 
 
-### 根据元素标签名字找到网页中元素标签内容
+### 节点选择器
+
+直接通过节点名称（元素标签名称）就可以选择节点元素。
+
+之后在调用节点元素的各个属性方法，就可以得到节点的各个数据信息。
 
 ```py
 # 获取网页中的head元素标签（包含标签本身）
@@ -89,7 +93,25 @@ print(soup.find("ul", id="mylist"))
 ```
 
 
-### 网页对象soup的各种属性
+### 节点的各种属性
+
+> .name 属性 可以获取节点（元素标签）的名称。
+
+```py
+# 获取网页中的head元素标签的名称
+a = soup.head.name
+print(a)
+# head
+```
+
+> 每个节点都有多个属性。可以通过 attrs属性 可以获取节点的所有属性信息。
+
+```py
+# 获取网页中的head元素标签
+a = soup.head.attrs
+print(a)
+# {'name':'head',.....}
+```
 
 > .contents 属性可以将 元素标签 的全部子节点以列表的方式输出。
 
@@ -106,11 +128,9 @@ print(head_tag.contents)
 title_tag = head_tag.contents[0]
 print(title_tag)
 # <title>The Dormouse's story</title>
-
 ```
 
-
-> .string 属性可以获取元素标签中的内容。
+> .string 属性可以获取节点（元素标签）中的文本内容。
 
 ```py
 print(title_tag)

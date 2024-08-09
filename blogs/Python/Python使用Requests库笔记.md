@@ -226,15 +226,13 @@ print(response_dict_info)
 
 ```py
 import requests
-url = 'http://httpbin.org/post'
 files = {'file': open('report.xls', 'rb')}
-response = requests.post(url, files=files)
+response = requests.post('http://httpbin.org/post', files=files)
 print(response.text)
 
 ## 或者显示设置文件名，文件类型和请求头：
-url = 'http://httpbin.org/post'
 files = {'file': ('report.xls', open('report.xls', 'rb'), 'application/vnd.ms-excel', {'Expires': '0'})}
-response = requests.post(url, files=files)
+response = requests.post('http://httpbin.org/post', files=files)
 print(response.text)
 
 ```
@@ -242,5 +240,70 @@ print(response.text)
 
 ## 高级用法
 
-暂无
+### 会话 Session
+
+当使用get()和post()等方法，去发送请求给目标服务器的时候。由于这本质上是两个请求。因此这两个请求无法共享cookie。
+
+解决这个问题的方式就是将两个请求，都放到一个会话之中。即Session对象。
+
+```py
+import requests
+session = requests.session()
+r = session.get("http://httpbin.org/cookies/set/number/123456789")
+print(r.text)
+# 运行结果
+# {
+#   "cookies": {
+#     "number": "123456789"
+#   }
+# }
+
+```
+
+### SSL证书检查
+
+requests 提供SSL证书验证的功能。当发送HTTP请求的时候，可以使用verify属性来控制是否检查SSL证书。
+
+默认情况下，verify属性为True，即默认检查SSL证书。
+
+当我们想要请求一个网站的时候，但是这个网站没有SSL证书。那么请求会报错。如果还是想继续请求该网站。可以将verify属性为False即可。
+
+```py
+import requests
+response = requests.get('https://www.12306.cn',verify=False)
+print(response)
+```
+
+### 设置代理
+
+在requets中，通常使用proxies属性来设置代理。
+
+如果该代理没有设置账户密码验证。那么使用方式如下
+```py
+import requests
+proxies = {
+    "http": "http://IP1:PORT1",
+    "https": "http://IP2:PORT2"
+}
+response = requests.get("https://www.baidu.com", proxies=proxies)
+```
+
+如果代理设置了账户密码验证，那么使用方式如下
+```py
+import requests
+
+# 用户名密码认证
+username = "xxx"
+password = "xxxxx"
+iport = "127.0.0.1:38888"
+
+# 此代理有账户密码验证
+proxies = {
+    "http": f"http://{username}:{password}@{iport}",
+    "https": f"http://{username}:{password}@{iport}"
+}
+# 使用代理IP发送请求
+response = requests.get("https://www.baidu.com", proxies=proxies)
+```
+
 
