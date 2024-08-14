@@ -190,3 +190,112 @@ user_table.insert({'name': 'jack', 'age': 12, 'city': 'New York'})
 user_table.create_index('name')
 ```
 
+### 中文乱码
+
+> 问题
+
+一般情况下，使用tinydb存储中文数据的时候，json文件中存储的是中文对应的unicode编码。这使得json文件的数据可读性不好。
+
+示例
+```py
+from tinydb import TinyDB, Query
+import json
+
+# 创建数据库  db.json
+db = TinyDB('db.json',encoding='utf-8')
+# 创建表
+table = db.table('t_user')
+
+if __name__ == '__main__':
+
+    # 清空表中数据
+    table.truncate()
+    # 用户数据
+    userlist = [{'name': '小明11', 'pwd': 'a123456', 'idCard': 'XXXXXXX',
+                 'remark': '焊接与热切割作业111'},
+                {'name': '小明12', 'pwd': 'a123456', 'idCard': 'XXXXXXX',
+                 'remark': '焊接与热切割作业222'}
+                ]
+    # 插入数据
+    for user in userlist:
+        table.insert(user)
+
+    # 关闭数据库以确保所有数据写入文件
+    db.close()
+
+```
+
+db.json文件中的数据如下所示
+```json
+{"t_user": {"1": {"name": "\u5c0f\u660e11", "pwd": "a123456", "idCard": "XXXXXXX", "remark": "\u710a\u63a5\u4e0e\u70ed\u5207\u5272\u4f5c\u4e1a111"}, "2": {"name": "\u5c0f\u660e12", "pwd": "a123456", "idCard": "XXXXXXX", "remark": "\u710a\u63a5\u4e0e\u70ed\u5207\u5272\u4f5c\u4e1a222"}}}
+```
+
+可以看到中文被转换为unicode编码，并且文件中的json数据没有进行格式化处理。
+
+
+> 解决方式
+
+解决办法：我们可以把json文件中的数据读取出来，然后把unicode编码转换为中文，再次写入到json文件中。
+
+例子
+```py
+from tinydb import TinyDB, Query
+import json
+
+# 创建数据库  db.json
+db = TinyDB('db.json',encoding='utf-8')
+# 创建表
+table = db.table('t_user')
+
+if __name__ == '__main__':
+
+    # 清空表中数据
+    table.truncate()
+    # 用户数据
+    userlist = [{'name': '小明11', 'pwd': 'a123456', 'idCard': 'XXXXXXX',
+                 'remark': '焊接与热切割作业111'},
+                {'name': '小明12', 'pwd': 'a123456', 'idCard': 'XXXXXXX',
+                 'remark': '焊接与热切割作业222'}
+                ]
+    # 插入数据
+    for user in userlist:
+        table.insert(user)
+
+    # 关闭数据库以确保所有数据写入文件
+    db.close()
+
+
+    # 读取 TinyDB 数据库文件
+    with open('db.json', 'r', encoding='utf-8') as file:
+        data = json.load(file)
+
+    # 写回 JSON 文件，确保中文不被转义
+    with open('db.json', 'w', encoding='utf-8') as file:
+        json.dump(data, file, ensure_ascii=False, indent=4)
+
+```
+
+- 最下面的代码，是把json文件中的数据读取了一遍，然后再写入了一遍。在写入数据的过程中，把unicode编码转换为中文字符。
+- `ensure_ascii=False` 作用是将非 ASCII 字符转义为 Unicode 编码。设置为 False 时，中文等非 ASCII 字符将以原始字符输出，而不是转义为 Unicode 编码。
+- `indent=4` 作用是将 JSON 数据以 4 个空格的缩进格式输出，使其更具可读性。
+
+
+db.json文件中的数据如下所示
+```json
+{
+    "t_user": {
+        "1": {
+            "name": "小明11",
+            "pwd": "a123456",
+            "idCard": "XXXXXXX",
+            "remark": "焊接与热切割作业111"
+        },
+        "2": {
+            "name": "小明12",
+            "pwd": "a123456",
+            "idCard": "XXXXXXX",
+            "remark": "焊接与热切割作业222"
+        }
+    }
+}
+```
