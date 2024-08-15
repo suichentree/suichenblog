@@ -113,7 +113,7 @@ print(a)
 
 ```
 
-### value操作 - String类型数据
+### value操作 - String字符串类型数据
 
 下面是关于value操作的示例。更多的方法，请查询官方文档。
 
@@ -143,7 +143,9 @@ a = r.setnx('newname', 'James')
 print(a)
 ```
 
-### value操作 - list类型数据
+### value操作 - list列表类型数据
+
+更多的方法，请查询官方文档。
 
 ```py
 # 向键为list的列表尾添加1、2、3
@@ -179,9 +181,111 @@ a = r.rpop('list')
 print(a)
 ```
 
-### value操作 - hash类型数据
+### value操作 - hash散列类型数据
+
+更多的方法，请查询官方文档。
 
 ```py
+# 向键为price的散列表中添加映射关系，cake的值为5
+a = r.hset('price', 'cake', 5)
+print(a)
 
+# 向键为price的散列表中添加映射关系，book的值为6
+a = r.hsetnx('price', 'book', 6)
+print(a)
+
+# 获取键为price的散列表中键名为cake的值
+a = r.hget('price', 'cake')
+print(a)
+
+# 获取键为price的散列表中apple和orange的值
+a = r.hmget('price', ['apple', 'orange'])
+print(a)
+
+# 向键为price的散列表中批量添加映射
+a = r.hmset('price', {'banana': 2, 'pear': 6})
+print(a)
+
+# 键为price的散列表中banana的值是否存在
+a = r.hexists('price', 'banana')
+print(a)
+
+# 从键为price的散列表中删除键名为banana的映射
+a = r.hdel('price', 'banana')
+print(a)
+
+# 从键为price的散列表中获取映射个数
+a = r.hlen('price')
+print(a)
+
+```
+
+### value操作 - set集合类型数据
+
+更多的方法，请查询官方文档。
+
+```py
+# 向键为tags的集合中添加Book、Tea和Coffee这3个内容
+a = r.sadd('tags', 'Book', 'Tea', 'Coffee')
+print(a)
+
+# 从键为tags的集合中随机删除并返回该元素
+a = r.spop('tags')
+print(a)
+
+# 获取键为tags的集合中的元素个数
+a = r.scard('tags')
+
+# 判断Book是否是键为tags的集合元素
+a = r.sismember('tags', 'Book')
+print(a)
+
+# 返回键为tags的集合和键为tags2的集合的差集
+a = r.sdiff(['tags', 'tags2'])
+print(a)
+
+# 返回键为tags的集合的所有元素
+a = r.smembers('tags')
+print(a)
+
+# 返回键为tags的集合和键为tags2的集合的并集
+a = r.sunion(['tags', 'tags2'])
+print(a)
+
+# 返回键为tags的集合和键为tags2的集合的交集
+a = r.sinter(['tags', 'tags2'])
+print(a)
+
+```
+
+
+### value操作 - zset有序集合类型数据
+
+更多的方法，请查询官方文档。
+
+```py
+# 向键为grade的zset中添加Bob（其score为100），并添加Mike（其score为98）
+a = r.zadd('grade', 100, 'Bob', 98, 'Mike')
+print(a)
+
+# 从键为grade的zset中删除Mike
+a = r.zrem('grade', 'Mike')
+print(a)
+
+# 得到键为grade的zset中Amy的排名
+a = r.zrank('grade', 'Amy')
+print(a)
+
+# 返回键为grade的zset中score在80和95之间的元素
+a = r.zrangebyscore('grade', 80, 95)
+print(a)
+
+# 返回键为grade的zset中score在80到95的元素个数
+a = r.zcount('grade', 80, 95)
+print(a)
+
+# 获取键为grade的zset中元素的个数
+a = r.zcard('grade')
+print(a)
 
 ```
