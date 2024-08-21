@@ -718,3 +718,229 @@ while(true) {
    console.log("这段代码会不停的执行") 
 }
 ```
+
+## 数组
+
+数组是一个用来存储一系列的值的数据类型。
+
+```ts
+//语法如下
+var array_name[:datatype];        //声明 
+array_name = [val1,val2,valn..]   //初始化
+//或者
+var array_name[:datatype] = [val1,val2…valn]
+
+
+// 定义一个numlist变量，数据类型是 number 类型的数组
+var numlist:number[] = [2,4,6,8]
+console.log(numlist[0]);   //2
+console.log(numlist[1]);   //4
+```
+
+![ts_20240821101706.png](../blog_img/ts_20240821101706.png)
+
+### 遍历数组
+
+```ts
+var j:any; 
+var nums:number[] = [1001,1002,1003,1004] 
+//遍历数组
+for(j in nums) { 
+    console.log(nums[j]) 
+}
+```
+
+### 多维数组
+
+一个数组的元素可以是另外一个数组，这样就构成了多维数组。
+
+```ts
+//多维数组定义如下
+var arr_name:datatype[][]=[ [val1,val2,val3],[v1,v2,v3] ]
+
+//例子,定义一个二维数组，每一个维度的数组有三个元素。
+var multi:number[][] = [[1,2,3],[23,24,25]]  
+console.log(multi[0][0])    //1
+console.log(multi[0][1])    //2
+console.log(multi[0][2])    //3
+console.log(multi[1][0])    //23
+console.log(multi[1][1])    //24
+console.log(multi[1][2])    //25
+```
+
+![ts_20240821104334.png](../blog_img/ts_20240821104334.png)
+
+### 常见数组方法
+
+> concat() 连接两个或更多的数组，并返回结果。
+
+```ts
+var alpha = ["a", "b", "c"]; 
+var numeric = [1, 2, 3];
+
+var alphaNumeric = alpha.concat(numeric); 
+console.log("alphaNumeric : " + alphaNumeric );    // a,b,c,1,2,3   
+
+```
+
+> filter() 检测数值元素，并返回符合条件所有元素的数组。
+
+```ts
+function isBigEnough(element, index, array) { 
+   return (element >= 10); 
+} 
+var passed = [12, 5, 8, 130, 44].filter(isBigEnough); 
+console.log("Test Value : " + passed ); // 12,130,44
+
+```
+
+> forEach() 数组每个元素都执行一次回调函数。
+
+```ts
+let num = [7, 8, 9];
+num.forEach(function (value) {
+    console.log(value);
+}); 
+
+```
+
+> indexOf()
+
+搜索数组中的元素，并返回它所在的位置。如果搜索不到，返回值 -1，代表没有此项。
+
+```ts
+var index = [12, 5, 8, 130, 44].indexOf(8); 
+console.log("index is : " + index );  // 2
+```
+
+> join() 把数组的所有元素放入一个字符串。
+
+```ts
+var arr = new Array("Google","Runoob","Taobao"); 
+          
+var str = arr.join(); 
+console.log("str : " + str );  // Google,Runoob,Taobao
+var str = arr.join(", "); 
+```
+
+> toString() 把数组转换为字符串，并返回结果。
+
+```ts
+var arr = new Array("orange", "mango", "banana", "sugar");         
+var str = arr.toString(); 
+console.log("Returned string is : " + str );  // orange,mango,banana,sugar
+```
+
+> sort() 对数组的元素进行排序。
+
+```ts
+var arr = new Array("orange", "mango", "banana", "sugar"); 
+var sorted = arr.sort(); 
+console.log("Returned string is : " + sorted );  // banana,mango,orange,sugar
+```
+
+> push() 向数组的末尾添加一个或更多元素，并返回新的长度。
+
+```ts
+var numbers = new Array(1, 4, 9); 
+var length = numbers.push(10); 
+console.log("new numbers is : " + numbers );  // 1,4,9,10 
+```
+
+> pop() 删除数组的最后一个元素并返回删除的元素。
+
+```ts
+var numbers = [1, 4, 9]; 
+var element = numbers.pop(); 
+console.log("element is : " + element );  // 9
+```
+
+## 元组
+
+数组中元素的数据类型都一般是相同的（any[] 类型的数组可以不同）。
+
+TypeScript 中的元组（Tuple）是一种特殊类型的数组，它允许在数组中存储不同类型的元素，与普通数组不同，元组中的每个元素都有明确的类型和位置。
+
+元组可以在很多场景下用于表示固定长度、且各元素类型已知的数据结构。
+
+```ts
+//语法
+let tuple: [类型1, 类型2, 类型3, ...];
+
+//例子，定义一个元组mytuple
+let mytuple: [number, string, boolean] = [42, "Runoob", true];
+ 
+// 访问元组中的元素
+let num = mytuple[0]; // 访问第一个元素，值为 42，类型为 number
+let str = mytuple[1]; // 访问第二个元素，值为 "Runoob"，类型为 string
+let bool = mytuple[2]; // 访问第三个元素，值为 true，类型为 boolean
+ 
+console.log(num);  // 输出: 42
+console.log(str);  // 输出: Runoob
+console.log(bool); // 输出: true
+```
+
+### 元组的常用方法
+
+> push() 和 pop() 方法
+
+push() 向元组添加元素，添加在最后面。pop() 从元组中移除元素（最后一个），并返回移除的元素。
+
+```ts
+let tuple = [42, "Hello"];
+tuple.push("World"); 
+console.log(tuple); // 输出: [42, "Hello", "World"]
+
+let tuple: [number, string, boolean] = [42, "Hello", true];
+let lastElement = tuple.pop();
+console.log(tuple);       // 输出: [42, "Hello"]
+```
+
+> concat()方法
+
+concat 方法可以连接多个元组，但需要注意连接后的结果是一个普通的数组，而不是元组。
+
+```ts
+let tuple1: [number, string] = [42, "Hello"];
+let tuple2: [boolean, number] = [true, 100];
+
+let result = tuple1.concat(tuple2);
+console.log(result); // 结果是一个数组 [42, "Hello", true, 100]
+```
+
+> slice()方法
+
+slice 方法可以对元组进行切片操作，返回一个新的数组。
+
+```ts
+let tuple: [number, string, boolean] = [42, "Hello", true];
+let sliced = tuple.slice(1); // 从索引 1 开始切片
+console.log(sliced); // 输出: ["Hello", true]
+```
+
+### 扩展元组
+
+使用剩余运算符可以轻松地将多个元组合并成一个新的元组。
+
+```ts
+let tuple1: [number, string] = [42, "Hello"];
+let tuple2: [boolean] = [true];
+
+let extendedTuple: [number, string, ...typeof tuple2] = [42, "Hello", ...tuple2];
+console.log(extendedTuple); // 输出: [42, "Hello", true]
+```
+
+### 元组转换为数组
+
+元组是一个固定长度、固定类型的数组，但可以通过 Array.prototype 的方法将其转换为普通数组进行进一步处理。
+
+```ts
+let tuple: [number, string, boolean] = [42, "Hello", true];
+
+// 转换为数组并使用数组方法
+let array = Array.from(tuple);
+array.push("New Element");
+
+console.log(array); // 输出: [42, "Hello", true, "New Element"]
+```
+
