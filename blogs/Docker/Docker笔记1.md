@@ -820,57 +820,6 @@ docker run --name="B"  --volumes-from A tomcat
 
 ## docker安装常用软件
 
-### docker安装nginx
-
-```shell
-# 下载nginx镜像
-docker pull nginx
-
-# 创建并后台启动nginx镜像的容器
-# --name nginx01 镜像重取名
-# -p 8081:80 主机的8081端口映射到容器的80端口
-# -d 后台运行，默认不会进入容器
-# nginx 镜像名，指定生成该容器的镜像
-docker run --name nginx01 -p 8081:80 -d nginx
-
-# 进入到该镜像中
-docker exec -it nginx01 /bin/bash
-
-# 查询该容器中nginx文件
-root@36432ae018b1:/$ whereis nginx 
-nginx: /usr/sbin/nginx /usr/lib/nginx /etc/nginx /usr/share/nginx
-
-# 可以在主机访问ip:port来测试nginx是否安装成功
-$ curl localhost:3344
-
-<!DOCTYPE html>
-<html>
-<head>
-<title>Welcome to nginx!</title>
-<style>
-    body {
-        width: 35em;
-        margin: 0 auto;
-        font-family: Tahoma, Verdana, Arial, sans-serif;
-    }
-</style>
-</head>
-<body>
-<h1>Welcome to nginx!</h1>
-<p>If you see this page, the nginx web server is successfully installed and
-working. Further configuration is required.</p>
-
-<p>For online documentation and support please refer to
-<a href="http://nginx.org/">nginx.org</a>.<br/>
-Commercial support is available at
-<a href="http://nginx.com/">nginx.com</a>.</p>
-
-<p><em>Thank you for using nginx.</em></p>
-</body>
-</html>
-
-```
-
 ### docker安装tomcat
 
 ```shell
