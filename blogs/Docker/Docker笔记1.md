@@ -221,6 +221,7 @@ sudo systemctl enable docker
 ```
 
 
+
 ### 切换为阿里云镜像源来安装docker
 
 1. 先卸载可能存在的或者为安装成功的Docker版本
@@ -287,6 +288,60 @@ For more examples and ideas, visit:
  https://docs.docker.com/get-started/
 
 ```
+
+### ubuntu 设置 docker 权限
+
+当我们在ubuntu系统中输入docker命令的时候，总是需要在命令前添加`sudo`，否则系统会提示报错，说没有权限。这样很麻烦。
+
+> 解决方法1
+
+将当前用户切换为root用户即可
+
+```sh
+# 先执行下面命令，将当前用户切换为root用户
+sudo su
+```
+
+> 解决方法2
+
+使用 sudo 以 root 权限运行 docker 命令
+
+```sh
+# 在docker命令之前，加上sudo
+sudo docker images 
+```
+
+> 解决方法3
+
+将当前用户添加到docker用户组中。
+
+1. 首先查询docker用户组是否存在。
+
+```shell
+cat /etc/group
+```
+
+若存在docker用户组，则可以在文件内找到docker字段。例如`docker:x:999:`
+
+2. 若不存在docker用户组，那么先添加docker用户组到文件内
+
+```shell
+sudo groupadd docker
+```
+
+3. 执行下面命令，将当前用户添加到docker用户组中。
+
+```shell
+sudo gpasswd -a $USER docker
+```
+
+4. 更新docker用户组的数据
+
+```shell
+newgrp docker
+```
+
+5. 验证效果。正常情况下可以执行docker命令，不再添加`sudo`了。
 
 
 ## Centos7安装docker
