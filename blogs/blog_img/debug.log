@@ -534,3 +534,25 @@
 [0919/233658:WARNING:quota_manager.cc(1833)] Create directory failed for path
 [0920/000658:WARNING:quota_manager.cc(1833)] Create directory failed for path
 [0920/003658:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1009/104134:INFO:http_cache_transaction.cc(72)] IgnoreZeroCacheError: 0
+[1009/104135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1009/104135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1009/104136:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1009/104238:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1009/104300:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
+[1009/111135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1009/114135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1009/121135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1009/124135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1009/131135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1009/134135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1009/141135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1009/144135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1009/151135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1009/154135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1009/161135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1009/164136:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1009/170910:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1009/170910:ERROR:waituntilobserver.cpp(144)] NOT IMPLEMENTED
+[1009/170926:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1009/170941:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
