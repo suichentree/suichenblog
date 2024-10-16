@@ -643,3 +643,8 @@
 [1011/124722:WARNING:quota_manager.cc(1833)] Create directory failed for path
 [1011/131722:WARNING:quota_manager.cc(1833)] Create directory failed for path
 [1011/134722:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1016/173749:INFO:http_cache_transaction.cc(72)] IgnoreZeroCacheError: 0
+[1016/173750:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1016/173750:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1016/173802:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
+[1016/173812:WARNING:quota_manager.cc(1833)] Create directory failed for path
