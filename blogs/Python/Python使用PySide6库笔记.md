@@ -553,6 +553,7 @@ getSaveFileName(parent, caption, directory, filter)
 
 ## QTableWidget 表格组件
 
+示例1
 ```py
 from PySide6.QtWidgets import QApplication, QPushButton, QTableWidget,QTableWidgetItem
 
@@ -613,6 +614,158 @@ if __name__ == '__main__':
 
 运行结果如下
 ![python_20240527180805.png](../blog_img/python_20240527180805.png)
+
+
+示例2
+
+```py
+import sys
+from PySide6.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QTableWidget, QTableWidgetItem, QLabel, QFormLayout, QFileDialog, QFrame, QHeaderView,
+                               QGroupBox, QSizePolicy, QMessageBox, QListWidget, QListWidgetItem, QAbstractItemView)
+
+# 主窗口类
+class MyMainWindow(QWidget):
+    def __init__(self):
+        super().__init__()
+        # 初始化
+        self.init_ui()
+        # 设置MainWindow的大小
+        self.resize(800,400)
+        # 设置MainWindow的标题
+        self.setWindowTitle("刷时")
+
+    def init_ui(self):
+        # 创建主布局（垂直布局）
+        main_layout = QFormLayout()
+        # 设置MainWindow的布局为主布局
+        self.setLayout(main_layout)
+
+        # 选择名单文件按钮
+        self.btn_import_excel = QPushButton("选择名单文件")
+        self.btn_import_excel.clicked.connect(self.choose_excel)
+        # 标签
+        self.file_info_label = QLabel("暂无文件")
+        self.file_info_label.setFixedHeight(30)
+        # 选择视频目录按钮
+        self.btn_import_dir = QPushButton("选择视频目录")
+        self.btn_import_dir.clicked.connect(self.choose_dir)
+        # 标签
+        self.dir_info_label = QLabel("暂无目录")
+        self.dir_info_label.setFixedHeight(30)
+        # 初始化按钮
+        self.btn_init = QPushButton("初始化")
+        self.btn_init.clicked.connect(self.init_table)
+        # 开始按钮
+        self.btn_start = QPushButton("开始")
+        self.btn_start.clicked.connect(self.start_all_run)
+        self.btn_start.setEnabled(False)
+        # 标签
+        self.run_info_label = QLabel("运行信息如下")
+        # 表格组件
+        self.tableWidget1 = QTableWidget()
+        # 禁止编辑表格
+        self.tableWidget1.setEditTriggers(QAbstractItemView.NoEditTriggers)
+
+        # 将上面的各个组件添加到主布局中
+        main_layout.addRow(self.btn_import_excel,self.file_info_label)
+        main_layout.addRow(self.btn_import_dir, self.dir_info_label)
+        main_layout.addRow(self.btn_init)
+        main_layout.addRow(self.btn_start)
+        main_layout.addRow(self.run_info_label)
+        main_layout.addRow(self.tableWidget1)
+
+    # 选择文件方法
+    def choose_excel(self):
+        # 创建文件对话框
+        file_dialog = QFileDialog()
+        file_path, _ = file_dialog.getOpenFileName(self, "选择名单文件")
+        if file_path:
+            print(f"excel文件路径为 {file_path}")
+            self.file_info_label.setText(file_path)
+    # 选择目录方法
+    def choose_dir(self):
+        # 创建文件对话框
+        file_dialog = QFileDialog()
+        directory_path = file_dialog.getExistingDirectory(self, "选择视频目录")
+        if directory_path:
+            print(f"目录路径为 {directory_path}")
+            self.dir_info_label.setText(directory_path)
+
+    # 初始化表格组件
+    def init_table(self):
+        # 测试路径
+        self.file_info_label.setText("C:/Users/18271/Desktop/xdj_shangde_gui/尚德名单.xlsx")
+        self.dir_info_label.setText("C:/Users/18271/Desktop/xdj_shangde_gui")
+
+        if (self.file_info_label.text() != "暂无文件" and self.dir_info_label.text() != "暂无目录"):
+            try:
+                # 设置用户列表数据
+                self.user_list = [{'name': '付法强', 'idCard': '11111', 'pwd': '264430', 'org': '广东xxx有限公司'},
+                                  {'name': '邓田忠', 'idCard': '11111', 'pwd': '035639', 'org': '广东xxx有限公司'},
+                                  {'name': '罗健华', 'idCard': '11111', 'pwd': '305414', 'org': '广东xxx有限公司'}]
+
+                # 清空表格组件中数据
+                self.tableWidget1.clearContents()
+                # 遍历数据，填充到表格组件中
+                for row, user in enumerate(self.user_list):
+                    # 设置表头
+                    header_cloumn = ["姓名", "身份证", "密码", "机构", "操作", "信息"]
+                    self.tableWidget1.setHorizontalHeaderLabels(header_cloumn)
+                    # 设置列数，行数
+                    self.tableWidget1.setColumnCount(len(header_cloumn))
+                    self.tableWidget1.setRowCount(len(self.user_list))
+
+                    # setItem方法的第一个参数为行，第二个参数为列，第三个参数为具体数据
+                    self.tableWidget1.setItem(row, 0, QTableWidgetItem(user['name']))
+                    self.tableWidget1.setItem(row, 1, QTableWidgetItem(user['idCard']))
+                    self.tableWidget1.setItem(row, 2, QTableWidgetItem(user['pwd']))
+                    self.tableWidget1.setItem(row, 3, QTableWidgetItem(user['org']))
+
+                    # 创建按钮控件，设置文本并连接槽函数
+                    button = QPushButton()
+                    button.setText("按钮")
+                    # 按钮点击事件连接槽函数button_clicked。
+                    # 直接使用传入参数row 会直接触发该函数。因此通过lambda表达式传入参数row。
+                    button.clicked.connect(lambda _, r=row: self.button_clicked(r))  # 按钮点击事件处理函数
+                    # 将按钮控件添加单元格中
+                    self.tableWidget1.setCellWidget(row, 4, button)
+
+            except Exception:
+                QMessageBox.warning(None, "Title", "初始化错误")
+            finally:
+                # 初始化按钮禁用，开始按钮启用
+                self.btn_init.setEnabled(False)
+                self.btn_start.setEnabled(True)
+        else:
+            QMessageBox.warning(None, "Title", "请选择名单文件和视频目录")
+
+    # 按钮点击事件
+    def button_clicked(self, row):
+        print(f"按钮位于第 {row} 行")
+        name = self.tableWidget1.item(row, 0).text()
+        idCard = self.tableWidget1.item(row, 1).text()
+        pwd = self.tableWidget1.item(row, 2).text()
+        org = self.tableWidget1.item(row, 3).text()
+        print(name, idCard, pwd, org)
+        self.tableWidget1.setItem(row, 5, QTableWidgetItem(f"{name}"))
+
+    # 全部运行
+    def start_all_run(self):
+        # 禁用开始按钮
+        self.btn_start.setEnabled(False)
+        # ....其他逻辑
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    main_window = MyMainWindow()
+    main_window.show()
+    app.exec()
+
+```
+
+运行截图如下
+![python_20241126172350.png](../blog_img/python_20241126172350.png)
+
 
 ## QTimer 定时器
 
@@ -753,6 +906,71 @@ if __name__ == "__main__":
 ![python_20240528163251.png](../blog_img/python_20240528163251.png)
 ![python_20240528163321.png](../blog_img/python_20240528163321.png)
 ![python_20240528163351.png](../blog_img/python_20240528163351.png)
+
+## Pyside6 信号（Signal）和槽（Slot）
+
+在PySide6中，信号（Signal）和槽（Slot）机制用于组件之间的通信。信号是组件对象发出的事件通知，槽是接收到信号后执行的函数。
+
+> 无参数信号与槽
+
+```py
+import sys
+from PySide6.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout
+
+class MainWindow(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.button = QPushButton("点击我")
+        # 按钮点击信号绑定槽函数button_clicked
+        self.button.clicked.connect(self.button_clicked)
+        self.layout = QVBoxLayout()
+        self.layout.addWidget(self.button)
+        self.setLayout(self.layout)
+    def button_clicked(self):
+        print("按钮被点击了")
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
+    app.exec()
+
+```
+
+> 有参数信号与槽
+
+有时候，我们可能希望在槽函数中使用额外的参数，这些参数不是信号本身传递的。lambda表达式可以用于传递额外的参数给槽函数。
+
+如果我们直接在槽函数中传递参数的话，在初始化组件的时候，就会触发一次槽函数。因此我们需要通过lambda表达式来连接按钮的clicked信号到button_clicked槽函数。
+
+```py
+import sys
+from PySide6.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout
+
+class MainWindow(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.layout = QVBoxLayout()
+        button1 = QPushButton("按钮1")
+        # 按钮点击信号绑定槽函数button_clicked,并通过lambda表达式向槽函数传递参数
+        button1.clicked.connect(lambda: self.button_clicked("按钮1"))
+        button2 = QPushButton("按钮2")
+        button2.clicked.connect(lambda: self.button_clicked("按钮2"))
+        self.layout.addWidget(button1)
+        self.layout.addWidget(button2)
+        self.setLayout(self.layout)
+        
+    def button_clicked(self, button_name):
+        print(f"{button_name}被点击了")
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
+    app.exec()
+
+```
+
 
 ## PySide6 UI 组件库
 
