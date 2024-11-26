@@ -7,6 +7,7 @@
 # 注意1: 需要在git终端中运行脚本。
 # 注意2: 使用 bash push.sh 命令运行该文件。
 # 注意3: 如果需要查询远程仓库地址，可以使用 git remote -v 命令查询远程仓库
+# 检测是否有 origin  https://gitee.com/suichenTree/suichenblog.git 仓库 和 github-origin  https://github.com/suichentree/suichenblog.git 仓库。如果没有则添加上。
 
 
 # 定义commit方法
