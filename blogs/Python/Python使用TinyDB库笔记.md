@@ -30,13 +30,13 @@ pip install tinydb
 
 ### 创建数据库和表
 
-会在脚本所在目录中，创建一个数据库文件用来存储数据。
+会在脚本所在目录中，创建一个数据库 json文件 用来存储数据。
 
 ```py
 # 导入tinydb库
 from tinydb import TinyDB, Query
 
-# 创建数据库  db.json
+# 创建数据库 db.json
 db = TinyDB('db.json')
 # 创建表
 table = db.table('users')
@@ -63,9 +63,13 @@ user_list = [
 ]
 for user in user_list:
     table.insert(user)
+
+# 或者可以批量插入数据
+table.insert_multiple(user_list)
+
 ```
 
-数据在数据库文件中是以下面的格式存储的
+数据在数据库json文件中是以下面的格式存储的
 ```json
 {"users": {"1": {"name": "jack", "age": 12, "city": "New York"}, "2": {"name": "tom", "age": 22, "city": "New York"}, "3": {"name": "mike", "age": 32, "city": "New York"}}}
 ```
@@ -122,7 +126,6 @@ print(result)
 # [{'name': 'jack', 'age': 31, 'city': 'New York'}]
 ```
 
-
 ### 删除数据
 
 可以使用remove方法删除表中的数据。例如，删除名为jack的数据。
@@ -139,6 +142,18 @@ query = Query()
 
 # 删除数据（先查询，再删除）
 table.remove(query.name == 'jack')
+```
+
+### 清空数据库
+
+```py
+from tinydb import TinyDB, Query
+# 创建数据库  db.json
+db = TinyDB('db.json')
+
+# 清空数据库的数据
+db.truncate()
+
 ```
 
 
