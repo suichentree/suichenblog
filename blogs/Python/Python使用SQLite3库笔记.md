@@ -103,10 +103,11 @@ c = conn.cursor()
 
 sql = '''
     CREATE TABLE t_user(
-        ID INT PRIMARY KEY     NOT NULL,
+        ID INT PRIMARY KEY     NOT NULL AUTOINCREMENT,
         NAME           TEXT    NOT NULL,
         AGE            INT     NOT NULL,
-        ADDRESS        CHAR(50) 
+        ADDRESS        CHAR(50) ,
+        region TEXT NOT NULL DEFAULT 'null',    --地区
     );'''
 # 游标执行SQL语句
 c.execute(sql)
@@ -151,6 +152,8 @@ conn.close()
 
 ## SELECT 操作
 
+查询操作不需要提交。非查询操作才需要提交
+
 ```py
 #!/usr/bin/python
 import sqlite3
@@ -184,8 +187,11 @@ conn = sqlite3.connect('test.db')
 c = conn.cursor()
 print ("数据库打开成功")
 
+# 执行语句
 c.execute("UPDATE t_user set address = 'beijing' where ID=1")
+# 提交
 conn.commit()
+# 关闭连接
 conn.close()
 ```
 
@@ -199,7 +205,9 @@ c = conn.cursor()
 print ("数据库打开成功")
 
 c.execute("DELETE from t_user where ID = 2;")
+# 提交
 conn.commit()
+# 关闭连接
 conn.close()
 ```
 
@@ -208,7 +216,7 @@ conn.close()
 当我们使用python执行查询语句的时候，查询结果有可能是元组的形式。通常情况下我们会将元组类型的查询结果，转换为字典类型。
 
 
-解决办法：需要进行配置
+解决办法：需要先进行配置
 
 ```py
 import sqlite3

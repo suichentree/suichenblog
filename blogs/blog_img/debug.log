@@ -1465,3 +1465,26 @@
 [1127/082045:WARNING:quota_manager.cc(1833)] Create directory failed for path
 [1127/085045:WARNING:quota_manager.cc(1833)] Create directory failed for path
 [1127/092045:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1127/092846:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
+[1127/095045:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1127/102045:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1127/105045:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1127/112045:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1127/115045:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1127/122045:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1127/125045:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1127/132045:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1127/135045:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1127/142045:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1127/145045:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1127/152045:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1127/155045:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1127/162045:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1127/162136:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
+[1127/162230:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
+[1127/162232:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
+[1127/162249:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
+[1127/162310:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
+[1127/162314:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
+[1127/162752:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
+[1127/162757:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank

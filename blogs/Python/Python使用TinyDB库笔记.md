@@ -40,6 +40,11 @@ from tinydb import TinyDB, Query
 db = TinyDB('db.json')
 # 创建表
 table = db.table('users')
+
+# 删除表中所有数据
+def clean_all():
+    users_table.truncate()
+
 ```
 
 - `TinyDB('db.json')`方法可以创建数据库，也可以获取数据库对象。
@@ -88,7 +93,7 @@ table = db.table('users')
 # 创建Query对象
 query = Query()
 
-# 查询名为jack的数据
+# 条件查询名为jack的数据
 result = table.search(query.name == "jack")
 print(result)
 

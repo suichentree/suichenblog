@@ -82,5 +82,112 @@ if __name__ == "__main__":
 
 ```
 
+## 视频截图并对截图进行压缩和分辨率尺寸处理
+
+```py
+import cv2
+import glob
+
+# 新的视频截图方法，从多个视频中随机获得一个视频文件进行截图。
+def new_video_capture(user):
+    # 指定要查找文件的目录
+    directory = "C:\\Users\\18271\\Desktop\\face_video"
+    # 使用glob模块查找文件名包含'名字+身份证'的视频文件
+    files = glob.glob(os.path.join(directory, f'*{user['name']+user['idCard']}*'))
+    if files:
+        random_user_video_path = random.choice(files)
+    else:
+        logger.error(f"{user["name"]} 在 C:\\Users\\18271\\Desktop\\face_video 没有找到视频文件")
+        raise Exception(f"{user["name"]} 。没有找到视频文件。当前子线程终止运行")
+
+    logger.info(f"{user["name"]} 开始执行 new_video_capture 方法 进行人脸视频截图。人脸视频文件为 {random_user_video_path} ====================== ")
+    # 打开视频文件
+    video = cv2.VideoCapture(random_user_video_path)
+    # 获取视频的总帧数
+    frame_count = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
+    # 获取视频的帧率
+    fps = int(video.get(cv2.CAP_PROP_FPS))
+    # 计算出视频时长
+    video_time = int(frame_count / fps)
+    # 截图成功判断
+    is_success = False
+    while is_success is False:
+        # 随机生成一个秒数，范围在1-video_time之间
+        rand_int = random.randint(1, video_time)
+        # 计算要截取的帧数
+        frame_to_capture = int(rand_int * fps)
+        # 跳到视频文件的指定帧数
+        video.set(cv2.CAP_PROP_POS_FRAMES, frame_to_capture)
+        # 读取该帧数
+        ret, frame = video.read()
+        # 截图路径
+        imgPath = "C:\\Users\\18271\\Desktop\\face_video\\img\\" + user['idCard'] + '.jpeg'
+        # 如果成功读取到帧，则保存为图片
+        if ret:
+            # 把视频截图保持到指定路径中，截图成功返回Ture
+            is_success = cv2.imwrite(imgPath, frame)
+            logger.info(f'{user["name"]} 截图成功。is_success 为 {is_success}')
+        else:
+            logger.error(f'{user["name"]} 截图失败，开始重新截图。is_success 为 {is_success}')
+
+        # 休眠
+        time.sleep(5)
+
+    # 释放视频文件
+    video.release()
+    newimgPath = "C:\\Users\\18271\\Desktop\\face_video\\img\\" + user['idCard'] + '.jpeg'
+    # 对图片进行压缩和尺寸处理
+    resize_and_compress_image(imgPath,newimgPath)
+    # 转换图片为base64编码
+    base64img = imgToBase64(newimgPath)
+    # 删除旧图片
+    os.remove(imgPath)
+    # 返回新图片编码和新图片链接
+    return base64img,newimgPath
+
+# 图片大小压缩到90kb之内 和 重新设置图片尺寸
+def resize_and_compress_image(input_path, output_path, target_size=90 * 1024):
+    # 读取图片
+    image = cv2.imread(input_path)
+
+    # 调整图片分辨率尺寸
+    # 获取原始图像的高度和宽度
+    height,width = image.shape[:2]
+    # 如果图片宽大于高，将设置图片宽为1170，高为对应的比例。如果图片高大于宽，将设置图片高为1170，宽为对应的比例。
+    if width > height:
+        # 定义目标宽度
+        target_width = 1170
+        # 根据原始宽高比计算目标高度
+        target_height = int((target_width / width) * height)
+    elif height > width:
+        # 定义目标宽度
+        target_height = 1170
+        # 根据原始宽高比计算目标宽度
+        target_width = int((target_height / height) * width)
+
+    # 使用cv2.resize进行缩放，保持宽高比
+    resized_img = cv2.resize(image, (target_width, target_height))
+
+    # 重新赋值
+    image = resized_img
+
+    # 图片大小压缩,压缩到目标大小内
+    # 设置图片初始质量
+    quality = 95
+    encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), quality]
+    while True:
+        result, encimg = cv2.imencode('.jpeg', image, encode_param)
+        if result:
+            size = len(encimg)
+            if size <= target_size:
+                break
+            quality -= 5
+            encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), quality]
+
+    with open(output_path, 'wb') as f:
+        f.write(encimg)
+
+```
+
 
 
