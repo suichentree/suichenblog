@@ -27,10 +27,13 @@ Gitea的首要目标是创建一个极易安装，运行非常快速，安装和
 - 制品库: Gitea支持超过 20 种不同种类的公有或私有软件包管理，包括：Maven, npm, PyPI 等
 - 多语言支持：Gitea 提供多种语言界面，适应全球范围内的用户，促进了国际化和本地化。
 
+[Gitea官网 https://docs.gitea.com/zh-cn/](https://docs.gitea.com/zh-cn/)
 
 ## docker 部署 Gitea
 
-Gitea 推荐使用docker-compose来部署Gitea服务
+Gitea 推荐使用docker-compose来部署Gitea服务。
+
+默认情况下Gitea使用SQLite3来作为数据库，也可以配置为其他数据库。
 
 ① 在本地服务器中创建一个 `gitea` 目录。
 
