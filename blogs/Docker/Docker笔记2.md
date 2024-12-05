@@ -2,6 +2,8 @@
 title: Docker笔记2
 date: 2023-10-12
 sidebar: 'auto'
+tags:
+ - Docker
 categories: 
  - Docker
 ---
@@ -658,7 +660,6 @@ docker-compose version
 ```shell
 sudo rm /usr/local/bin/docker-compose
 ```
-
 
 ### docker-compose常用命令
 

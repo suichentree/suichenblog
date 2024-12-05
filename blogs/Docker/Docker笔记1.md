@@ -2,6 +2,8 @@
 title: Docker笔记1
 date: 2023-10-08
 sidebar: 'auto'
+tags:
+ - Docker
 categories: 
  - Docker
 ---
