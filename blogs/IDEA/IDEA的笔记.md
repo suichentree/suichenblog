@@ -58,25 +58,6 @@ IDEA 的sdk（软件开发工具包）概念,就相当于 jre 运行环境。
 
 在File->Settings->Appearance & Behavior->System Settings->Updates下取消 Automatically check updates for 勾选 
 
-### 3 文件编码设置（防止出现中文乱码问题）
-
-先在 File->Settings->Editor->File Encodings 设置界面中
-
-推荐设置
-```
-Global Encoding:UTF-8
-Projectt Encoding:UTF-8
-Default encoding for properties files:UTF-8
-勾选上Transparent native-to-ascii conversion
-```
-
-然后打开 idea安装地址中bin目录的 idea.exe.vmoptions 和 idea64.exe.vmoptions 文件。进行编辑。
-
-在文件中的最后一行加上`-Dfile.encoding=UTF-8`即可。
-
-![idea_20240613095824.png](../blog_img/idea_20240613095824.png)
-
-
 ## 使用IDEA中的Git
 
 ### 1.IDEA 创建 spring boot项目
@@ -164,3 +145,61 @@ ps:注意创建github仓库时，不要建立readme文件。否则push的时候�
 5. 或者右键-》maven->Reload Projects
 6. 最后清除idea的编译器缓存。File->invalidate Caches / Restart
 
+
+
+## IDEA 统一设置文件编码为UTF-8（防止出现中文乱码问题）
+
+1. 进入IDEA的 Setting>Editor>File Encodings 设置界面
+
+修改下面设置
+```
+Global Encoding:UTF-8
+Projectt Encoding:UTF-8
+Default encoding for properties files:UTF-8
+勾选上Transparent native-to-ascii conversion
+```
+
+注意：Transparent native-to-ascii conversion 需勾选上，不然项目中配置文件中的中文注释无法正常显示。
+
+![idea_20241212151927.png](../blog_img/idea_20241212151927.png)
+
+2. 菜单 File - > settings -> appearence , 将字体设置为支持中文的微软雅黑
+
+![idea_20241212152415.png](../blog_img/idea_20241212152415.png)
+
+3. 找到idea安装目录，打开bin目录中的 idea.exe.vmoptions 或 idea64.exe.vmoptions 文件。在最后一行添加上`-Dfile.encoding=UTF-8`。
+
+![idea_20240613095824.png](../blog_img/idea_20240613095824.png)
+
+4. 导航栏“Help→Etit Custom VM Options…”进入自定义虚拟机设置页面。
+
+在idea64.exe.vmoptions 文件尾加上
+
+```
+-Dfile.encoding=UTF-8
+-Dconsole.encoding=UTF-8
+```
+
+![idea_20241212152707.png](../blog_img/idea_20241212152707.png)
+
+5. 最后相关配置修改完成后，需重启 IDEA, 才能让设置生效 
+
+
+## IDEA 中使用外置 Tomcat, 相关的控制台日志中文乱码
+
+当在IDEA中运行一些老的项目的时候。往往需要搭配外置的tomcat进行启动。因此很有可能也会出现中文乱码的情况。
+
+在此之前，先给IDEA 统一设置文件编码为UTF-8。
+
+1. 导航栏 Run -> Edit Configurations… , 进入到Tomcat配置页面。
+
+修改当前 Web 项目 Tomcat Server的虚拟机输出选项 VM options, 添加`-Dfile.encoding=UTF-8`,从而让Tomcat 支持 UTF-8 编码
+
+![idea_20241212153157.png](../blog_img/idea_20241212153157.png)
+
+2. tomcat安装目录中找到config目录中的logging.properties文件，修改下面配置
+
+```properties
+## java.util.logging.ConsoleHandler.encoding = GBK
+java.util.logging.ConsoleHandler.encoding = UTF-8
+```

@@ -983,3 +983,415 @@ QFluentWidgets 是一个基于 C++ Qt/PyQt/PySide 的 Fluent Design 风格组件
 [QFluentWidgets 官网地址https://qfluentwidgets.com/zh/](https://qfluentwidgets.com/zh/)
 
 ![python_20240604120408.png](../blog_img/python_20240604120408.png)
+
+
+## 案例
+
+下面是自己写的案例界面或者其他值得收藏的案例界面。
+
+### 案例1 刷视频界面
+
+刷视频界面的效果如图所示。
+
+![python_20241212155019.png](../blog_img/python_20241212155019.png)
+
+界面功能大致介绍：
+1. 先选择excel文件和人脸视频目录
+2. 勾选是否使用代理。勾选是否开启循环。
+3. 点击初始化按钮。初始化会有以下操作。
+    - 读取excel文件中的用户数据，转换为一个用户列表数据。
+    - 如果使用代理。则将代理地址作为用户的一个属性，添加到用户数据中。
+    - 如果使用循环，则将其作为用户的一个属性，添加到用户数据中。
+    - 读取用户列表数据，将一个个用户数据，转化为对应的一个个自定义组件。并将自定义组件添加到运行信息列表框中。
+    - 每一个自定义组件，包含了多个信息标签栏。以及一个按钮。按钮绑定了一个已经实例化的子线程对象。点击按钮就会运行这个子线程。
+4. 点击全部开始按钮。
+    - 点击全部开始按钮后，会遍历自定义组件，并依次点击自定义组件中的按钮，从而启动自定义组件中的子线程。
+    - 当子线程开始运行后，会通过信号与槽函数，将日志的信息发送给自定义组件。从而可以在自定义组件中展示日志。
+    - 当子线程正常运行结束后，会发送刷时完成信息给自定义组件。并且字体颜色设置为绿色
+    - 当子线程异常结束后，可以捕获这个异常。发送异常信息给自定义组件。并且字体颜色设置为红色。
+    - 若自定义组件接收到子线程发送的信号后，会根据不同的信号，执行不同的函数。
+
+
+代码分为两部分。
+- main_gui_ui.py 是Gui部分，Gui相关的代码，都在这个文件中。
+- main_gui_code.py 是爬虫脚本部分，具体执行的爬虫脚本的代码，都在这个文件中。
+
+
+> main_gui_ui.py
+
+```py
+import os
+import sys
+import time
+import random
+import re
+from main_gui_code import main,read_excel
+from PySide6.QtCore import QTimer, QRunnable, QThreadPool, QThread, Signal
+from PySide6.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QTableWidget, QTableWidgetItem, QLabel, QFormLayout, QFileDialog, QFrame, QHeaderView,
+                               QGroupBox, QSizePolicy, QMessageBox, QListWidget, QListWidgetItem, QAbstractItemView, QScrollArea, QCheckBox, QLineEdit, QMenuBar, QSpinBox)
+
+# 线程类
+class MyThread(QThread):
+    # 用户信息
+    user = None
+    # 用于发送日志信息的信号
+    log_signal = Signal(str)
+    # 线程运行状态的的信号(1为正常结束，0为异常结束)
+    run_finished_signal = Signal(int)
+
+    def __init__(self,user):
+        super().__init__()
+        # 初始化信息
+        self.user = user
+
+    # 线程主体
+    def run(self):
+        try:
+            # 随机休眠.防止线程一起运行
+            time.sleep(random.randint(2, 10))
+            # 发送信号，开始刷时
+            self.log_signal.emit(f"{self.user['name']} 正在刷时")
+            main(self.user)
+            self.log_signal.emit(f"{self.user['name']} 刷时完成")
+            self.run_finished_signal.emit(1)
+        except Exception as e:
+            self.log_signal.emit(f"异常信息为 {e} ")
+            self.run_finished_signal.emit(0)
+
+# 自定义组件
+class MyCustomWidget(QWidget):
+    user = None
+    def __init__(self,user):
+        super().__init__()
+        # 初始化用户信息和目录信息
+        self.user = user
+
+        # 创建水平布局对象
+        self.hlayout = QHBoxLayout()
+        # 标签
+        self.label1 = QLabel(str(user['name']))
+        self.label2 = QLabel(str(user['idCard']))
+        self.label3 = QLabel(str(user['pwd']))
+        self.label4 = QLabel(str(user['org']))
+        # 标签宽度
+        self.label1.setFixedWidth(100)
+        self.label2.setFixedWidth(200)
+        self.label3.setFixedWidth(100)
+        self.label4.setFixedWidth(200)
+
+        # 消息标签
+        self.msg_label = QLabel()
+
+        # 创建按钮控件，设置文本并连接槽函数
+        self.button1 = QPushButton()
+        self.button1.setFixedWidth(100)
+        self.button1.setText("开始")
+        # 按钮点击事件处理函数(通过lambd表达式传参)
+        self.button1.clicked.connect(self.button_clicked)
+
+        # 将组件依次添加到水平布局中
+        self.hlayout.addWidget(self.label1)
+        self.hlayout.addWidget(self.label2)
+        self.hlayout.addWidget(self.label3)
+        self.hlayout.addWidget(self.label4)
+        self.hlayout.addWidget(self.button1)
+        self.hlayout.addWidget(self.msg_label)
+
+        # 设置水平布局为自定义组件的布局
+        self.setLayout(self.hlayout)
+
+    # 按钮点击事件
+    def button_clicked(self):
+        # 更新按钮
+        self.button1.setText("运行中")
+        self.button1.setEnabled(False)
+        # 更新信息标签的样式
+        self.msg_label.setStyleSheet("color: black;")
+
+        # 创建线程。注意子线程对象必须是主界面的属性。此处必须是self.thread。不能是thread。否则启动子线程会导致主界面闪退
+        self.thread = MyThread(self.user)
+        # 连接信号和槽函数
+        self.thread.log_signal.connect(lambda log: self.update_msg_info(log))
+        self.thread.run_finished_signal.connect(lambda status: self.run_finished(status))
+        self.thread.start()
+
+    # 更新消息标签
+    def update_msg_info(self, log):
+        self.msg_label.setText(log)
+
+    # 线程运行结束
+    def run_finished(self,status):
+        # 当接收到线程的完成信号时，设置按钮文本和启用按钮
+        self.button1.setText("开始")
+        self.button1.setEnabled(True)
+        if status == 1:
+            # 若是正常结束，则设置信息为绿色
+            self.msg_label.setStyleSheet("color: green;")
+        else:
+            # 若是异常结束，则设置信息为红色
+            self.msg_label.setStyleSheet("color: red;")
+
+            # 若开启了循环刷时
+            if self.user['loop_time'] != None:
+                # 重新刷时
+                self.restart_run(self.user['loop_time'])
+
+    # 通过定时器重新刷时
+    def restart_run(self,loop_time):
+        # 创建一个定时器
+        self.timer = QTimer(self)
+        # 设置为单次触发
+        self.timer.setSingleShot(True)
+        # 定时器触发事件
+        self.timer.timeout.connect(self.button_clicked)
+        # 一段时间后触发，这里时间间隔单位是毫秒
+        self.timer.start(loop_time)
+
+# 主窗口类
+class MyMainWindow(QWidget):
+    def __init__(self):
+        super().__init__()
+        # 初始化
+        self.init_ui()
+        # 全局用户列表属性
+        self.user_list = None
+        # 设置MainWindow的大小
+        self.resize(800,400)
+        # 设置MainWindow的标题
+        self.setWindowTitle("尚德刷时")
+    def init_ui(self):
+        # 创建主布局（垂直布局）
+        self.main_layout = QFormLayout()
+        # 设置MainWindow的布局为主布局
+        self.setLayout(self.main_layout)
+
+        # 选择名单文件按钮
+        self.btn_import_excel = QPushButton("选择名单文件")
+        self.btn_import_excel.clicked.connect(self.choose_excel)
+        # 标签
+        self.file_info_label = QLabel("暂无文件")
+        self.file_info_label.setFixedHeight(30)
+        # 选择视频目录按钮
+        self.btn_import_dir = QPushButton("选择视频目录")
+        self.btn_import_dir.clicked.connect(self.choose_dir)
+        # 标签
+        self.dir_info_label = QLabel("暂无目录")
+        self.dir_info_label.setFixedHeight(30)
+
+        # 单选框
+        self.proxy_checkbox = QCheckBox("是否使用代理")
+        # 输入框
+        self.proxy_ip_input = QLineEdit()
+        self.proxy_ip_input.setPlaceholderText("输入代理IP地址(格式: IP:PORT)")
+
+        # 单选框
+        self.loop_checkbox = QCheckBox("是否开启循环")
+        # 数字输入框
+        self.loop_input = QSpinBox()
+        self.loop_input.setSuffix("分钟") # 设置后缀文本
+        self.loop_input.setMinimum(60)  # 设置最小值
+
+        # 初始化按钮
+        self.btn_init = QPushButton("初始化")
+        self.btn_init.clicked.connect(self.init_listitem)
+        # 开始按钮
+        self.btn_start = QPushButton("全部开始")
+        self.btn_start.clicked.connect(self.start_all_run)
+        self.btn_start.setEnabled(False)
+        # 标签
+        self.run_info_label = QLabel("运行信息如下")
+        # 列表
+        self.list_widget = QListWidget()
+
+        # 将上面的各个组件添加到主布局中
+        self.main_layout.addRow(self.btn_import_excel,self.file_info_label)
+        self.main_layout.addRow(self.btn_import_dir, self.dir_info_label)
+        self.main_layout.addRow(self.proxy_checkbox, self.proxy_ip_input)
+        self.main_layout.addRow(self.loop_checkbox, self.loop_input)
+        self.main_layout.addRow(self.btn_init)
+        self.main_layout.addRow(self.btn_start)
+        self.main_layout.addRow(self.run_info_label)
+        self.main_layout.addRow(self.list_widget)
+
+    # 展示注意事项
+    def show_notice(self):
+        # 弹出消息框显示注意事项
+        QMessageBox.information(self, "注意事项", "这里是一些需要注意的内容。")
+
+    # 选择文件方法
+    def choose_excel(self):
+        # 创建文件对话框
+        file_dialog = QFileDialog()
+        file_path, _ = file_dialog.getOpenFileName(self, "选择名单文件")
+        if file_path:
+            print(f"excel文件路径为 {file_path}")
+            self.file_info_label.setText(file_path)
+
+    # 选择目录方法
+    def choose_dir(self):
+        # 创建文件对话框
+        file_dialog = QFileDialog()
+        directory_path = file_dialog.getExistingDirectory(self, "选择视频目录")
+        if directory_path:
+            print(f"目录路径为 {directory_path}")
+            self.dir_info_label.setText(directory_path)
+
+    # 初始化列表组件
+    def init_listitem(self):
+        proxy_ip = None  # 代理ip地址默认为None
+        loop_time = None # 循环时间默认为None
+
+        # 若选择使用代理，检查代理ip输入框是否填写并且是否填写正确
+        if self.proxy_checkbox.isChecked():
+            # 获取输入框中的代理IP
+            proxy_ip = self.proxy_ip_input.text()
+            # 匹配ip加端口的正则表达式
+            ip_port_pattern = re.compile(r"^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?):([0-9]{1,5})$")
+            # 若输入代理ip不匹配
+            if not ip_port_pattern.match(proxy_ip):
+                QMessageBox.warning(None, "Title", "请输入正确的代理IP地址")
+                return
+
+        # 若选择开启循环刷时，检查循环时间是否填写正确
+        if self.loop_checkbox.isChecked():
+            # 获取数字输入框的数字（分钟为单位），并转换为毫秒单位
+            loop_time = self.loop_input.value() * 60 * 1000
+
+        if (self.file_info_label.text() != "暂无文件" and self.dir_info_label.text() != "暂无目录"):
+            try:
+                # 读取名单文件转换为用户列表数据
+                self.user_list = read_excel(self.file_info_label.text())
+                # 检测人脸目录中是否存在子目录img，若不存在则创建子目录img
+                dir_path = os.path.dirname(self.dir_info_label.text()+"\\img\\")
+                if not os.path.exists(dir_path):
+                    os.makedirs(dir_path)
+
+                # 遍历数据,创建自定义组件，添加到列表组件中
+                for row, user in enumerate(self.user_list):
+                    # 设置人脸视频目录路径
+                    user['face_path'] = self.dir_info_label.text()
+                    # 设置代理ip
+                    user['proxy_ip'] = proxy_ip
+                    # 设置循环时间（毫秒为单位）
+                    user['loop_time'] = loop_time
+
+                    # 创建自定义组件对象
+                    custom_widget = MyCustomWidget(user)
+                    item = QListWidgetItem(self.list_widget)
+                    # 设置列表中的每一项自适应尺寸
+                    item.setSizeHint(custom_widget.sizeHint())
+                    self.list_widget.setItemWidget(item, custom_widget)
+
+            except Exception as e:
+                print(e)
+                QMessageBox.warning(None, "Title", "初始化错误")
+            finally:
+                # 代理选择框禁用，代理输入框禁用，循环选择框禁用，循环输入框禁用，初始化按钮禁用,开始按钮启用
+                self.proxy_checkbox.setEnabled(False)
+                self.proxy_ip_input.setEnabled(False)
+                self.loop_checkbox.setEnabled(False)
+                self.loop_input.setEnabled(False)
+                self.btn_init.setEnabled(False)
+                self.btn_start.setEnabled(True)
+        else:
+            QMessageBox.warning(None, "Title", "请选择名单文件和视频目录")
+            return
+
+    # 全部开始（触发列表组件中的每一个自定义组件中的按钮点击事件）
+    def start_all_run(self):
+        for index in range(self.list_widget.count()):
+            # 获取列表中的每一个自定义组件实例对象
+            item = self.list_widget.item(index)
+            custom_widget = self.list_widget.itemWidget(item)
+            # 若自定义组件获取成功
+            if custom_widget:
+                # 触发自定义组件中的按钮点击事件
+                custom_widget.button_clicked()
+        # 禁用开始按钮
+        self.btn_start.setEnabled(False)
+
+# 主方法
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    main_window = MyMainWindow()
+    main_window.show()
+    app.exec()
+
+```
+
+> main_gui_code.py
+
+1. main_gui_code.py 文件既可以作为单文件运行，也可以搭配main_gui_ui.py文件运行。
+2. 下面是main_gui_code.py的简单示例。
+
+```py
+import requests
+import json
+import uaFile
+from lxml import etree
+from uuid import uuid1
+from requests_toolbelt import MultipartEncoder
+import math
+import threading
+from urllib.parse import urlparse, parse_qs
+from bs4 import BeautifulSoup
+from log_util import logger
+import openpyxl
+import re
+import glob
+import random
+import cv2
+import os
+import time
+
+# 主方法
+def main(user):
+    try:
+        logger.info(f"{user['name']} 开始运行")
+
+        """
+        此处省略具体的爬虫方法。下面只是范例
+        """
+
+        # 登录方法
+        login(user, headers)
+        # 获取课程
+        course_list = getCourse(user, cookie, headers, headers2)
+
+        # 若今日学习学时已满，则抛出异常
+        if "今日学习学时已满" in course_list['data']['status']:
+            raise Exception(f"{user["name"]} 今日学习学时已满")
+        
+        # 去学习
+        study_video(user, hreflist, cookie, headers, headers2)
+                
+                
+        logger.success(f'{user["name"]} 刷时完成')
+    except Exception as e:
+        # 打印完整异常信息
+        logger.exception(f"发生异常。异常信息为 {e}")
+
+        # 如果脚本作为单文件运行时，想要循环刷的话，则直接休眠后重新开启线程即可。
+        # time.sleep(7200)
+        # main(user)
+
+        # 如果脚本作为GUI的任务模块，则需要在此处抛出异常，将异常信息传递给gui界面的。让gui界面去处理这个异常
+        raise Exception(f"发生异常。异常信息为 {e}")
+
+# 单文件运行时
+if __name__ == '__main__':
+
+    user_list = [
+        # {'name': 'xxx', 'pwd': '264430', 'idCard': '440232198xxx', 'org': 'xxx'},
+    ]
+
+    # 给用户创建子线程
+    for user in user_list:
+        # 休眠
+        time.sleep(2)
+        # 创建一个子线程
+        t = threading.Thread(target=main, name=f"{user['name']}", args=(user,))
+        # 运行该子线程
+        t.start()
+
+```
