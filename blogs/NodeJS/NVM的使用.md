@@ -5,7 +5,7 @@ sidebar: 'auto'
 categories: 
  - 前端
 tags:
- - NodeJs
+ - NodeJS
 ---
 
 ## windows下NVM的使用
