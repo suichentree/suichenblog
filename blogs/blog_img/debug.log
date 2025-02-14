@@ -1816,3 +1816,228 @@
 [1217/080906:WARNING:quota_manager.cc(1833)] Create directory failed for path
 [1217/083906:WARNING:quota_manager.cc(1833)] Create directory failed for path
 [1217/090906:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1224/172322:INFO:http_cache_transaction.cc(72)] IgnoreZeroCacheError: 0
+[1226/100333:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1226/103333:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1226/110333:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1226/113333:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1226/120333:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1226/123333:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1226/130333:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1226/133333:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1226/140333:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1226/143333:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1226/150333:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1226/153150:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1226/153333:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1226/160333:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1226/161157:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
+[1226/163333:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1226/170333:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1226/172316:WARNING:webmediaplayer_impl.cc(341)] Using MultibufferDataSource
+[1226/172316:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1226/172316:ERROR:waituntilobserver.cpp(144)] NOT IMPLEMENTED
+[1226/172349:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
+[1226/173333:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1226/180333:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1226/183333:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1226/190333:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1226/193333:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1226/200333:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1226/203333:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1226/210337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1226/213337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1226/220337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1226/223337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1226/230337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1226/233337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/000337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/003337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/010337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/013337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/020337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/023337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/030337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/033337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/040337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/043337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/050337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/053337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/060337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/063337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/070337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/073337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/080337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/083337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/090337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/093337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/100337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/103337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/110337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/113337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/120337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/123337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/130337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/133337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/140337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/143337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/150337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/153337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/160337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/163337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/170337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/173337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/180337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/183337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/190337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/193337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/200337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/203337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/210337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/213337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/220337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/223337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/230337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1227/233337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1228/000337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1228/003337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1228/010337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1228/013337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1228/020337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1228/023337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1228/030337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1228/033337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1228/040337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1228/043337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1228/050337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1228/053337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1228/060337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1228/063337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1228/070337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1228/073337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1228/080337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1228/083337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1228/090337:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0213/162238:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0213/165238:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0213/172238:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0213/175238:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0213/182238:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0213/185238:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0213/192238:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0213/195238:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0213/202238:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0213/205238:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0213/212238:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0213/215238:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0213/222238:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0213/222457:WARNING:dns_config_service_win.cc(674)] Failed to read DnsConfig.
+[0213/222553:WARNING:dns_config_service_win.cc(674)] Failed to read DnsConfig.
+[0213/225229:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0213/232229:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0213/235229:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0214/002232:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0214/004114:WARNING:dns_config_service_win.cc(674)] Failed to read DnsConfig.
+[0214/005223:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0214/011405:WARNING:dns_config_service_win.cc(674)] Failed to read DnsConfig.
+[0214/012213:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0214/014450:WARNING:dns_config_service_win.cc(674)] Failed to read DnsConfig.
+[0214/015204:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0214/021548:WARNING:dns_config_service_win.cc(674)] Failed to read DnsConfig.
+[0214/022154:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0214/024707:WARNING:dns_config_service_win.cc(674)] Failed to read DnsConfig.
+[0214/025145:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0214/031826:WARNING:dns_config_service_win.cc(674)] Failed to read DnsConfig.
+[0214/032136:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0214/034923:WARNING:dns_config_service_win.cc(674)] Failed to read DnsConfig.
+[0214/035127:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0214/042037:WARNING:dns_config_service_win.cc(674)] Failed to read DnsConfig.
+[0214/042124:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0214/045124:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0214/045143:WARNING:dns_config_service_win.cc(674)] Failed to read DnsConfig.
+[0214/052115:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0214/052240:WARNING:dns_config_service_win.cc(674)] Failed to read DnsConfig.
+[0214/055105:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0214/055400:WARNING:dns_config_service_win.cc(674)] Failed to read DnsConfig.
+[0214/062056:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0214/065024:WARNING:dns_config_service_win.cc(674)] Failed to read DnsConfig.
+[0214/065050:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0214/072050:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0214/072107:WARNING:dns_config_service_win.cc(674)] Failed to read DnsConfig.
+[0214/075041:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0214/075204:WARNING:dns_config_service_win.cc(674)] Failed to read DnsConfig.
+[0214/082031:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0214/083538:WARNING:dns_config_service_win.cc(674)] Failed to read DnsConfig.
+[0214/084143:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0214/084143:ERROR:waituntilobserver.cpp(144)] NOT IMPLEMENTED
+[0214/084144:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0214/084201:WARNING:spdy_session.cc(2455)] Received HEADERS for invalid stream 325
+[0214/084201:WARNING:spdy_session.cc(2455)] Received HEADERS for invalid stream 327
+[0214/084201:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
+[0214/084254:WARNING:webmediaplayer_impl.cc(341)] Using MultibufferDataSource
+[0214/084254:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0214/084254:ERROR:waituntilobserver.cpp(144)] NOT IMPLEMENTED
+[0214/084303:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0214/084305:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
+[0214/084709:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
+[0214/084709:WARNING:spdy_session.cc(2455)] Received HEADERS for invalid stream 301
+[0214/085021:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0214/092021:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0214/095021:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0214/102021:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0214/102343:ERROR:CONSOLE(1)] "Uncaught (in promise) TypeError: Cannot read property 'ButtonProvider' of undefined", source: chrome-devtools://devtools/inspector.html (1)
+[0214/102346:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
+[0214/104546:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
+[0214/105021:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0214/105209:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0214/105209:ERROR:waituntilobserver.cpp(144)] NOT IMPLEMENTED
+[0214/105215:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
+[0214/105339:WARNING:webmediaplayer_impl.cc(341)] Using MultibufferDataSource
+[0214/105339:WARNING:webmediaplayer_impl.cc(341)] Using MultibufferDataSource
+[0214/105340:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0214/105340:ERROR:waituntilobserver.cpp(144)] NOT IMPLEMENTED
+[0214/105342:WARNING:spdy_session.cc(2455)] Received HEADERS for invalid stream 567
+[0214/105342:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
+[0214/105350:WARNING:webmediaplayer_impl.cc(341)] Using MultibufferDataSource
+[0214/105350:WARNING:webmediaplayer_impl.cc(341)] Using MultibufferDataSource
+[0214/105351:WARNING:webmediaplayer_impl.cc(341)] Using MultibufferDataSource
+[0214/105351:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0214/105351:ERROR:waituntilobserver.cpp(144)] NOT IMPLEMENTED
+[0214/105352:WARNING:spdy_session.cc(2455)] Received HEADERS for invalid stream 861
+[0214/105352:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
+[0214/105404:WARNING:webmediaplayer_impl.cc(341)] Using MultibufferDataSource
+[0214/105404:WARNING:webmediaplayer_impl.cc(341)] Using MultibufferDataSource
+[0214/105405:WARNING:webmediaplayer_impl.cc(341)] Using MultibufferDataSource
+[0214/105405:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0214/105405:ERROR:waituntilobserver.cpp(144)] NOT IMPLEMENTED
+[0214/105406:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0214/105407:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
+[0214/105415:WARNING:webmediaplayer_impl.cc(341)] Using MultibufferDataSource
+[0214/105415:WARNING:webmediaplayer_impl.cc(341)] Using MultibufferDataSource
+[0214/105415:WARNING:spdy_session.cc(2455)] Received HEADERS for invalid stream 1423
+[0214/105415:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
+[0214/105420:WARNING:webmediaplayer_impl.cc(341)] Using MultibufferDataSource
+[0214/105420:WARNING:webmediaplayer_impl.cc(341)] Using MultibufferDataSource
+[0214/105421:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0214/105421:ERROR:waituntilobserver.cpp(144)] NOT IMPLEMENTED
+[0214/105421:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0214/105426:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
+[0214/112021:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0214/115021:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0214/122021:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0214/123323:WARNING:dns_config_service_win.cc(674)] Failed to read DnsConfig.
+[0214/125012:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0214/132012:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0214/132518:WARNING:dns_config_service_win.cc(674)] Failed to read DnsConfig.
+[0214/135003:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0214/135612:WARNING:dns_config_service_win.cc(674)] Failed to read DnsConfig.
+[0214/141959:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0214/144959:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0214/151959:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0214/152116:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0214/152116:ERROR:waituntilobserver.cpp(144)] NOT IMPLEMENTED
+[0214/152206:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
+[0214/154959:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0214/161959:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0214/164959:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0214/171959:WARNING:quota_manager.cc(1833)] Create directory failed for path
