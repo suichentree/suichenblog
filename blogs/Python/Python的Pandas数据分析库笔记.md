@@ -1,5 +1,5 @@
 ---
-title: Python的Pandas库笔记
+title: Python的Pandas数据分析库笔记
 date: 2025-02-13
 sidebar: 'auto'
 categories: 
@@ -10,7 +10,7 @@ tags:
 
 [toc]
 
-# Python的Pandas库笔记
+# Python的Pandas数据分析库笔记
 
 Pandas 是一个强大的 Python 库，主要用于数据处理和分析。它为 Python 提供了高效、灵活、便捷的数据结构和操作工具，特别适合处理表格数据（例如：Excel、CSV 文件、SQL 数据库等格式的数据）。
 
