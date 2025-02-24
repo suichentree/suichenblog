@@ -95,3 +95,41 @@ context1 = execjs.compile(js_from_file('./a.js'))
 result = context1.call("add", 3, 4)
 print(result)  # 输出 7
 ```
+
+### 遇到的问题
+
+> 问题描述
+
+当在代码中使用`execjs`类的方法的时候，可能会报如下错误。
+
+```PY
+# 读取js文件
+def js_from_file():
+    # 只读方式打开文件
+    with open("./tool.js", 'r', encoding='UTF-8') as file:
+        return file.read()
+
+## AES解密
+def AES_Decrypt_Functon(str):
+    # 读取并编译js文件
+    context1 = execjs.compile(js_from_file())
+    # 此处可能会报如下错误
+    result = context1.call("AES_Decrypt_Functon", str)
+    return result
+
+# UnicodeEncodeError: 'gbk' codec can't encode character '\u0192' in position 424: illegal multibyte sequence
+```
+
+这个错误表达的意思是代码尝试将一个包含不支持字符（在这里是ƒ，即“florin”符号，Unicode编码是 \u0192）的字符串文本，使用 gbk 编码格式进行编码时失败了。
+
+> 解决方法
+
+当我们在使用`execjs`类的时候，编辑器可能自动帮我们导入了pyexecjs库，使用这个库会导致上面错误的发生。然而我们真正需要导入的是pyexecjs2库。
+
+### pyexecjs 和 pyexecjs2 的区别
+
+pyexecjs 和 pyexecjs2 都是 Python 中用于执行 JavaScript 代码的库，它们提供了与 JavaScript 引擎（如 Node.js 或其他支持的 JavaScript 引擎）交互的能力。但是，它们之间有一些差异：
+
+pyexecjs 是最早的 Python 封装库之一，用于执行 JavaScript 代码。目前可能已经停止更新或维护得较慢。
+
+pyexecjs2 是 pyexecjs 的一个分支，解决了原库中的一些问题，特别是对 Python 3 的支持。

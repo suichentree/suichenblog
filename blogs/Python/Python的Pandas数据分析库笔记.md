@@ -16,6 +16,10 @@ Pandas 是一个强大的 Python 库，主要用于数据处理和分析。它�
 
 Pandas 名字衍生自术语 "panel data"（面板数据）和 "Python data analysis"（Python 数据分析）。
 
+[Pandas官网 https://pandas.pydata.org](https://pandas.pydata.org/)
+
+![python_20250224170607.png](../blog_img/python_20250224170607.png)
+
 > Pandas库的应用场景
 
 - Pandas 可以从各种文件格式比如 CSV、JSON、SQL、Microsoft Excel 导入数据。
@@ -535,7 +539,6 @@ orient参数 是指定 JSON 文件中的数据格式方式。常见值有 split�
 
 ![python_20250214110621.png](../blog_img/python_20250214110621.png)
 
-
 > 示例代码
 
 ```py
@@ -570,16 +573,44 @@ print(df)
 # row2     2    y
 # row3     3    z
 
+# 从 URL 中读取 JSON 数据
+URL = 'https://static.jyshare.com/download/sites.json'
+df = pd.read_json(URL)
+print(df)
 
 
+# 从 JSON 字符串加载数据
+# JSON 字符串
+json_data = '''
+[
+  {"Name": "Alice", "Age": 25, "City": "New York"},
+  {"Name": "Bob", "Age": 30, "City": "Los Angeles"},
+  {"Name": "Charlie", "Age": 35, "City": "Chicago"}
+]
+'''
+df = pd.read_json(json_data)
+print(df)
 
+```
 
+## Pandas 数据清洗
 
+数据清洗是对一些没有用的数据进行处理的过程。
 
+很多数据集存在数据缺失、数据格式错误、错误数据或重复数据的情况，如果要使数据分析更加准确，就需要对这些没有用的数据进行处理。
 
+数据清洗的常用方式如下：
+- 缺失值处理：识别并填补缺失值，或删除含缺失值的行/列。
+- 重复数据处理：检查并删除重复数据，确保每条数据唯一。
+- 异常值处理：识别并处理异常值，如极端值、错误值。
+- 数据格式转换：转换数据类型或进行单位转换，如日期格式转换。
+- 标准化与归一化：对数值型数据进行标准化（如 Z-score）或归一化（如 Min-Max）。
+- 文本处理：对文本数据进行清洗，如去除停用词、词干化、分词等。
+- 数据抽样：从数据集中抽取样本，或通过过采样/欠采样处理类别不平衡。
 
+### Pandas 清洗空值
 
-
+```py
 
 
 ```
