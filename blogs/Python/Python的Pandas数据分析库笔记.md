@@ -608,9 +608,265 @@ print(df)
 - 文本处理：对文本数据进行清洗，如去除停用词、词干化、分词等。
 - 数据抽样：从数据集中抽取样本，或通过过采样/欠采样处理类别不平衡。
 
-### Pandas 清洗空值
+### 清洗空值
+
+如果我们要删除包含空字段的行，可以使用 dropna() 方法，语法格式如下：
 
 ```py
+DataFrame.dropna(axis=0, how='any', thresh=None, subset=None, inplace=False)
 
+# 参数说明
+# axis：默认为 0，表示逢空值剔除整行，如果设置参数 axis＝1 表示逢空值去掉整列。
+# how：默认为 'any' 如果一行（或一列）里任何一个数据有出现 NA 就去掉整行，如果设置 how='all' 一行（或列）都是 NA 才去掉这整行。
+# thresh：设置需要多少非空值的数据才可以保留下来的。
+# subset：设置想要检查的列。如果是多个列，可以使用列名的 list 作为参数。
+# inplace：如果设置 True，将计算得到的值直接覆盖之前的值并返回 None，修改的是源数据。
+
+
+import pandas as pd
+# 读取csv文件中的数据，转换为DataFrame对象
+df = pd.read_csv('property-data.csv')
+# 清洗空值，返回一个新的 DataFrame
+new_df = df.dropna()
+print(new_df.to_string())
 
 ```
+
+### 清洗重复数据
+
+如果我们要清洗重复数据，可以使用 duplicated() 和 drop_duplicates() 方法。
+
+- duplicated()可用判断数据是否重复。会返回 True，否则返回 False。
+- 删除重复数据，可以直接使用drop_duplicates() 方法
+
+```py
+import pandas as pd
+person = {
+  "name": ['Google', 'Runoob', 'Runoob', 'Taobao'],
+  "age": [50, 40, 40, 23]  
+}
+
+# 判断重复数据
+df = pd.DataFrame(person)
+print(df.duplicated())
+# 输出结果
+# 0    False
+# 1    False
+# 2     True
+# 3    False
+# dtype: bool
+
+# 删除重复数据
+df.drop_duplicates(inplace = True)
+print(df)
+```
+
+### 数据清洗与预处理的常见方法
+
+- 使用指定的值（如均值、中位数、众数等）填充缺失值。	df.fillna(value)
+- 删除包含缺失值的行或列。	df.dropna()
+- 删除重复数据	df.drop_duplicates()
+- 将数据类型从一个类型转换为另一个类型。 df.astype()
+- 日期时间格式转换（转换字符串或数字为日期时间类型） pd.to_datetime()
+- 数据抽样（随机抽样，从数据中随机抽取一定比例的样本）	df.sample()
+- 数据合并与连接（合并数据，将多个 DataFrame 按照某些列合并在一起）	pd.merge()
+- 连接数据（将多个 DataFrame 进行行或列拼接）	pd.concat()
+- 数据类型转换与处理（字符串处理，对字符串数据进行处理，如去除空格、转换大小写等）	str.replace() 、 str.upper() 等
+- 分组计算（按照某个特征分组后进行聚合计算）	df.groupby()
+- 数据转换与映射（数据映射与替换，将数据中的某些值替换为其他值）	df.replace()
+
+
+## Pandas 常用函数及使用实例
+
+### 读取数据
+
+- pd.read_csv(filename)	读取 CSV 文件；
+- pd.read_excel(filename)	读取 Excel 文件；
+- pd.read_sql(query, connection_object)	从 SQL 数据库读取数据；
+- pd.read_json(json_string)	从 JSON 字符串中读取数据；
+- pd.read_html(url)	从 HTML 页面中读取数据。
+
+```py
+import pandas as pd
+# 从 CSV 文件中读取数据
+df = pd.read_csv('data.csv')
+# 从 Excel 文件中读取数据
+df = pd.read_excel('data.xlsx')
+# 从 SQL 数据库中读取数据
+import sqlite3
+conn = sqlite3.connect('database.db')
+df = pd.read_sql('SELECT * FROM table_name', conn)
+# 从 JSON 字符串中读取数据
+json_string = '{"name": "John", "age": 30, "city": "New York"}'
+df = pd.read_json(json_string)
+# 从 HTML 页面中读取数据
+url = 'https://www.runoob.com'
+dfs = pd.read_html(url)
+df = dfs[0] # 选择第一个数据框
+```
+
+### 查看数据
+
+- df.head(n)	显示前 n 行数据；
+- df.tail(n)	显示后 n 行数据；
+- df.info()	显示数据的信息，包括列名、数据类型、缺失值等；
+- df.describe()	显示数据的基本统计信息，包括均值、方差、最大值、最小值等；
+- df.shape	显示数据的行数和列数。
+
+```py
+import pandas as pd
+data = [
+    {"name": "Google", "likes": 25, "url": "https://www.google.com"},
+    {"name": "Runoob", "likes": 30, "url": "https://www.runoob.com"},
+    {"name": "Taobao", "likes": 35, "url": "https://www.taobao.com"}
+]
+df = pd.DataFrame(data)
+
+# 显示前五行数据
+df.head()
+# 显示后五行数据
+df.tail()
+# 显示数据信息
+df.info()
+# 显示基本统计信息
+df.describe()
+# 显示数据的行数和列数
+df.shape
+```
+
+### 数据清洗
+
+- df.dropna()	删除包含缺失值的行或列；
+- df.fillna(value)	将缺失值替换为指定的值；
+- df.replace(old_value, new_value)	将指定值替换为新值；
+- df.duplicated()	检查是否有重复的数据；
+- df.drop_duplicates()	删除重复的数据。
+
+```py
+# 删除包含缺失值的行或列
+df.dropna()
+# 将缺失值替换为指定的值
+df.fillna(0)
+# 将指定值替换为新值
+df.replace('old_value', 'new_value')
+# 检查是否有重复的数据
+df.duplicated()
+# 删除重复的数据
+df.drop_duplicates()
+```
+
+### 数据选择和切片
+
+- df[column_name]	选择指定的列；
+- df.loc[row_index, column_name]	通过标签选择数据；
+- df.iloc[row_index, column_index]	通过位置选择数据；
+- df.ix[row_index, column_name]	通过标签或位置选择数据；
+- df.filter(items=[column_name1, column_name2])	选择指定的列；
+- df.filter(regex='regex')	选择列名匹配正则表达式的列；
+- df.sample(n)	随机选择 n 行数据。
+
+```py
+# 选择指定的列
+df['column_name']
+# 通过标签选择数据
+df.loc[row_index, column_name]
+# 通过位置选择数据
+df.iloc[row_index, column_index]
+# 通过标签或位置选择数据
+df.ix[row_index, column_name]
+# 选择指定的列
+df.filter(items=['column_name1', 'column_name2'])
+# 选择列名匹配正则表达式的列
+df.filter(regex='regex')
+# 随机选择 n 行数据
+df.sample(n=5)
+```
+
+### 数据排序
+
+- df.sort_values(column_name)	按照指定列的值排序；
+- df.sort_values([column_name1, column_name2], ascending=[True, False])	按照多个列的值排序；
+- df.sort_index()	按照索引排序。
+
+```py
+# 按照指定列的值排序
+df.sort_values('column_name')
+# 按照多个列的值排序
+df.sort_values(['column_name1', 'column_name2'], ascending=[True, False])
+# 按照索引排序
+df.sort_index()
+```
+
+### 数据分组和聚合
+
+- df.groupby(column_name)	按照指定列进行分组；
+- df.aggregate(function_name)	对分组后的数据进行聚合操作；
+- df.pivot_table(values, index, columns, aggfunc)	生成透视表。
+
+```py
+# 按照指定列进行分组
+df.groupby('column_name')
+# 对分组后的数据进行聚合操作
+df.aggregate('function_name')
+# 生成透视表
+df.pivot_table(values='value', index='index_column', columns='column_name', aggfunc='function_name')
+```
+
+### 数据合并
+
+- pd.concat([df1, df2])	将多个数据框按照行或列进行合并；
+- pd.merge(df1, df2, on=column_name)	按照指定列将两个数据框进行合并。
+
+```py
+# 将多个数据框按照行或列进行合并
+df = pd.concat([df1, df2])
+# 按照指定列将两个数据框进行合并
+df = pd.merge(df1, df2, on='column_name')
+```
+
+### 数据选择和过滤
+
+- df.loc[row_indexer, column_indexer]	按标签选择行和列。
+- df.iloc[row_indexer, column_indexer]	按位置选择行和列。
+- df[df['column_name'] > value]	选择列中满足条件的行。
+- df.query('column_name > value')	使用字符串表达式选择列中满足条件的行。
+
+### 数据统计和描述
+
+- df.describe()	计算基本统计信息，如均值、标准差、最小值、最大值等。
+- df.mean()	计算每列的平均值。
+- df.median()	计算每列的中位数。
+- df.mode()	计算每列的众数。
+- df.count()	计算每列非缺失值的数量。
+
+
+## Pandas 数据可视化
+
+Pandas 提供了与 Matplotlib 和 Seaborn 等可视化库的集成，使得数据的可视化变得简单而高效。
+
+在 Pandas 中，数据可视化功能主要通过 DataFrame.plot() 和 Series.plot() 方法实现，这些方法实际上是对 Matplotlib 库的封装，简化了图表的绘制过程。
+
+> plot() 方法
+
+plot() 方法参数说明：
+- kind	图表类型，支持 'line', 'bar', 'barh', 'hist', 'box', 'kde', 'density', 'area', 'pie' 等类型
+- x	设置 x 轴的数据列
+- y	设置 y 轴的数据列
+- title	图表的标题
+- xlabel	x 轴的标签
+- ylabel	y 轴的标签
+- color	设置图表的颜色
+- figsize	设置图表的大小（宽, 高）
+- legend	是否显示图例
+
+> 常用的图标类型
+
+- 折线图	用于显示随时间变化的数据趋势	    df.plot(kind='line')
+- 柱状图	用于显示类别之间的比较数据	      df.plot(kind='bar')
+- 水平柱状图	与柱状图类似，但柱子是水平的	df.plot(kind='barh')
+- 直方图	用于显示数据的分布（频率分布）	  df.plot(kind='hist')
+- 散点图	用于显示两个数值变量之间的关系	  df.plot(kind='scatter', x='col1', y='col2')
+- 箱线图	用于显示数据的分布、异常值及四分位数	df.plot(kind='box')
+- 密度图	用于显示数据的密度分布	            df.plot(kind='kde')
+- 饼图	用于显示各部分占总体的比例	          df.plot(kind='pie')
+- 区域图	用于显示累计数值的图表（类似于折线图，但填充了颜色）	df.plot(kind='area')
