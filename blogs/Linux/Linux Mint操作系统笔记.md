@@ -79,12 +79,11 @@ Linux Mint 官网截图
 
 在linux中如果有多个硬盘的话，linux一般会将多个硬盘识别为 /dev/sda,/dev/sab.....
 
-
-1. 先选择设备列表中的磁盘，例如dev/sda。如果硬盘中已经存在分区，可以先删除后，在重新在硬盘中建立新的分区。
+1. 先选择一个设备列表中的磁盘，作为系统盘，类似windows系统的C盘，例如dev/sda。如果硬盘中已经存在分区，可以先删除后，在重新在硬盘中建立新的分区。
 
 ![linux_20250313161929.png](../blog_img/linux_20250313161929.png)
 
-2. 创建 EFI 系统分区：这是 UEFI 系统的必选分区。 它将保存由 UEFI 固件启动的 EFI 引导加载程序和驱动程序。
+2. 在系统盘上创建 EFI 系统分区：这是 UEFI 系统的必选分区。 它将保存由 UEFI 固件启动的 EFI 引导加载程序和驱动程序。
 
 创建一个新的分区，设置 EFI 分区的属性：
 - 大小：100 ~ 500 MB
@@ -94,7 +93,7 @@ Linux Mint 官网截图
 
 ![linux_20250313163543.png](../blog_img/linux_20250313163543.png)
 
-3. 创建 SWAP 交换空间 分区：这个分区相当于虚拟内存。当实际内存即将用完的时候，会启用虚拟内存。平时不启用。
+3. 在系统盘上创建 SWAP 交换空间 分区：这个分区相当于虚拟内存。当实际内存即将用完的时候，会启用虚拟内存。平时不启用。
 
 创建一个新的分区，设置 SWAP 交换空间 分区的属性：
 - 大小：推荐与内存大小相同。
@@ -104,7 +103,7 @@ Linux Mint 官网截图
 
 ![linux_20250313163826.png](../blog_img/linux_20250313163826.png)
 
-4. 创建 保留 BIOS 启动区域 分区：这个分区用于存储BIOS程序代码。当主板的BIOS损坏的时候，用这个可以代替。
+4. 在系统盘上创建创建 BIOS 启动区域 分区：这个分区用于存储BIOS程序代码。当主板的BIOS损坏的时候，用这个可以代替。
 
 创建一个新的分区，设置 保留 BIOS 启动区域 分区的属性：
 - 大小：1 MB
@@ -114,7 +113,7 @@ Linux Mint 官网截图
 
 ![linux_20250313164021.png](../blog_img/linux_20250313164021.png)
 
-5. 创建 根分区: 根分区就是根目录所在的磁盘位置。
+5. 在系统盘上创建 根分区: 根分区就是根目录所在的磁盘位置。
 
 创建一个新的分区，设置根分区的属性：
 - 大小：剩余的所有空闲空间
@@ -126,6 +125,9 @@ Linux Mint 官网截图
 ![linux_20250313164328.png](../blog_img/linux_20250313164328.png)
 
 6. 创建好所有分区后，点击现在安装。
+
+
+<font color="red">PS：当我们选择一个磁盘作为系统盘之后，linux的系统文件都会在这个系统盘上。其他磁盘会以目录的形式挂载到/dev目录下。</font>
 
 
 > 第七步： 选择当前时区，创建用户账户
@@ -177,6 +179,180 @@ Linux Mint 自带的「驱动管理器」可以自动检测电脑中的硬件，
 
 ### 安装中文 pingyin 输入法
 
-选择Linux中的输入法设置，按图所示安装中文 pingyin 输入法
+在Linux mint 系统设置中找到输入法设置，按图所示安装中文 pingyin 输入法
 
 ![linux_20250313165150.png](../blog_img/linux_20250313165150.png)
+
+### 设置桌面图标不自动排列
+
+默认情况下，桌面的快捷方式图标是自动排列的。如果我们想要将桌面的快捷方式图标进行自由摆放的话。需要如下设置。
+
+在桌面点击右键，选择自定义。进入到显示器布局设置。将自动排列选项关闭即可。
+
+![linux_20250314092008.png](../blog_img/linux_20250314092008.png)
+
+### 安装git 和 SmartGit客户端
+
+Linux Mint 基于 Ubuntu，因此可以使用 apt 包管理器来安装 Git。
+
+安装Git
+
+```sh
+# 先更新软件包列表，获取最新的软件信息
+sudo apt update
+
+# 安装git
+sudo apt install git
+
+# 查询git版本
+git --version
+```
+
+安装SmartGit客户端
+
+1. 进入到 SmartGit 官网，下载SmartGit deb安装包
+2. 可以通过linux mint的图像化安装界面，直接安装。
+3. 运行 SmartGit
+
+![linux_20250314102524.png](../blog_img/linux_20250314102524.png)
+![linux_20250314103136.png](../blog_img/linux_20250314103136.png)
+
+
+### 安装向日葵远程控制
+
+先进入到向日葵官网，下载向日葵的linux版本安装包
+
+由于linux mint是基于ubuntu系统的，因此下载ubuntu系统的版本的向日葵软件包即可。可以选择图像界面版本的。
+![linux_20250314104332.png](../blog_img/linux_20250314104332.png)
+
+```sh
+# 安装软件包
+sudo dpkg -i SunloginClient_15.2.0.63064_amd64.deb
+
+# 安装完成后，启动命令
+/usr/local/sunlogin/bin/sunloginclient
+
+# 卸载命令
+sudo dpkg -r sunloginclient
+```
+
+当向日葵安装完成后，可以在系统的程序面板中找到它，将其添加到桌面即可。
+
+![linux_20250314113006.png](../blog_img/linux_20250314113006.png)
+
+> 无法安装的解决办法
+
+情况①：若安装的过程中 缺少依赖包。执行下面命令，然后重新安装即可。
+
+```sh
+# 用于修复软件包依赖关系并自动安装缺失依赖的命令
+# -f（--fix-missing） 修复依赖包
+# -y（--yes） 自动确认
+sudo apt-get install -f -y
+```
+
+情况②：若使用`sudo apt-get install -f -y`命令，提示有几个软件包无法下载。
+
+```sh
+# 更新软件包列表
+sudo apt-get update
+
+# 重新修复
+sudo apt-get install -f -y
+```
+
+情况③：若`sudo apt-get update` 更新失败。则可能需要更换软件源，才能下载缺失的依赖包。
+
+```sh
+# 编辑文件
+sudo vim /etc/apt/sources.list.d/official-package-repositories.list
+
+# 添加下面内容
+# 以 Linux Mint 21.x 为例，基于 Ubuntu 22.04
+deb https://mirrors.tuna.tsinghua.edu.cn/linuxmint jammy main upstream import backport
+deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu jammy main restricted universe multiverse
+deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu jammy-updates main restricted universe multiverse
+deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu jammy-backports main restricted universe multiverse
+deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu jammy-security main restricted universe multiverse
+
+# 更新软件源
+sudo apt update
+```
+
+### 安装vim
+
+在linux mint22 自带的软件管理器中搜索vim,下载安装即可。
+
+### 安装docker
+
+1. 先卸载旧版本docker 或者 任何可能冲突的软件包。
+
+```sh
+# 执行以下命令卸载所有冲突的软件包
+for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do sudo apt-get remove $pkg; done
+```
+
+2. 在安装docker之前，需要先安装依赖软件包
+
+```sh
+sudo apt update
+sudo apt install apt-transport-https ca-certificates curl gnupg
+```
+
+3. 添加 Docker 官方 GPG 密钥
+
+将 Docker GPG 存储库密钥导入Mint 系统中。用于验证下载的软件包的完整性和真实性
+
+```sh
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker.gpg
+
+# 如果上面命令执行失败，则执行这个命令试试看
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+```
+
+<font color="red">注意两个命令中的文件名称不一样，一个是docker.gpg 一个是docker-archive-keyring.gpg</font>
+
+4. 添加 Docker 软件源
+
+由于 Linux Mint 22.1 基于 Ubuntu 24.04（代号 noble），因此需要添加 Docker 的 APT 软件包源如下。
+
+<font color="red">注意两个命令中的文件名称不一样，一个是docker.gpg 一个是docker-archive-keyring.gpg</font>
+
+```sh
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu noble stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+# 如果上一步用的是第二个命令，则这一步也用第二个命令。
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu noble stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+# 刷新软件包列表
+sudo apt update
+```
+
+ APT 软件包源新增了两个docker软件源
+![linux_20250314161846.png](../blog_img/linux_20250314161846.png)
+
+
+5. 在 Linux Mint 22 上安装 Docker
+
+```sh
+sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+```
+
+该命令会按照下面的Docker组件：
+- docker-ce：Docker 引擎本身。
+- docker-ce-cli ：一个命令行工具，可让您与 Docker 守护程序通信。
+- `containerd.io` ：管理容器生命周期的容器运行时。
+- docker-buildx-plugin：Docker 的这个扩展增强了构建镜像的能力，主要集中在多平台构建上。
+- docker-compose-plugin：一个配置管理插件，可帮助使用单个 YAML 文件管理多容器 Docker 应用程序。
+
+6. 检查docker版本并设置docker 开机自启动
+
+```sh
+# docker版本查询
+docker version  
+
+# 设置开机启动
+sudo systemctl is-active docker
+```
+
+![linux_20250314172903.png](../blog_img/linux_20250314172903.png)
