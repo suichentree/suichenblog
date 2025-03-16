@@ -283,6 +283,61 @@ sudo apt update
 
 在linux mint22 自带的软件管理器中搜索vim,下载安装即可。
 
+### 安装微信
+
+目前微信也推出了linux的版本。网址：`https://linux.weixin.qq.com/`
+
+下载微信的deb软件包，使用linux mint 自带软件管理器安装即可。
+
+### 安装网易云音乐
+
+1. 下载 网易云音乐的linux 安装包 
+
+下载链接：`https://d1.music.126.net/dmusic/netease-cloud-music_1.2.1_amd64_ubuntu_20190428.deb`
+
+2. 安装
+
+```sh
+sudo dpkg -i netease-cloud-music_1.2.1_amd64_ubuntu_20190428.deb
+```
+
+3. 修改配置
+
+当执行完安装命令之后，应用还无法打开。需要去修改配置文件才行。
+
+```sh
+## 打开文件
+sudo vim /usr/bin/netease-cloud-music
+
+
+## 编辑文件内容
+
+#!/bin/sh
+HERE="$(dirname "$(readlink -f "${0}")")"
+export LD_LIBRARY_PATH="${HERE}"/libs
+export QT_PLUGIN_PATH="${HERE}"/plugins 
+export QT_QPA_PLATFORM_PLUGIN_PATH="${HERE}"/plugins/platforms
+cd /lib/x86_64-linux-gnu/  ##添加这行代码
+exec "${HERE}"/netease-cloud-music $@
+```
+
+4. 运行网易云音乐
+
+![linux_202503152337.png](../blog_img/linux_202503152337.png)
+
+
+### 安装 samba服务 共享文件夹
+
+Samba 是在 Linux 和 Unix 系统上实现 SMB/CIFS 协议的一个免费软件，它可以让 Linux 系统与 Windows 系统之间进行文件和打印机共享。
+
+```sh
+sudo apt update
+
+# 安装samba服务
+sudo apt install samba
+
+```
+
 ### 安装docker
 
 1. 先卸载旧版本docker 或者 任何可能冲突的软件包。
@@ -304,33 +359,30 @@ sudo apt install apt-transport-https ca-certificates curl gnupg
 将 Docker GPG 存储库密钥导入Mint 系统中。用于验证下载的软件包的完整性和真实性
 
 ```sh
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker.gpg
-
-# 如果上面命令执行失败，则执行这个命令试试看
+# 添加Docker 官方 GPG 密钥（国内可能无法访问）
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+
+# 添加阿里云 搭建的 docker 的 GPG 密钥
+curl -fsSL http://mirrors.aliyun.com/docker-ce/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
 ```
 
-<font color="red">注意两个命令中的文件名称不一样，一个是docker.gpg 一个是docker-archive-keyring.gpg</font>
 
 4. 添加 Docker 软件源
 
 由于 Linux Mint 22.1 基于 Ubuntu 24.04（代号 noble），因此需要添加 Docker 的 APT 软件包源如下。
 
-<font color="red">注意两个命令中的文件名称不一样，一个是docker.gpg 一个是docker-archive-keyring.gpg</font>
+<font color="red">注意命令中的是noble stable。与ubuntu的代号有关。</font>
 
 ```sh
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu noble stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-# 如果上一步用的是第二个命令，则这一步也用第二个命令。
+# 添加官方的 Docker 软件源（国内可能无法访问）
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu noble stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+# 添加阿里云的 Docker 软件源
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] http://mirrors.aliyun.com/docker-ce/linux/ubuntu noble stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
 # 刷新软件包列表
 sudo apt update
 ```
-
- APT 软件包源新增了两个docker软件源
-![linux_20250314161846.png](../blog_img/linux_20250314161846.png)
-
 
 5. 在 Linux Mint 22 上安装 Docker
 
@@ -356,3 +408,26 @@ sudo systemctl is-active docker
 ```
 
 ![linux_20250314172903.png](../blog_img/linux_20250314172903.png)
+
+#### 有时候无法下载某个国内镜像，可以修改 Docker 配置文件
+
+使用文本编辑器打开 /etc/docker/daemon.json 文件，如果该文件不存在则创建它。
+
+文件内容如下，下面的链接都算能够访问的。否则就进行替换。
+
+```json
+{
+    "registry-mirrors": [
+        "https://docker-0.unsee.tech",
+        "https://docker-cf.registry.cyou",
+        "https://docker.1panel.live",
+        "https://hub.fast360.xyz"
+    ]
+}
+```
+
+然后重启docker服务，让配置生效。
+
+```sh
+sudo systemctl restart docker
+```

@@ -965,21 +965,23 @@ docker volume create portainer_data
 
 ```shell
 # 创建并启动portainer-ce容器
-docker run -d -p 8000:8000 -p 9443:9443 --name portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce:latest
+docker run -d -p 38000:8000 -p 39443:9443 --name portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce:latest
 
 # 检查容器是否运行
 docker ps
 
 ## 参数介绍
 -d #容器在后台运行
--p 9000:9000 #宿主机9000端口映射容器中的9000端口
+
+-p 38000:8000  #宿主机的38000端口映射容器的8000端口
+-p 39443:9443  #宿主机39443端口映射容器中的9443端口
 -v /var/run/docker.sock:/var/run/docker.sock # 把宿主机的Docker守护进程(docker daemon)默认监听的Unix域套接字挂载到容器中
 -v portainer_data:/data  #把宿主机目录 /portainer 挂载到容器 /data 目录；
 –name portainer # 指定运行容器的名称
 portainer/portainer-ce:latest #镜像的全称
 ```
 
-4. 浏览器登录portainer的管理界面`https://localhost:9443`
+4. 浏览器登录portainer的管理界面`https://localhost:39443`
 
 初次登录需要先创建管理员账户。
 ![docker_20231024011143.png](../blog_img/docker_20231024011143.png)
