@@ -338,6 +338,22 @@ sudo apt install samba
 
 ```
 
+### 安装 SSH 服务
+
+Samba 是在 Linux 和 Unix 系统上实现 SMB/CIFS 协议的一个免费软件，它可以让 Linux 系统与 Windows 系统之间进行文件和打印机共享。
+
+```sh
+# 检查ssh服务是否已经安装了。如果没有输出结果，说明 SSH 服务未安装
+dpkg -l | grep openssh-server 
+
+sudo apt update
+
+# 安装ssh服务
+sudo apt install openssh-server
+
+```
+
+
 ### 安装docker
 
 1. 先卸载旧版本docker 或者 任何可能冲突的软件包。
