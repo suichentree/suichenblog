@@ -184,6 +184,18 @@ CrystalDiskInfo 是一款免费开源的硬盘健康监测工具，主要通过�
 
 [CrystalDiskInfo 下载链接 https://crystalmark.info/en/software/crystaldiskinfo/](https://crystalmark.info/en/software/crystaldiskinfo/)
 
+### git 代码管理
+
+下载git 并安装
+
+[git 官网 https://git-scm.com/](https://git-scm.com/)
+
+### vscode 轻量级文本编辑器
+
+安装vscode
+
+[vscode 官网 https://code.visualstudio.com/](https://code.visualstudio.com/)
+
 ### docker desktop
 
 docker desktop 是 docker 在 windows系统上的一站式解决方案。可以通过它来更加快捷方便的使用docker。
@@ -191,6 +203,10 @@ docker desktop 是 docker 在 windows系统上的一站式解决方案。可以�
 [docker desktop 下载地址 https://www.docker.com/products/docker-desktop/](https://www.docker.com/products/docker-desktop/)
 
 > 安装 docker desktop
+
+1. 先再电脑上开启Hyper-v和wsl功能。然后重启电脑。
+
+2. 点击安装下载好的docker desktop即可。
 
 
 
