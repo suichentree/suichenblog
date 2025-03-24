@@ -184,9 +184,13 @@ CrystalDiskInfo 是一款免费开源的硬盘健康监测工具，主要通过�
 
 [CrystalDiskInfo 下载链接 https://crystalmark.info/en/software/crystaldiskinfo/](https://crystalmark.info/en/software/crystaldiskinfo/)
 
-### 安装 docker desktop
+### docker desktop
 
-docker desktop 是 docker 在 windows系统上的docker开发工具。可以通过它来更具快捷方便的使用docker。
+docker desktop 是 docker 在 windows系统上的一站式解决方案。可以通过它来更加快捷方便的使用docker。
 
-[docker desktop 下载地址 ]()
+[docker desktop 下载地址 https://www.docker.com/products/docker-desktop/](https://www.docker.com/products/docker-desktop/)
+
+> 安装 docker desktop
+
+
 

@@ -3153,3 +3153,5 @@
 [0324/162411:WARNING:quota_manager.cc(1833)] Create directory failed for path
 [0324/165411:WARNING:quota_manager.cc(1833)] Create directory failed for path
 [0324/172411:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0324/174152:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
+[0324/175411:WARNING:quota_manager.cc(1833)] Create directory failed for path
