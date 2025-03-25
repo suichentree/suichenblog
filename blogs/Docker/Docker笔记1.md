@@ -86,6 +86,31 @@ Docker客户端是与Docker服务端进行交互的主要方式。当使用docke
 
 ## windows 安装 docker
 
+① 在安装 Docker Desktop 之前，首先需要开启主板的 CPU 虚拟化功能。
+
+1. 重启电脑，进入主板的bios系统。
+2. 如果是 Intel 处理器，启用 Intel VT-x 选项。
+
+① 在电脑上打开“控制面板”->“程序”-> “启动或关闭Windows功能”。
+
+![blog_20250325100130.png](../blog_img/blog_20250325100130.png)
+
+② 勾选如下内容。
+
+![blog_20250325102516.png](../blog_img/blog_20250325102516.png)
+![blog_20250325102542.png](../blog_img/blog_20250325102542.png)
+
+③ 双击安装docker desktop安装包
+
+④ 安装完成启动程序之后，一般会报错。此时我们需要更新wsl版本。
+
+打开PowerShell，选择以管理员身份运行 PowerShell。输入以下命令并回车即可。
+```sh
+wsl --update
+```
+
+⑤ wsl版本更新之后，就能正常使用docker desktop了。
+
 直接在docker官网上搜索Docker Desktop on Windows应用程序安装到本机即可。其他自行百度。
 
 Docker Desktop on Windows应用程序的首页截图
@@ -106,9 +131,9 @@ Docker Desktop on Windows这个应用程序会在windows环境上虚拟一个lin
 ```js
 {
   "registry-mirrors": [
-    "https://ustc-edu-cn.mirror.aliyuncs.com/",
+    "https://docker.1ms.run",
+    "https://docker.xuanyuan.me",
     "https://ccr.ccs.tencentyun.com/",
-    "https://docker.m.daocloud.io/"
   ]
 }
 ```

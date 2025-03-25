@@ -146,9 +146,15 @@ windows系统默认不显示文件的文件扩展名。
 
 [360压缩下载地址 https://yasuo.360.cn/](https://yasuo.360.cn/)
 
+![blog_20250325110426.png](../blog_img/blog_20250325110426.png)
+
 ### 向日葵 远程控制
 
 用于远程控制，无需公网IP。
+
+向日葵网站：https://sunlogin.oray.com/
+
+![blog_20250325110456.png](../blog_img/blog_20250325110456.png)
 
 ### potplayer 视频播放器
 
@@ -160,11 +166,15 @@ windows系统默认不显示文件的文件扩展名。
 
 国内下载一些文件，特别是一些冷门文件，还是需要用到迅雷。
 
+迅雷网站：https://dl.xunlei.com/
+
+![blog_20250325110600.png](../blog_img/blog_20250325110600.png)
+
 ### Everything 文件搜索
 
 Everything 是一个非常好用的文件搜索工具。
 
-[Everything 官网 https://www.voidtools.com/zh-cn/](https://www.voidtools.com/zh-cn/)
+Everything 官网 https://www.voidtools.com/zh-cn/
 
 ![blog_20250324115630.png](../blog_img/blog_20250324115630.png)
 
@@ -172,7 +182,7 @@ Everything 是一个非常好用的文件搜索工具。
 
 FastCopy是Windows上最快的复制/备份软件
 
-[FastCopy 官网 https://fastcopy.jp/](https://fastcopy.jp/)
+FastCopy 官网 https://fastcopy.jp
 
 ![blog_20250324153443.png](../blog_img/blog_20250324153443.png)
 
@@ -182,31 +192,69 @@ CrystalDiskInfo 是一款免费开源的硬盘健康监测工具，主要通过�
 
 通过 CrystalDiskInfo，可直观掌握硬盘状态，及时采取措施保护数据安全。
 
-[CrystalDiskInfo 下载链接 https://crystalmark.info/en/software/crystaldiskinfo/](https://crystalmark.info/en/software/crystaldiskinfo/)
+CrystalDiskInfo下载链接 https://crystalmark.info/en/software/crystaldiskinfo/
+
+![blog_20250325110815.png](../blog_img/blog_20250325110815.png)
 
 ### git 代码管理
 
 下载git 并安装
 
-[git 官网 https://git-scm.com/](https://git-scm.com/)
+git 官网 https://git-scm.com/
+
+![blog_20250325110913.png](../blog_img/blog_20250325110913.png)
 
 ### vscode 轻量级文本编辑器
 
-安装vscode
+vscode 轻量级文本编辑器。这个编辑器也相当于是一个轻量级的IDE，可以编写各种代码。
 
-[vscode 官网 https://code.visualstudio.com/](https://code.visualstudio.com/)
+vscode 官网 https://code.visualstudio.com/
+
+![blog_20250325110952.png](../blog_img/blog_20250325110952.png)
 
 ### docker desktop
 
 docker desktop 是 docker 在 windows系统上的一站式解决方案。可以通过它来更加快捷方便的使用docker。
 
-[docker desktop 下载地址 https://www.docker.com/products/docker-desktop/](https://www.docker.com/products/docker-desktop/)
+docker desktop 下载地址 https://www.docker.com/products/docker-desktop/
+
+![blog_20250325105010.png](../blog_img/blog_20250325105010.png)
 
 > 安装 docker desktop
 
-1. 先再电脑上开启Hyper-v和wsl功能。然后重启电脑。
+① 在安装 Docker Desktop 之前，首先需要开启主板的 CPU 虚拟化功能。
 
-2. 点击安装下载好的docker desktop即可。
+1. 重启电脑，进入主板的bios系统。
+2. 如果是 Intel 处理器，启用 Intel VT-x 选项。
+
+① 在电脑上打开“控制面板”->“程序”-> “启动或关闭Windows功能”。
+
+![blog_20250325100130.png](../blog_img/blog_20250325100130.png)
+
+② 勾选如下内容。
+
+![blog_20250325102516.png](../blog_img/blog_20250325102516.png)
+![blog_20250325102542.png](../blog_img/blog_20250325102542.png)
+
+③ 双击安装docker desktop安装包
+
+④ 安装完成启动程序之后，一般会报错。此时我们需要更新wsl版本。
+
+打开PowerShell，选择以管理员身份运行 PowerShell。输入以下命令并回车即可。
+```sh
+wsl --update
+```
+
+⑤ wsl版本更新之后，就能正常使用docker desktop了。
+
+![docker_20240620171350.png](../blog_img/docker_20240620171350.png)
+
+⑥ docker desktop这个应用程序会在windows环境上虚拟一个linux环境，然后在linux环境中再安装docker。
+
+打开windows的CMD终端。输入`docker -v`命令，可以看到安装的docker的版本
+
+![docker_20240620171538.png](../blog_img/docker_20240620171538.png)
+
 
 
 
