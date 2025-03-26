@@ -138,7 +138,35 @@ windows系统默认不显示文件的文件扩展名。
 
 ![blog_20250324161217.png](../blog_img/blog_20250324161217.png)
 
+### smb共享
+
+对于某些视频目录，我们可以将其设置为共享目录。从而可以让局域网中的其他设备访问该目录。达到远程访问的效果。
+
+方法：选中该目录，点击右键属性，设置共享即可。
+
 ## 应用
+
+### 网易云音乐 
+
+网易云音乐官网：https://music.163.com/
+
+![ruankao_20250326215859.png](../blog_img/ruankao_20250326215859.png)
+
+### WPS 办公三件套 和 PDF阅读器
+
+WPS的办公三件套有时候还是很有用的。WPS也可以作为PDF阅读器使用。
+
+WPS 官网：https://www.wps.cn/
+
+![ruankao_20250326215648.png](../blog_img/ruankao_20250326215648.png)
+
+### Snipaste 截图工具
+
+Snipaste是一个好用的截图工具。
+
+Snipaste官网：https://zh.snipaste.com/index.html
+
+![ruankao_20250326215021.png](../blog_img/ruankao_20250326215021.png)
 
 ### 360压缩
 
@@ -185,6 +213,14 @@ FastCopy是Windows上最快的复制/备份软件
 FastCopy 官网 https://fastcopy.jp
 
 ![blog_20250324153443.png](../blog_img/blog_20250324153443.png)
+
+### Diskgenius 硬盘分区工具
+
+Diskgenius 可以专门用于硬盘的分区和数据恢复等功能。
+
+Diskgenius官网：https://www.diskgenius.cn/
+
+![ruankao_20250326215610.png](../blog_img/ruankao_20250326215610.png)
 
 ### 硬盘检测工具 CrystalDiskInfo
 
