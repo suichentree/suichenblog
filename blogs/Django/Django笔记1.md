@@ -63,11 +63,11 @@ pip install Django
 
 安装Django之后，会默认安装 django-admin 命令行管理工具。
 
-django-admin 命令行管理工具可以帮助开发者很方便的管理Django项目。
+django-admin 命令行管理工具可以帮助开发者很方便的管理和开发Django项目。
 
-### 创建 Django 项目
+### 第一个 Django 项目
 
-① 创建第一个Django项目
+① 创建Django项目
 
 ```shell
 # 语法
@@ -82,13 +82,12 @@ django-admin会创建一个项目目录。如下图所示。
 ![python_20240426205744.png](../blog_img/python_20240426205744.png)
 ![python_20240426205805.png](../blog_img/python_20240426205805.png)
 
-- manage.py: 一个命令行工具，可以与该 Django 项目进行交互。
+- manage.py: 一个命令行文件，可以与该 Django 项目进行交互。
 - `__init__`.py: 一个空文件，告诉 Python 该目录是一个 Python 包。
 - asgi.py: 一个 ASGI 兼容的 Web 服务器的入口，以便运行你的项目。
-- settings.py: 该 Django 项目的设置/配置。
-- urls.py: 该 Django 项目的 URL 声明; 一份由 Django 驱动的网站"目录"。
+- settings.py: 该 Django 项目的配置文件。
+- urls.py: 该 Django 项目的 URL 路由文件。
 - wsgi.py: 一个 WSGI 兼容的 Web 服务器的入口，以便运行你的项目。
-
 
 ② 运行该Django项目
 
@@ -103,6 +102,58 @@ python manage.py runserver
 
 浏览器访问`http://127.0.0.1:8000/`。首页如下图所示
 ![python_20240427130455.png](../blog_img/python_20240427130455.png)
+
+③ 创建一个Django应用
+
+通常一个Django项目中会有多个子应用，类似功能模块的概念。
+
+```py
+# 创建一个名为app01的应用
+python manage.py startapp app01
+```
+
+创建子应用会在项目目录中新增一个python包。包中有一些相关文件。
+![django_20250411153850.png](../blog_img/django_20250411153850.png)
+
+④ 定义数据库模型
+
+在 app01/models.py 中定义相关的数据库模型。
+
+```py
+from django.db import models
+
+class Post(models.Model):
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+    pub_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
+```
+
+⑤ 执行命令创建数据库表
+
+```py
+python manage.py makemigrations
+python manage.py migrate
+```
+
+⑥ 创建视图方法
+
+在app01/views.py中创建视图方法
+
+```py
+from django.shortcuts import render
+from .models import Post
+
+def post_list(request):
+    posts = Post.objects.all()
+    return render(request, 'myapp/111.html', {'posts': posts})
+```
+
+⑦ 创建页面
+
+
 
 
 
