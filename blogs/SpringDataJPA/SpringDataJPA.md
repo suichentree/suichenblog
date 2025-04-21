@@ -354,11 +354,6 @@ public interface Repository<T, ID extends Serializable> {
 
 ## 4.在XxxRepsotory 接口中编写CRUD方法（CRUD方法编写具有一定的规则）：
 
-<h3><font color="red">Spring data jpa支持的关键字：</font></h3>
-
-![spring_data_jpa_3.png](../blog_img/springdata_img_spring_data_jpa_3.png)
-![spring_data_jpa_4.png](../blog_img/springdata_img_spring_data_jpa_4.png)
-
 ### 1.使用关键字的方式定义方法名：
 
 ```java
