@@ -3196,3 +3196,10 @@
 [0327/164455:INFO:http_cache_transaction.cc(72)] IgnoreZeroCacheError: 0
 [0327/164457:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
 [0328/091040:ERROR:browser_gpu_channel_host_factory.cc(119)] Failed to launch GPU process.
+[0512/165134:INFO:http_cache_transaction.cc(72)] IgnoreZeroCacheError: 0
+[0512/165135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0512/165135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0512/165135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0512/165218:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
+[0512/172135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0512/174034:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
