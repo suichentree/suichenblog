@@ -3203,3 +3203,50 @@
 [0512/165218:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
 [0512/172135:WARNING:quota_manager.cc(1833)] Create directory failed for path
 [0512/174034:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
+[0512/174708:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
+[0512/175135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0512/182135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0512/185135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0512/192135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0512/195135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0512/202135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0512/205135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0512/212135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0512/215135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0512/222135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0512/225135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0512/232135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0512/235135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0513/002135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0513/005135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0513/012135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0513/015135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0513/022135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0513/025135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0513/032135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0513/035135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0513/042135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0513/045135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0513/052135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0513/055135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0513/062135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0513/065135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0513/072135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0513/075135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0513/082135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0513/085135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0513/092018:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0513/092018:ERROR:waituntilobserver.cpp(144)] NOT IMPLEMENTED
+[0513/092029:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
+[0513/092135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0513/095135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0513/102135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0513/105135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0513/112135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0513/115135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0513/122135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0513/125135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0513/132135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0513/135135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0513/142135:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0513/145135:WARNING:quota_manager.cc(1833)] Create directory failed for path
