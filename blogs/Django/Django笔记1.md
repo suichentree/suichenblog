@@ -79,6 +79,19 @@ python manage.py runserver
 浏览器访问`http://127.0.0.1:8000/`。如下图所示
 ![django_20250612164929.png](../blog_img/django_20250612164929.png)
 
+③ 创建子工程(子应用)
+
+当Django工程创建完之后，我们还需要写正式的业务代码。通常一个Django工程中可以有多个子工程，根据业务的不同，创建不同的子工程。类似功能模块的概念。
+
+```py
+# 创建一个名为app01的子应用
+python manage.py startapp app01
+```
+
+会在当前的Django工程目录中新增一个子目录作为app01子工程。如图是子工程的目录结构
+
+![django_20250613165604.png](../blog_img/django_20250613165604.png)
+
 
 ## Django的MTV架构模式
 
@@ -99,13 +112,9 @@ MVC 架构由三个主要组件组成：模型（Model）、视图（View）和�
 
 Django 的 MTV 模式和 传统的MVC模式 本质上是一样的，都是为了各组件间保持松耦合关系，只是定义上有些许不同，Django 的 MTV 分别是指。
 
-- M 模型（Model）：与 MVC中的模型类似，负责与数据库交互。模型通常是 models.py 中定义的类。
-- T 模板 (Template)：Django 将传统 MVC 中的“视图”部分（负责显示数据）拆分成了模板和视图两个部分。模板负责数据的展示与布局。
-    - 模板是 HTML 文件，并使用 Django 的模板语言（DTL）来动态填充数据。
-    - 模板定义了 Web 页面中的 HTML、CSS、JavaScript 结构和样式，并通过占位符动态显示模型中的数据。
-- V 视图（View）：在 Django 中视图就是MVC模式中的控制器，接收 HTTP 请求并返回 HTTP 响应。
-    - 视图是一个函数或类，通常包含业务逻辑，决定如何处理输入、验证表单数据、调用模型更新数据库等。
-    - 视图的作用是获取模型中的数据，填充到模板中，并返回给用户。
+- M 模型（Model）：与 MVC中的模型类似，负责与数据库交互。
+- T 模板 (Template)：模板负责数据的展示与布局。模板是 HTML 文件，并使用 Django 的模板语言（DTL）来动态填充数据。
+- V 视图（View）：视图是一个函数或类，通常包含业务逻辑，决定如何处理输入、验证表单数据、调用模型更新数据库等。在 Django 中视图就是MVC模式中的控制器，接收 HTTP 请求并返回 HTTP 响应。
 
 
 > 对应关系如表格所示
@@ -117,32 +126,117 @@ Django 的 MTV 模式和 传统的MVC模式 本质上是一样的，都是为了
 | Controller（控制器） | View（视图） | 
 
 
-除了以上三层之外，还有一个 URL 控制器，它的作用是将一个个 URL 的请求分发给不同的 View视图处理，View视图再调用相应的 Model模型 和 Template模板。
+除了以上三层之外，还有一个 URL 路由控制器，它的作用是将一个个 URL 的请求分发给不同的 View视图处理，View视图再调用相应的 Model模型 和 Template模板。
 
 大致操作流程如下
 ![python_20240427125050.png](../blog_img/python_20240427125050.png)
 
-1. 用户通过浏览器输入URL访问视图函数
-2. 如果不涉及到数据调用，视图直接返回一个模板给用户。
-3. 如果涉及到数据调用，视图先调用模型数据，然后把模型数据填充到模板中，最后返回给用户。
+### 模型（Model）
 
+在 Django 中，模型是对数据库表的抽象。每个模型类对应一个数据库表，每个类的属性对应数据库表中的字段。
 
+每个模型类的定义都需要先继承自 django.db.models.Model 类。这样 Django 才能知道这个类是一个模型类，并且知道这个类的一些属性。
 
-
-
-
-
-③ 创建子工程
-
-通常一个Django工程中会有多个子工程，类似功能模块的概念。
-
+示例如下
 ```py
-# 创建一个名为app01的应用
-python manage.py startapp app01
+from django.db import models
+# 定义一个User模型类，以及模型类中的一些属性。
+class User(models.Model):
+    id = models.IntegerField(primary_key=True)
+    name = models.CharField(max_length=100)
+    phone = models.CharField(max_length=100)
+    idCard = models.CharField(max_length=100)
+    create_time = models.DateTimeField(auto_now_add=True)
+
 ```
 
-创建子应用会在项目目录中新增一个python包。包中有一些相关文件。
-![django_20250411153850.png](../blog_img/django_20250411153850.png)
+- 上面代码中定义一个模型类，该类对应数据库中的一个表。
+- 每个模型类都可以有主键属性，它是一个自增的整数，用于对应表中主键列。主键属性的名称通常是 id。
+- 每个模型类可以定义多个属性，每个属性对应数据库表中的一个列。
+- 每个属性都有一个名称，用于标识该列。属性的名称通常是小写字母，多个单词之间用下划线分隔。
+- 每个属性都可以有一些选项，用于指定该属性的默认配置，例如最大长度、是否为空等。
+- 每个属性的数据类型可以是：
+  - 整数（IntegerField）
+  - 字符串（CharField、TextField）
+  - 日期时间（DateTimeField、DateField、TimeField）
+  - 布尔值（BooleanField）
+  - 浮点数（FloatField、DecimalField）
+  - 文件（FileField、ImageField）
+  - 关系字段（ForeignKey、ManyToManyField、OneToOneField）
+  
+
+### 视图（View）
+
+视图是一个函数或类，通常包含业务逻辑，决定如何处理输入、验证表单数据、调用模型更新数据库等。
+
+示例如下
+```py
+from django.shortcuts import render
+from .models import User
+
+def get_user_data(request, user_id):
+    user = User.objects.get(id=user_id)
+    return render(request, 'user.html', {'user': user})
+```
+
+视图函数get_user_data接受一个 HTTP 请求对象 request 和一个参数 user_id。通过 user_id 从数据库中获取用户信息，并将用户信息传递给模板user_profile.html进行渲染。
+
+
+### 模板（Template）
+
+模板负责数据的展示与布局。模板本质上就是页面,即html文件。模板使用 Django 的模板语言（DTL）来动态填充数据到页面中。
+
+创建一个模板
+1. 在Django工程中新建一个 templates 目录。并创建一个模板文件 user.html.
+2. 编辑模板文件 user.html.
+
+示例
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <h1>ID {{ user.id }}!</h1>
+    <h1>姓名 {{ user.name }}!</h1>
+    <h1>电话 {{ user.phone }}!</h1>
+    <h1>ID {{ user.idCard }}!</h1>
+    <h1>邮箱 {{ user.email }}!</h1>
+</body>
+</html>
+```
+
+模板会将根据视图返回的数据填充到HTML页面中，并动态生成全新的HTML页面。
+
+在HTML页面中，`{{ }}` 是占位符，表示从视图中传递过来的数据会被填充到这里,具体填充什么数据，根据占位符中参数而定。
+
+
+### URL 路由控制器
+
+Django 的 URL 路由控制器是其核心组件之一，它负责将用户的 HTTP 请求（即 URL）映射到相应的视图函数上。
+
+每当用户在浏览器中访问某个 URL 时，Django 会根据项目的 URL 配置文件（urls.py）来匹配对应的视图函数，并调用它来处理请求。
+
+在 Django 中，URL 路由配置通常位于 urls.py 文件中。这个文件定义了 URL 模式和它们对应的视图函数。
+
+示例如下
+```py
+from django.urls import path
+from app01 import views as app01_views
+
+urlpatterns = [
+    ## 将 user/ 路由 与 app01子应用的views文件中的get_user_data函数绑定
+    path('user/', app01_views.get_user_data(),name="get_user_data"),
+]
+```
+
+
+
+
+//////////////////////////////////////////////////////////////////
+
 
 ④ 定义数据库模型
 
@@ -187,23 +281,6 @@ def post_list(request):
 
 
 
-
-## Django 模板
-
-模板 (Template) 通常指的是未填充数据的视图页面。
-
-> 创建一个模板
-
-1. 在项目目录中新建一个 templates 目录。并创建一个模板文件 hello.html.
-2. 编辑模板文件 hello.html.
-
-```html
-
-```
-
-
-
-
 ## Django 模型
 
 Django 对各种数据库提供了很好的支持，包括：PostgreSQL、MySQL、SQLite、Oracle。Django 为这些数据库提供了统一的调用API。 
@@ -218,51 +295,6 @@ Django 可以使用自带的 ORM 描述对象和数据库之间的映射的元�
 
 ![python_20240427133356.png](../blog_img/python_20240427133356.png)
 
-### Django 使用 mysql 数据库
-
-① 先安装 mysql 数据库驱动。
-
-```shell
-# 通过pip包工具安装 mysql 数据库驱动 pymysql
-pip3 install pymysql
-```
-
-② 然后提前创建使用的数据库。并在项目的 settings.py 文件中进行数据库配置。
-
-```py
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',       # mysql数据库
-        'NAME': 'my_test',      # 数据库名称
-        'HOST': '127.0.0.1',    # 数据库地址，本机 ip 地址 127.0.0.1 
-        'PORT': 3306,           # 端口 
-        'USER': 'root',         # 数据库用户名
-        'PASSWORD': '123456',   # 数据库密码
-    }
-}
-```
-
-③ 设置该Django项目使用 pymysql 模块连接 mysql 数据库。
-
-```py
-# 在与 settings.py 同级目录下的 __init__.py 中引入pymysql模块并进行配置 
-import pymysql
-pymysql.install_as_MySQLdb()
-```
-
-### 定义模型
-
-Django 规定，如果某个Django项目要使用模型，必须要在当前项目中创建一个 app。
-
-1. 进入到Django项目中，创建模型
-
-```sh
-# 语法
-django-admin startapp 模型名称
-
-# 例子
-django-admin startapp StudentModel
-```
 
 
 
