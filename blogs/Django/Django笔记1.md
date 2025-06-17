@@ -190,69 +190,220 @@ class User(models.Model):
 
 ## 视图（View）
 
-视图是一个函数或类，通常包含业务逻辑，决定如何处理输入、验证表单数据、调用模型更新数据库等。
+视图本质是一个函数或类。主要作用是接收一个 request 对象，并返回一个 HttpResponse 或其他响应对象。
 
-### 基本视图函数
+视图的主要作用包含业务逻辑，决定如何处理输入、验证表单数据、调用模型更新数据库等。
 
-视图函数本质上就是一个普通的 Python 函数，接收一个 request 对象，并返回一个 HttpResponse 或其他响应对象。
-
+示例如下
 ```py
 from django.http import HttpResponse
 from django.shortcuts import render
  
 # 简单的视图函数
 def home(request):
+    # 返回一个HttpResponse响应对象
     return HttpResponse("Welcome to the home page!")
  
 # 使用模板的视图函数
 def about(request):
+    # render() 函数将一个模板页面包装为HttpResponse响应对象，并返回。   
     return render(request, 'about.html')
 
 ```
 
-在上面示例中，home() 视图函数直接返回了一个字符串。而 about() 视图函数则使用 render() 函数返回了一个模板。
+### request请求
 
-### 视图函数-request参数
+#### 获取请求的基本信息
 
-视图函数默认处理GET请求，还可以处理POST请求。可以根据请求类型进行不同的处理。
+视图函数的第一个参数用于接收路由发送过来的HTTP请求的相关信息。第一个参数的命名是任意的，通常取名为request
+
+部分代码示例如下
+```py
+def get_request_info(request):
+    print(request.method)   #获取请求方式
+    print(request.path)     #获取请求路径
+    print(request.headers)  #获取请求头
+    print(request.body)     #获取请求体
+    print(request.META)     #获取原生请求头
+
+    return HttpResponse("OK")
+```
+
+#### 获取GET请求中的URL路径参数数据
+
+由于GET请求没有请求体，因此GET请求的请求参数都在请求路径上。可以直接通过request.GET来获取请求路径上的参数。
+
+示例如下
+```py
+def get_request_info2(request):
+    ## 若是GET请求
+    if request.method == "GET":
+        print(request.GET) #获取请求路径上的请求参数
+
+        ##若一个请求的路径为`http://localhost:8000/app01/get_request/?a=1&b=2`。
+        ##则request.GET来获取请求路径上的参数为`{'a': ['1'], 'b': ['2']}`。
+
+        ## 或者 获取单个参数
+        print(request.GET.get('a'))
+        print(request.GET.get('b'))
+
+    return HttpResponse("OK")
+```
+
+#### 获取POST请求中的表单数据
+
+POST请求有请求体，请求体的数据有两种存储方式。一种是表单数据，一种是json数据。
+
+我们可以通过request.POST来获取请求体中的表据单数。
+
+示例如下
+```py
+def get_request_info(request):
+    ## 若是POST请求
+    if request.method == "POST":
+        print(request.POST) #获取请求体的表单数据
+
+    return HttpResponse("OK")
+```
+
+#### 获取POST请求中的json数据
+
+request.POST不能获取请求体中的json数据，只能通过request.POST来获取请求体中的表据单数。。
+
+示例如下
+```py
+import json
+
+def get_request_info(request):
+    print(request.body)  #获取请求体中的json数据
+
+    # 将请求体中的json数据转换为字典格式
+    print(json.loads(request.body))
+
+    return HttpResponse("OK")
+```
+
+#### 获取上传文件数据
 
 ```py
-from django.shortcuts import render
-from django.http import HttpResponse
- 
-def contact(request):
-    ## 判断请求类型
-    if request.method == 'POST':
-        ## 获取请求名称
-        name = request.POST.get('name')
-        ## 获取请求消息
-        message = request.POST.get('message')
-
-    return HttpResponse(f"111111")
+def get_request_info(request):
+    print(request.FILES)  #获取post请求上传的文件
+    return HttpResponse("OK")
 ```
 
 
-### 视图函数-其他请求参数
+#### 获取请求路径中的占位符参数
 
 视图函数还可以向模板传递动态数据。通过将数据传递给模板，模板中可以使用这些数据来进行动态渲染。
 
 ```py
-from django.shortcuts import render
-def get_user_data(request, user_id):
-    return render(request, 'user.html', {'user_id': user_id})
+# urls.py路由文件
+
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    # 传入占位符参数user_id
+    path('user/<int:user_id>/', views.user_detail),
+]
+
+# views.py视图文件
+
+# 视频函数接收路由中的路径参数
+def user_detail(request, user_id):
+    print(user_id)
 ```
 
 在上面示例中，get_user_data() 视图函数接收一个request请求参数和user_id参数。将user_id参数传递给模板。然后使用 render() 函数返回动态渲染后的模板。
 
-### 视图函数-重定向
+### HttpResponse对象
+
+django针对Http请求的响应，提供2种方式。
+- 方式1：响应内容：即直接响应数据给浏览器。
+    - 响应html内容,一般用于web前后端不分离的方式。
+    - 响应json内容，一般用于web前后端分离的方式。
+- 方式2：重定向。即返回页面跳转的信息给浏览器，让浏览器自行页面跳转。
+
 
 ```py
-from django.shortcuts import redirect
-def redirect_to_home(request):
-    return redirect('home')
+from django.http import HttpResponse
+import json
+
+def response_str(request):
+    # 返回文本数据
+    return HttpResponse("OK")
+
+def response_html(request):
+    # 返回html数据
+    return HttpResponse("<h1>html内容</h1>")
+
+def response_json(request):
+    # 返回json数据
+    return HttpResponse(json.dumps({"name":"alex","age":18}))
+
+def response_json(request):
+    # 列表数据
+    list_data = [
+        {"id": 1, "name": 111},
+        {"id": 2, "name": 222}
+    ]
+    # 将列表数据转换为json数组,并返回
+    return HttpResponse(json.dumps(list_data))
+
+def get_request_img(request):
+    # 读取图片数据
+    with open("app01/bg.png", "rb")as f:
+        img = f.read()
+    # 返回图片数据
+    return HttpResponse(content=img,content_type="image/png")
 ```
 
-Django 提供了 redirect() 方法来处理 URL 的重定向。使用 redirect() 时，可以直接传入视图的名称来实现反向解析，即根据视图名称自动生成 URL。
+HttpResponse对象除了可以返回各种数据，还可以设置响应的各种信息。
+
+示例如下
+```py
+from django.http import HttpResponse
+import json
+
+def response_json(request):
+    
+    json_data = json.dumps({"name":"alex","age":18})
+    # 设置响应的响应头，响应状态等信息
+    return HttpResponse(content=json_data, content_type="application/json", status=200,charset="utf-8", headers={"Content-Type": "application/json"})
+```
+
+#### JsonResponse对象-返回Json数据
+
+JsonResponse对象的内部直接将数据转换为json格式。
+
+```py
+from django.http import HttpResponse, JsonResponse
+def response_json(request):
+    # 返回json数据
+    json_data = {"id": 1, "name": 111}
+    return JsonResponse(data=json_data)
+```
+
+#### HttpResponseRedirect对象-重定向
+
+重定向分为两种：
+- 外链重定向。即跳转到外部网址。
+- 路由重定向。即重新请求其他路由。
+
+```py
+
+def get_request_info(request):
+    # 重定向外部网址
+    return HttpResponseRedirect("http://www.baidu.com")
+
+
+from django.shortcuts import redirect
+def redirect_to_home(request):
+    # 重定向其他路由
+    return redirect('home/')
+```
+
+Django 提供了 redirect() 方法来处理 URL路由 的重定向。使用 redirect() 时，可以直接传入视图的名称来实现反向解析，即根据视图名称自动生成 URL。
 
 
 ### 类视图
