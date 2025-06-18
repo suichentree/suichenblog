@@ -229,9 +229,13 @@ def get_request_info(request):
     return HttpResponse("OK")
 ```
 
-#### 获取GET请求中的URL路径参数数据
+#### 获取GET请求的请求参数
 
-由于GET请求没有请求体，因此GET请求的请求参数都在请求路径上。可以直接通过request.GET来获取请求路径上的参数。
+由于GET请求没有请求体，因此GET请求的请求参数都在请求路径上。
+
+例如请求路径`http://localhost:8000/app01/get_request/?a=1&b=2`中的请求参数就是`a=1&b=2`
+
+可以直接通过request.GET来获取请求路径上的参数。
 
 示例如下
 ```py
@@ -266,7 +270,7 @@ def get_request_info(request):
     return HttpResponse("OK")
 ```
 
-#### 获取POST请求中的json数据
+#### 获取POST请求中的Json数据
 
 request.POST不能获取请求体中的json数据，只能通过request.POST来获取请求体中的表据单数。。
 
@@ -283,7 +287,7 @@ def get_request_info(request):
     return HttpResponse("OK")
 ```
 
-#### 获取上传文件数据
+#### 获取请求中的上传文件
 
 ```py
 def get_request_info(request):
@@ -291,30 +295,25 @@ def get_request_info(request):
     return HttpResponse("OK")
 ```
 
+#### 获取请求路径中的参数
 
-#### 获取请求路径中的占位符参数
+假设请求路径为`http://localhost:8000/app01/id/1/order/2/`。那么如何获取请求路径中的参数。
 
-视图函数还可以向模板传递动态数据。通过将数据传递给模板，模板中可以使用这些数据来进行动态渲染。
-
+示例如下
 ```py
 # urls.py路由文件
-
 from django.urls import path
 from . import views
-
 urlpatterns = [
-    # 传入占位符参数user_id
-    path('user/<int:user_id>/', views.user_detail),
+    # 传入占位符参数id和user_id
+    path('/app01/id/<int:id>/order/<int:order_id>/', views.user_detail),
 ]
 
 # views.py视图文件
-
-# 视频函数接收路由中的路径参数
-def user_detail(request, user_id):
-    print(user_id)
+# 视图函数接收请求路径中的占位符参数
+def user_detail(request,id,order_id):
+    print(id,order_id)
 ```
-
-在上面示例中，get_user_data() 视图函数接收一个request请求参数和user_id参数。将user_id参数传递给模板。然后使用 render() 函数返回动态渲染后的模板。
 
 ### HttpResponse对象
 
@@ -455,11 +454,57 @@ ListView 会自动查询数据库中的所有 Article 对象，并将它们传�
 
 ## 模板（Template）
 
-模板负责数据的展示与布局。模板本质上就是页面,即html文件。
+模板负责数据的展示与布局。模板本质上就是html页面。
+
+我们可以在视图函数中，用render方法将html页面作为响应返回给客户端。需要3个步骤。
+1. 在项目配置文件setting.py中设置模板目录的位置。一般模板目录创建在工程根目录下。
+2. 在模板目录中创建对应的模板页面文件，并根据模板语法和视图函数传递过来的数据去填充页面。
+3. 在视图函数中使用render方法将某个模板页面作为响应返回给客户端。
+
+### 模板页面作为响应返回
+
+① setting.py中设置模板目录位置
+
+- 创建模板目录templates。
+- 修改setting.py文件中的TEMPLATES的DIRS配置项。如下所示
+
+```py
+TEMPLATES = [
+    {
+        ......
+        'DIRS': [BASE_DIR / 'templates'],
+        .......
+    },
+]
+```
+
+② 创建模板页面文件
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <h1>this is user.html</h1>
+</body>
+</html>
+```
+
+③ 视图函数中使用render方法将模板页面作为响应返回给客户端
+```py
+from django.shortcuts import render
+def get_request_info(request):
+    return render(request, template_name='user.html')
+```
+
+render方法本质上还是将模板页面封装为HttpResponse响应对象，并返回给客户端。
 
 ### Django模板语言（DTL）
 
-Django 模板基于 Django模板语言（DTL），它提供了一些强大的功能，如模板标签、过滤器、条件语句和循环等，可以灵活地渲染和控制页面内容。
+Django 模板基于 Django模板语言（DTL），它提供了一些强大的功能，如模板标签、过滤器、条件语句和循环等，可以动态地渲染和控制页面内容。
 
 Django模板语言（DTL）主要包括以下几个部分。
 - 模板变量：用于显示动态数据。
@@ -475,8 +520,6 @@ Django模板语言（DTL）主要包括以下几个部分。
 创建一个视图函数user_show
 ```py
 from django.shortcuts import render
-from .models import User
- 
 def user_show(request, user):
     # 将user参数，传递给模板。
     return render(request, 'user.html', {'user': user})
@@ -500,7 +543,7 @@ def user_show(request, user):
 </html>
 ```
 
-当调用user_show视图函数，会将user数据传递给模板。模板变量会根据视图传递的数据填充到HTML页面中，并动态生成全新的HTML页面。最终返回给用户。
+render方法会将user数据传递给模板，模板变量会根据视图传递的数据填充到HTML页面中。并动态生成全新的HTML页面。最终返回给客户端。
 
 
 ### 模板标签
@@ -547,7 +590,7 @@ def user_show(request, user):
 
 ### 模板过滤器
 
-模板过滤器用于修饰模板变量的显示方式。它们在模板变量后面用 | 分隔。
+模板过滤器本质上是一个函数。用于对模板变量进行输出和调整。它们在模板变量后面用 | 分隔表示。
 
 例如，`{{ value|lower }}` 会将 value 模板变量转换为小写字母。
 
@@ -568,12 +611,10 @@ def user_show(request, user):
     <h1>生日 {{ user.birth|date:'Y-m-d' }}!</h1>
 </body>
 </html>
-
 ```
 
-- lower 模板过滤器，将字符串的模板变量转换为小写
-- date 模板过滤器，用于格式化日期类型的模板变量
-
+常用的模板过滤器如图所示
+![django_20250618163657.png](../blog_img/django_20250618163657.png)
 
 ## URL 路由
 
@@ -643,14 +684,135 @@ urlpatterns = [
 `path('blog/', include('blog.urls'))` 这句话的作用是引入blog子工程中的urls路由文件。并设置'blog/'为该子工程路由的前缀。
 
 
+## Django 配置文件
+
+在 Django 的核心包里面存在了一个全局默认配置文件`django/conf/global_settings.py`，同时在开发者构建Django工程的时候，也生成了一个全局项目配置文件在工程主目录下的 `setting.py` 文件中。
+
+这两个配置文件，在 Django 项目运行时，Django 会先加载了 `global_settings.py` 中的所有配置项，接着加载 `setting.py` 的配置项。`settings.py` 文件中的配置项会优先覆盖 `global_settings.py` 文件的配置项。
+
+==在Django中，配置变量被强制要求大写。否则Django无法识别。==
+
+`setting.py` 文件示例如下
+```py
+
+from pathlib import Path
+
+# BASE_DIR 代表工程的根路径，是当前文件的父级的父级目录的路径（即Django工程的根目录路径）。主要作用是提供给整个Django项目进行路径拼接用的。
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+# SECRET_KEY 随机生成的，用于提供给加密算法的密钥。
+SECRET_KEY = 'django-insecure-ant4q+=il*10^2(*%chbbw7$l^@xl+y-g9dumko(p#z2a)d(-a'
+
+# 本地开发的时候，设置DEBUG = True 。当服务端出错，django会提示详细的错误信息
+# 线上运行的时候，设置DEBUG = Flase。当服务端出错，django不会提示详细的错误信息，仅仅展示错误页面。
+DEBUG = True
+
+# 设置当前Django项目允许哪些IP地址访问
+# ALLOWED_HOSTS = ['*'] *代表任意IP都可以访问
+ALLOWED_HOSTS = []
 
 
+# 已注册到Django项目的子应用列表。下面是Django官方内置的子应用。
+# 当创建子应用的时候，需要在该列表中添加对应子应用名称。否则Django项目无法识别子应用。
+INSTALLED_APPS = [
+    'django.contrib.admin',         #django内置的admin子应用
+    'django.contrib.auth',          #django内置的登录认证功能
+    'django.contrib.contenttypes',  #django内置的内容类型管理
+    'django.contrib.sessions',      #django内置的session功能
+    'django.contrib.messages',      #django内置的消息功能
+    'django.contrib.staticfiles',   #django内置的静态文件服务功能
+]
+
+# 中间件（拦截器）MIDDLEWARE 实际就是django提供给开发者在http请求和响应过程中，进行数据拦截的插件系统。
+# 中间件 主要用于拦截请求或响应，数据修饰，权限判断等功能。
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',        # 安全中间件（跨域判断等）
+    'django.contrib.sessions.middleware.SessionMiddleware', # session中间件（提供session功能）
+    'django.middleware.common.CommonMiddleware',            # 通用中间件
+    'django.middleware.csrf.CsrfViewMiddleware',            # Csrf中间件
+    'django.contrib.auth.middleware.AuthenticationMiddleware',  # 权限认证中间件
+    'django.contrib.messages.middleware.MessageMiddleware',     # 消息中间件
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',   # 网站安全中间件
+]
+
+# django工程中的根路由文件的地址
+ROOT_URLCONF = 'djangoDemo1.urls'
+
+# 模板引擎配置
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [BASE_DIR / 'templates']    ## 配置模板目录所在的位置
+        ,
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
+
+# web应用程序的模块配置
+WSGI_APPLICATION = 'djangoDemo1.wsgi.application'
 
 
+# Database 数据库配置
+DATABASES = {
+    # 默认使用sqlite3数据库
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
 
 
+# Password validation 密码的加密方式
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+]
 
 
+# 国际化语言配置，默认英文
+LANGUAGE_CODE = 'zh-hans'   #中文
+# LANGUAGE_CODE = 'en-us'   # 英文
+
+# 时区配置
+# TIME_ZONE = 'UTC'     #英国时间
+TIME_ZONE = 'Asia/Shanghai'       #中国时间
+
+# 是否开启国际化本地化功能
+USE_I18N = True
+
+# 是否启用时区转换
+# 若为False,则django会基于TIME_ZONE来转换时间，若为True,则采用系统时间来转换时间。
+USE_TZ = True
+
+# 静态文件存放路径
+STATIC_URL = 'static/'
+
+# 默认情况下，django中数据表的主键ID的数据类型。默认为bigint
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+```
+
+
+# 静态文件输出
+
+通过下面的配置，django工程允许后，可以直接访问下面的静态文件，从而提供给客户端进行访问。
 
 
 
@@ -660,50 +822,13 @@ urlpatterns = [
 //////////////////////////////////////////////////////////////////
 
 
-④ 定义数据库模型
-
-在 app01/models.py 中定义相关的数据库模型。
-
-```py
-from django.db import models
-
-class Post(models.Model):
-    title = models.CharField(max_length=200)
-    content = models.TextField()
-    pub_date = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.title
-```
-
-⑤ 执行命令创建数据库表
-
-```py
-python manage.py makemigrations
-python manage.py migrate
-```
-
-⑥ 创建视图方法
-
-在app01/views.py中创建视图方法
-
-```py
-from django.shortcuts import render
-from .models import Post
-
-def post_list(request):
-    posts = Post.objects.all()
-    return render(request, 'myapp/111.html', {'posts': posts})
-```
-
-⑦ 创建页面
 
 
 
 
 
 
-## Django 模型
+## Django ORM
 
 Django 对各种数据库提供了很好的支持，包括：PostgreSQL、MySQL、SQLite、Oracle。Django 为这些数据库提供了统一的调用API。 
 
