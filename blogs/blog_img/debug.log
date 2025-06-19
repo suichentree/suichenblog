@@ -3635,3 +3635,5 @@
 [0618/171835:WARNING:quota_manager.cc(1833)] Create directory failed for path
 [0618/171835:WARNING:quota_manager.cc(1833)] Create directory failed for path
 [0618/171836:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0618/171844:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
+[0618/174835:WARNING:quota_manager.cc(1833)] Create directory failed for path

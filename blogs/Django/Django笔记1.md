@@ -18,6 +18,8 @@ tags:
 
 Django 是一个由 Python 编写的一个重量级 Web 应用框架。使用 Django，只要很少的代码，Python 的程序开发人员就可以轻松地完成一个正式网站所需要的大部分内容，并进一步开发出全功能的 Web 服务。
 
+[Django 官方网址 https://docs.djangoproject.com/zh-hans/5.2/contents/](https://docs.djangoproject.com/zh-hans/5.2/contents/)
+
 > Django的特点
 
 - 快速开发: Django的最大优势之一就是能够快速搭建Web应用。它通过提供开箱即用的组件，如认证、后台管理、表单、数据库管理等，使开发者能够专注于业务逻辑而不必从零开始编写大量的代码。
@@ -149,50 +151,15 @@ Django 的 MTV 模式和 传统的MVC模式 本质上是一样的，都是为了
 大致操作流程如下
 ![python_20240427125050.png](../blog_img/python_20240427125050.png)
 
-## 模型（Model）
-
-在 Django 中，模型是对数据库表的抽象。每个模型类对应一个数据库表，模型类的属性则对应数据库表中的字段。
-
-Django 的模型是通过继承 django.db.models.Model 类来定义的。每个模型类的属性代表数据库表中的字段，Django 会根据模型自动生成数据库迁移文件并同步到数据库。
-
-
-示例如下
-```py
-from django.db import models
-# 定义一个User模型类，以及模型类中的一些属性。
-class User(models.Model):
-    id = models.IntegerField(primary_key=True)
-    name = models.CharField(max_length=100)
-    phone = models.CharField(max_length=100)
-    idCard = models.CharField(max_length=100)
-    create_time = models.DateTimeField(auto_now_add=True)
-    updated_time = models.DateTimeField(auto_now=True)
-
-```
-
-- 上面代码中定义一个模型类，该类对应数据库中的一个表。
-- 每个模型类都可以有主键属性，它是一个自增的整数，用于对应表中主键列。主键属性的名称通常是 id。
-- 每个模型类可以定义多个属性，每个属性对应数据库表中的一个列。
-- 每个属性都有一个名称，用于标识该列。属性的名称通常是小写字母，多个单词之间用下划线分隔。
-- 每个属性都可以有一些选项，用于指定该属性的默认配置，例如最大长度、是否为空等。
-
-> 常用的字段类型如下
-
-- 整数（IntegerField）：用于存储整数。
-- 浮点数（FloatField、DecimalField）：用于存储浮点数
-- 字符串（CharField、TextField）:用于存储文本
-- 布尔值（BooleanField）：用于存储布尔值（True 或 False）。
-- 文件（FileField、ImageField）：用于存储图像，支持文件上传。
-- 关系字段（ForeignKey、ManyToManyField、OneToOneField）：表示外键，一对多，多对多关系。
-- 日期时间（DateTimeField、DateField、TimeField）：用于存储日期和时间
-    - auto_now_add=True 表示创建时自动填充当前时间
-    - auto_now=True 表示每次保存时都会自动更新时间。
-
 ## 视图（View）
 
-视图本质是一个函数或类。主要作用是接收一个 request 对象，并返回一个 HttpResponse 或其他响应对象。
+在Django框架中，视图（View）是用于处理Web请求和生成响应的核心组件。即接收一个 request 对象，并返回一个 HttpResponse 或其他响应对象。
+
+Django提供了两种主要方式来创建视图：函数视图和类视图。
 
 视图的主要作用包含业务逻辑，决定如何处理输入、验证表单数据、调用模型更新数据库等。
+
+### 函数视图
 
 示例如下
 ```py
@@ -211,7 +178,7 @@ def about(request):
 
 ```
 
-### request请求
+### 接收request请求
 
 #### 获取请求的基本信息
 
@@ -315,7 +282,7 @@ def user_detail(request,id,order_id):
     print(id,order_id)
 ```
 
-### HttpResponse对象
+### HttpResponse响应对象
 
 django针对Http请求的响应，提供2种方式。
 - 方式1：响应内容：即直接响应数据给浏览器。
@@ -415,17 +382,91 @@ Django 提供了 redirect() 方法来处理 URL路由 的重定向。使用 redi
 
 ### 基本类视图 View
 
-基本类视图通过继承 Django 的 View 类来定义。
+基本类视图需要通过继承 Django 的 View 类来定义，并覆写View类的方法。
 
+View类提供了`get post put patch delete head options trace`等方法,不同的方法有不同的作用。
+
+示例如下
 ```py
+## views.py
+## 定义视图类HomeView
 from django.http import HttpResponse
 from django.views import View
 class HomeView(View):
     def get(self, request):
-        return HttpResponse("Welcome to the home page!")
+        ## 这里编写处理 get 请求的逻辑
+        return HttpResponse("this is get request")
+    
+    def post(self, request):
+        ## 这里编写处理 post 请求的逻辑
+        return HttpResponse("this is post request")
+
+    def put(self, request):
+        ## 这里编写处理 put 请求的逻辑
+        return HttpResponse("this is put request")
+
+    def delete(self, request):
+        ## 这里编写处理 delete 请求的逻辑
+        return HttpResponse("this is delete request")
+
+
+## urls.py
+from django.urls import path
+from myapp.views import HelloView  # 假设视图类定义在 myapp 的 views.py 中
+## 给视图类配置 URL 路由
+urlpatterns = [
+    # 当路由绑定视图类的时候，需通过 as_view() 方法将视图类 “转换” 为可被路由识别的可调用对象。
+    path('hello/', HelloView.as_view(), name='helloview'),
+]
+
 ```
 
-在示例中，HomeView 继承了 View 类，并重写了 get() 方法来处理 GET 请求。
+> as_view() 方法的作用
+
+as_view() 方法会创建视图类的实例对象，然后在请求到来时，根据请求的 HTTP 类型（如 GET、POST ），调用实例中对应的方法（如 get、post ）来处理请求。
+
+简而言之就是，GET类型的'hello/'请求会调用HelloView视图类的get方法,其他同理。
+
+> 路由与视图类的自定义方法可以进行绑定吗？
+
+路由只能通过 as_view() 绑定视图类中的 HTTP 方法（如 get/post/put 等 ），自定义方法无法直接被路由触发。
+
+因为 Django 无法识别视图类中的自定义方法，因此不能直接通过路由触发。但是可以在视图类中的HTTP 方法（如 get/post/put 等 ）中调用自定义方法，从而实现间接触发。
+
+
+#### 基本类视图 View 的其他方法
+
+> setup 方法
+
+调用具体 HTTP 方法处理函数（如 get、post ）之前调用，可用于初始化。
+
+```py
+from django.views import View
+class HomeView(View):
+    def setup(self, request, *args, **kwargs):
+        super().setup(request, *args, **kwargs)
+        self.some_attribute = "初始化的值"  # 自定义属性，后续方法可使用
+
+```
+
+> dispatch 方法
+
+负责根据请求的 HTTP 方法，分发到对应的处理函数（如 get、post ）。也可重写它来添加统一的预处理或后处理逻辑，比如权限校验。
+
+```py
+from django.views import View
+class HomeView(View):
+    def dispatch(self, request, *args, **kwargs):
+        # 预处理：检查用户是否登录
+        if not request.user.is_authenticated:
+            return HttpResponse("请先登录", status=401)
+        # 调用父类的 dispatch 方法，继续向后处理请求
+        return super().dispatch(request, *args, **kwargs)
+    
+    def get(self, request):
+        return HttpResponse("已登录用户才能执行的GET请求方法")
+```
+
 
 ### 模板类视图 TemplateView
 
@@ -433,24 +474,42 @@ Django 提供了 TemplateView 类视图来处理渲染模板的常见需求。
 
 ```py
 from django.views.generic import TemplateView
-class AboutView(TemplateView):
+
+class AboutUsView(TemplateView):
     template_name = 'about.html'
+    
+    # 向模板传递额外数据（可选）
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['current_year'] = datetime.now().year
+        return context
 ```
 
 ### ListView 类视图
 
-Django 提供了很多通用类视图，例如 ListView 用于列出对象
+Django 提供了很多通用类视图，例如 ListView 用于查询列表数据
 
 ```py
 from django.views.generic import ListView
-from .models import Article
-class ArticleListView(ListView):
-    model = Article
-    template_name = 'article_list.html'
-    context_object_name = 'articles'
+from myapp.models import Product
+
+class ProductListView(ListView):
+    model = Product
+    template_name = 'product/list.html'
+    context_object_name = 'product_list'
+    paginate_by = 12  # 每页显示12条数据
+    ordering = ['-created_at']  # 按创建时间倒序排列
+    
+    # 自定义查询集（可选）
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        category = self.request.GET.get('category')
+        if category:
+            return queryset.filter(category=category)
+        return queryset
 ```
 
-ListView 会自动查询数据库中的所有 Article 对象，并将它们传递给模板article_list.html。
+ProductListView 会自动查询数据库中的所有 Product 对象，并将它们传递给模板list.html。
 
 ## 模板（Template）
 
@@ -726,13 +785,13 @@ INSTALLED_APPS = [
 # 中间件（拦截器）MIDDLEWARE 实际就是django提供给开发者在http请求和响应过程中，进行数据拦截的插件系统。
 # 中间件 主要用于拦截请求或响应，数据修饰，权限判断等功能。
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',        # 安全中间件（跨域判断等）
+    'django.middleware.security.SecurityMiddleware',        # 安全检测中间件（防止页面过期，脚本攻击，跨域判断等）
     'django.contrib.sessions.middleware.SessionMiddleware', # session中间件（提供session功能）
-    'django.middleware.common.CommonMiddleware',            # 通用中间件
-    'django.middleware.csrf.CsrfViewMiddleware',            # Csrf中间件
-    'django.contrib.auth.middleware.AuthenticationMiddleware',  # 权限认证中间件
-    'django.contrib.messages.middleware.MessageMiddleware',     # 消息中间件
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',   # 网站安全中间件
+    'django.middleware.common.CommonMiddleware',            # 通用中间件（给url进行重写，给url后面加上/等）
+    'django.middleware.csrf.CsrfViewMiddleware',            # Csrf中间件（防止网站收到Csrf攻击的）
+    'django.contrib.auth.middleware.AuthenticationMiddleware',  # 用户权限认证中间件
+    'django.contrib.messages.middleware.MessageMiddleware',     # 消息中间件（提示错误消息等）
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',   # 网站安全中间件（用于防止iframe标签劫持攻击的）
 ]
 
 # django工程中的根路由文件的地址
@@ -810,29 +869,131 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 ```
 
 
-# 静态文件输出
+## 中间件MiddleWare
 
-通过下面的配置，django工程允许后，可以直接访问下面的静态文件，从而提供给客户端进行访问。
+中间件是 Django 请求 / 响应处理机制里的钩子（hooks）框架，是轻量级、底层的插件系统 。
+
+它能在全局改变 Django 的请求输入或响应输出，比如实现权限校验、日志记录、请求限流、添加自定义响应头这类功能，对请求和响应进行统一的预处理和后处理。
+
+> Django 处理 HTTP 请求的大致流程如下
+
+```
+HttpRequest（用户请求） → 中间件（按顺序处理请求） → View（视图函数处理） → 中间件（按逆序处理响应） → HttpResponse（返回给用户）
+```
+
+也就是说，一个URL请求在视图函数处理前，要依次经过配置的中间件处理；视图处理完生成响应后，响应要按相反顺序再经过中间件处理，之后才返回给客户端 。
+
+比如，你配置了 A、B、C 三个中间件，请求阶段会按 A→B→C 的顺序执行各个中间件里的请求处理逻辑；响应阶段则按 C→B→A 的顺序执行各个中间件里的响应处理逻辑 。
 
 
+> Django提供两种中间件自定义方式
+
+- 函数式中间件
+- 类中间件
+
+### 函数式中间件
+
+① 创建一个xxx_middleware.py文件，在该文件中编写自定义中间件的代码。
+
+示例如下
+```py
+def simple_middleware(get_response):
+    """
+    simple_middleware 自定义中间件的名称
+
+    get_response 这个参数可以理解为视图
+
+    middleware(request)方法就是中间件的具体业务方法。request就是请求本身
+    """
+
+    # 一次性初始化配置（服务器启动时执行，只会执行一次）
+    print("中间件初始化，这段只执行一次")
+
+    def middleware(request):
+        # 1. 请求到达视图前执行的逻辑
+        print("请求处理前的逻辑，每次请求都会执行")
+
+        # 2. 传递请求给下一个中间件或视图，获取响应
+        response = get_response(request)  
+
+        # 3. 响应返回给客户端前执行的逻辑
+        print("响应处理后的逻辑，每次响应都会执行")
+
+        return response
+
+    return middleware
+```
+
+> 自定义中间件工作流程
+1. 服务器启动时，simple_middleware 外层函数执行，做初始化（如打印 “中间件初始化，只执行一次” ），返回 middleware 内层函数。
+2. 每次有请求时，先执行 middleware 里 “请求处理前的逻辑”，再通过 get_response 把请求传递给下一个中间件或视图。
+3. 视图处理完生成响应后，回到当前中间件执行 “响应处理后的逻辑”，最后返回响应。
 
 
+② 将自定义中间件注册到Django中
+
+```py
+MIDDLEWARE = [
+    # 自定义中间件（按需要的顺序添加，假设自定义中间件在myapp子应用目录中）
+    'myapp.middleware.simple_middleware',  
+]
+```
 
 
-//////////////////////////////////////////////////////////////////
+### 类中间件
 
+自定义的类中间件需要继承MiddlewareMixin类。
 
+示例如下
+```py
+from django.utils.deprecation import MiddlewareMixin
 
+class CustomMiddleware(MiddlewareMixin):
+    def __init__(self, get_response):
+        # 初始化，保存 get_response 方法，服务器启动时执行
+        self.get_response = get_response
+        print("类式中间件初始化，只执行一次")
 
+    def process_request(self, request):
+        # 请求到达视图前执行（按中间件顺序依次执行）
+        print("process_request：请求处理前逻辑")
+        # 返回 None 则继续往下走；返回 HttpResponse 则直接返回响应，不再执行后续中间件和视图
+        return None  
 
+    def process_view(self, request, view_func, view_args, view_kwargs):
+        # 视图函数调用前执行（在 process_request 之后，视图执行前）
+        print(f"process_view：即将调用视图 {view_func.__name__}")
+        # 返回 None 则继续执行视图；返回 HttpResponse 则直接返回响应
+        return None  
 
+    def process_exception(self, request, exception):
+        # 视图执行过程中抛出异常时执行
+        print(f"process_exception：捕获到异常 {exception}")
+        # 返回 None 则继续抛出异常给下一个中间件；返回 HttpResponse 则返回自定义响应
+        return None  
+
+    def process_response(self, request, response):
+        # 响应返回给客户端前执行（按中间件逆序执行）
+        print("process_response：响应处理后逻辑")
+        # 必须返回 response 对象
+        return response  
+```
+
+在项目 settings.py 的 MIDDLEWARE 列表里添加自定义中间件
+```py
+MIDDLEWARE = [
+    # 自定义中间件（按需要的顺序添加）
+    'myapp.middleware.CustomMiddleware',  
+]
+
+```
 
 
 ## Django ORM
 
 Django 对各种数据库提供了很好的支持，包括：PostgreSQL、MySQL、SQLite、Oracle。Django 为这些数据库提供了统一的调用API。 
 
-Django 可以使用自带的 ORM 描述对象和数据库之间的映射的元数据，将程序中的对象自动持久化到数据库中
+Django 可以使用内置的 ORM 框架来描述对象和数据库之间的映射，将程序中的对象自动持久化到数据库中。
 
 因此 ORM 在业务逻辑层和数据库层之间充当了桥梁的作用。
 
@@ -841,6 +1002,101 @@ Django 可以使用自带的 ORM 描述对象和数据库之间的映射的元�
 3. 然后在数据库中执行 SQL 语句并将结果返回。
 
 ![python_20240427133356.png](../blog_img/python_20240427133356.png)
+
+### Django 连接数据库mysql
+
+① 安装mysql驱动
+
+```py
+# 使用 pymysql 数据库驱动
+pip install pymysql
+```
+
+若使用 pymysql，需在项目的 `__init__.py` 中添加下面这段代码。作用是让Django内置的ORM能以mysqldb的方式来调用pymysql
+
+```py
+# 在项目根目录的 __init__.py 中添加下面这段代码
+import pymysql
+pymysql.install_as_MySQLdb()
+```
+
+② 提前在mysql中创建数据库和数据表。
+
+③ 配置mysql数据库配置
+
+在setting.py中配置数据库的连接信息。Django默认初始配置使用sqlite数据库。因此需要替换为mysql数据库的配置。
+
+```py
+# setting.py 文件
+# Database 数据库配置
+DATABASES = {
+    # 使用mysql数据库
+    'default': {
+        'ENGINE': 'django.db.backends.mysql', #数据库引擎
+        'NAME': 'your_database_name',  # 数据库名
+        'USER': 'your_username',      # 用户名
+        'PASSWORD': 'your_password',  # 密码
+        'HOST': 'localhost',          # 主机
+        'PORT': '3306',               # 端口
+        'OPTIONS': {
+            'charset': 'utf8mb4',     # 字符集
+        },
+    }
+}
+```
+
+④ 测试连接
+
+```py
+python manage.py migrate  # 执行迁移，验证连接是否正常
+```
+
+
+## 模型（Model）
+
+在 Django 中，模型是对数据库表的抽象。每个模型类对应一个数据库表，模型类的属性则对应数据库表中的字段。
+
+### 定义模型类
+
+- 模型类通常定义在子工程（子应用）的`models.py`文件中。
+- 模型类必须直接或间接继承 django.db.models.Model 类来定义的
+- 每个模型类的属性代表数据库表中的字段，Django 会根据模型类自动生成数据库迁移文件并同步到数据库。
+
+示例如下
+```py
+from django.db import models
+# 定义一个User模型类，以及模型类中的一些属性。
+class User(models.Model):
+    id = models.IntegerField(primary_key=True)
+    name = models.CharField(max_length=100)
+    phone = models.CharField(max_length=100)
+    idCard = models.CharField(max_length=100)
+    create_time = models.DateTimeField(auto_now_add=True)
+    updated_time = models.DateTimeField(auto_now=True)
+
+```
+
+- 上面代码中定义一个模型类，该类对应数据库中的一个表。
+- 每个模型类都可以有主键属性，它是一个自增的整数，用于对应表中主键列。主键属性的名称通常是 id。
+- 每个模型类可以定义多个属性，每个属性对应数据库表中的一个列。
+- 每个属性都有一个名称，用于标识该列。属性的名称通常是小写字母，多个单词之间用下划线分隔。
+- 每个属性都可以有一些选项，用于指定该属性的默认配置，例如最大长度、是否为空等。
+
+> 常用的字段类型如下
+
+- 整数（IntegerField）：用于存储整数。
+- 浮点数（FloatField、DecimalField）：用于存储浮点数
+- 字符串（CharField、TextField）:用于存储文本
+- 布尔值（BooleanField）：用于存储布尔值（True 或 False）。
+- 文件（FileField、ImageField）：用于存储图像，支持文件上传。
+- 关系字段（ForeignKey、ManyToManyField、OneToOneField）：表示外键，一对多，多对多关系。
+- 日期时间（DateTimeField、DateField、TimeField）：用于存储日期和时间
+    - auto_now_add=True 表示创建时自动填充当前时间
+    - auto_now=True 表示每次保存时都会自动更新时间。
+
+
+
+
 
 
 
