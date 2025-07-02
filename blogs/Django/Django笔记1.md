@@ -87,7 +87,7 @@ python manage.py runserver
 
 ③ 创建子工程(子应用)
 
-当Django工程创建完之后，我们还需要写正式的业务代码。通常一个Django工程中可以有多个子工程，根据业务功能的不同，创建不同的子工程。类似功能模块的概念。
+当Django工程创建完之后，我们还需要写正式的业务代码。通常一个Django工程中可以有多个子工程，根据业务功能的不同，创建不同的子工程。子工程就相当于项目中的模块。
 
 ```py
 # 创建一个名为app01的子应用的命令 
@@ -155,11 +155,11 @@ Django 的 MTV 模式和 传统的MVC模式 本质上是一样的，都是为了
 
 在Django框架中，视图（View）是用于处理Web请求和生成响应的核心组件。即接收一个 request 对象，并返回一个 HttpResponse 或其他响应对象。
 
-Django提供了两种主要方式来创建视图：函数视图和类视图。
-
 视图的主要作用包含业务逻辑，决定如何处理输入、验证表单数据、调用模型更新数据库等。
 
-### 函数视图
+Django中的视图有两种：函数视图和类视图。
+
+### 基本函数视图
 
 示例如下
 ```py
@@ -175,7 +175,6 @@ def home(request):
 def about(request):
     # render() 函数将一个模板页面包装为HttpResponse响应对象，并返回。   
     return render(request, 'about.html')
-
 ```
 
 ### 接收request请求
@@ -372,17 +371,13 @@ def redirect_to_home(request):
 Django 提供了 redirect() 方法来处理 URL路由 的重定向。使用 redirect() 时，可以直接传入视图的名称来实现反向解析，即根据视图名称自动生成 URL。
 
 
-### 类视图
+### 基本类视图
 
 视图即可以是一个函数，也可以是一个类。
 
 类视图通过继承 Django 提供的基类来组织视图逻辑，使得视图的代码更加模块化、可复用，并且更符合面向对象的编程范式。
 
-类视图通过继承 Django 的 View 类来定义。
-
-### 基本类视图 View
-
-基本类视图需要通过继承 Django 的 View 类来定义，并覆写View类的方法。
+类视图需要通过继承 Django 的 View 类来定义，并覆写View类的方法。
 
 View类提供了`get post put patch delete head options trace`等方法,不同的方法有不同的作用。
 
@@ -434,7 +429,7 @@ as_view() 方法会创建视图类的实例对象，然后在请求到来时，�
 因为 Django 无法识别视图类中的自定义方法，因此不能直接通过路由触发。但是可以在视图类中的HTTP 方法（如 get/post/put 等 ）中调用自定义方法，从而实现间接触发。
 
 
-#### 基本类视图 View 的其他方法
+#### 基本类视图的其他方法
 
 > setup 方法
 
@@ -743,252 +738,6 @@ urlpatterns = [
 `path('blog/', include('blog.urls'))` 这句话的作用是引入blog子工程中的urls路由文件。并设置'blog/'为该子工程路由的前缀。
 
 
-## Django 配置文件
-
-在 Django 的核心包里面存在了一个全局默认配置文件`django/conf/global_settings.py`，同时在开发者构建Django工程的时候，也生成了一个全局项目配置文件在工程主目录下的 `setting.py` 文件中。
-
-这两个配置文件，在 Django 项目运行时，Django 会先加载了 `global_settings.py` 中的所有配置项，接着加载 `setting.py` 的配置项。`settings.py` 文件中的配置项会优先覆盖 `global_settings.py` 文件的配置项。
-
-==在Django中，配置变量被强制要求大写。否则Django无法识别。==
-
-`setting.py` 文件示例如下
-```py
-
-from pathlib import Path
-
-# BASE_DIR 代表工程的根路径，是当前文件的父级的父级目录的路径（即Django工程的根目录路径）。主要作用是提供给整个Django项目进行路径拼接用的。
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-# SECRET_KEY 随机生成的，用于提供给加密算法的密钥。
-SECRET_KEY = 'django-insecure-ant4q+=il*10^2(*%chbbw7$l^@xl+y-g9dumko(p#z2a)d(-a'
-
-# 本地开发的时候，设置DEBUG = True 。当服务端出错，django会提示详细的错误信息
-# 线上运行的时候，设置DEBUG = Flase。当服务端出错，django不会提示详细的错误信息，仅仅展示错误页面。
-DEBUG = True
-
-# 设置当前Django项目允许哪些IP地址访问
-# ALLOWED_HOSTS = ['*'] *代表任意IP都可以访问
-ALLOWED_HOSTS = []
-
-
-# 已注册到Django项目的子应用列表。下面是Django官方内置的子应用。
-# 当创建子应用的时候，需要在该列表中添加对应子应用名称。否则Django项目无法识别子应用。
-INSTALLED_APPS = [
-    'django.contrib.admin',         #django内置的admin子应用
-    'django.contrib.auth',          #django内置的登录认证功能
-    'django.contrib.contenttypes',  #django内置的内容类型管理
-    'django.contrib.sessions',      #django内置的session功能
-    'django.contrib.messages',      #django内置的消息功能
-    'django.contrib.staticfiles',   #django内置的静态文件服务功能
-]
-
-# 中间件（拦截器）MIDDLEWARE 实际就是django提供给开发者在http请求和响应过程中，进行数据拦截的插件系统。
-# 中间件 主要用于拦截请求或响应，数据修饰，权限判断等功能。
-MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',        # 安全检测中间件（防止页面过期，脚本攻击，跨域判断等）
-    'django.contrib.sessions.middleware.SessionMiddleware', # session中间件（提供session功能）
-    'django.middleware.common.CommonMiddleware',            # 通用中间件（给url进行重写，给url后面加上/等）
-    'django.middleware.csrf.CsrfViewMiddleware',            # Csrf中间件（防止网站收到Csrf攻击的）
-    'django.contrib.auth.middleware.AuthenticationMiddleware',  # 用户权限认证中间件
-    'django.contrib.messages.middleware.MessageMiddleware',     # 消息中间件（提示错误消息等）
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',   # 网站安全中间件（用于防止iframe标签劫持攻击的）
-]
-
-# django工程中的根路由文件的地址
-ROOT_URLCONF = 'djangoDemo1.urls'
-
-# 模板引擎配置
-TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates']    ## 配置模板目录所在的位置
-        ,
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-            ],
-        },
-    },
-]
-
-# web应用程序的模块配置
-WSGI_APPLICATION = 'djangoDemo1.wsgi.application'
-
-
-# Database 数据库配置
-DATABASES = {
-    # 默认使用sqlite3数据库
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
-
-# Password validation 密码的加密方式
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
-
-
-# 国际化语言配置，默认英文
-LANGUAGE_CODE = 'zh-hans'   #中文
-# LANGUAGE_CODE = 'en-us'   # 英文
-
-# 时区配置
-# TIME_ZONE = 'UTC'     #英国时间
-TIME_ZONE = 'Asia/Shanghai'       #中国时间
-
-# 是否开启国际化本地化功能
-USE_I18N = True
-
-# 是否启用时区转换
-# 若为False,则django会基于TIME_ZONE来转换时间，若为True,则采用系统时间来转换时间。
-USE_TZ = True
-
-# 静态文件存放路径
-STATIC_URL = 'static/'
-
-# 默认情况下，django中数据表的主键ID的数据类型。默认为bigint
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-```
-
-
-## 中间件MiddleWare
-
-中间件是 Django 请求 / 响应处理机制里的钩子（hooks）框架，是轻量级、底层的插件系统 。
-
-它能在全局改变 Django 的请求输入或响应输出，比如实现权限校验、日志记录、请求限流、添加自定义响应头这类功能，对请求和响应进行统一的预处理和后处理。
-
-> Django 处理 HTTP 请求的大致流程如下
-
-```
-HttpRequest（用户请求） → 中间件（按顺序处理请求） → View（视图函数处理） → 中间件（按逆序处理响应） → HttpResponse（返回给用户）
-```
-
-也就是说，一个URL请求在视图函数处理前，要依次经过配置的中间件处理；视图处理完生成响应后，响应要按相反顺序再经过中间件处理，之后才返回给客户端 。
-
-比如，你配置了 A、B、C 三个中间件，请求阶段会按 A→B→C 的顺序执行各个中间件里的请求处理逻辑；响应阶段则按 C→B→A 的顺序执行各个中间件里的响应处理逻辑 。
-
-
-> Django提供两种中间件自定义方式
-
-- 函数式中间件
-- 类中间件
-
-### 函数式中间件
-
-① 创建一个xxx_middleware.py文件，在该文件中编写自定义中间件的代码。
-
-示例如下
-```py
-def simple_middleware(get_response):
-    """
-    simple_middleware 自定义中间件的名称
-
-    get_response 这个参数可以理解为视图
-
-    middleware(request)方法就是中间件的具体业务方法。request就是请求本身
-    """
-
-    # 一次性初始化配置（服务器启动时执行，只会执行一次）
-    print("中间件初始化，这段只执行一次")
-
-    def middleware(request):
-        # 1. 请求到达视图前执行的逻辑
-        print("请求处理前的逻辑，每次请求都会执行")
-
-        # 2. 传递请求给下一个中间件或视图，获取响应
-        response = get_response(request)  
-
-        # 3. 响应返回给客户端前执行的逻辑
-        print("响应处理后的逻辑，每次响应都会执行")
-
-        return response
-
-    return middleware
-```
-
-> 自定义中间件工作流程
-1. 服务器启动时，simple_middleware 外层函数执行，做初始化（如打印 “中间件初始化，只执行一次” ），返回 middleware 内层函数。
-2. 每次有请求时，先执行 middleware 里 “请求处理前的逻辑”，再通过 get_response 把请求传递给下一个中间件或视图。
-3. 视图处理完生成响应后，回到当前中间件执行 “响应处理后的逻辑”，最后返回响应。
-
-
-② 将自定义中间件注册到Django中
-
-```py
-MIDDLEWARE = [
-    # 自定义中间件（按需要的顺序添加，假设自定义中间件在myapp子应用目录中）
-    'myapp.middleware.simple_middleware',  
-]
-```
-
-
-### 类中间件
-
-自定义的类中间件需要继承MiddlewareMixin类。
-
-示例如下
-```py
-from django.utils.deprecation import MiddlewareMixin
-
-class CustomMiddleware(MiddlewareMixin):
-    def __init__(self, get_response):
-        # 初始化，保存 get_response 方法，服务器启动时执行
-        self.get_response = get_response
-        print("类式中间件初始化，只执行一次")
-
-    def process_request(self, request):
-        # 请求到达视图前执行（按中间件顺序依次执行）
-        print("process_request：请求处理前逻辑")
-        # 返回 None 则继续往下走；返回 HttpResponse 则直接返回响应，不再执行后续中间件和视图
-        return None  
-
-    def process_view(self, request, view_func, view_args, view_kwargs):
-        # 视图函数调用前执行（在 process_request 之后，视图执行前）
-        print(f"process_view：即将调用视图 {view_func.__name__}")
-        # 返回 None 则继续执行视图；返回 HttpResponse 则直接返回响应
-        return None  
-
-    def process_exception(self, request, exception):
-        # 视图执行过程中抛出异常时执行
-        print(f"process_exception：捕获到异常 {exception}")
-        # 返回 None 则继续抛出异常给下一个中间件；返回 HttpResponse 则返回自定义响应
-        return None  
-
-    def process_response(self, request, response):
-        # 响应返回给客户端前执行（按中间件逆序执行）
-        print("process_response：响应处理后逻辑")
-        # 必须返回 response 对象
-        return response  
-```
-
-在项目 settings.py 的 MIDDLEWARE 列表里添加自定义中间件
-```py
-MIDDLEWARE = [
-    # 自定义中间件（按需要的顺序添加）
-    'myapp.middleware.CustomMiddleware',  
-]
-
-```
-
-
 ## Django ORM
 
 Django 对各种数据库提供了很好的支持，包括：PostgreSQL、MySQL、SQLite、Oracle。Django 为这些数据库提供了统一的调用API。 
@@ -1067,23 +816,37 @@ python manage.py migrate  # 执行迁移，验证连接是否正常
 from django.db import models
 # 定义一个User模型类，以及模型类中的一些属性。
 class User(models.Model):
+    ## 该主键字段id，可以不显式定义
     id = models.IntegerField(primary_key=True)
-    name = models.CharField(max_length=100)
-    phone = models.CharField(max_length=100)
-    idCard = models.CharField(max_length=100)
-    create_time = models.DateTimeField(auto_now_add=True)
-    updated_time = models.DateTimeField(auto_now=True)
+    name = models.CharField(max_length=100,verbose_name="姓名")
+    phone = models.CharField(max_length=100,verbose_name="手机号")
+    idCard = models.CharField(max_length=100,db_column='id_card',verbose_name="身份证号")
+    desc = models.TextField(verbose_name="描述",null=True)
+    create_time = models.DateTimeField(auto_now_add=True,verbose_name="创建时间")
+    updated_time = models.DateTimeField(auto_now=True,verbose_name="更新时间")
+
+    def __str__(self):
+        # 当使用print打印模型类对象的输出内容。类似java类的toString方法。
+        return self.name
+
+    # 添加 Meta 类定义元数据
+    class Meta:
+        verbose_name = "用户"  # Admin 界面显示的单数名称（替代默认的 "user"）
+        verbose_name_plural = "用户列表"  # 复数名称（替代默认的 "users"）
+        db_table = "t_user"  # 自定义数据库表名（Django 默认表名为 {应用名}_{模型类名小写}）
+        ordering = ["-create_time"]  # 默认按创建时间倒序排序（最新的在前）
 
 ```
 
 - 上面代码中定义一个模型类，该类对应数据库中的一个表。
-- 每个模型类都可以有主键属性，它是一个自增的整数，用于对应表中主键列。主键属性的名称通常是 id。
+- 在 Django 模型类中，默认情况下不需要显式自定义主键字段，Django 会自动为每个模型添加一个自增的整数类型主键（字段名为 id）。但在以下场景中可能需要自定义主键：
+    - 使用 UUID 作为主键
+    - 使用业务唯一编号作为主键
 - 每个模型类可以定义多个属性，每个属性对应数据库表中的一个列。
 - 每个属性都有一个名称，用于标识该列。属性的名称通常是小写字母，多个单词之间用下划线分隔。
 - 每个属性都可以有一些选项，用于指定该属性的默认配置，例如最大长度、是否为空等。
 
 > 常用的字段类型如下
-
 - 整数（IntegerField）：用于存储整数。
 - 浮点数（FloatField、DecimalField）：用于存储浮点数
 - 字符串（CharField、TextField）:用于存储文本
@@ -1094,10 +857,21 @@ class User(models.Model):
     - auto_now_add=True 表示创建时自动填充当前时间
     - auto_now=True 表示每次保存时都会自动更新时间。
 
+> 常用字段属性如下、
+- verbose_name：设置该字段在 Admin 后台的显示名称（如 "姓名"）。
+- db_column属性：显式指定模型字段在数据库表中对应的列名。解决模型字段名与数据库列名的命名差异。
+- max_length属性 指定该字段的最大存储长度。
+- null=True 表示该字段在数据库中允许为空（NULL），若不设置则默认 null=False（字段必填）
+- auto_now_add=True 对象首次创建时自动设置为当前时间（仅生效一次，适合 create_time）。
+- auto_now=True 对象每次保存时自动更新为当前时间（每次修改都会更新，适合 updated_time）。
 
+> 模型类的元数据配置
 
+class Meta 用于定义模型类的元数据配置（如后台显示名称、数据库表名、排序规则等）
 
-
+- verbose_name：优化 Admin 后台的菜单显示。
+- db_table：自定义数据库表名（避免使用 Django 默认的 {应用名}_{模型名小写} 格式，例如表名是 t_user）。
+- ordering：设置查询时的默认排序规则（"-create_time" 表示按 create_time 降序排列，最新创建的用户排在最前）
 
 
 

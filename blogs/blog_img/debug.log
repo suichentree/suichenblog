@@ -3637,3 +3637,253 @@
 [0618/171836:WARNING:quota_manager.cc(1833)] Create directory failed for path
 [0618/171844:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
 [0618/174835:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0618/181835:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0618/184835:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0618/191835:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0618/194835:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0618/201835:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0618/204835:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0618/211835:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0618/214835:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0618/221835:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0618/224835:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0618/231835:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0618/234839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/001839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/004839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/011839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/014839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/021839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/024839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/031839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/034839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/041839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/044839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/051839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/054839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/061839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/064839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/071839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/074839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/081839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/084839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/091839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/094839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/101839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/104839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/111839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/114839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/121839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/124839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/131839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/134839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/141839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/144839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/151839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/154839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/161839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/164839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/171839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/174839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/181839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/184839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/191839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/194839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/201839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/204839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/211839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/214839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/221839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/224839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/231839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0619/234839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/001839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/004839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/011839:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/014844:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/021844:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/024844:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/031844:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/034844:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/041844:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/044844:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/051844:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/054844:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/061844:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/064844:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/071844:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/074844:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/081844:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/084844:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/091844:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/094844:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/101844:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/104844:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/111844:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/114844:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/121844:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/124844:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/131844:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/134844:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/141844:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/144844:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/151844:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/154844:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/161844:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/164844:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/171844:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/174844:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/175914:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/175914:ERROR:waituntilobserver.cpp(144)] NOT IMPLEMENTED
+[0620/175932:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
+[0620/175940:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/175940:ERROR:waituntilobserver.cpp(144)] NOT IMPLEMENTED
+[0620/175949:WARNING:url_request_job_manager.cc(89)] Failed to map: weixin://resourceid/blank
+[0620/181844:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/184844:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/191844:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/194844:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/201844:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/204844:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/211844:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/214844:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/221844:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/224844:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/231844:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0620/234844:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/001848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/004848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/011848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/014848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/021848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/024848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/031848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/034848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/041848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/044848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/051848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/054848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/061848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/064848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/071848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/074848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/081848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/084848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/091848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/094848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/101848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/104848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/111848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/114848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/121848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/124848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/131848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/134848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/141848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/144848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/151848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/154848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/161848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/164848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/171848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/174848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/181848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/184848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/191848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/194848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/201848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/204848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/211848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/214848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/221848:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/224852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/231852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0621/234852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/001852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/004852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/011852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/014852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/021852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/024852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/031852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/034852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/041852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/044852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/051852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/054852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/061852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/064852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/071852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/074852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/081852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/084852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/091852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/094852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/101852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/104852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/111852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/114852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/121852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/124852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/131852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/134852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/141852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/144852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/151852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/154852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/161852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/164852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/171852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/174852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/181852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/184852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/191852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/194852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/201852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/204852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/211852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/214852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/221852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/224852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/231852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0622/234852:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0623/001856:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0623/004856:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0623/011856:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0623/014856:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0623/021856:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0623/024856:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0623/031856:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0623/034856:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0623/041856:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0623/044856:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0623/051856:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0623/054856:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0623/061856:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0623/064856:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0623/071856:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0623/074856:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0623/081856:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0623/084102:ERROR:gles2_cmd_decoder.cc(15300)] [.DisplayCompositor-184A7950]GL ERROR :GL_INVALID_OPERATION : glCreateAndConsumeTextureCHROMIUM: invalid mailbox name
+[0623/084102:ERROR:gles2_cmd_decoder.cc(8605)] [.DisplayCompositor-184A7950]RENDER WARNING: texture bound to texture unit 0 is not renderable. It maybe non-power-of-2 and have incompatible texture filtering.
+[0623/084102:ERROR:gles2_cmd_decoder.cc(15300)] [.DisplayCompositor-184A7950]GL ERROR :GL_INVALID_OPERATION : glCreateAndConsumeTextureCHROMIUM: invalid mailbox name
+[0623/084102:ERROR:gles2_cmd_decoder.cc(8605)] [.DisplayCompositor-184A7950]RENDER WARNING: texture bound to texture unit 0 is not renderable. It maybe non-power-of-2 and have incompatible texture filtering.
+[0623/084102:ERROR:gles2_cmd_decoder.cc(15300)] [.DisplayCompositor-184A7950]GL ERROR :GL_INVALID_OPERATION : glCreateAndConsumeTextureCHROMIUM: invalid mailbox name
+[0623/084102:ERROR:gles2_cmd_decoder.cc(8605)] [.DisplayCompositor-184A7950]RENDER WARNING: texture bound to texture unit 0 is not renderable. It maybe non-power-of-2 and have incompatible texture filtering.
+[0623/084102:ERROR:gles2_cmd_decoder.cc(15300)] [.DisplayCompositor-184A7950]GL ERROR :GL_INVALID_OPERATION : glCreateAndConsumeTextureCHROMIUM: invalid mailbox name
+[0623/084102:ERROR:gles2_cmd_decoder.cc(8605)] [.DisplayCompositor-184A7950]RENDER WARNING: texture bound to texture unit 0 is not renderable. It maybe non-power-of-2 and have incompatible texture filtering.
+[0623/084102:ERROR:gles2_cmd_decoder.cc(15300)] [.DisplayCompositor-184A7950]GL ERROR :GL_INVALID_OPERATION : glCreateAndConsumeTextureCHROMIUM: invalid mailbox name
+[0623/084102:ERROR:gles2_cmd_decoder.cc(8605)] [.DisplayCompositor-184A7950]RENDER WARNING: texture bound to texture unit 0 is not renderable. It maybe non-power-of-2 and have incompatible texture filtering.
+[0623/084102:ERROR:gles2_cmd_decoder.cc(15300)] [.DisplayCompositor-184A7950]GL ERROR :GL_INVALID_OPERATION : glCreateAndConsumeTextureCHROMIUM: invalid mailbox name
+[0623/084102:ERROR:gles2_cmd_decoder.cc(8605)] [.DisplayCompositor-184A7950]RENDER WARNING: texture bound to texture unit 0 is not renderable. It maybe non-power-of-2 and have incompatible texture filtering.
+[0623/084102:ERROR:gles2_cmd_decoder.cc(15300)] [.DisplayCompositor-184A7950]GL ERROR :GL_INVALID_OPERATION : glCreateAndConsumeTextureCHROMIUM: invalid mailbox name
+[0623/084102:ERROR:gles2_cmd_decoder.cc(8605)] [.DisplayCompositor-184A7950]RENDER WARNING: texture bound to texture unit 0 is not renderable. It maybe non-power-of-2 and have incompatible texture filtering.
+[0623/084102:ERROR:gles2_cmd_decoder.cc(15300)] [.DisplayCompositor-184A7950]GL ERROR :GL_INVALID_OPERATION : glCreateAndConsumeTextureCHROMIUM: invalid mailbox name
+[0623/084102:ERROR:gles2_cmd_decoder.cc(8605)] [.DisplayCompositor-184A7950]RENDER WARNING: texture bound to texture unit 0 is not renderable. It maybe non-power-of-2 and have incompatible texture filtering.
+[0623/084102:ERROR:gles2_cmd_decoder.cc(15300)] [.DisplayCompositor-184A7950]GL ERROR :GL_INVALID_OPERATION : glCreateAndConsumeTextureCHROMIUM: invalid mailbox name
+[0623/084102:ERROR:gles2_cmd_decoder.cc(8605)] [.DisplayCompositor-184A7950]RENDER WARNING: texture bound to texture unit 0 is not renderable. It maybe non-power-of-2 and have incompatible texture filtering.
+[0623/084102:ERROR:gles2_cmd_decoder.cc(15300)] [.DisplayCompositor-184A7950]GL ERROR :GL_INVALID_OPERATION : glCreateAndConsumeTextureCHROMIUM: invalid mailbox name
+[0623/084102:ERROR:gles2_cmd_decoder.cc(8605)] [.DisplayCompositor-184A7950]RENDER WARNING: texture bound to texture unit 0 is not renderable. It maybe non-power-of-2 and have incompatible texture filtering.
+[0623/084856:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0623/091856:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0623/094856:WARNING:quota_manager.cc(1833)] Create directory failed for path
