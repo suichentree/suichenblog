@@ -16,6 +16,7 @@ tags:
 
 目前最新的Django LTS版本为5.2.3
 
+
 ## Django 配置文件
 
 在 Django 的核心包里面存在了一个全局默认配置文件`django/conf/global_settings.py`，同时在开发者构建Django工程的时候，也生成了一个全局项目配置文件在工程主目录下的 `setting.py` 文件中。
@@ -260,3 +261,200 @@ MIDDLEWARE = [
 ]
 
 ```
+
+
+## Django ORM
+
+Django 对各种数据库提供了很好的支持，包括：PostgreSQL、MySQL、SQLite、Oracle。Django 为这些数据库提供了统一的调用API。 
+
+Django 可以使用内置的 ORM 框架来描述对象和数据库之间的映射，将程序中的对象自动持久化到数据库中。
+
+因此 ORM 在业务逻辑层和数据库层之间充当了桥梁的作用。
+
+1. ORM 会将 Python 代码转成为 SQL 语句。
+2. SQL 语句通过 数据库驱动(例如pymysql) 传送到数据库服务端。
+3. 然后在数据库中执行 SQL 语句并将结果返回。
+
+![python_20240427133356.png](../blog_img/python_20240427133356.png)
+
+### Django 连接数据库 sqlite
+
+Django 默认情况下是可以直接使用 sqlite数据库的。
+
+settings.py 文件中
+```py
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
+
+## NAME是SQLite 数据库文件的路径。db.sqlite3 是默认的 SQLite 数据库文件名
+```
+
+### Django 连接数据库 mysql
+
+① 安装mysql驱动
+
+```py
+# 使用 pymysql 数据库驱动
+pip install pymysql
+```
+
+若使用 pymysql，需在项目的 `__init__.py` 中添加下面这段代码。作用是让Django内置的ORM能以mysqldb的方式来调用pymysql
+
+```py
+# 在项目根目录的 __init__.py 中添加下面这段代码
+import pymysql
+pymysql.install_as_MySQLdb()
+```
+
+② 提前在mysql中创建数据库和数据表。
+
+③ 配置mysql数据库配置
+
+在setting.py中配置数据库的连接信息。Django默认初始配置使用sqlite数据库。因此需要替换为mysql数据库的配置。
+
+```py
+# setting.py 文件
+# Database 数据库配置
+DATABASES = {
+    # 使用mysql数据库
+    'default': {
+        'ENGINE': 'django.db.backends.mysql', #数据库引擎
+        'NAME': 'your_database_name',  # 数据库名
+        'USER': 'your_username',      # 用户名
+        'PASSWORD': 'your_password',  # 密码
+        'HOST': 'localhost',          # 主机
+        'PORT': '3306',               # 端口
+        'OPTIONS': {
+            'charset': 'utf8mb4',     # 字符集
+        },
+    }
+}
+```
+
+④ 测试连接
+
+```py
+python manage.py migrate  # 执行迁移，验证连接是否正常
+```
+
+### 定义模型类
+
+在 Django 中，模型是对数据库表的抽象。每个模型类对应一个数据库表，模型类的属性则对应数据库表中的字段。
+
+- 模型类通常定义在子工程（子应用）的`models.py`文件中。
+- 模型类必须直接或间接继承 django.db.models.Model 类来定义的
+- 每个模型类的属性代表数据库表中的字段，Django 会根据模型类自动生成数据库迁移文件并同步到数据库。
+
+示例如下
+```py
+from django.db import models
+# 定义一个User模型类，以及模型类中的一些属性。
+class User(models.Model):
+    ## 该主键字段id，可以不显式定义
+    id = models.IntegerField(primary_key=True)
+    name = models.CharField(max_length=100,verbose_name="姓名")
+    phone = models.CharField(max_length=100,verbose_name="手机号")
+    idCard = models.CharField(max_length=100,db_column='id_card',verbose_name="身份证号")
+    desc = models.TextField(verbose_name="描述",null=True)
+    create_time = models.DateTimeField(auto_now_add=True,verbose_name="创建时间")
+    updated_time = models.DateTimeField(auto_now=True,verbose_name="更新时间")
+
+    def __str__(self):
+        # 当使用print打印模型类对象的输出内容。类似java类的toString方法。
+        return self.name
+
+    # 添加 Meta 类定义元数据
+    class Meta:
+        verbose_name = "用户"  # Admin 界面显示的单数名称（替代默认的 "user"）
+        verbose_name_plural = "用户列表"  # 复数名称（替代默认的 "users"）
+        db_table = "t_user"  # 自定义数据库表名（Django 默认表名为 {应用名}_{模型类名小写}）
+        ordering = ["-create_time"]  # 默认按创建时间倒序排序（最新的在前）
+
+```
+
+- 上面代码中定义一个模型类，该类对应数据库中的一个表。
+- 在 Django 模型类中，默认情况下不需要显式自定义主键字段，Django 会自动为每个模型添加一个自增的整数类型主键（字段名为 id）。但在以下场景中可能需要自定义主键：
+    - 使用 UUID 作为主键
+    - 使用业务唯一编号作为主键
+- 每个模型类可以定义多个属性，每个属性对应数据库表中的一个列。
+- 每个属性都有一个名称，用于标识该列。属性的名称通常是小写字母，多个单词之间用下划线分隔。
+- 每个属性都可以有一些选项，用于指定该属性的默认配置，例如最大长度、是否为空等。
+
+> 常用的字段类型如下
+- 整数（IntegerField）：用于存储整数。对应mysql中的int
+- 浮点数（FloatField、DecimalField）：用于存储浮点数
+- 字符串（CharField、TextField）:用于存储文本
+    - CharField 短文本
+    - TextField 长文本
+- 布尔值（BooleanField）：用于存储布尔值（True 或 False）。实际在数据库中用0/1表示。
+- 文件（FileField、ImageField）：用于存储图像，支持文件上传。
+    - FileField字段继承于CharField字段，本质上保存文件的访问路径。
+    - ImageField字段继承于FileField字段，主要用于存储图像文件。
+- 关系字段（ForeignKey、ManyToManyField、OneToOneField）：表示外键，一对多，多对多关系。
+- 日期时间（DateTimeField、DateField、TimeField）：用于存储日期和时间
+    - TimeField 字段表示时分秒
+    - DateField 字段表示年月日
+    - DateTimeField 字段表示年月日时分秒
+    - auto_now=True 属性表示每次修改时都会自动设置改字段的值为当前时间。
+    - auto_now_add=True 属性表示创建时自动填充当前时间。与auto_now属性是互斥的。
+
+> 常用字段属性如下
+
+- max_length属性 指定该字段的最大存储长度。
+- null	如果为 True，表示允许为空，默认值是 False。相当于 python 的 None
+- blank	如果为 True，则该字段允许为空白，默认值是 False。 相当于 python 的空字符串：""
+- db_column	数据表中真实的字段名称，如果未指定，则使用模型类属性的名称。防止数据字段是 python 的关键字。
+- db_index	若值为 True, 则在表中会为此字段创建索引，默认值是 False。相当于 SQL 语句中的 key
+- default	默认值，当不填写数据时，使用该选项的值作为字段的默认值。
+- primary_key	如果为 True，则该字段在表中设置为主键，默认值是 False，一般不用设置，系统默认设置。
+- unique	如果为 True，则该字段在表中创建唯一索引，默认值是 False。相当于 SQL 语句中的 unique
+- verbose_name：设置该字段在 Admin 后台的显示名称（如 "姓名"）。
+
+
+> 模型类的元数据配置
+
+class Meta 用于定义模型类的元数据配置（如后台显示名称、数据库表名、排序规则等）
+
+- verbose_name：优化 Admin 后台的菜单显示。
+- db_table：自定义数据库表名（避免使用 Django 默认的 {应用名}_{模型名小写} 格式，例如表名是 t_user）。
+- ordering：设置查询时的默认排序规则（"-create_time" 表示按 create_time 降序排列，最新创建的用户排在最前）
+
+
+### 数据迁移
+
+当在Django工程中完成模型类的定义时。就需要通过迁移命令来创建和管理数据库。并更新模型类对应的数据库结构到数据库中。
+
+① 创建数据库迁移文件。这个命令会在django工程目录中为模型类生成对应的迁移文件和数据库文件。
+```py
+python manage.py makemigrations
+```
+
+② 应用迁移。这个命令会将迁移应用到你的数据库中。它会更新数据库文件以匹配模型类中的定义。
+```py
+python manage.py migrate
+```
+
+
+> 数据库回滚迁移操作
+
+在django中针对数据库的每一次数据迁移操作都会在数据库中的django_migrations表中有对应的历史记录。django_migrations表中的app字段表示迁移文件对应的应用名称，name字段表示迁移文件的名称。
+
+```py
+
+python manage.py migrate 应用名 迁移文件名 --fake  # 回滚指定迁移
+
+python manage.py migrate --fake 应用名 zero  # 回滚所有迁移
+
+python manage.py migrate --fake 应用名 迁移文件名 zero  # 回滚指定迁移之前的所有迁移
+```
+
+### 使用模型操作数据库
+
+
+
+
+
