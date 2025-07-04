@@ -17,9 +17,9 @@ tags:
 目前最新的Django LTS版本为5.2.3
 
 
-## Django 配置文件
+## Django 常用配置
 
-在 Django 的核心包里面存在了一个全局默认配置文件`django/conf/global_settings.py`，同时在开发者构建Django工程的时候，也生成了一个全局项目配置文件在工程主目录下的 `setting.py` 文件中。
+在 Django 的核心包里面存在了一个全局默认配置文件`django/conf/global_settings.py`，同时在开发者创建Django工程的时候，也生成了一个项目配置文件在工程主目录下的 `setting.py` 文件中。
 
 这两个配置文件，在 Django 项目运行时，Django 会先加载了 `global_settings.py` 中的所有配置项，接着加载 `setting.py` 的配置项。`settings.py` 文件中的配置项会优先覆盖 `global_settings.py` 文件的配置项。
 
@@ -40,11 +40,13 @@ SECRET_KEY = 'django-insecure-ant4q+=il*10^2(*%chbbw7$l^@xl+y-g9dumko(p#z2a)d(-a
 # 线上运行的时候，设置DEBUG = Flase。当服务端出错，django不会提示详细的错误信息，仅仅展示错误页面。
 DEBUG = True
 
-# 设置当前Django项目允许哪些IP地址访问
-# ALLOWED_HOSTS = ['*'] *代表任意IP都可以访问
+# 站点访问权限设置 ALLOWED_HOSTS ，设置当前Django项目允许哪些IP地址访问
+### 当ALLOWED HOSTS配置项取值为[]，即空列表，表示只有127.0.0.1、localhost 能访问本项目。
+### 当ALLOWED HOSTS配置项取值为['*']，表示任何网络地址IP都能访问当前项目。
+### 当ALLOWED HOSTS配置项取值为['hostname.cn','diango.com']，表示只有当前这两个网络地址能访问当前项目
 ALLOWED_HOSTS = []
 
-
+# APP配置
 # 已注册到Django项目的子应用列表。下面是Django官方内置的子应用。
 # 当创建子应用的时候，需要在该列表中添加对应子应用名称。否则Django项目无法识别子应用。
 INSTALLED_APPS = [
@@ -54,8 +56,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',      #django内置的session功能
     'django.contrib.messages',      #django内置的消息功能
     'django.contrib.staticfiles',   #django内置的静态文件服务功能
+    'app01',                        #自已创建的子应用
 ]
 
+# 中间件配置
 # 中间件（拦截器）MIDDLEWARE 实际就是django提供给开发者在http请求和响应过程中，进行数据拦截的插件系统。
 # 中间件 主要用于拦截请求或响应，数据修饰，权限判断等功能。
 MIDDLEWARE = [
@@ -71,13 +75,13 @@ MIDDLEWARE = [
 # django工程中的根路由文件的地址
 ROOT_URLCONF = 'djangoDemo1.urls'
 
-# 模板引擎配置
+# 模板配置
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [BASE_DIR / 'templates']    ## 配置模板目录所在的位置
         ,
-        'APP_DIRS': True,
+        'APP_DIRS': True,  ## 表示在子应用中查找模板文件。DIRS的优先级高于APP_DIRS
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.request',
@@ -92,12 +96,12 @@ TEMPLATES = [
 WSGI_APPLICATION = 'djangoDemo1.wsgi.application'
 
 
-# Database 数据库配置
+# DATABASES 数据库配置
 DATABASES = {
-    # 默认使用sqlite3数据库
+    # Django默认使用sqlite3数据库
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.sqlite3',  ## ENGINE 表示数据库驱动位置
+        'NAME': BASE_DIR / 'db.sqlite3',         ## NAME 表示数据库文件位置
     }
 }
 
@@ -119,13 +123,13 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# 国际化语言配置，默认英文
+# 项目的语言配置，默认英文
 LANGUAGE_CODE = 'zh-hans'   #中文
 # LANGUAGE_CODE = 'en-us'   # 英文
 
 # 时区配置
-# TIME_ZONE = 'UTC'     #英国时间
-TIME_ZONE = 'Asia/Shanghai'       #中国时间
+# TIME_ZONE = 'UTC'                 #英国时间
+TIME_ZONE = 'Asia/Shanghai'         #中国时间
 
 # 是否开启国际化本地化功能
 USE_I18N = True
