@@ -164,7 +164,7 @@ Django中的视图有两种：视图函数和视图类。
 
 视图函数本质上就是一个Python函数，用于接收Web请求并且返回Web响应。
 
-对于基于Django框架的Web项目而言，通常约定将视图函数写在项目或应用目录中名称为“views.py”的文件中。
+对于基于Django框架的Web项目而言，通常约定将视图函数写在项目或应用目录中名称为`views.py`的文件中。
 
 示例如下
 ```py
@@ -182,11 +182,15 @@ def about(request):
     return render(request, 'about.html')
 ```
 
-### 接收request请求
+### 请求对象 HttpRequest类
 
-#### 获取请求的基本信息
+在Django框架中，HttpRequest对象是由HttpRequest类来定义的。HttpRequest对象是组成HTTP数据包的核心部件之一，其中包含了非常多的、十分重要的信息和数据。
 
-视图函数的第一个参数用于接收路由发送过来的HTTP请求的相关信息。第一个参数的命名是任意的，通常取名为request
+每当一个客户端请求发送过来时，Django框架负责将HTTP数据包中的相关内容打包成为一个HttpRequest对象，并传递给视图函数的第一个位置上的参数(request)。
+
+#### HttpRequest类的常用属性
+
+视图函数的第一个参数用于接受HttpRequest类的对象。注意：第一个参数的命名是任意的，通常取名为request。
 
 部分代码示例如下
 ```py
@@ -200,58 +204,115 @@ def get_request_info(request):
     return HttpResponse("OK")
 ```
 
-#### 获取GET请求的请求参数
+- HttpRequest.scheme: 字符串类型，表示请求的协议种类，通常为“http”或“https”。
+- HttpRequest.body: Bytes类型，表示原始HTTP请求的正文。该属性对于处理非HTML形式的数据(例如二进制图像、XML等)非常有用。注意，如果要处理常规的表单数据，应该使用`HttpRequest.POST。`
+- HttpRequest.path: 字符串类型，表示当前请求的路径，但是不包括协议名和域名。
+- HttpRequest.method: 字符串类型，表示该HTTP请求的请求方式，默认为大写。
+- HttpRequest.encoding: 字符串类型，表示提交数据的编码方式(如果属性值为None，则使用DEFAULT CHARSET默认设置)。
+- HttpRequest.content_type:表示从CONTENT_TYPE头解析的请求的MIME类型。
+- HttpRequest.content_params:包含在CONTENT_TYPE头标题中的键一值对参数字典。
+- HttpRequest.GET:一个类似于字典的对象，包含GET请求中的所有参数。举例来讲，在链接地址`http://example.com/?name=jack&age=18`中,`name=jack&age=18`就是字典对象类型的键一值对参数。
+- HttpRequest.POST:包含POST请求中的表单数据。如果需要访问请求中的原始或非表单数据，可以使用HttpRequest.body属性。注意，使用if条件语句通过判断`request.method=="POST`来甄别一个请求是否为POST类型，而不要直接使用request.POST进行判断。此外，POST中不包含上传的文件数据。
+- HttpRequest.COOKIES:该属性包含所有Cookie信息的字典数据。
+- HttpRequest.FILES:该属性为一个类似于字典的对象，包含上传的文件数据。在Django框架中，实现文件上传功能主要依靠该属性。另外需要注意，FILES属性只有在请求方法为POST，并且提交请求的表`<form>`具有`enctype=multipart/form-data`属性时才有效;否则FILES属性将为空。
+- HttpRequest.META:该属性为一个包含所有HTTP头部信息的字典。具体示例如下。
 
-由于GET请求没有请求体，因此GET请求的请求参数都在请求路径上。
+```
+CONTENT_LENGTH:请求正文的长度(以字符串计)。
+CONTENT_TYPE:请求正文的MIME类型。
+HTTP_ACCEPT:可接收的响应Content-Type。
+HTTP_ACCEPT_ENCODING:可接收的响应编码类型。
+HTTP_ACCEPT_LANGUAGE:可接收的响应语言种类。
+HTTP_HOST:客服端发送的HOST头部。
+HTTP_REFERER:Referring页面。
+HTTP_USER_AGENT:客户端的“user-agent”字符串。
+QUERY_STRING:查询字符串。
+REMOTE_ADDR:客户端的IP地址，可以获取客户端的IP信息。
+REMOTE_HOST:客户端的主机名。
+REMOTE_USER:服务器认证后的用户，前提是用户可用。
+REQUEST_METHOD:表示请求方式的字符串，例如“GET”或“POST”。
+SERVER_NAME:服务器的主机名。
+SERVER_PORT:服务器的端口(字符串)。
+```
 
-例如请求路径`http://localhost:8000/app01/get_request/?a=1&b=2`中的请求参数就是`a=1&b=2`
+#### HttpRequest类的常用方法
 
-可以直接通过request.GET来获取请求路径上的参数。
+- HttpRequest.get_host()方法:该方法返回根据HTTP_X_FORWARDED_HOST信息和HTTP_HOST头部信息获取的请求的原始主机。如果这两个头部信息没有提供相应的值，则使用SERVER_NAME和SERVER_PORT头部信息。
+- HttpRequest.get_port()方法:该方法使用META中的HTTP_X_FORWARDED_PORT和SERVER_PORT的信息返回请求的始发端口。
+- HttpRequest.get_full_path()方法:该方法返回包含完整参数列表的路径path，例如`/xxx/xxx/?a=true`。
+- HttpRequest.build_absolute_uri(location)方法:该方法返回location的绝对URI形式。
+- HttpRequest.get_signed_cookie(key)方法:该方法从Cookie中获取键值对数据。
+- HttpRequest.is_secure()方法:如果使用的是HTTPS，则该方法返回True，表示链接是安全的。
+- HttpRequest.accepts(mime_type)方法:如果请求头部接收的类型匹配mime_type参数，则该方法返回True，否则返回False。
+
+
+#### 获取请求URL中请求参数
+
+HttpRequest类的GET属性，专门用于获取 URL 中的请求参数（即 URL 中 ? 后面的键值对）,与请求方法无关（无论请求是 GET、POST 还是其他方式，只要 URL 包含请求参数，均可通过此属性获取）。
+
+例如请求URL路径为`http://localhost:8000/app01/get_request/?a=1&b=2`,那么请求参数就是`a=1&b=2`。可以直接通过HttpRequest类的GET属性来获取路径上的请求参数。
+
+使用场景
+- 可以获取 GET 请求中 URL 携带的参数（如分页 page=1）。
+- 可以获取 POST 请求中 URL 携带的参数（如 /xxx/xxx?a=1 中的 a=1）
+
 
 示例如下
 ```py
+
+# 视图函数的第一个参数用于接受路由转过来的HttpRequest类对象
 def get_request_info2(request):
-    ## 若是GET请求
-    if request.method == "GET":
-        print(request.GET) #获取请求路径上的请求参数
 
-        ##若一个请求的路径为`http://localhost:8000/app01/get_request/?a=1&b=2`。
-        ##则request.GET来获取请求路径上的参数为`{'a': ['1'], 'b': ['2']}`。
+    print(request.GET) #获取请求路径上的请求参数
 
-        ## 或者 获取单个参数
-        print(request.GET.get('a'))
-        print(request.GET.get('b'))
+    ##若一个请求的路径为`http://localhost:8000/app01/get_request/?a=1&b=2`。
+    ##则request.GET来获取请求路径上的参数为`{'a': ['1'], 'b': ['2']}`。
+
+    ## 或者 获取单个参数
+    print(request.GET.get('a'))
+    print(request.GET.get('b'))
+
+    # 获取 URL 查询参数（无论请求方法）
+    a = request.GET.get('a', '默认值')  # 单个值
+    b = request.GET.getlist('b', [])    # 多个值
 
     return HttpResponse("OK")
 ```
 
-#### 获取POST请求中的表单数据
+#### 获取请求体中的表单数据
 
-POST请求有请求体，请求体的数据有两种存储方式。一种是表单数据，一种是json数据。
+HttpRequest类的POST属性。用于获取 POST 请求的表单数据（即请求体中提交的数据），仅在请求方法为 POST 时有效。
 
-我们可以通过request.POST来获取请求体中的表据单数。
+请求体的数据一般有两种。一种是表单数据，一种是json数据。
+
+注意事项：
+- 仅支持 POST 请求，且依赖正确的 Content-Type（若为 application/json 格式的 POST 数据，需通过 request.body 解析，而非 request.POST）。
+- 数据不暴露在 URL 中，可传递较大量数据或敏感信息（需配合 HTTPS 加密）。
+- 表单提交时需包含 {% csrf_token %} 标签（避免 CSRF 攻击）
+
 
 示例如下
 ```py
-def get_request_info(request):
-    ## 若是POST请求
-    if request.method == "POST":
-        print(request.POST) #获取请求体的表单数据
+# 视图函数中使用
+def demo_view(request):
+    # 获取 POST 表单数据（仅 POST 请求有效）
+    if request.method == 'POST':
+        username = request.POST.get('username')       # 单个值
+        hobbies = request.POST.getlist('hobby')       # 多个值
 
-    return HttpResponse("OK")
+    return HttpResponse("处理完成")
 ```
 
-#### 获取POST请求中的Json数据
+#### 获取请求体中的Json数据
 
-request.POST不能获取请求体中的json数据，只能通过request.POST来获取请求体中的表据单数。。
+HttpRequest类的POST属性，不能获取请求体中的json数据。只能通过HttpRequest类的body属性来获取请求体中的json数据。
 
 示例如下
 ```py
 import json
-
 def get_request_info(request):
-    print(request.body)  #获取请求体中的json数据
-
+    #获取请求体中的json数据
+    print(request.body)  
     # 将请求体中的json数据转换为字典格式
     print(json.loads(request.body))
 
@@ -266,7 +327,7 @@ def get_request_info(request):
     return HttpResponse("OK")
 ```
 
-#### 获取请求路径中的参数
+#### 获取请求URL中的动态参数
 
 假设请求路径为`http://localhost:8000/app01/id/1/order/2/`。那么如何获取请求路径中的参数。
 
@@ -286,14 +347,57 @@ def user_detail(request,id,order_id):
     print(id,order_id)
 ```
 
-### HttpResponse响应对象
+### 响应对象 HttpResponse类
 
-django针对Http请求的响应，提供2种方式。
-- 方式1：响应内容：即直接响应数据给浏览器。
-    - 响应html内容,一般用于web前后端不分离的方式。
-    - 响应json内容，一般用于web前后端分离的方式。
-- 方式2：重定向。即返回页面跳转的信息给浏览器，让浏览器自行页面跳转。
+在Django框架中HttpRequest对象是浏览器发送过来的请求数据的封装，而HttpResponse对象则是将要返回给浏览器的数据的封装，HttpResponse对象是由HttpResponse类来定义的。
 
+HttpRequest对象由Django自动解析HTTP数据包而创建，而HttpResponse对象则是需要手动创建的。
+
+通常每个视图函数的返回值就是一个HttpResponse对象。
+
+#### HttpResponse类的常用属性
+
+- content属性: 表示响应的内容。
+- content_type属性：表示响应内容的类型。
+- charset属性: 表示编码的字符集。如果没指定，将会从content_type中解析出来。
+- status_code属性: 表示响应的状态码，例如200。
+- reason_phrase属性: 表示响应的HTTP原因短语，一般使用HTTP标准的默认原因短语。除非明确设置，否则该属性将由status_code的值决定。
+- streaming属性: 该属性的值总是False。由于该属性的存在，使得中间件能够区别对待流式响应和常规响应。
+- closed属性:如果响应已关闭，那么该属性的值为True。
+
+
+#### HttpResponse类的常用方法
+
+- HttpResponse.init__(content=b",content_type=None,status=200,reason=None,charset=None)方法: 该方法为HttpResponse类的初始化方法。具体参数介绍如下:
+    - content参数通常是一个迭代器、bytestring、memoryview或字符串类型。如果是其他类型，则将通过编码转换为bytestring类型;如果是迭代器,那么这个迭代器返回的应该是字符串，并且这些字符串连接起来形成response的内容。
+    - content_type参数是可选的，用于填充HTTP的Content-Type头部。
+    - status参数表示响应的状态码。
+    - reason参数是HTTP响应短语。
+    - charset参数是编码方式。
+
+- `HttpResponse.__setitem__(header,value)`方法:该方法用于设置头部的键一值对。其中的两个参数都必须为字符串类型。
+- `HttpResponse.__delitem__(header)`方法:该方法用于删除头部的某个键，如果键不存在也不会报错。该方法不区分字母大小写。
+- `HttpResponse.__getitem__(header)`方法:该方法用于返回对应键的值。该方法不区分字母大小写。
+- HttpResponse.get(header, alternate=None)方法:该方法用于返回给定的头部的值，当头部不存在时返回一个alternate参数。
+- HttpResponse.has_header(header)方法:该方法用于检查头部中是否有给定的名称(不区分字母大小写)，结果返回布尔值(True或False)。
+- HttpResponse.items()方法:该方法的行为类似于Python字典中的dict.items()方法，用于获取HTTP响应中的头部信息。
+- HttpResponse.setdefault(header,value)方法:该方法用于设置一个头部，除非该头部已经设置过了。
+- HttpResponse.set_cookie()方法:该方法用于设置一个Cookie。其中的参数如下:
+    - max_age参数:用于定义生存周期，以秒为单位。如果设置为None，则在浏览器开启期间该Cookie一直保持，浏览器关闭后该Cookie一同删除。
+    - expires参数:用于定义到期时间。
+    - domain参数:用于设置跨域的Cookie。
+    - secure参数:secure=True表明支持HTTPS安全协议,secure=False表明不支持HTTPS安全协议。
+    - httponly=True:阻止客户端的Java Script代码访问Cookie。
+
+- HttpResponse.set_signed_cookie()方法:该方法与set_cookie()方法类似，但是在设置
+之前将对Cookie进行加密签名。
+- HttpResponse.delete_cookie(key)方法:该方法用于删除Cookie中指定的key。
+- HttpResponse.close()方法:在请求结束后WSGI服务器会调用此方法来关闭连接。
+- HttpResponse.write(content)方法:该方法会将HttpResponse实例看作类似文件的对象，往里面添加内容。
+- HttpResponse.flush()方法:该方法用于清空HttpResponse实例的内容。
+- HttpResponse.getvalue()方法:该方法返回HttpResponse.content的值。同时，该方法将HttpResponse实例看作一个类似流的对象。
+
+#### HttpResponse响应对象的用法
 
 ```py
 from django.http import HttpResponse
@@ -326,35 +430,74 @@ def get_request_img(request):
         img = f.read()
     # 返回图片数据
     return HttpResponse(content=img,content_type="image/png")
-```
-
-HttpResponse对象除了可以返回各种数据，还可以设置响应的各种信息。
-
-示例如下
-```py
-from django.http import HttpResponse
-import json
 
 def response_json(request):
-    
+    # 创建一个json数据
     json_data = json.dumps({"name":"alex","age":18})
     # 设置响应的响应头，响应状态等信息
     return HttpResponse(content=json_data, content_type="application/json", status=200,charset="utf-8", headers={"Content-Type": "application/json"})
 ```
 
-#### JsonResponse对象-返回Json数据
+### 响应对象 HttpResponse的子类
 
-JsonResponse对象的内部直接将数据转换为json格式。
+Django还包含了一系列的HttpResponse的衍生类(子类)，用来处理不同类型的HTTP响应。
 
+同时，这些子类主要区别就是响应码的不同。HttpResponse衍生类的说明如下:
+- HttpResponseRedirect类:重定向，返回302状态码。目前，已经被redirect()方法替代。
+- HttpResponsePermanentRedirect类:永久重定向，返回301状态码。
+- HttpResponseNotModified类:未修改的页面，返回304状态码。
+- HttpResponseBadRequest类:错误的请求，返回400状态码。
+- HttpResponseNotFound类:页面不存在，返回404状态码。
+- HttpResponseForbidden类:禁止访问，返回403状态码。
+- HttpResponseNotAllowed类:禁止访问，返回405状态码。
+- HttpResponseGone类:响应过期，返回405状态码。
+- HttpResponseServerError类:服务器错误，返回500状态码。
+
+#### JsonResponse类-返回Json数据
+
+JsonResponse对象是HttpResponse对象的子类。JsonResponse对象的内部直接将数据转换为json格式。（会默认设置 Content-Type: application/json）。
+
+JsonResponse类的构造方法如下
+```py
+class JsonResponse(data,encoder=DjangoJSONEncoder,safe=True,json_dumps_params=None,**kwargs)
+# JsonResponse类会默认Content-Type头部设置为application/json
+# data参数应该是一个字典数据类型。如果后面的safe参数设置为False，则该参数可以为任意JSON对象。
+# encoder参数默认设置为django.core.serializers.json.DjangoJSONEncoder，用于序列化数据。
+# safe参数只有设置为False时，才可以将任何可JSON序列化的对象作为data参数的值。如果safe参数设置为True，则同时将一个非字典型对象传递给data参数时，会触发一个TypeError错误。
+# json_dumps_params参数通过将一个字典类型关键字参数传递给json.dumps()方法,来生成一个响应。
+```
+
+代码示例如下
 ```py
 from django.http import HttpResponse, JsonResponse
 def response_json(request):
-    # 返回json数据
-    json_data = {"id": 1, "name": 111}
-    return JsonResponse(data=json_data)
+    return JsonResponse(data={"id": 1, "name": 111}) # 等价于 HttpResponse(json.dumps(data), content_type='application/json')
+
+def response_json2(request):
+    # 若要序列化一个非字典数据，则需要设置safe为False。否则会抛出异常。
+    return JsonResponse(data=[1,2,3],safe=False)
+
 ```
 
+#### FileResponse 对象-返回文件
+
+在Django框架中,FileResponse类用于返回文件类型的响应数据。通常用于给浏览器返回一个文件附件。
+
+对于FileResponse类而言，如果提供了WSGI服务器，则使用wsgi.file_wrapper，否则会将文件
+分成小块进行传输。
+
+FileResponse类的定义如下:
+```py
+class FileResponse(open_file, as_attachment=False, filename='',**kwargs)
+```
+
+- 如果设置as_attachment=True，则Content-Disposition被设置为attachment，通知浏览器这是一个以文件形式下载的附件;否则Content-Disposition会被设置为inline(浏览器默认行为)。
+- 如果open_file参数传递的类文件对象没有名字，或者名字不合适，那么可以通过filename参数为文件对象指定一个合适的名字。
+
+
 #### HttpResponseRedirect对象-重定向
+
+HttpResponseRedirect对象是HttpResponse对象的子类。
 
 重定向分为两种：
 - 外链重定向。即跳转到外部网址。
@@ -373,6 +516,113 @@ def redirect_to_home(request):
 ```
 
 Django 提供了 redirect() 方法来处理 URL路由 的重定向。使用 redirect() 时，可以直接传入视图的名称来实现反向解析，即根据视图名称自动生成 URL。
+
+
+
+### render()函数
+
+render函数可以将一个模板和一个上下文字典，返回一个渲染后的HttpResponse对象。
+
+render函数语法格式
+```py
+render(request, template_name, context=None, content_type=None, status=None, using=
+None)
+```
+
+- request:视图函数正在处理的当前请求，封装了请求头(Header)的所有数据，其实就是视图请求参数。
+- template_name:视图要使用的模板的完整名称或者模板名称的列表。如果是一个列表，将使用其中能够查找到的第一个模板。
+- context:将要添加到模板上下文中的字典类型值。默认情况下，这是一个空的字典值。如
+果字典中的值是可调用的，则视图将在渲染模板之前调用该参数。
+- content_type:响应内容的类型，默认设置为“text/html”。
+- status:响应的状态代码，默认值为“200”。
+- using:用于加载模板的模板引擎名称。
+
+### redirect()函数
+
+redirect()函数会返回一个HttpResponseRedirect对象，并通过传递参数到适当的URL地址上。
+
+redirect()函数语法格式：`redirect(to, *args, permanent=False, **kwargs)`
+
+传递的参数:
+- 一个模型:通过模型对象的get absolute_url()函数进行调用。
+- 一个视图名称(可能带有参数):通过reverse()方法来进行反向解析的名称。
+- 一个目前将要被重定向位置的绝对或相对URL地址。
+
+示例
+```py
+from django.shortcuts import redirect
+
+def my_view(request):
+    # 调用对象的get_absolute_url()方法,获取模型对象的URL重定向地址
+    obj = MyModel.objects.get_absolute_url(...)
+    # redirect()函数传入地址，进行重定向
+    return redirect(obj)
+
+def my_view2(request):
+    # 通过视图名称和一些参数返回重定向URL
+    return redirect('some-view-name', foo='bar')
+
+def my_view3(request):
+    #通过硬编码返回重定向URL
+    return redirect('https://www.redirect-url.com/')
+
+def my_view(request):
+    #通过硬编码返回重定向URL
+    return redirect('/page/content/detail/')    
+
+```
+
+
+### 视图装饰器
+
+视图装饰器用来对视图函数进行相关的控制操作，实现了对各种HTTP特性的支持功能。
+
+在Django框架中，位于django.views.decorators.http模块的装饰器被用来限制可以访问该视图的HTTP请求方法。如果请求的HTTP方法不是指定的方法之一，则返回django.http.HttpResponseNotAllowed响应。
+
+
+#### require_http_methods()装饰器
+
+当视图方法被require_http_methods()装饰器修饰的时候，该视图方法仅能被特定的请求方式访问
+
+```py
+from django.views.decorators.http import require_http_methods
+
+#请求方法应该是大写
+@require_http_methods(["GET"， "POST"])
+def my_view(request):
+    # 现在可以假设只有GET或POST请求才能到达这里
+    # ...
+
+```
+
+#### require_GET() require_POST() require_safe() 装饰器
+
+- require_GET()装饰器:是require_http_methods()装饰器的简化版本，功能上只允许GET请求方式的访问。
+- require_POST()装饰器：是require_http_methods()的简化版本，功能上只允许POST请求方式的访问。
+- require_safe()装饰器：只允许安全的请求类型，也就是GET请求方式和HEAD请求方式的访问。这类请求通常用于读取数据。
+
+代码示例
+```py
+from django.views.decorators.http import require_GET, require_POST, require_safe
+
+# 仅处理 GET 请求
+@require_GET
+def my_view(request):
+    # ... 业务代码
+
+# 仅处理 POST 
+@require_POST
+def my_view2(request):
+    # ... 业务代码
+
+# 仅处理GET和HEAD请求
+@require_safe
+def my_view3(request):
+    # ... 业务代码
+
+```
+
+
 
 
 ### 简单视图类
