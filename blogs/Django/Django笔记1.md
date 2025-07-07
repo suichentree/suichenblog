@@ -92,6 +92,13 @@ python manage.py runserver
 ```py
 # 创建一个名为app01的子应用的命令 
 python manage.py startapp app01
+
+# 当创建子工程之后，还需要再settings.py配置文件中的INSTALLED APPS配置项添加该子工程
+INSTALLED_APPS=[
+    # ....
+    'app01',
+    # ....
+]
 ```
 
 会在当前的Django工程目录中新增一个子目录作为app01子工程。如图是子工程的目录结构
@@ -152,7 +159,138 @@ Django 的 MTV 模式和 传统的MVC模式 本质上是一样的，都是为了
 大致操作流程如下
 ![python_20240427125050.png](../blog_img/python_20240427125050.png)
 
-## 视图（View）
+
+
+## Django 常用配置
+
+在 Django 的核心包里面存在了一个全局默认配置文件`django/conf/global_settings.py`，同时在开发者创建Django工程的时候，也生成了一个项目配置文件在工程主目录下的 `setting.py` 文件中。
+
+这两个配置文件，在 Django 项目运行时，Django 会先加载了 `global_settings.py` 中的所有配置项，接着加载 `setting.py` 的配置项。`settings.py` 文件中的配置项会优先覆盖 `global_settings.py` 文件的配置项。
+
+==在Django中，配置变量被强制要求大写。否则Django无法识别。==
+
+`setting.py` 文件示例如下
+```py
+
+from pathlib import Path
+
+# BASE_DIR 代表工程的根路径，是当前文件的父级的父级目录的路径（即Django工程的根目录路径）。主要作用是提供给整个Django项目进行路径拼接用的。
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+# SECRET_KEY 随机生成的，用于提供给加密算法的密钥。
+SECRET_KEY = 'django-insecure-ant4q+=il*10^2(*%chbbw7$l^@xl+y-g9dumko(p#z2a)d(-a'
+
+# 本地开发的时候，设置DEBUG = True 。当服务端出错，django会提示详细的错误信息
+# 线上运行的时候，设置DEBUG = Flase。当服务端出错，django不会提示详细的错误信息，仅仅展示错误页面。
+DEBUG = True
+
+# 站点访问权限设置 ALLOWED_HOSTS ，设置当前Django项目允许哪些IP地址访问
+### 当ALLOWED HOSTS配置项取值为[]，即空列表，表示只有127.0.0.1、localhost 能访问本项目。
+### 当ALLOWED HOSTS配置项取值为['*']，表示任何网络地址IP都能访问当前项目。
+### 当ALLOWED HOSTS配置项取值为['hostname.cn','diango.com']，表示只有当前这两个网络地址能访问当前项目
+ALLOWED_HOSTS = []
+
+# APP配置
+# 已注册到Django项目的子应用列表。下面是Django官方内置的子应用。
+# 当创建子应用的时候，需要在该列表中添加对应子应用名称。否则Django项目无法识别子应用。
+INSTALLED_APPS = [
+    'django.contrib.admin',         #django内置的admin子应用
+    'django.contrib.auth',          #django内置的登录认证功能
+    'django.contrib.contenttypes',  #django内置的内容类型管理
+    'django.contrib.sessions',      #django内置的session功能
+    'django.contrib.messages',      #django内置的消息功能
+    'django.contrib.staticfiles',   #django内置的静态文件服务功能
+    'app01',                        #自已创建的子应用
+]
+
+# 中间件配置
+# 中间件（拦截器）MIDDLEWARE 实际就是django提供给开发者在http请求和响应过程中，进行数据拦截的插件系统。
+# 中间件 主要用于拦截请求或响应，数据修饰，权限判断等功能。
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',        # 安全检测中间件（防止页面过期，脚本攻击，跨域判断等）
+    'django.contrib.sessions.middleware.SessionMiddleware', # session中间件（提供session功能）
+    'django.middleware.common.CommonMiddleware',            # 通用中间件（给url进行重写，给url后面加上/等）
+    'django.middleware.csrf.CsrfViewMiddleware',            # Csrf中间件（防止网站收到Csrf攻击的）
+    'django.contrib.auth.middleware.AuthenticationMiddleware',  # 用户权限认证中间件
+    'django.contrib.messages.middleware.MessageMiddleware',     # 消息中间件（提示错误消息等）
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',   # 网站安全中间件（用于防止iframe标签劫持攻击的）
+]
+
+# django工程中的根路由文件的地址
+ROOT_URLCONF = 'djangoDemo1.urls'
+
+# 模板配置
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [BASE_DIR / 'templates']    ## 配置模板目录所在的位置
+        ,
+        'APP_DIRS': True,  ## 表示在子应用中查找模板文件。DIRS的优先级高于APP_DIRS
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
+
+# web应用程序的模块配置
+WSGI_APPLICATION = 'djangoDemo1.wsgi.application'
+
+
+# DATABASES 数据库配置
+DATABASES = {
+    # Django默认使用sqlite3数据库
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',  ## ENGINE 表示数据库驱动位置
+        'NAME': BASE_DIR / 'db.sqlite3',         ## NAME 表示数据库文件位置
+    }
+}
+
+
+# Password validation 密码的加密方式
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+]
+
+
+# 项目的语言配置，默认英文
+LANGUAGE_CODE = 'zh-hans'   #中文
+# LANGUAGE_CODE = 'en-us'   # 英文
+
+# 时区配置
+# TIME_ZONE = 'UTC'                 #英国时间
+TIME_ZONE = 'Asia/Shanghai'         #中国时间
+
+# 是否开启国际化本地化功能
+USE_I18N = True
+
+# 是否启用时区转换
+# 若为False,则django会基于TIME_ZONE来转换时间，若为True,则采用系统时间来转换时间。
+USE_TZ = True
+
+# 静态文件存放路径
+STATIC_URL = 'static/'
+
+# 默认情况下，django中数据表的主键ID的数据类型。默认为bigint
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+```
+
+## Django 视图
 
 在Django框架中，视图（View）是用于处理Web请求和生成响应的核心组件。即接收一个 Web 请求对象，并返回一个 Web 响应对象。
 
@@ -508,7 +646,6 @@ def get_request_info(request):
     # 重定向外部网址
     return HttpResponseRedirect("http://www.baidu.com")
 
-
 from django.shortcuts import redirect
 def redirect_to_home(request):
     # 重定向其他路由
@@ -518,30 +655,11 @@ def redirect_to_home(request):
 Django 提供了 redirect() 方法来处理 URL路由 的重定向。使用 redirect() 时，可以直接传入视图的名称来实现反向解析，即根据视图名称自动生成 URL。
 
 
+> redirect() 方法
 
-### render()函数
+redirect() 方法会返回一个HttpResponseRedirect对象，并通过传递参数到适当的URL地址上。
 
-render函数可以将一个模板和一个上下文字典，返回一个渲染后的HttpResponse对象。
-
-render函数语法格式
-```py
-render(request, template_name, context=None, content_type=None, status=None, using=
-None)
-```
-
-- request:视图函数正在处理的当前请求，封装了请求头(Header)的所有数据，其实就是视图请求参数。
-- template_name:视图要使用的模板的完整名称或者模板名称的列表。如果是一个列表，将使用其中能够查找到的第一个模板。
-- context:将要添加到模板上下文中的字典类型值。默认情况下，这是一个空的字典值。如
-果字典中的值是可调用的，则视图将在渲染模板之前调用该参数。
-- content_type:响应内容的类型，默认设置为“text/html”。
-- status:响应的状态代码，默认值为“200”。
-- using:用于加载模板的模板引擎名称。
-
-### redirect()函数
-
-redirect()函数会返回一个HttpResponseRedirect对象，并通过传递参数到适当的URL地址上。
-
-redirect()函数语法格式：`redirect(to, *args, permanent=False, **kwargs)`
+redirect()方法语法格式：`redirect(to, *args, permanent=False, **kwargs)`
 
 传递的参数:
 - 一个模型:通过模型对象的get absolute_url()函数进行调用。
@@ -760,313 +878,3 @@ class ProductListView(ListView):
 
 ProductListView 会自动查询数据库中的所有 Product 对象，并将它们传递给模板list.html。
 
-
-## URL 路由
-
-Django 的 URL 路由是其核心组件之一，它负责将用户的 HTTP 请求（即 URL）映射到相应的视图函数上。
-
-> URL 路由的作用
-
-客户端发来的HTTP请求经过URL路由映射处理后，会发送到相应的View视图处理函数进行处理，View视图函数处理完成后，再通过HtpResponse对象返回具体信息到客户端进行显示。
-
-> URL 路由文件
-
-在 Django 中，URL路由通常写在工程的 `urls.py` 文件中。这个文件定义了 URL 路由和它们对应的视图函数。
-
-> 路由文件的基本示例
-
-```py
-from django.urls import path
-from .views import get_info
-
-urlpatterns = [
-    ## 通过path函数，将`get_info/`路由与get_request_info视图函数进行绑定。
-    path('get_info/',get_request_info)
-]
-```
-
-### 路由与视图函数绑定
-
-> 使用 path()函数 定义 URL 路由
-
-path()函数 是 Django 配置 URL 路由的推荐方式，它使用简洁的字符串匹配模式。
-
-```py
-from django.urls import path
-from . import views
- 
-urlpatterns = [
-    ## /home/ 路由映射到 views.home 视图函数。
-    path('home/', views.home, name='home'),
-    ## /about/ 路由映射到 views.about 视图函数。
-    path('about/', views.about, name='about'),
-]
-```
-
-> URL 路由添加动态参数
-
-```py
-urlpatterns = [
-    ## /profile/???/ 路由映射到 views.profile 视图函数。
-    path('profile/<int:user_id>/', views.profile, name='profile'),
-]
-```
-
-URL 中的 `<int:user_id>` 会被动态替换为实际的 user_id，并传递给视图函数 profile()。其中int表示动态参数的类型。例如`/profile/111/，/profile/222/`等
-
-> 使用 re_path()函数 定义 URL 路由
-
-re_path() 函数允许你使用正则表达式来匹配更复杂的 URL 模式。它的基本语法与 path() 类似，但它允许你使用正则表达式进行灵活的匹配。
-
-```py
-from django.urls import re_path
-from . import views
-urlpatterns = [
-    re_path(r'^article/(?P<slug>[\w-]+)/$', views.article_detail, name='article_detail'),
-]
-```
-
-### 路由模块化管理 include函数
-
-
-> 使用include函数 引入子工程的路由。
-
-当我们在Django工程中创建了多个子工程。每个子工程都有各自的路由urls文件。此时我们可以在Django主工程的urls文件中使用include函数来引入各个子工程的路由文件，从而实现路由的模块化管理。
-
-```py
-# 主路由配置（project/urls.py）
-urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('blog/', include('blog.urls')),   # 引入blog子工程的路由
-]
-```
-
-`path('blog/', include('blog.urls'))` 这句话的作用是引入blog子工程中的urls路由文件。并设置'blog/'为该子工程路由的前缀。
-
-### 路由传递额外参数给视图函数
-
-在 Django 中，有多种方式可以将额外参数传递给视图函数。
-
-> 方式1：定义路由时，可以设置额外参数
-
-```py
-# urls.py 文件中
-from django.urls import path
-from. import views
-urlpatterns = [
-    path('example/', views.example_view, {'extra_param': '额外参数值'}),
-]
-
-# views.py文件中
-from django.http import HttpResponse
-def example_view(request,extra_param):
-    print(f"extra_param: {extra_param}")
-    return HttpResponse("视图函数执行成功")
-
-```
-
-> 方式2：使用查询字符串
-
-可以在 URL 中通过查询字符串的形式传递参数，然后在视图函数中从request.GET获取。
-
-```py
-# urls.py 文件中
-from django.urls import path
-from. import views
-urlpatterns = [
-    path('example/<int:id>/', views.example_view),
-]
-
-# views.py文件中
-from django.http import HttpResponse
-def example_view(request, id):
-    print(f"id: {id}")
-    return HttpResponse("视图函数执行成功")
-
-```
-
-> 方式3：使用类视图的as_view()方法传入额外参数
-
-```py
-# urls.py 文件中
-from django.urls import path
-from. import views
-urlpatterns = [
-    path('example/<int:id>/', views.ExampleView.as_view(extra_param='额外参数值')),
-]
-
-# views.py文件中
-from django.views.generic import View
-from django.http import HttpResponse
-class ExampleView(View):
-    def get(self, request, id, extra_param):
-        print(f"id: {id}, extra_param: {extra_param}")
-        return HttpResponse("类视图执行成功")
-
-```
-
-以上几种方式可以根据实际业务需求灵活选择，实现将额外参数传递给视图函数的目的。
-
-## 模板（Template）
-
-模板负责数据的展示与布局。模板本质上就是html页面。
-
-我们可以在视图函数中，用render方法将html页面作为响应返回给客户端。需要3个步骤。
-1. 在项目配置文件setting.py中设置模板目录的位置。一般模板目录创建在工程根目录下。
-2. 在模板目录中创建对应的模板页面文件，并根据模板语法和视图函数传递过来的数据去填充页面。
-3. 在视图函数中使用render方法将某个模板页面作为响应返回给客户端。
-
-### 模板页面作为响应返回
-
-① setting.py中设置模板目录位置
-
-- 创建模板目录templates。
-- 修改setting.py文件中的TEMPLATES的DIRS配置项。如下所示
-
-```py
-TEMPLATES = [
-    {
-        ......
-        'DIRS': [BASE_DIR / 'templates'],
-        .......
-    },
-]
-```
-
-② 创建模板页面文件
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-    <h1>this is user.html</h1>
-</body>
-</html>
-```
-
-③ 视图函数中使用render方法将模板页面作为响应返回给客户端
-```py
-from django.shortcuts import render
-def get_request_info(request):
-    return render(request, template_name='user.html')
-```
-
-render方法本质上还是将模板页面封装为HttpResponse响应对象，并返回给客户端。
-
-### Django模板语言（DTL）
-
-Django 模板基于 Django模板语言（DTL），它提供了一些强大的功能，如模板标签、过滤器、条件语句和循环等，可以动态地渲染和控制页面内容。
-
-Django模板语言（DTL）主要包括以下几个部分。
-- 模板变量：用于显示动态数据。
-- 模板标签：控制模板的逻辑（如条件语句、循环等）。
-- 模板过滤器：用于修改变量的输出内容。
-
-### 模板变量
-
-模板变量用 `{{ }}` 包裹。表示从视图中传递过来的数据会被填充到这里,具体填充什么数据，根据模板变量中参数而定。
-
-示例如下
-
-创建一个视图函数user_show
-```py
-from django.shortcuts import render
-def user_show(request, user):
-    # 将user参数，传递给模板。
-    return render(request, 'user.html', {'user': user})
-```
-
-创建一个user.html模板
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-    <h1>ID {{ user.id }}!</h1>
-    <h1>姓名 {{ user.name }}!</h1>
-    <h1>电话 {{ user.phone }}!</h1>
-    <h1>ID {{ user.idCard }}!</h1>
-    <h1>邮箱 {{ user.email }}!</h1>
-</body>
-</html>
-```
-
-render方法会将user数据传递给模板，模板变量会根据视图传递的数据填充到HTML页面中。并动态生成全新的HTML页面。最终返回给客户端。
-
-
-### 模板标签
-
-模板标签用于实现更复杂的功能，如条件判断、循环等。标签使用 {% %} 包裹。常用的模板标签包括 if、for等。
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-    <h1>ID {{ user.id }}!</h1>
-    <h1>姓名 {{ user.name }}!</h1>
-    <h1>电话 {{ user.phone }}!</h1>
-    <h1>ID {{ user.idCard }}!</h1>
-    <h1>邮箱 {{ user.email }}!</h1>
-
-    <!--这是 if 条件模板标签的示例-->
-
-    {% if user.is_authenticated %}
-        <p>姓名 {{ user.name }}!</p>
-    {% else %}
-        <p>Please log in to access your profile.</p>
-    {% endif %}
-
-    <!--这是 for 循环模板标签的示例-->
-    <ul>
-    {% for post in post_list %}
-        <li>{{ post.title }} - {{ post.created_at }}</li>
-    {% empty %}
-        <li>No posts available.</li>
-    {% endfor %}
-    </ul>
-</body>
-</html>
-```
-
-- if 模板标签用于根据条件执行不同的代码块。在模板中，if 标签用于判断条件是否成立，如果成立则执行相应的代码。
-- for 模板标签用于循环遍历一个序列（如列表、字典等）。
-
-
-### 模板过滤器
-
-模板过滤器本质上是一个函数。用于对模板变量进行输出和调整。它们在模板变量后面用 | 分隔表示。
-
-例如，`{{ value|lower }}` 会将 value 模板变量转换为小写字母。
-
-示例如下
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-    <h1>ID {{ user.id }}!</h1>
-    <h1>姓名 {{ user.name }}!</h1>
-    <h1>电话 {{ user.phone }}!</h1>
-    <h1>ID {{ user.idCard }}!</h1>
-    <h1>邮箱 {{ user.email|lower }}!</h1>
-    <h1>生日 {{ user.birth|date:'Y-m-d' }}!</h1>
-</body>
-</html>
-```
-
-常用的模板过滤器如图所示
-![django_20250618163657.png](../blog_img/django_20250618163657.png)
