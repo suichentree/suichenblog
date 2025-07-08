@@ -638,7 +638,6 @@ Django ORM的作用
 - 模型类.objects.last()：获取最后一条记录（无记录抛异常）
 - 模型类.objects.count()：获取记录数量
 - 模型类.objects.exists()：判断记录是否存在（返回布尔值）
-- 模型类.objects.order_by()：排序（默认升序，字段前加-号表示降序）
 - 模型类.objects.count()：统计记录数
 
 代码示例如下
@@ -653,10 +652,6 @@ User.objects.all()[:5]
 
 # values()：返回指定字段查询结果（返回字典列表对象）。若没有传参，则返回全部字段的查询结果。
 User.objects.values('name', 'age')
-
-# 排序查询
-# 按创建时间正序排序（覆盖模型默认的倒序）
-User.objects.order_by("-create_time")
 
 # 取最新一条 User 记录（根据模型 Meta 的 ordering）
 User.objects.first()
@@ -820,6 +815,96 @@ User.objects.filter(create_time__time__gte='09:00:00')
 |-------|---------|-------|-------|
 | `__regex`  | 正则匹配（区分大小写） | `User.objects.filter(name__regex=r'^张')` | `name REGEXP '^张'` |
 | `__iregex` | 正则匹配（不区分大小写） | `User.objects.filter(name__iregex=r'^zhang')` | `name REGEXP '^zhang'` |
+
+
+### 复杂条件查询
+
+在 Django ORM 里，F 对象和 Q 对象是非常实用的工具，可用于构建复杂的查询条件。
+
+#### F对象
+
+F 对象能引用模型字段的值，在数据库层面进行字段和字段之间的比较和操作，从而无需将数据查询出来后进行对比和操作。
+
+F对象的使用场景
+- 字段和字段之间的比较
+- 批量操作字段值
+- 关联字段引用
+
+代码示例如下
+```py
+from django.db.models import F
+from .models import User,Order,Product
+
+# 查询年龄大于身份证号码长度的用户
+# 是将年龄字段的值与身份证号码长度进行比较
+users = User.objects.filter(age__gt=F('idCard__length'))
+
+# 将所有用户的年龄加 1
+# 是将所有用户的年龄字段的值加上 1
+User.objects.update(age=F('age') + 1)
+
+# 查询订单价格大于对应产品价格的订单
+# 是将订单表中的价格字段与产品表中的价格字段进行比较
+orders = Order.objects.filter(price__gt=F('product__price'))
+
+```
+
+#### Q对象
+
+Q 对象可用于构建复杂的逻辑查询，支持使用逻辑运算符（& 表示 AND，| 表示 OR，~ 表示 NOT）组合多个查询条件。
+
+代码示例如下
+```py
+from django.db.models import Q
+from .models import User
+
+# 查询姓名为张三或者年龄大于 20 的用户
+users = User.objects.filter(Q(name='张三') | Q(age__gt=20))
+
+# 查询姓名为张三并且年龄大于 20 的用户
+users = User.objects.filter(Q(name='张三') & Q(age__gt=20))
+
+# 查询姓名不为张三的用户
+users = User.objects.filter(~Q(name='张三'))
+
+# 查询姓名为张三或者年龄大于 20，并且邮箱不为空的用户
+users = User.objects.filter((Q(name='张三') | Q(age__gt=20)) & Q(email__isnull=False))
+
+```
+
+### 排序查询
+
+在 Django ORM 里，排序查询可借助 `order_by()` 方法对查询结果进行排序，该方法支持多种排序规则，能满足不同场景需求。
+
+使用方式如下
+- order_by() 方法默认按升序排序，若要降序排序，可在字段名前加 `-` 符号。
+- order_by() 方法支持传入多个字段，会先按第一个字段排序，若该字段值相同，再按第二个字段排序，依此类推。
+- 使用 ? 作为 order_by() 方法的参数，可实现随机排序。
+- 可以结合 F 对象对字段进行计算后再排序。
+
+```python
+from .models import User
+from django.db.models import F
+
+# 按年龄升序排序
+users_asc = User.objects.order_by('age')
+
+# 按年龄降序排序
+users_desc = User.objects.order_by('-age')
+
+# 先按年龄升序排序，年龄相同时按姓名升序排序
+users = User.objects.order_by('age', 'name')
+
+# 先按年龄降序排序，年龄相同时按姓名降序排序
+users = User.objects.order_by('-age', '-name')
+
+# 随机排序用户
+random_users = User.objects.order_by('?')
+
+# 按年龄加 5 后的结果升序排序
+users = User.objects.order_by(F('age') + 5)
+
+```
 
 ### 插入
 
@@ -1177,7 +1262,7 @@ class MyModelAdmin(admin.ModelAdmin):
 
 Django 后台管理系统提供了方便的方式来管理项目中的数据。通过自定义后台管理页面，可以根据项目需求对数据进行增删改查操作，提高开发效率。
 
-> 注意：自定义后台管理页面需要谨慎操作，确保只有授权的用户才能访问并操作后台管理系统。
+注意：自定义后台管理页面需要谨慎操作，确保只有授权的用户才能访问并操作后台管理系统。
 
 
 
