@@ -459,10 +459,63 @@ def get_request_info(request):
 
 #### 获取请求中的上传文件
 
+当客户端通过表单上传文件时，文件数据会被封装在HTTP请求体中。Django通过`request.FILES`对象获取上传的文件数据，该对象是一个类似字典的对象，键是表单中`<input type="file" name=""/>`标签的`name`属性值，值是上传的文件数据。
+
+
+> 关键注意事项
+
+1. **表单配置要求**：必须满足以下条件才能获取文件数据：
+   - 请求方法为`POST`
+   - `<form>表单`中带有`enctype="multipart/form-data"`的情况下才会获取到上传文件数据。（否则`request.FILES`为空）
+2. **文件对象属性**：上传的文件对象包含以下常用属性：
+   - `name`：文件名（如`example.jpg`）
+   - `size`：文件大小（字节数）
+   - `content_type`：文件MIME类型（如`image/jpeg`）
+   - `read()`：读取文件内容的方法（返回字节流）
+
+3. 使用模型类处理上传文件时，需要将对应的属性定义成`models.ImageField`字段类型或者`models.FileField`字段类型。
+
+代码示例如下
+
+HTML表单示例
+```html
+<!-- templates/upload.html -->
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <!-- 单文件上传（name属性为"avatar"） -->
+    <input type="file" name="avatar" accept="image/*">
+    <!-- 多文件上传（name属性为"photos"，需添加multiple属性） -->
+    <input type="file" name="photos" multiple>
+    <button type="submit">上传</button>
+</form>
+```
+
+视图函数代码示例
 ```py
-def get_request_info(request):
-    print(request.FILES)  #获取post请求上传的文件
-    return HttpResponse("OK")
+from django.http import HttpResponse
+from django.shortcuts import render
+
+def upload_view(request):
+    if request.method == 'POST':
+        # 单文件处理（获取name="avatar"的文件）
+        avatar = request.FILES.get('avatar')
+        if avatar:
+            # 手动保存文件到服务器（示例路径：media/avatars/）
+            with open(f'media/avatars/{avatar.name}', 'wb+') as f:
+                for chunk in avatar.chunks():  # 分块读取大文件
+                    f.write(chunk)
+
+        # 多文件处理（获取name="photos"的所有文件）
+        photos = request.FILES.getlist('photos')
+        for photo in photos:
+            with open(f'media/photos/{photo.name}', 'wb+') as f:
+                f.write(photo.read())  # 直接读取小文件内容
+
+        return HttpResponse("文件上传成功")
+    
+    # 显示上传表单
+    return render(request, 'upload.html')
+
 ```
 
 #### 获取请求URL中的动态参数
@@ -878,3 +931,351 @@ class ProductListView(ListView):
 
 ProductListView 会自动查询数据库中的所有 Product 对象，并将它们传递给模板list.html。
 
+
+
+
+## Django 路由
+
+Django 的路由是其核心组件之一，它负责将用户的 HTTP 请求（即 URL）映射到相应的视图函数上。
+
+> 路由的作用
+
+Django框架会将客户端发来的HTTP请求交给路由进行处理。路由会根据请求的URL来确定应该调用哪个视图函数来处理请求。当视图函数处理完成后，再通过视图函数的返回值将数据返回给客户端。
+
+> 路由文件
+
+在 Django 中，路由通常写在工程的 `urls.py` 文件中。这个文件定义了路由和它们对应的视图函数。
+
+路由文件的基本示例
+```py
+from django.urls import path
+from .views import get_info
+
+urlpatterns = [
+    ## 通过path函数，将`get_info/`路由与get_request_info视图函数进行绑定。
+    path('get_info/',get_request_info)
+]
+```
+
+### 路由与视图函数绑定
+
+> 使用 path()函数 定义路由
+
+path()函数 是 Django 配置路由的推荐方式，它使用简洁的字符串匹配模式。
+
+```py
+from django.urls import path
+from . import views
+ 
+urlpatterns = [
+    ## /home/ 路由映射到 views.home 视图函数。
+    path('home/', views.home, name='home'),
+    ## /about/ 路由映射到 views.about 视图函数。
+    path('about/', views.about, name='about'),
+]
+```
+
+> 路由中设置动态参数
+
+```py
+urlpatterns = [
+    ## /profile/???/ 路由映射到 views.profile 视图函数。
+    path('profile/<int:user_id>/', views.profile, name='profile'),
+]
+```
+
+URL 中的 `<int:user_id>` 会被动态替换为实际的 user_id，并传递给视图函数 profile()。其中int表示动态参数的类型。例如`/profile/111/，/profile/222/`等
+
+> 使用 re_path()函数 定义路由
+
+re_path() 函数允许你使用正则表达式来匹配更复杂的路由。它的基本语法与 path() 类似，但它允许你使用正则表达式进行灵活的匹配。
+
+```py
+from django.urls import re_path
+from . import views
+urlpatterns = [
+    re_path(r'^article/(?P<slug>[\w-]+)/$', views.article_detail, name='article_detail'),
+]
+```
+
+### 路由模块化管理 include函数
+
+
+> 使用include函数 引入子工程的路由。
+
+当我们在Django工程中创建了多个子工程。每个子工程都有各自的路由urls文件。此时我们可以在Django主工程的urls文件中使用include函数来引入各个子工程的路由文件，从而实现路由的模块化管理。
+
+```py
+# 主路由配置（project/urls.py）
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('blog/', include('blog.urls')),   # 引入blog子工程的路由
+]
+```
+
+`path('blog/', include('blog.urls'))` 这句话的作用是引入blog子工程中的urls路由文件。并设置'blog/'为该子工程路由的前缀。
+
+### 路由传递额外参数给视图函数
+
+在 Django 中，有多种方式可以将额外参数传递给视图函数。
+
+> 方式1：定义路由时，可以设置额外参数
+
+```py
+# urls.py 文件中
+from django.urls import path
+from. import views
+urlpatterns = [
+    path('example/', views.example_view, {'extra_param': '额外参数值'}),
+]
+
+# views.py文件中
+from django.http import HttpResponse
+def example_view(request,extra_param):
+    print(f"extra_param: {extra_param}")
+    return HttpResponse("视图函数执行成功")
+
+```
+
+> 方式2：使用查询字符串
+
+可以在 URL 中通过查询字符串的形式传递参数，然后在视图函数中从request.GET获取。
+
+```py
+# urls.py 文件中
+from django.urls import path
+from. import views
+urlpatterns = [
+    path('example/<int:id>/', views.example_view),
+]
+
+# views.py文件中
+from django.http import HttpResponse
+def example_view(request, id):
+    print(f"id: {id}")
+    return HttpResponse("视图函数执行成功")
+
+```
+
+> 方式3：使用类视图的as_view()方法传入额外参数
+
+```py
+# urls.py 文件中
+from django.urls import path
+from. import views
+urlpatterns = [
+    path('example/<int:id>/', views.ExampleView.as_view(extra_param='额外参数值')),
+]
+
+# views.py文件中
+from django.views.generic import View
+from django.http import HttpResponse
+class ExampleView(View):
+    def get(self, request, id, extra_param):
+        print(f"id: {id}, extra_param: {extra_param}")
+        return HttpResponse("类视图执行成功")
+
+```
+
+以上几种方式可以根据实际业务需求灵活选择，实现将额外参数传递给视图函数的目的。
+
+## Django 模板
+
+模板负责数据的展示与布局。模板本质上就是html页面。
+
+我们可以在视图函数中，用render方法将html页面作为响应返回给客户端。需要3个步骤。
+1. 在项目配置文件setting.py中设置模板目录的位置。一般模板目录创建在工程根目录下。
+2. 在模板目录中创建对应的模板页面文件，并根据模板语法和视图函数传递过来的数据去填充页面。
+3. 在视图函数中使用render方法将某个模板页面作为响应返回给客户端。
+
+
+### 模板页面作为响应返回
+
+① setting.py中设置模板目录位置
+
+- 创建模板目录templates。
+- 修改setting.py文件中的TEMPLATES的DIRS配置项。如下所示
+
+```py
+TEMPLATES = [
+    {
+        ......
+        'DIRS': [BASE_DIR / 'templates'],
+        .......
+    },
+]
+```
+
+② 创建模板页面文件
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <h1>this is user.html</h1>
+</body>
+</html>
+```
+
+③ 视图函数中使用render方法将模板页面作为响应返回给客户端
+```py
+from django.shortcuts import render
+def get_request_info(request):
+    return render(request, template_name='user.html')
+```
+
+render方法本质上还是将模板页面封装为HttpResponse响应对象，并返回给客户端。
+
+### render()方法
+
+render函数可以将一个模板和一个上下文字典，返回一个渲染后的HttpResponse对象。
+
+render函数语法格式
+```py
+render(request, template_name, context=None, content_type=None, status=None, using=
+None)
+```
+
+- request:视图函数正在处理的当前请求，封装了请求头(Header)的所有数据，其实就是视图请求参数。
+- template_name:视图要使用的模板的完整名称或者模板名称的列表。如果是一个列表，将使用其中能够查找到的第一个模板。
+- context:将要添加到模板上下文中的字典类型值。默认情况下，这是一个空的字典值。如
+果字典中的值是可调用的，则视图将在渲染模板之前调用该参数。
+- content_type:响应内容的类型，默认设置为“text/html”。
+- status:响应的状态代码，默认值为“200”。
+- using:用于加载模板的模板引擎名称。
+
+### Django模板语言（DTL）
+
+Django 模板基于 Django模板语言（DTL），它提供了一些强大的功能，如模板标签、过滤器、条件语句和循环等，可以动态地渲染和控制模板页面的内容。
+
+Django模板语言（DTL）主要包括以下几个部分。
+- 模板变量：用于显示动态数据。
+- 模板标签：控制模板的逻辑（如条件语句、循环等）。
+- 模板过滤器：用于修改变量的输出内容。
+
+#### 模板变量
+
+模板变量用 `{{ }}` 包裹。表示从视图函数中传递过来的数据会被填充到这里,具体填充什么数据,根据模板变量中参数而定。
+
+模板变量的名称由字母、数字和下划线任意组合组成，但注意不能以下划线开头。另外，变量名称中还不能包含空格或标点符号(“.”除外，其具有特殊含义)。
+
+示例如下
+
+创建一个视图函数user_show
+```py
+from django.shortcuts import render
+def user_show(request):
+    user = {id:1,name:'xiaoming',phone:'13888888888',idCard:'111111111111111111',email:'123456@qq.com'}
+    # 将user的值，传递给模板。
+    return render(request, 'user.html', {'user': user})
+```
+
+创建一个user.html模板
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <h1>ID {{ user.id }}!</h1>
+    <h1>姓名 {{ user.name }}!</h1>
+    <h1>电话 {{ user.phone }}!</h1>
+    <h1>ID {{ user.idCard }}!</h1>
+    <h1>邮箱 {{ user.email }}!</h1>
+</body>
+</html>
+```
+
+render方法会将user数据传递给模板，模板会根据模板变量和传递过来的参数，进行匹配。如果模板变量和参数名称相同，则将参数值填充到模板变量中。最终动态渲染成全新的HTML页面。
+
+
+
+#### 模板标签
+
+模板标签用于实现更复杂的功能，如条件判断、循环等。模板标签使用 `{% %}` 包裹。
+
+常用的模板标签如下所示
+- if标签:逻辑条件判断。
+- for标签:用于循环遍历（如列表、字典等）。
+- autoescape标签:自动转义。可以对超链接地址进行自动转义。
+- cycle标签:循环对象的值。
+- ifchanged标签:判断一个值是否在上一次的选代中被改变了
+- regroup标签:用于重组对象。
+- resetcycle标签:用于重置通过cycle标签操作的循环对象
+- ur1标签:定义链接的标签。
+- templatetag标签:用于输出模板标签字符。
+- widthratio标签:用于计算比率
+- now标签:用于显示当前时间。
+
+代码示例如下
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <h1>ID {{ user.id }}!</h1>
+    <h1>姓名 {{ user.name }}!</h1>
+    <h1>电话 {{ user.phone }}!</h1>
+    <h1>ID {{ user.idCard }}!</h1>
+    <h1>邮箱 {{ user.email }}!</h1>
+
+    <!--这是 if 条件模板标签的示例-->
+
+    {% if user.name == 'A' %}
+        <p>姓名 {{ user.name }}!</p>
+    {% elif user.name == 'B' %}
+    <p>姓名 {{ user.name }}!</p>
+    {% else %}
+        <p>user name is C</p>
+    {% endif %}
+
+    <!--这是 for 循环模板标签的示例-->
+    <ul>
+    {% for post in post_list %}
+        <li>{{ post.id }} - {{ post.title }}</li>
+    {% endfor %}
+    </ul>
+
+    当时时间为{% now"H:i:s DY/M/d"%}
+
+</body>
+</html>
+```
+
+
+#### 模板过滤器
+
+模板过滤器本质上是一个函数。用于对模板变量进行输出和调整。它们在模板变量后面用 | 分隔表示。
+
+例如，`{{ value|lower }}` 会将 value 模板变量转换为小写字母。
+
+示例如下
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <h1>ID {{ user.id }}!</h1>
+    <h1>姓名 {{ user.name }}!</h1>
+    <h1>电话 {{ user.phone }}!</h1>
+    <h1>ID {{ user.idCard }}!</h1>
+    <h1>邮箱 {{ user.email|lower }}!</h1>
+    <h1>生日 {{ user.birth|date:'Y-m-d' }}!</h1>
+</body>
+</html>
+```
+
+常用的模板过滤器如图所示
+![django_20250618163657.png](../blog_img/django_20250618163657.png)
