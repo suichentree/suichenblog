@@ -473,11 +473,10 @@ def get_request_info(request):
    - `content_type`：文件MIME类型（如`image/jpeg`）
    - `read()`：读取文件内容的方法（返回字节流）
 
-3. 使用模型类处理上传文件时，需要将对应的属性定义成`models.ImageField`字段类型或者`models.FileField`字段类型。
+3. 使用模型类获取上传文件数据时，需要将对应的属性定义成`models.ImageField`字段类型或者`models.FileField`字段类型。
 
-代码示例如下
 
-HTML表单示例
+HTML表单代码示例
 ```html
 <!-- templates/upload.html -->
 <form method="post" enctype="multipart/form-data">
@@ -929,7 +928,7 @@ class ProductListView(ListView):
         return queryset
 ```
 
-ProductListView 会自动查询数据库中的所有 Product 对象，并将它们传递给模板list.html。
+- ProductListView 会自动查询数据库中的所有 Product 对象，并将它们传递给模板list.html。
 
 
 

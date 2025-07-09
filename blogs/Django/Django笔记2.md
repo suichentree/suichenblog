@@ -566,6 +566,55 @@ users = User.objects.order_by(F('age') + 5)
 ```
 
 
+### 分页查询
+
+在处理大量数据时，分页查询能有效提升用户体验和系统性能。
+
+Django ORM 提供了 `Paginator` 类来实现分页功能，它可以将查询结果集按指定的每页记录数进行分页。同时，`Page` 类代表 `Paginator` 分页后的某一页数据。
+
+使用 `Paginator` 类和 `Page` 类进行分页查询的基本步骤如下：
+1. 导入 `Paginator` 类。
+2. 创建 `Paginator` 对象，传入查询结果集和每页记录数。
+3. 获取指定页码的 `Page` 对象。
+4. 返回 `Page` 对象中的数据。
+
+
+代码示例如下
+```py
+from django.core.paginator import Paginator
+from .models import User
+
+# 获取所有用户记录
+users = User.objects.all()
+
+# 创建 Paginator 对象，每页显示 10 条记录
+paginator = Paginator(users, 10)
+
+# 获取第 2 页的 Page 对象
+page_number = 2
+page_obj = paginator.get_page(page_number)
+
+# 遍历第 2 页的用户记录
+for user in page_obj:
+    print(user.name)
+
+# Paginator 对象的属性和方法
+print(f"总记录数: {paginator.count}")
+print(f"总页数: {paginator.num_pages}")
+
+# Page 对象的属性和方法
+print(f"当前页的数据: {list(page_obj.object_list)}")
+print(f"当前页码: {page_obj.number}")
+print(f"是否有下一页: {page_obj.has_next()}")
+if page_obj.has_next():
+    print(f"下一页页码: {page_obj.next_page_number()}")
+print(f"当前页列表中第一个对象的序号: {page_obj.start_index()}")
+print(f"当前页列表中最后一个对象的序号: {page_obj.end_index()}")
+
+```
+
+- 当传入的页码超出范围时，`Paginator` 类的 get_page 方法会返回最后一页或第一页的 `Page` 对象，避免抛出异常。
+
 ### 聚合
 
 聚合用于对查询的数据进行统计计算，常用于生成汇总数据。
@@ -1262,6 +1311,153 @@ MIDDLEWARE = [
     'myapp.middleware.CustomMiddleware',  
 ]
 ```
+
+
+## Django 缓存
+
+在 Web 应用开发中，缓存是提高应用性能的重要手段，它可以减少数据库查询和计算操作，从而加快页面响应速度。Django 提供了多种缓存机制，能够满足不同场景下的性能优化需求。
+
+生产环境建议使用 Redis 或 Memcached 等高性能缓存服务。
+
+### 缓存配置
+
+Django 的缓存配置在 `settings.py` 文件中进行，通过 `CACHES` 配置项来设置不同的缓存后端。以下是常见的缓存后端配置示例：
+
+使用本地内存作为缓存的配置
+```py
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}
+```
+
+使用文件系统作为缓存的配置
+```py
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': '/var/tmp/django_cache', # 文件系统路径
+        'TIMEOUT': 300,  # 缓存超时时间，单位为秒
+        'OPTIONS': {
+            'MAX_ENTRIES': 1000  # 缓存最大条目数
+        }
+    }
+}
+
+```
+
+Redis 缓存配置
+```py
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379/1',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
+    }
+}
+
+```
+
+### 缓存使用方式
+
+Django提供了多种缓存的使用方式。
+
+> 全站缓存
+
+全站缓存会对整个网站的所有页面进行缓存，适用于内容更新不频繁的网站。在 settings.py 中配置中间件。
+
+```py
+MIDDLEWARE = [
+    'django.middleware.cache.UpdateCacheMiddleware',
+    # 其他中间件...
+    'django.middleware.cache.FetchFromCacheMiddleware',
+]
+
+CACHE_MIDDLEWARE_ALIAS = 'default'  # 使用的缓存别名
+CACHE_MIDDLEWARE_SECONDS = 600  # 缓存时间，单位为秒
+CACHE_MIDDLEWARE_KEY_PREFIX = ''  # 缓存键前缀
+```
+
+> 视图缓存
+
+视图缓存可以对单个视图的响应进行缓存，使用 cache_page 装饰器实现。
+
+```py
+from django.views.decorators.cache import cache_page
+
+@cache_page(60 * 15)  # 缓存 15 分钟
+def my_view(request):
+    # 视图逻辑
+    pass
+
+```
+
+> 模板片段缓存
+
+模板片段缓存可以对模板中的部分内容进行缓存，使用 {% cache %} 模板标签实现。
+
+```py
+{% load cache %}
+{% cache 600 sidebar %}
+    <!-- 缓存的模板内容 -->
+    <div id="sidebar">
+        ...
+    </div>
+{% endcache %}
+
+```
+
+> 低级缓存 API
+
+Django 提供了低级缓存 API，可以在代码中操作缓存。
+
+```py
+from django.core.cache import cache
+
+# 设置缓存
+cache.set('my_key', 'my_value', timeout=60)  # 缓存 60 秒
+
+# 获取缓存
+value = cache.get('my_key')
+
+# 删除缓存
+cache.delete('my_key')
+
+# 检查缓存是否存在
+if cache.has_key('my_key'):
+    pass
+
+# 批量设置缓存
+cache.set_many({'key1': 'value1', 'key2': 'value2'}, timeout=60)
+
+# 批量获取缓存
+values = cache.get_many(['key1', 'key2'])
+
+# 检查多个键是否存在
+if cache.has_many(['key1', 'key2']):
+    pass
+
+# 缓存失效时间
+cache.set('my_key', 'my_value', timeout=60)  # 缓存 60 秒
+
+# 永久缓存（不会自动失效）
+cache.set('my_key', 'my_value')
+
+# 缓存失效时间（秒）
+cache.ttl('my_key')
+
+# 缓存失效时间（秒），如果没有设置过期时间则返回 -1
+cache.ttl('my_key')
+
+# 缓存失效时间（秒），如果没有设置过期时间则返回 -2
+cache.get_timeout('my_key')
+
+```
+
 
 
 ## Django 后台管理
