@@ -20,6 +20,12 @@ Django 是一个由 Python 编写的一个重量级 Web 应用框架。使用 Dj
 
 [Django 官方网址 https://docs.djangoproject.com/zh-hans/5.2/contents/](https://docs.djangoproject.com/zh-hans/5.2/contents/)
 
+
+参考：
+- [Django 官方文档](https://docs.djangoproject.com/en/5.2/)
+- Django 5企业级Web应用开发实战(视频教学版) 王金柱 著
+
+
 > Django的特点
 
 - 快速开发: Django的最大优势之一就是能够快速搭建Web应用。它通过提供开箱即用的组件，如认证、后台管理、表单、数据库管理等，使开发者能够专注于业务逻辑而不必从零开始编写大量的代码。
@@ -60,15 +66,16 @@ django-admin startproject djangoDemo1
 
 django-admin 命令行管理工具会根据命令创建一个工程目录，然后再其中会创建一个同名子目录和一个 `manage.py` 文件。
 
-```
-djangoDemo1 工程的根目录
-| - manage.py: 一个非常重要的脚本文件，位于工程的根目录中。它是管理 Django 工程的命令行工具，包含了许多常用的管理命令。
-| - djangoDemo1 与根目录同名的目录是配置目录。存放工程的一些启动文件和核心配置文件。
-| ---- `__init__`.py: 一个空文件，告诉 Python 该子目录是一个 Python 包。在 Django 工程中，这个文件是必需的，虽然它通常是空的，但它保证了该子目录会被 Python 识别为一个模块。
-| ---- settings.py: 是 Django 工程的核心配置文件。如数据库配置、缓存设置、安全设置等。
-| ---- urls.py: 是 Django 工程的 URL 路由配置文件。它定义了 URL 与函数之间的映射关系。
-| ---- asgi.py: 这个文件可以让 Django 运行在异步模式的web服务器中。
-| ---- wsgi.py: 这个文件是让工程运行在wsgi服务器的入口文件。
+```py
+djangoDemo1/                  # Django工程目录
+├── manage.py                 # 工程管理脚本文件（核心工具）它包含了管理 Django 工程的常用命令。
+├── djangoDemo1/              # 工程配置目录（与工程名同名）存放Django工程的一些启动文件和核心配置文件。
+│   ├── __init__.py           # Python包标识（这个文件是必需的，确保目录被识别为模块）
+│   ├── settings.py           # Django 工程的核心配置文件（数据库、中间件、应用注册等）
+│   ├── urls.py               # Django 工程的根路由配置文件（定义全局URL映射）
+│   ├── asgi.py               # ASGI服务器入口文件（用于生产环境部署异步应用）
+│   └── wsgi.py               # WSGI服务器入口文件（用于生产环境部署同步应用）
+└── templates/                # （可选，需手动创建）存放HTML模板文件
 ```
 
 ② 运行该Django工程
@@ -91,9 +98,10 @@ python manage.py runserver
 
 ```py
 # 创建一个名为app01的子应用的命令 
+# 该命令需在 Django工程根目录（即包含 manage.py 文件的目录）下执行。若在其他目录运行，会导致子应用无法正确生成到工程中。
 python manage.py startapp app01
 
-# 当创建子工程之后，还需要再settings.py配置文件中的INSTALLED APPS配置项添加该子工程
+# 当创建子工程之后，还需要再settings.py配置文件中的INSTALLED APPS配置项添加该子工程。
 INSTALLED_APPS=[
     # ....
     'app01',
@@ -105,20 +113,88 @@ INSTALLED_APPS=[
 
 ![django_20250613165604.png](../blog_img/django_20250613165604.png)
 
-```
-djangoDemo1 工程的根目录
-| - manage.py: 一个非常重要的脚本文件，位于工程的根目录中。它是管理 Django 工程的命令行工具，包含了许多常用的管理命令。
-| - djangoDemo1 与根目录同名的目录是配置目录。存放工程的主要配置文件。
-| ---- `__init__`.py: 一个空文件，告诉 Python 该子目录是一个 Python 包。在 Django 工程中，这个文件是必需的，虽然它通常是空的，但它保证了该子目录会被 Python 识别为一个模块。
-| ---- settings.py: 是 Django 工程的核心配置文件。如数据库配置、缓存设置、安全设置等。
-| ---- urls.py: 是 Django 工程的 URL 路由配置文件。它定义了 URL 与函数之间的映射关系。
-| ---- asgi.py: 这个文件可以让 Django 运行在异步模式的web服务器中。
-| ---- wsgi.py: 这个文件是让工程运行在wsgi服务器的入口文件。
+
+> 建子应用后，生成的目录结构及核心文件作用
+
+```py
+app01/                  # 子应用根目录（与子应用名一致）
+├── __init__.py         # 标识该目录是Python包（不可删除）
+├── admin.py            # 后台管理配置文件（注册模型到后台）
+├── apps.py             # 子应用配置类（可自定义应用标签、名称等）
+├── models.py           # 模型类定义文件（数据库表结构）
+├── tests.py            # 测试用例文件（编写单元测试）
+├── views.py            # 视图函数/类定义文件（处理请求逻辑）
+├── migrations/         # 数据库迁移记录目录（自动生成，勿手动修改）
+│   └── __init__.py
+└── urls.py             # 子应用路由文件（需手动创建，非默认生成）
 ```
 
-- views.py 在这个文件编写视图函数
-- models.py 在这个文件编写模型。
-- tests.py 用于测试
+
+## WSGI和ASGI
+
+WSGI和ASGI都是基于Python设计的网关接口（Gateway Interface, GI），用于规范Web服务器与Python应用程序之间的通信协议。
+
+WSGl是python语言基于http协议模式开发的，不支持websocket协议，而ASGI的诞生解决了WSGI不支持当前的web开发中的一些新的协议标准，同时ASGI支持原有模式和Websocket的扩展，即ASGI是WSGl的扩展。
+
+注意：Django开发服务器（runserver）默认同时支持WSGI和ASGI。
+
+生产环境中Python Web服务器建议：
+- 同步应用使用WSGI服务器（如Gunicorn + uWSGI）
+- 异步应用使用ASGI服务器（如Uvicorn + Daphne）
+
+### 网关接口
+
+网关接口(Gateway Interface，Gl)就是一种为了实现加载动态脚本而运行在Web服务器和Web应用程序中的通信接口，也可以理解为一份协议/规范。
+
+![django_20250710111847745.png](../blog_img/django_20250710111847745.png)
+
+只有Web服务器和Web应用程序都实现了网关接口规范以后，双方的通信才能顺利完成。常见的网关接口协议:CGl，FastCGl，WSGI, ASGI等
+
+### CGI
+
+公共网关接口(Common Gateway Interface，CGl)是最早的Web服务器主机提供信息服务的标准接口规范。
+
+只要Web服务器和Web应用程序都实现了CGI协议。那么Web服务器就能够获取并了解客户端提交的信息，转交给服务器端的web应用程序进行处理，最后将返回结果给客户端。
+
+快速通用网关接口(Fast Common Gateway Interface,FastCGl)是公共网关接口(CGI)的增强版本。
+
+
+### WSGI
+
+WSGI是Python Web应用程序与Web服务器之间的标准接口规范，诞生于2003年。它定义了**同步模式下**服务器与应用的交互方式，是传统Python Web框架（如Django、Flask）的基础通信协议。
+
+![django_20250710112608239.png](../blog_img/django_20250710112608239.png)
+
+实现了WSGI协议的web服务器有:uWSGl、uvicorn、gunicorn，Hypercorn。
+
+像django框架开发的web 应用程序一般在线上web服务器运行时，就不会使用`python manage.py runserver`命令来运行，而是采用上面实现了WSGI协议的web服务器来运行。
+
+diango中运行`python manage.py runserver`命令时，其实内部就启动了wsqiref模块作为web服务器运行的。
+
+wsgiref模块是python内置的一个简单地遵循了wsgi接口规范的web服务器程序。
+
+> WSGI的工作机制
+1. **服务器端**：Web服务器（如Gunicorn、uWSGI）接收HTTP请求后，将请求信息（如路径、头部、Body）封装成环境变量字典（environ）和一个`start_response`回调函数。
+2. **应用端**：Python应用程序（如Django视图）通过WSGI接口获取environ，处理请求并生成响应内容，最后调用`start_response`设置状态码和响应头，返回响应体。
+3. **同步限制**：WSGI是同步协议，每个请求必须等待前一个请求处理完成才能开始，无法高效处理高并发或长时间连接（如WebSocket）。
+
+> 适用场景
+- 传统同步Web应用（如静态页面、表单提交）
+- 不需要实时通信的场景（如新闻网站、企业官网）
+
+### ASGI
+
+ASGI是WSGI的异步扩展，由Django团队主导设计，支持同步+异步混合模式，解决了WSGI无法处理异步请求（如WebSocket、HTTP/2流）的问题。
+
+> ASGI的工作机制
+1. **服务器端**：与WSGI类似，ASGI服务器接收HTTP请求后，将请求信息（如路径、头部、Body）封装成环境变量字典（environ）和一个`send`回调函数。
+2. **应用端**：Python应用程序通过ASGI接口获取environ，处理请求并生成响应内容，最后调用`send`函数发送响应头和响应体。
+3. **异步处理**：ASGI支持异步处理请求，每个请求可以在不等待前一个请求处理完成的情况下同时处理多个请求，适用于高并发场景。
+
+> 适用场景
+- 实时通信应用（如聊天应用、实时监控）
+- 基于事件的应用（如消息队列、实时通知）
+
 
 ## Django的MTV架构模式
 
@@ -457,7 +533,7 @@ def get_request_info(request):
     return HttpResponse("OK")
 ```
 
-#### 获取请求中的上传文件
+#### 获取请求中的上传文件数据
 
 当客户端通过表单上传文件时，文件数据会被封装在HTTP请求体中。Django通过`request.FILES`对象获取上传的文件数据，该对象是一个类似字典的对象，键是表单中`<input type="file" name=""/>`标签的`name`属性值，值是上传的文件数据。
 
@@ -793,22 +869,21 @@ def my_view3(request):
 ```
 
 
-
-
 ### 简单视图类
 
-视图即可以是一个函数，也可以是一个类。
+视图既可以是函数（视图函数），也可以是类（视图类）。
 
-视图类通过继承 Django 提供的基类来组织视图逻辑，使得视图的代码更加模块化、可复用，并且更符合面向对象的编程范式。
-
-视图类需要通过继承 Django 的 View 类来定义，并覆写View类的方法。
+视图类通过继承 Django 提供的基类（如 `View`）来组织逻辑，相比函数视图，具有以下优势：
+- **代码复用**：通过继承基类共享通用逻辑（如权限校验、数据预处理）
+- **结构清晰**：按 HTTP 方法（GET/POST/PUT 等）拆分逻辑，符合 RESTful 设计规范
+- **扩展性强**：可通过重写基类方法（如 `setup`、`dispatch`）实现统一的预处理/后处理
 
 View类提供了`get post put patch delete head options trace`等方法,不同的方法有不同的作用。
 
-示例如下
+代码示例如下
 ```py
 ## views.py
-## 定义视图类HomeView
+## 定义视图类HomeView，继承基类View
 from django.http import HttpResponse
 from django.views import View
 class HomeView(View):
@@ -834,15 +909,18 @@ from django.urls import path
 from myapp.views import HelloView  # 假设视图类定义在 myapp 的 views.py 中
 ## 给视图类配置 URL 路由
 urlpatterns = [
-    # 当路由绑定视图类的时候，需通过 as_view() 方法将视图类 “转换” 为可被路由识别的可调用对象。
+    # 当路由绑定视图类的时候，需通过 as_view() 方法视图类转换为可被路由识别的可调用对象。
     path('hello/', HelloView.as_view(), name='helloview'),
 ]
 
 ```
 
-> as_view() 方法的作用
+> `as_view()` 方法的执行流程如下
 
-as_view() 方法会创建视图类的实例对象，然后在请求到来时，根据请求的 HTTP 类型（如 GET、POST ），调用实例中对应的方法（如 get、post ）来处理请求。
+1. 创建视图类实例对象
+2. 调用 `setup()` 方法初始化请求相关属性（如 `request`、`args`、`kwargs`）
+3. 根据请求的 HTTP 类型（如 GET、POST、PUT、DELETE ），调用实例中对应的方法（如 get、post、put、delete ）来处理请求。
+4. 若请求方法未实现（如请求的 HTTP 类型是DELETE,但未定义 `delete` 方法），则返回 `405 Method Not Allowed` 响应
 
 简而言之就是，GET类型的'hello/'请求会调用HelloView视图类的get方法,其他同理。
 
@@ -889,7 +967,7 @@ class HomeView(View):
 
 ### 模板类视图 TemplateView
 
-Django 提供了 TemplateView 类视图来处理渲染模板的常见需求。
+Django 内置了多种通用类视图，用于快速实现常见功能，避免重复编写样板代码。TemplateView 类视图来处理渲染模板的常见需求。
 
 ```py
 from django.views.generic import TemplateView
@@ -906,7 +984,7 @@ class AboutUsView(TemplateView):
 
 ### ListView 类视图
 
-Django 提供了很多通用类视图，例如 ListView 用于查询列表数据
+Django 内置了多种通用类视图，用于快速实现常见功能，避免重复编写样板代码。ListView 类视图用于查询列表数据。
 
 ```py
 from django.views.generic import ListView
@@ -929,8 +1007,6 @@ class ProductListView(ListView):
 ```
 
 - ProductListView 会自动查询数据库中的所有 Product 对象，并将它们传递给模板list.html。
-
-
 
 
 ## Django 路由

@@ -264,6 +264,12 @@ python manage.py migrate --fake 应用名 迁移文件名 zero  # 回滚指定�
 1. 数据迁移节省了编写SQL语句的时间，但是复杂的表结构，数据迁移也可能无法实现，从而导致无法迁移到数据库中。
 
 
+> 其他迁移命令
+
+1. `python manage.py showmigrations` 命令用于查看迁移文件的状态和历史。
+2. `python manage.py sqlmigrate 应用名 迁移文件名` 命令通过指定迁移文件，可以用来回滚到指定的迁移文件。
+3. `python manage.py flush` 命令用于清空数据库中的所有数据。
+
 
 ## Django ORM
 
@@ -1317,29 +1323,39 @@ MIDDLEWARE = [
 
 在 Web 应用开发中，缓存是提高应用性能的重要手段，它可以减少数据库查询和计算操作，从而加快页面响应速度。Django 提供了多种缓存机制，能够满足不同场景下的性能优化需求。
 
-生产环境建议使用 Redis 或 Memcached 等高性能缓存服务。
+> 缓存适用于以下典型业务场景
+
+- 适用于高频读低频写的数据：例如商品详情页信息，分类导航菜单（结构稳定，前端频繁调用）等。
+- 适用于页面内容固定或变化不频繁的数据。
+- 适用于需要频繁访问的用户状态数据。
+- 适用于列表页的分页查询场景。
+
+> 缓存注意事项
+1. 缓存需避免用于实时性要求高的数据（如股票行情、秒杀库存），或频繁更新的数据（如用户在线状态），否则可能导致缓存与数据库数据不一致。
+2. 生产环境建议使用 Redis 或 Memcached 等高性能缓存服务。
 
 ### 缓存配置
 
 Django 的缓存配置在 `settings.py` 文件中进行，通过 `CACHES` 配置项来设置不同的缓存后端。以下是常见的缓存后端配置示例：
 
-使用本地内存作为缓存的配置
+> 使用本地内存作为缓存的配置
 ```py
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
         'LOCATION': 'unique-snowflake',
+        'TIMEOUT': 300,  # 缓存超时时间，单位为秒。默认300秒
     }
 }
 ```
 
-使用文件系统作为缓存的配置
+> 使用文件系统作为缓存的配置
 ```py
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
         'LOCATION': '/var/tmp/django_cache', # 文件系统路径
-        'TIMEOUT': 300,  # 缓存超时时间，单位为秒
+        'TIMEOUT': 300,  # 缓存超时时间，单位为秒。默认300秒
         'OPTIONS': {
             'MAX_ENTRIES': 1000  # 缓存最大条目数
         }
@@ -1348,12 +1364,23 @@ CACHES = {
 
 ```
 
-Redis 缓存配置
+> Memcached 缓存配置
+```py
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',  # Memcached 缓存
+        'LOCATION': '127.0.0.1:11211',  # Memcached 服务地址
+    }
+}
+```
+
+> Redis 缓存配置
 ```py
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://127.0.0.1:6379/1',
+        'LOCATION': 'redis://127.0.0.1:6379',  # 默认使用0号库
+        # 'LOCATION': 'redis://127.0.0.1:6379/1', # 也可以指定某个redis库
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         }
@@ -1362,11 +1389,26 @@ CACHES = {
 
 ```
 
+- 在python中连接并操作redis，需要安装`django-redis-cache`包。
+
+> 数据库缓存配置
+
+```py
+# 将缓存存储在数据库中，适合数据持久化需求，但性能相对较低。
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',  # 数据库缓存
+        'LOCATION': 'django_cache_table',  # 用于存储缓存数据的数据库表名
+    }
+}
+```
+
+
 ### 缓存使用方式
 
 Django提供了多种缓存的使用方式。
 
-> 全站缓存
+#### 全站缓存
 
 全站缓存会对整个网站的所有页面进行缓存，适用于内容更新不频繁的网站。在 settings.py 中配置中间件。
 
@@ -1382,38 +1424,76 @@ CACHE_MIDDLEWARE_SECONDS = 600  # 缓存时间，单位为秒
 CACHE_MIDDLEWARE_KEY_PREFIX = ''  # 缓存键前缀
 ```
 
-> 视图缓存
+#### 视图缓存
 
-视图缓存可以对单个视图的响应进行缓存，使用 cache_page 装饰器实现。
+视图缓存可以对视图的返回值进行缓存。
+
+视图缓存的原理：是直接在中间件层面进行拦截请求，并返回缓存给客户端。
+
+> 视图函数缓存用法
+
+使用cache_page装饰器直接装饰视图函数，支持以下常用参数：
+- timeout：缓存超时时间（秒），必填
+- cache：指定使用的缓存后端别名（默认使用CACHES['default']）
+- key_prefix：缓存键前缀（用于区分不同环境的缓存）
+- vary_on_headers：根据请求头变化生成不同缓存（如['Cookie']区分用户）
+
 
 ```py
 from django.views.decorators.cache import cache_page
+from django.http import HttpResponse
+import random
 
-@cache_page(60 * 15)  # 缓存 15 分钟
-def my_view(request):
-    # 视图逻辑
-    pass
+# 基础用法：缓存15分钟
+@cache_page(timeout=60*15)
+def article_detail(request, article_id):
+    content = f"文章{article_id}内容（动态生成）"
+    return HttpResponse(content)
+
+# 缓存15分钟+随机时间，防止大量缓存同时过期。
+@cache_page(timeout=60 * 15 + random.randint(1,1000))
+def article_detail(request, article_id):
+    content = f"文章{article_id}内容（动态生成）"
+    return HttpResponse(content)
+
+# 高级用法：指定缓存后端+区分用户缓存
+@cache_page(
+    timeout=60*30,
+    cache='user_cache',  # 使用settings中配置的'user_cache'缓存后端
+    vary_on_headers=['Cookie']  # 根据Cookie生成不同缓存（区分登录状态）
+)
+def user_profile(request):
+    user_info = f"用户{request.user.id}的个人信息"
+    return HttpResponse(user_info)
 
 ```
 
-> 模板片段缓存
+> 视图类缓存用法
 
-模板片段缓存可以对模板中的部分内容进行缓存，使用 {% cache %} 模板标签实现。
+Django类视图需要通过method_decorator装饰器应用缓存。适用于只缓存GET等特定方法的场景
 
 ```py
-{% load cache %}
-{% cache 600 sidebar %}
-    <!-- 缓存的模板内容 -->
-    <div id="sidebar">
-        ...
-    </div>
-{% endcache %}
+from django.views import View
+from django.http import HttpResponse
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 
+class ArticleListView(View):
+    # 仅缓存GET请求30分钟
+    @method_decorator(cache_page(timeout=60*30))
+    def get(self, request):
+        articles = "文章列表（动态查询数据库）"
+        return HttpResponse(articles)
+
+    # POST请求不会被缓存
+    def post(self, request):
+        return HttpResponse("提交成功")
 ```
 
-> 低级缓存 API
 
-Django 提供了低级缓存 API，可以在代码中操作缓存。
+#### 缓存 API
+
+Django 提供了缓存 API，可以在代码中操作缓存。缓存 API 的粒度比视图缓存更小。
 
 ```py
 from django.core.cache import cache
@@ -1426,6 +1506,9 @@ value = cache.get('my_key')
 
 # 删除缓存
 cache.delete('my_key')
+
+# 清空所有缓存
+cache.clear()
 
 # 检查缓存是否存在
 if cache.has_key('my_key'):
@@ -1470,6 +1553,10 @@ Django 自带的后台管理应用admin提供了以下功能：
 - 日志查看：可以查看后台管理系统的操作日志，方便排查问题。
 - 数据导入导出：可以将数据库中的数据导出为 CSV、JSON 等格式，也可以从 CSV、JSON 等格式文件中导入数据。
 - 自定义页面：可以根据项目需求自定义后台管理页面，添加自定义的功能模块。
+
+Django 后台管理系统提供了方便的方式来管理项目中的数据。通过自定义后台管理页面，可以根据项目需求对数据进行增删改查操作，提高开发效率。
+
+注意：自定义后台管理需要谨慎操作，确保只有授权的用户才能访问并操作后台管理系统。
 
 ### 开启默认的后台管理
 
@@ -1558,9 +1645,8 @@ python manage.py makemigrations
 python manage.py migrate
 ```
 
-4. 在子应用工程的 admin.py 文件中，将自定义的模型类注册到后台管理admin模块中。
+4. 在子应用工程的 `admin.py` 文件中，将自定义的模型类注册到后台管理admin模块中。
 
-代码示例如下
 ```py
 from django.contrib import admin
 from .models import Student  # 导入自定义的模型类
@@ -1602,14 +1688,121 @@ class MyModelAdmin(admin.ModelAdmin):
 2. 重启 Django 开发服务器，刷新后台管理页面，即可看到自定义的模型类。
 3. 可以根据需要自定义列表页显示的字段、搜索字段、筛选字段、只读字段等。
 
-### 总结
 
-Django 后台管理系统提供了方便的方式来管理项目中的数据。通过自定义后台管理页面，可以根据项目需求对数据进行增删改查操作，提高开发效率。
+## Django 部署
 
-注意：自定义后台管理页面需要谨慎操作，确保只有授权的用户才能访问并操作后台管理系统。
+将Django应用程序从开发环境迁移到生产环境需要完成环境配置、服务器部署、安全优化等关键步骤。
+
+### 部署前准备
+
+> 环境与依赖检查
+
+- Python版本：确保生产环境Python版本与开发环境一致（推荐使用虚拟环境隔离依赖）
+- 数据库：确保生产环境数据库与开发环境数据库兼容
+- Web服务器：选择适合生产环境的Web服务器等
+- 生成开发环境的依赖清单：生成`requirements.txt`文件（开发环境执行）：
+
+```bash
+pip freeze > requirements.txt
+```
+- 生产环境安装依赖清单（生产环境执行）：
+
+```bash
+pip install -r requirements.txt
+```  
+
+> 生产环境配置调整（settings.py）
+
+```py
+# 关闭调试模式（必须！防止泄露敏感信息）
+DEBUG = False
+
+# 允许访问的主机（根据实际域名/IP配置）
+ALLOWED_HOSTS = ['your-domain.com', 'xxx.xxx.xxx.xxx']
+
+# 静态文件收集路径（需提前创建目录）
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# 数据库配置（替换为生产数据库，如PostgreSQL）
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'prod_db',
+        'USER': 'db_user',
+        'PASSWORD': 'secure_password',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    }
+}
+
+# 安全相关配置
+CSRF_COOKIE_SECURE = True  # 仅通过HTTPS传输CSRF Cookie
+SESSION_COOKIE_SECURE = True  # 仅通过HTTPS传输Session Cookie
+SECURE_SSL_REDIRECT = True  # 强制HTTP重定向到HTTPS（需配合Nginx）
+```
 
 
 
 
 
+### WSGI服务器（Gunicorn，适用于同步应用）的部署
 
+Gunicorn是常用的WSGI服务器，用于运行Django应用。
+
+1. 安装Gunicorn：
+
+```bash
+pip install gunicorn
+```
+
+2. 配置Gunicorn：
+   - 在项目根目录下创建`gunicorn.conf.py`文件，配置Gunicorn参数。
+   - 示例配置如下：
+
+```py
+# 工作进程数（推荐为CPU核心数×2+1）
+workers = 3
+# 绑定地址
+bind = '0.0.0.0:8000'
+# 日志路径
+accesslog = '/var/log/gunicorn/access.log'
+errorlog = '/var/log/gunicorn/error.log'
+# 守护进程模式（后台运行）
+daemon = True
+```
+
+3. 启动Gunicorn：
+
+```bash
+gunicorn --bind 0.0.0.0:8000 your_project.wsgi:application
+```
+
+### ASGI服务器（Uvicorn，适用于异步应用）的部署
+
+1. 安装Uvicorn：
+
+```bash
+pip install uvicorn
+```
+
+2. 配置Uvicorn：
+   - 在项目根目录下创建`uvicorn.conf.py`文件，配置Uvicorn参数。
+   - 示例配置如下：
+
+```py
+# 工作进程数（推荐为CPU核心数）
+workers = 2
+# 绑定地址
+bind = '0.0.0.0:8000'
+# 日志路径
+accesslog = '/var/log/uvicorn/access.log'
+errorlog = '/var/log/uvicorn/error.log'
+# 守护进程模式（后台运行）
+daemon = True
+```
+
+3. 启动命令
+
+```bash
+uvicorn your_project.asgi:application --host 0.0.0.0 --port 8000
+```
