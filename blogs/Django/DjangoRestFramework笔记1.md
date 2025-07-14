@@ -15,15 +15,13 @@ tags:
 
 ## DRF 介绍
 
+![drf_20250711095451162.png](../blog_img/drf_20250711095451162.png)
+
 Django REST Framework（简称 DRF）是一个基于 Django 框架的Web应用开发框架。其专门用于快速构建 Restful API接口应用程序。
 
 Django REST Framework 通过扩展 Django框架的功能，提供了一系列标准化的组件和便捷的开发模式，显著降低了构建高性能、可维护 API 的复杂度。
 
-![drf_20250711095451162.png](../blog_img/drf_20250711095451162.png)
-
-
 [Django Rest Framework 官网 https://www.django-rest-framework.org/](https://www.django-rest-framework.org/)
-
 
 > Django REST Framework 优点
 - 深度集成 Django：充分利用 Django 的 ORM、模板、管理后台等功能，与 Django 生态无缝衔接。
@@ -102,43 +100,67 @@ REST_FRAMEWORK = {
 
 ## DRF 序列化器（Serializers）
 
+DRF框架提供了一个序列化模块。该模块中包含了所有可用的序列化器类。
+
 > 序列化器的作用
 
 - 序列化：将Django模型对象/查询集对象转换为JSON/XML等格式的响应数据（用于API返回数据）
-- 反序列化：将客户端发送的请求数据（如JSON）转换为Django模型对象（用于API接收数据）
+- 反序列化：将客户端发送的请求数据（如JSON数据）转换为Django模型对象（用于API接收数据）
 - 验证：可以对数据进行合法性校验（字段类型、业务规则等）
 - 数据转换：处理不同格式间的类型转换（如日期字符串转datetime对象）
 
-> DRF提供了一个序列化模块。该模块中包含了所有可用的序列化器类。最常用的序列化器类有两个。
-- rest_framework.serializers.Serializer 序列化器基类，DRF中所有的序列化器类都必须直接或间接继承于 Serializer类。
-- rest_framework.serializers.ModelSerializer 模型序列化器类。在工作中，除了Serializer基类以外，最常用的序列化器类。
 
 
-### 自定义基础序列化器类（继承Serializer类）
+DRF框架中最常用的序列化器类有两个。
+- Serializer 序列化器基类，DRF中所有的序列化器类都必须直接或间接继承于 Serializer 序列化器基类。
+- ModelSerializer 模型序列化器类。在工作中，除了Serializer基类以外，最常用的序列化器类。
 
-我们自定义一个序列化器类，该序列化器类需要继承Serializer类。
+### Serializer 序列化器基类
 
-通常情况下，序列化器类的字段与模型类的字段是一一对应的。只有这样才能将模型类对象进行序列化和反序列化。
+DRF 中的 `Serializer` 是所有序列化器的基类，为序列化、反序列化和数据验证提供了基础功能。
 
+如果我们想要实现序列化的功能，需要做到以下几点。
+1. 自定义一个序列化器类，需要继承Serializer类。
+2. 构建自定义序列化器类的字段。需要与模型类的字段是一一对应的。只有这样才能将模型类对象进行序列化和反序列化。
+3. 实现序列化方法。
+4. 实现反序列化方法。
 
 代码示例如下
+在models.py文件中定义一个模型类。
+```py
+from django.db import models
+
+# 假设这是 Django 模型类
+class UserModel:
+    # 模型类的字段如下
+    username = models.CharField(max_length=100)
+    age = models.IntegerField()
+    email = models.EmailField()
+    is_active = models.BooleanField(default=False)
+    tags = models.JSONField()
+
+```
+
+创建serializers.py文件，并定义一个序列化器类。
 ```py
 from rest_framework import serializers
-
+# 自定义一个序列化器类UserInfoSerializer继承Serializer类
+# 并且自定义的序列化器类需要与模型类的字段一一对应。
 class UserInfoSerializer(serializers.Serializer):
     # 必传字符串字段（默认required=True），最长100字符
     username = serializers.CharField(max_length=100)
     # 可选整数字段（允许为空），年龄范围1-150
     age = serializers.IntegerField(required=False, min_value=1, max_value=150)
-    # 邮箱字段（自动验证格式）
+    # 邮箱字段
     email = serializers.EmailField()
     # 布尔字段（默认值False）
     is_active = serializers.BooleanField(default=False)
     # 列表字段（元素为字符串）
     tags = serializers.ListField(child=serializers.CharField(max_length=20))
+
 ```
 
-> Serializer 序列化器基类中提供的常用字段如下所示
+> Serializer 序列化器基类中提供了许多创建字段的方法，如下所示
 
 | 字段类型 | 说明 | 常用参数示例 | 
 |--------|--------------|---------------| 
@@ -149,7 +171,7 @@ class UserInfoSerializer(serializers.Serializer):
 | BooleanField | 布尔值字段 | default=False | 
 | ListField | 列表字段（元素为指定类型） | child=IntegerField() |
 
-> Serializer 序列化器基类中提供的常用字段参数如下所示
+> Serializer 序列化器基类的常用字段的字段参数如下所示
 
 | 参数名 | 作用说明 | 示例 | 
 |---------|------------|--------| 
