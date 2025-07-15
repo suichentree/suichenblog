@@ -193,6 +193,7 @@ from django.db import models
 # 假设这是 Django 模型类
 class UserModel:
     # 模型类的字段如下
+    id = models.IntegerField(primary_key=True)
     username = models.CharField(max_length=100)
     age = models.IntegerField()
     email = models.EmailField()
@@ -208,6 +209,8 @@ class UserModel:
 from rest_framework import serializers
 # 自定义一个序列化器类UserInfoSerializer需要继承Serializer类
 class UserInfoSerializer(serializers.Serializer):
+    # read_only 表示该字段，在序列化时包含该字段，但反序列化时忽略输入
+    id = serializers.IntegerField(read_only=True)
     # 必传字符串字段（默认required=True），最长100字符
     username = serializers.CharField(max_length=100)
     # 可选整数字段（允许为空），年龄范围1-150
