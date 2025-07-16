@@ -97,7 +97,7 @@ DRF框架提供了一个序列化模块。该模块中包含了所有可用的�
 
 - 序列化：将Django模型对象/查询集对象转换为JSON/XML等格式的响应数据（用于API返回数据）
 - 反序列化：将客户端发送的请求数据（如JSON数据）转换为Django模型对象（用于API接收数据）
-- 验证：可以对数据进行合法性校验（字段类型、业务规则等）
+- 数据验证：可以对数据进行合法性校验（如字段类型、业务规则等）
 - 数据转换：处理不同格式间的类型转换（如日期字符串转datetime对象）
 
 DRF框架中最常用的序列化器类有两个。
@@ -105,19 +105,23 @@ DRF框架中最常用的序列化器类有两个。
 - ModelSerializer 模型序列化器类。在工作中，除了Serializer基类以外，ModelSerializer是最常用的序列化器类。
 
 
-### 自定义序列化器类 （继承Serializer 序列化器基类）
+### 继承 Serializer 序列化器基类
 
 DRF 中的 `Serializer` 是所有序列化器的基类，提供了序列化、反序列化和数据验证的基础功能。
 
 如果我们想要实现序列化的功能，需要做到以下几点。
 1. 自定义一个序列化器类，需要继承Serializer类。
 2. 构建自定义序列化器类的字段。需要与模型类的字段是需要一一对应的。只有这样才能将模型类对象进行序列化和反序列化。
+3. 自定义序列化器类的验证方法,确保数据在序列化和反序列化的过程中符合要求。(可选)
+    - 通过`validate_<字段名>`方法对单个字段进行验证。(可选)
+    - 通过`validate`方法对多个字段进行验证。(可选)
 
-#### Serializer 序列化器基类提供的常用字段类型
 
-通常根据模型字段类型选择匹配的序列化器字段，以确保数据类型和校验规则的一致性。
+#### 常用字段类型
 
-> Serializer 序列化器字段类和模型类字段类型的对应关系。如下所示
+> Serializer 序列化器基类提供了许多常用字段类型。如下所示
+
+通常根据模型字段类型选择匹配的序列化器字段类型，以确保数据类型和校验规则的一致性。
 
 | Django 模型字段类型 | DRF 序列化器字段类型 | 说明  |
 |----------|--------|---------|
@@ -153,7 +157,7 @@ DRF 中的 `Serializer` 是所有序列化器的基类，提供了序列化、�
 | label | 字段的显示名称（用于API文档或表单展示） | CharField(label="用户姓名")（文档中显示为“用户姓名”） | 
 | help_text | 字段的帮助文本（用于API文档说明字段用途） | IntegerField(help_text="用户年龄，范围1-150")（文档中提示年龄范围） | 
 
-#### Serializer 序列化器基类的构造方法
+#### 构造方法
 
 Serializer 序列化器基类的构造方法，需要传入模型对象。语法如下
 
@@ -183,7 +187,7 @@ print(serializer.data)
 - **kwargs参数：其他自定义参数。
 
 
-#### 自定义序列化器的基本使用
+#### 序列化，反序列化
 
 > ① 在models.py文件中定义一个模型类。
 
@@ -208,7 +212,7 @@ class UserModel:
 # 导入DRF中的序列化器模块  
 from rest_framework import serializers
 # 自定义一个序列化器类UserInfoSerializer需要继承Serializer类
-class UserInfoSerializer(serializers.Serializer):
+class UserSerializer(serializers.Serializer):
     # read_only 表示该字段，在序列化时包含该字段，但反序列化时忽略输入
     id = serializers.IntegerField(read_only=True)
     # 必传字符串字段（默认required=True），最长100字符
@@ -231,7 +235,7 @@ from django.http import JsonResponse
 from .models import UserModel
 from .serializers import UserInfoSerializer
 
-def user_detail(request, pk):
+def user_get1(request, pk):
     # 从数据库中查询单个模型对象
     user = UserModel.objects.get(pk=pk)  
     # 将对象传入序列化器中，返回序列化器对象
@@ -242,13 +246,14 @@ def user_detail(request, pk):
     # 通过JsonResponse将字典数据打包为json，并返回给客户端
     return JsonResponse(a) 
 
+
 ```
 
 > ④ 反序列化（JSON → 模型对象）的代码示例
 
 使用序列化器进行反序列化时，必须先调用is_valid()方法对数据进行验证，验证成功返回True，否则返回False。
 - 验证失败，可以通过序列化器对象的errors属性获取错误信息。
-- 验证成功，可以通过序列化器对象的validated_data属性获取数据。
+- 验证成功，可以通过序列化器对象的validated_data属性获取反序列化之后的模型对象。
 
 ```py
 from django.http import JsonResponse
@@ -256,37 +261,483 @@ import json
 from .models import UserModel
 from .serializers import UserInfoSerializer
 
-def user_create(request):
-    
+def user_get2(request):
     # 将请求中的Json数据传入序列化器构造方法的data参数中，进行反序列化
-    serializer = UserInfoSerializer(data=request.data)  
+    serializer = UserInfoSerializer(data=request.data)
     # 验证反序列化是否有效
     if serializer.is_valid():
-        # 调用序列化器对象的data属性，返回模型对象
-        user_obj = serializer.data
-        # 返回给客户端
-        return JsonResponse(serializer.validated_data, status=200)
+        # 调用序列化器对象的validated_data属性，返回反序列化之后的模型对象
+        user_obj = serializer.validated_data
+        return JsonResponse(user_obj, status=200)
     else:
         # 验证失败，返回验证错误信息
         return JsonResponse(serializer.errors, status=400)
         
 ```
 
+#### 数据验证
 
-### ModelSerializer（模型序列化器类）
+当我们由于业务要求，需要自定义序列化器的验证规则时。可以在自定义序列化器类中定义验证方法。
+1. 通过`validate_<字段名>`方法对单个字段进行验证。(可选)
+2. 通过`validate`方法对多个字段进行验证。(可选)
 
-### 嵌套序列化器（处理关联模型）
+注意
+- 自定义验证方法的参数：需要验证的字段值。
+- 自定义验证方法的返回值：验证通过后的字段值，或抛出ValidationError异常。
+- 验证方法的最后必须把验证数据作为返回值返回，否则序列化器会丢失验证的数据。
+
+
+```py
+from rest_framework import serializers
+class UserSerializer(serializers.Serializer):
+    # ...原有字段定义...
+
+    # 对单个字段验证：检查邮箱格式（DRF已通过EmailField自动校验，此处演示自定义逻辑）
+    def validate_email(self, value):
+        if 'test.com' in value:
+            raise ValidationError("禁止使用测试邮箱域名")
+        return value
+
+    # 对多个字段验证：检查年龄与监护人邮箱的关联逻辑
+    def validate(self, attrs):
+        age = attrs.get('age')
+        email = attrs.get('email')
+        
+        if age and age < 18 and 'guardian_' not in email:
+            raise ValidationError("18岁以下用户邮箱需包含'guardian_'前缀（如guardian_123@example.com）")
+        return attrs
+
+```
+
+#### 数据保存
+
+DRF 序列化器通过 `save()` 方法可以实现数据持久化。
+
+自定义序列化器类需手动重写 `create()` 和 `update()`方法完成数据保存。
+
+> 核心方法说明
+- `save()`：判断方法内部根据参数的`instance`是否存在，决定调用 `create()` 或 `update()`。
+- `create(validated_data)`：用于将模型对象插入到数据库中（当未传入 `instance` 时调用）
+- `update(instance, validated_data)`：用于更新数据库中的模型对象（当传入 `instance` 时调用）
+
+
+代码示例
+① 在自定义序列化器类中重写 `create(),update()` 方法。
+```py
+from rest_framework import serializers
+from .models import UserModel
+
+class UserSerializer(serializers.Serializer):
+    # ...（已有字段定义和验证方法）...
+
+    def create(self, validated_data):
+        """插入数据（需手动写入数据库）"""
+        return UserModel.objects.create(**validated_data)  # 调用 ORM create 方法
+
+    def update(self, instance, validated_data):
+        """更新数据（需手动更新数据库字段）"""
+        instance.username = validated_data.get('username', instance.username)
+        instance.age = validated_data.get('age', instance.age)
+        # ...其他字段更新...
+        instance.save()  # 调用 Django ORM的save 方法更新数据
+
+        return instance
+
+```
+
+② 视图函数中使用序列化器进行数据保存。
+
+```py
+from rest_framework import serializers
+from .models import UserModel
+from .serializers import UserSerializer
+
+def user_post(request):
+    # 从请求中获取数据
+    data = request.data
+    # 初始化序列化器，传入数据
+    serializer = UserSerializer(data=data)
+    # 验证数据是否有效
+    if serializer.is_valid():
+
+        # save源代码中，判断实例化序列化器时是否传递instance
+        # 如果传递了instance参数，则serializer.save()会自动调用序列化器内部的update,并把instance与验证后的validated data作为参数
+        # 如果没有传递instance参数，则serializer,save()会自动调用序列化器内部的create方法，并把验证后的validated data作为参数
+        serializer.save()
+
+        return JsonResponse(serializer.data, status=201)
+    else:
+        return JsonResponse(serializer.errors, status=400)
+```
+
+
+### 继承 ModelSerializer 模型序列化器类
+
+ModelSerializer 是 DRF 提供的**模型专用序列化器**。大幅简化了基于模型的序列化器开发流程。适用于需要快速实现模型数据序列化/反序列化的场景（如CRUD接口）。
+
+ModelSerializer与Serializer的用法相同，但额外提供了:
+- 自动映射模型字段：无需手动声明所有字段。
+- 自动实现 CRUD 方法：默认提供了 `create()` 和 `update()` 方法，无需手动实现。
+- 字段校验规则：ModelSerializer 会根据模型字段的校验规则自动生成校验参数（如 `max_length`）。
+
+
+> ModelSerializer 模型序列化器类和 Serializer 自定义序列化器类的区别
+
+| 特性  | Serializer | ModelSerializer |
+|----------|---------|----------|
+| 字段定义 | 需手动声明所有字段 | 自动根据模型生成字段（可配置） |
+| 模型关联   | 需手动处理模型实例 | 自动关联模型类（通过 `model` 属性） |
+| CRUD 方法  | 需手动实现 `create()`/`update()` | 默认提供基础 `create()`/`update()` 实现 |
+| 字段校验规则 | 需手动声明校验参数（如 `max_length`） | 自动继承模型字段的校验规则（如 `max_length` 来自 `models.CharField`） |
+
+> ModelSerializer 模型序列化器类的构造方法
+
+```py
+# 构造方法语法（与 Serializer 一致）
+ModelSerializer(
+    instance=None,  # 序列化时传入的模型实例/查询集
+    data=empty,     # 反序列化时传入的请求数据（如 request.data）
+    many=False,     # 是否处理多个对象（True 时 instance 应为集合）
+    context=None,   # 额外添加数据
+    **kwargs        # 其他自定义参数
+)
+```
+
+#### 序列化，反序列化
+
+> ① 定义模型类
+
+```py
+from django.db import models
+
+# 假设这是 Django 模型类
+class UserModel:
+    # 模型类的字段如下
+    id = models.IntegerField(primary_key=True)
+    username = models.CharField(max_length=100)
+    age = models.IntegerField()
+    email = models.EmailField()
+    is_active = models.BooleanField(default=False)
+    tags = models.JSONField()
+
+```
+
+> ② 创建serializers.py文件，并且自定义一个序列化器类。需要继承ModelSerializer 模型序列化器类
+
+```py
+# 导入DRF中的序列化器
+from rest_framework import serializers
+# # 导入模型类
+from .models import UserModel  
+
+# 自定义一个序列化器类。继承ModelSerializer 模型序列化器类
+class UserModelSerializer(serializers.ModelSerializer):
+    # 元数据配置
+    class Meta:
+        model = UserModel  # 关联模型类
+        
+        fields = "__all__"  # 包含模型所有字段
+        # fields = ['id', 'username', 'age']  # 或指定字段列表
+
+        # exclude = ['tags']  # 排除指定字段（与fields互斥）
+        
+        # read_only_fields = ['id']  # 指定只读字段（序列化时返回，反序列化时忽略）
+        
+        # extra_kwargs = {  # 额外字段参数（覆盖模型默认规则）
+        #     'age': {'min_value': 0, 'max_value': 200}
+        # }
+
+```
+
+元数据配置选项
+- model：必选，指定关联的模型类
+- fields：指定包含的字段（`__all__` 表示所有字段，或指定字段列表）
+- exclude：指定排除的字段（与 fields 互斥）
+- read_only_fields：指定只读字段（序列化时返回，反序列化时忽略）
+- extra_kwargs：为字段添加额外参数（覆盖模型默认规则）
+
+> ③ 序列化与反序列化示例
+
+```py
+from django.http import JsonResponse
+from .models import UserModel
+from .serializers import UserModelSerializer
+
+# 序列化单个/多个模型对象（模型对象→JSON数据）
+def user_detail(request, pk):
+    # 从数据库获取单个用户实例
+    user = UserModel.objects.get(pk=pk)
+    # 构造 ModelSerializer 实例（指定 instance 参数）
+    serializer = UserModelSerializer(instance=user) 
+    # 获取序列化后的 JSON 数据
+    print(serializer.data)
+
+    # 获取所有用户的查询集
+    users = UserModel.objects.all()
+    # 设置 many=True（处理查询集）
+    serializer = UserModelSerializer(instance=users, many=True)
+    # 输出列表形式的 JSON 数据
+    print(serializer.data) 
+
+    return JsonResponse(serializer.data)
+
+# 反序列化创建新对象（JSON数据→模型对象）
+def user_create(request):
+    # 假设 request.data 是前端提交的 JSON 数据
+    serializer = UserModelSerializer(data=request.data)
+    if serializer.is_valid(raise_exception=True):
+        # 调用 save() 触发内置的 create() 方法，默认将 validated_data属性值保存/更新到数据库中
+        user = serializer.save()
+
+        # 打印Json数据反序列化之后的模型对象
+        print(serializer.validated_data)
+        return JsonResponse(serializer.validated_data, status=201)
+```
+
+#### 数据保存
+
+Serializer类中并没有内置create与update方法，所以如果要让Serializer类实现数据保存功能，则务必手动实现create与update方法。
+
+而ModelSerializer类内置了create与update方法，所以在使用过程中，实际上不需要手写create与update方法的。
+
+> 核心方法说明
+- `save()`：判断方法内部根据参数的`instance`是否存在，决定调用 `create()` 或 `update()`。
+- `create(validated_data)`：用于将模型对象插入到数据库中（当未传入 `instance` 时调用）
+- `update(instance, validated_data)`：用于更新数据库中的模型对象（当传入 `instance` 时调用）
+
+代码示例
+```py
+# 创建新对象（自动调用 create()）
+def user_create(request):
+    # 假设 request.data 是前端提交的 JSON 数据
+    print(request.data)
+    # 构造 ModelSerializer 实例（指定 data 参数）
+    serializer = UserModelSerializer(data=request.data)
+    # 若验证成功
+    if serializer.is_valid():
+        # 调用save方法，自动将反序列化后的模型对象保存到数据库中
+        user = serializer.save() 
+
+        # 打印反序列化后的模型对象
+        print(serializer.validated_data)
+        return JsonResponse(serializer.validated_data, status=200)
+
+# 完整更新对象（自动调用 update()）
+def user_update(request, pk):
+    # 从数据库中查询
+    user = UserModel.objects.get(pk=pk)
+    # 构造 ModelSerializer 实例（指定 instance,data参数）
+    serializer = UserModelSerializer(instance=user, data=request.data)
+    # 验证数据
+    if serializer.is_valid():
+        # 保存反序列化后的模型对象到数据库中
+        updated_user = serializer.save()  
+
+        # 打印反序列化后的模型对象
+        print(serializer.validated_data)
+        return JsonResponse(serializer.validated_data, status=200)
+
+
+```
+
+注意事项
+- 必须先调用 is_valid()方法 且返回 True 后，才能调用 save()方法,否则 validated_data 不存在。
+- 自定义逻辑：若需添加额外业务逻辑（如记录操作日志），可重写 create()/update() 方法
+- 返回值：save()方法返回保存后的模型对象，可直接用于后续操作（如关联数据处理等）
 
 
 ## DRF 视图（Views）
-### APIView：DRF最基础的视图类（请求/响应封装、异常处理）
 
-### GenericAPIView：通用视图类（结合查询集与序列化器）
+DRF 视图是核心组件，主要负责：
+- 控制序列化器的执行（校验、保存、转换数据）
+- 操作数据库（查询、新增、更新、删除）
+- 处理请求与响应（解析请求数据、生成响应数据）
 
-### 混合类（Mixins）：ListModelMixin、CreateModelMixin等组合使用
+### Request 请求对象
 
-### ModelViewSet：一站式CRUD视图（自动绑定增删改查方法）
+DRF框架扩展了原生HttpRequest类,提供更强大的Request请求对象。
 
+DRF会根据请求头的`Content-Type`指明的请求数据类型,自动解析请求体数据（如 JSON、表单、XML 等），并将解析后的结果存储在Request请求对象的`data`属性中。
+
+然后在视图中就可以通过`request.data`获取解析之后的请求体数据（支持 JSON、表单等格式）,也可以通过`request.query_params`获取请求URL的查询参数。
+
+> Request请求对象常用属性
+
+- request.data：解析后的请求体数据（类似 Django 的 request.POST，但支持更多格式）。
+- request.query_params：解析后的请求 URL 查询参数（等价于 Django 的 request.GET）。
+- request.user：通过认证后的用户对象（未认证时为 AnonymousUser）。
+- request.auth：认证后的凭证对象（如 Token 认证中的 Token）。
+
+### Response 响应对象
+
+DRF框架提供了一个Response类，用来替代了Django原生的 HttpResponse 类。Response类支持内容协商。
+
+当使用Response类构造Response响应对象时，Response类会根据请求头字段（如 application/json），使用对应的渲染器（Renderer）将请求数据转换为目标格式（默认支持JSON、HTML等）。
+
+
+> Response类构造Response响应对象
+```py
+
+from rest_framework.response import Response
+response = Response(
+    data,                # 待渲染的 Python 数据（如字典、列表）
+    status=None,         # HTTP 状态码（如 201、400）
+    headers=None,        # 自定义响应头（如 {'X-Custom': 'value'}）
+    content_type=None    # 强制指定内容类型（如 'application/json'）
+)
+
+```
+
+> DRF的Response类和Django的JsonResponse类的区别
+
+- DRF的Response类是基于Django的HttpResponse类的封装，提供了更多的功能和选项。
+- DRF的Response类可以自动处理内容协商，无需手动设置`Content-Type`属性。
+- Response类支持多种渲染格式（JSON、XML、HTML 等），而 JsonResponse类仅支持 JSON。
+
+
+### 视图函数
+
+DRF 支持基于视图函数的写法，主要通过 @api_view 装饰器实现。
+
+- 使用 @api_view 装饰器声明允许的 HTTP 方法（如 GET、POST）。
+- 自动解析请求数据并转换（支持JSON、表单等格式）,然后通过 `request.data` 访问。
+- 返回 Response 对象（DRF 提供的响应类，支持自动序列化和内容协商）。
+
+#### 基本使用
+
+```py
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+from .models import UserModel
+from .serializers import UserModelSerializer
+
+# @api_view 装饰器声明允许 GET 和 POST 方法
+@api_view(['GET', 'POST'])
+def user_list(request):
+    # GET 请求
+    if request.method == 'GET':
+        # 获取所有用户
+        users = UserModel.objects.all()
+        # 序列化
+        serializer = UserModelSerializer(users, many=True)
+        return Response(serializer.data)  # 返回 JSON 格式数据
+
+    # POST 请求
+    elif request.method == 'POST':
+        # 反序列化
+        serializer = UserModelSerializer(data=request.data)
+        # 验证数据
+        if serializer.is_valid():
+            # 持久化到数据库中
+            serializer.save()
+            # 返回数据
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        # 验证失败返回数据
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+```
+
+- @api_view 装饰器：指定允许的 HTTP 方式列表（如 ['GET', 'POST']），未声明的HTTP 方式会返回 405 Method Not Allowed。
+- 请求对象：DRF 会将 Django 原生的 HttpRequest 封装为 Request 对象，通过 request.data 可直接获取解析后的请求体数据（支持 JSON、表单等格式）。
+- 响应对象：使用 Response 类替代 Django 原生的 JsonResponse，支持自动根据客户端 `Accept` 请求头来返回不同格式的响应数据。
+- 状态码：推荐使用 rest_framework.status 模块中的常量，提高代码可读性。
+
+
+### 视图类
+
+在 DRF 中，视图类是更推荐的开发方式，支持继承和复用，适合复杂业务场景。
+
+DRF 提供了多种视图类，包括 APIView、GenericAPIView 等。
+
+#### APIView（基础视图类）
+
+APIView 是 DRF 框架中所有视图类的基类，提供了请求解析、认证、权限校验等基础功能。需手动实现 HTTP 方法（get、post 等）。
+
+
+代码示例
+```py
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .models import UserModel
+from .serializers import UserModelSerializer
+
+# 自定义视图类，继承APIView
+class UserListAPIView(APIView):
+    # 处理get请求
+    def get(self, request):
+        # 从数据库中获取所有用户
+        users = UserModel.objects.all()
+        # 序列化操作
+        serializer = UserModelSerializer(users, many=True)
+        # 返回序列化后的数据
+        return Response(serializer.data)
+
+    # 处理post请求
+    def post(self, request):
+        # 将请求数据进行反序列化
+        serializer = UserModelSerializer(data=request.data)
+        if serializer.is_valid():
+            # 将反序列化后的数据，持久化到数据库中
+            serializer.save()
+            # 返回反序列化的数据
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        # 验证失败返回数据
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+```
+
+#### GenericAPIView（通用视图类）
+
+GenericAPIView 继承自 APIView，额外封装了模型查询集和序列化器的配置，通常与 Mixin 类结合使用，简化 CRUD 操作。
+
+代码示例
+```py
+from rest_framework.generics import GenericAPIView
+from rest_framework.mixins import (
+    ListModelMixin,  # 提供 list() 方法（GET获取列表）
+    CreateModelMixin,  # 提供 create() 方法（POST创建）
+    RetrieveModelMixin,  # 提供 retrieve() 方法（GET获取单个）
+    UpdateModelMixin,  # 提供 update() 方法（PUT/PATCH更新）
+    DestroyModelMixin   # 提供 destroy() 方法（DELETE删除）
+)
+from .models import UserModel
+from .serializers import UserModelSerializer
+
+# 自定义视图类，继承GenericAPIView类和Mixin类
+class UserListCreateView(ListModelMixin, CreateModelMixin, GenericAPIView):
+    #
+    queryset = UserModel.objects.all()  # 配置查询集
+    serializer_class = UserModelSerializer  # 配置序列化器
+
+    def get(self, request, *args, **kwargs):
+        # 调用 ListModelMixin 的 list() 方法
+        return self.list(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        # 调用 CreateModelMixin 的 create() 方法
+        return self.create(request, *args, **kwargs)
+
+class UserRetrieveUpdateDestroyView(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, GenericAPIView):
+    queryset = UserModel.objects.all()
+    serializer_class = UserModelSerializer
+    lookup_field = 'pk'  # URL 中通过 pk 匹配对象（默认）
+
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)  # 获取单个
+
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)    # 完整更新
+
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)  # 部分更新
+
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)  # 删除
+
+
+```
 
 ## DRF 路由（Routers）
 
