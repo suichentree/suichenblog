@@ -565,14 +565,15 @@ DRF会根据请求头的`Content-Type`指明的请求数据类型,自动解析�
 
 - request.data：解析后的请求体数据（类似 Django 的 request.POST，但支持更多格式）。
 - request.query_params：解析后的请求 URL 查询参数（等价于 Django 的 request.GET）。
+- request._request：获取原始的 HttpRequest 对象（django的HttpRequest对象）。
 - request.user：通过认证后的用户对象（未认证时为 AnonymousUser）。
 - request.auth：认证后的凭证对象（如 Token 认证中的 Token）。
 
 ### Response 响应对象
 
-DRF框架提供了一个Response类，用来替代了Django原生的 HttpResponse 类。Response类支持内容协商。
+DRF框架提供了一个Response类，用来替代了Django原生的 HttpResponse 类。
 
-当使用Response类构造Response响应对象时，Response类会根据请求头字段（如 application/json），使用对应的渲染器（Renderer）将请求数据转换为目标格式（默认支持JSON、HTML等）。
+Response类支持内容协商，即使用Response类构造Response响应对象时，Response类会根据请求头的属性（如 application/json），使用对应的渲染器（Renderer）将请求数据转换为目标格式（默认支持JSON、HTML等）。 
 
 
 > Response类构造Response响应对象
@@ -583,7 +584,7 @@ response = Response(
     data,                # 待渲染的 Python 数据（如字典、列表）
     status=None,         # HTTP 状态码（如 201、400）
     headers=None,        # 自定义响应头（如 {'X-Custom': 'value'}）
-    content_type=None    # 强制指定内容类型（如 'application/json'）
+    content_type=None    # 响应头的content-type属性。通常无需赋值，会根据返回的响应数据来自动设置。
 )
 
 ```
@@ -621,7 +622,8 @@ def user_list(request):
         users = UserModel.objects.all()
         # 序列化
         serializer = UserModelSerializer(users, many=True)
-        return Response(serializer.data)  # 返回 JSON 格式数据
+        return Response(data=serializer.data)  # 返回 JSON 格式数据
+
 
     # POST 请求
     elif request.method == 'POST':
@@ -632,9 +634,10 @@ def user_list(request):
             # 持久化到数据库中
             serializer.save()
             # 返回数据
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
         # 验证失败返回数据
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 ```
 
@@ -652,8 +655,18 @@ DRF 提供了多种视图类，包括 APIView、GenericAPIView 等。
 
 #### APIView（基础视图类）
 
-APIView 是 DRF 框架中所有视图类的基类，提供了请求解析、认证、权限校验等基础功能。需手动实现 HTTP 方法（get、post 等）。
+APIView 是 DRF 框架中所有视图类的基类，并且继承自Django的View类。APIView类提供了请求解析、认证、权限校验等基础功能。需手动实现 HTTP 方法（get、post 等）。
 
+> APIView类和View类的区别
+
+- 使用APIView类的时候，传入到视图中的是 Request对象，而不是Django的HttpRequeset对象;
+- 使用APIView类的时候，视图可以返回Response对象，视图会自动为响应数据设置(renderer)符合前端期望要求的格
+式;
+- 使用APIView类的时候，任何 APIException 异常都会被捕获到，并且处理成合适格式的响应信息返回给客户端;而使用 View类的时候，所有异常全部以HTML格式显示。
+- APIView类除了继承了View类原有的属性方法，还新增了如下类属性
+    - authentication_classes列表或元组，身份认证类
+    - permission_classes列表或元组，权限检查类
+    - throttle_classes列表或元祖，流量控制类
 
 代码示例
 ```py
@@ -668,9 +681,9 @@ class UserListAPIView(APIView):
     # 处理get请求
     def get(self, request):
         # 从数据库中获取所有用户
-        users = UserModel.objects.all()
-        # 序列化操作
-        serializer = UserModelSerializer(users, many=True)
+        user_list = UserModel.objects.all()
+        # 序列化操作,设置many=True 表示要序列化多个模型对象
+        serializer = UserModelSerializer(user_list, many=True)
         # 返回序列化后的数据
         return Response(serializer.data)
 
@@ -678,19 +691,55 @@ class UserListAPIView(APIView):
     def post(self, request):
         # 将请求数据进行反序列化
         serializer = UserModelSerializer(data=request.data)
-        if serializer.is_valid():
+        if serializer.is_valid(raise_exception=True):
             # 将反序列化后的数据，持久化到数据库中
             serializer.save()
             # 返回反序列化的数据
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
         # 验证失败返回数据
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 ```
 
 #### GenericAPIView（通用视图类）
 
-GenericAPIView 继承自 APIView，额外封装了模型查询集和序列化器的配置，通常与 Mixin 类结合使用，简化 CRUD 操作。
+`GenericAPIView` 是 DRF 中一个非常实用的通用视图类，它继承自 `APIView`，在其基础上增加了操作序列化器和数据库查询的方法，旨在让开发者能更便捷地处理常见的 API 操作，如列表查询、单个对象查询、创建、更新和删除等。
+
+通常，`GenericAPIView` 会搭配一个或多个 `Mixin` 扩展类一起使用，以进一步简化代码。
+
+> 主要功能与特性
+
+- **查询集管理**：通过 `queryset` 属性管理数据库查询集，方便对数据库中的数据进行操作。
+- **序列化器管理**：使用 `serializer_class` 属性指定序列化器类，实现数据的序列化和反序列化。
+- **对象查找**：支持通过 `lookup_field` 和 `lookup_url_kwarg` 属性在 URL 中查找特定对象。
+- **分页和过滤**：提供内置的分页和过滤功能，可轻松实现数据的分页展示和筛选。
+
+> GenericAPIView类的常用属性
+
+- `queryset`：指定视图使用的查询集，用于从数据库中获取数据。
+- `serializer_class`：指定视图使用的序列化器类，用于处理数据的序列化和反序列化。
+- `lookup_field`：指定用于查找单个对象的模型字段，默认为 `'pk'`。
+- `lookup_url_kwarg`：指定 URL 中用于查找对象的关键字参数名，默认与 `lookup_field` 相同。
+- `pagination_class`：指定分页类，用于对查询集进行分页处理。
+- `filter_backends`：指定过滤后端类，用于对查询集进行过滤操作。
+
+> GenericAPIView类的常用方法
+
+- `get_queryset()`：返回视图使用的查询集，可重写该方法实现自定义的查询逻辑。
+- `get_serializer_class()`：返回视图使用的序列化器类，可重写该方法实现动态选择序列化器。
+- `get_serializer(instance=None, data=None, many=False, **kwargs)`：返回序列化器实例，用于处理数据的序列化和反序列化。
+- `get_object()`：根据 `lookup_field` 和 `lookup_url_kwarg` 从查询集中获取单个对象。
+- `paginate_queryset(queryset)`：对查询集进行分页处理，返回分页后的查询集。
+- `get_paginated_response(data)`：返回分页后的响应数据。
+
+> GenericAPIView 通常会与以下 Mixin 扩展类搭配使用，以实现常见的 CRUD 操作
+
+- `ListModelMixin`：提供 `list()` 方法，用于处理 GET 请求，获取对象列表。
+- `CreateModelMixin`：提供 `create()` 方法，用于处理 POST 请求，创建新对象。
+- `RetrieveModelMixin`：提供 `retrieve()` 方法，用于处理 GET 请求，获取单个对象。
+- `UpdateModelMixin`：提供 `update()` 和 `partial_update()` 方法，分别用于处理 PUT 和 PATCH 请求，更新对象。
+- `DestroyModelMixin`：提供 `destroy()` 方法，用于处理 DELETE 请求，删除对象。
+
 
 代码示例
 ```py
@@ -705,39 +754,398 @@ from rest_framework.mixins import (
 from .models import UserModel
 from .serializers import UserModelSerializer
 
-# 自定义视图类，继承GenericAPIView类和Mixin类
+# 自定义视图类，继承GenericAPIView类和Mixin类，用于处理用户列表和创建操作
 class UserListCreateView(ListModelMixin, CreateModelMixin, GenericAPIView):
-    #
-    queryset = UserModel.objects.all()  # 配置查询集
-    serializer_class = UserModelSerializer  # 配置序列化器
+    # 从数据库中获取用户查询集
+    queryset = UserModel.objects.all()
+    # 配置序列化器
+    serializer_class = UserModelSerializer
 
     def get(self, request, *args, **kwargs):
-        # 调用 ListModelMixin 的 list() 方法
+        # 调用 ListModelMixin 的 list() 方法，获取用户列表
         return self.list(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        # 调用 CreateModelMixin 的 create() 方法
+        # 调用 CreateModelMixin 的 create() 方法，创建新用户
         return self.create(request, *args, **kwargs)
 
+
+# 自定义视图类，继承GenericAPIView类和Mixin类，用于处理用户详情、更新和删除操作
 class UserRetrieveUpdateDestroyView(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, GenericAPIView):
+    # 从数据库中获取用户查询集
     queryset = UserModel.objects.all()
+    # 配置序列化器
     serializer_class = UserModelSerializer
     lookup_field = 'pk'  # URL 中通过 pk 匹配对象（默认）
 
     def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)  # 获取单个
+        return self.retrieve(request, *args, **kwargs)  # 获取单个用户信息
 
     def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)    # 完整更新
+        return self.update(request, *args, **kwargs)    # 完整更新用户信息
 
     def patch(self, request, *args, **kwargs):
-        return self.partial_update(request, *args, **kwargs)  # 部分更新
+        return self.partial_update(request, *args, **kwargs)  # 部分更新用户信息
 
     def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)  # 删除
-
+        return self.destroy(request, *args, **kwargs)  # 删除用户信息
 
 ```
+
+#### 5个视图扩展类
+
+通常，`GenericAPIView` 会搭配一个或多个 `Mixin` 扩展类一起使用，以进一步简化代码。
+
+这些 `Mixin` 扩展类为 `GenericAPIView` 提供了常见的 CRUD（创建、读取、更新、删除）操作方法，让开发者可以更高效地实现 API 接口。下面详细介绍各个常用的 `Mixin` 扩展类。
+
+==注意在实际开发中，通常会将多个 Mixin 类与 GenericAPIView 组合使用，以实现更完整的 API 功能。==
+
+##### ListModelMixin扩展类
+
+istModelMixin扩展类提供 `list()` 方法，用于处理 GET 请求，获取对象列表。
+
+ListModelMixin扩展类的基本使用
+```py
+from rest_framework.generics import GenericAPIView
+from rest_framework.mixins import ListModelMixin
+from .models import UserModel
+from .serializers import UserModelSerializer
+
+# 自定义视图类，继承ListModelMixin和GenericAPIView类，用于处理用户列表获取操作
+class UserListView(ListModelMixin, GenericAPIView):
+    # 从数据库中获取查询集
+    queryset = UserModel.objects.all()
+    # 初始化序列器
+    serializer_class = UserModelSerializer
+
+    # 获取用户列表
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+
+```
+
+这是ListModelMixin扩展类中的list方法的源代码
+```py
+class ListModelMixin:
+    def list(self, request, *args, **kwargs):
+        # 获取查询集
+        queryset = self.filter_queryset(self.get_queryset())
+
+        # 对查询集进行分页处理
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            # 获取分页后的响应数据
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        # 若未分页，直接序列化查询集
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+```
+
+##### CreateModelMixin扩展类
+
+提供 create() 方法，用于处理 POST 请求，创建新对象。
+
+代码示例
+```py
+from rest_framework.generics import GenericAPIView
+from rest_framework.mixins import CreateModelMixin
+from .models import UserModel
+from .serializers import UserModelSerializer
+
+# 自定义视图类，继承CreateModelMixin和GenericAPIView类，用于处理用户创建操作
+class UserCreateView(CreateModelMixin, GenericAPIView):
+    queryset = UserModel.objects.all()
+    serializer_class = UserModelSerializer
+
+    # 定义POST请求的处理方法，调用CreateModelMixin的create()方法创建新用户
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+
+```
+
+
+以下是CreateModelMixin扩展类中的create方法的源代码
+```py
+class CreateModelMixin:
+    def create(self, request, *args, **kwargs):
+        # 获取序列化器实例，传入请求数据
+        serializer = self.get_serializer(data=request.data)
+        # 验证数据是否有效，若无效则抛出异常
+        serializer.is_valid(raise_exception=True)
+        # 调用 perform_create 方法保存实例
+        self.perform_create(serializer)
+        # 获取请求头
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def perform_create(self, serializer):
+        # 实际执行创建操作，保存序列化器实例
+        serializer.save()
+
+    def get_success_headers(self, data):
+        try:
+            return {'Location': str(data[api_settings.URL_FIELD_NAME])}
+        except (TypeError, KeyError):
+            return {}
+```
+
+##### RetrieveModelMixin扩展类
+
+提供 retrieve() 方法，用于处理 GET 请求，获取单个对象。
+
+```py
+from rest_framework.generics import GenericAPIView
+from rest_framework.mixins import RetrieveModelMixin
+from .models import UserModel
+from .serializers import UserModelSerializer
+
+# 自定义视图类，继承RetrieveModelMixin和GenericAPIView类，用于处理用户详情获取操作
+class UserRetrieveView(RetrieveModelMixin, GenericAPIView):
+    queryset = UserModel.objects.all()
+    serializer_class = UserModelSerializer
+    lookup_field = 'pk'  # URL 中通过 pk 匹配对象（默认）
+
+    # 定义GET请求的处理方法，调用RetrieveModelMixin的retrieve()方法获取用户详情
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+```
+
+
+以下是RetrieveModelMixin扩展类中的retrieve方法的源代码
+```py
+class RetrieveModelMixin:
+    def retrieve(self, request, *args, **kwargs):
+        # 获取单个对象
+        instance = self.get_object()
+        # 获取序列化器实例，传入对象
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
+```
+
+##### UpdateModelMixin扩展类
+
+提供 update() 和 partial_update() 方法，分别用于处理 PUT 和 PATCH 请求，更新对象。
+- update()：处理 PUT 请求，要求提供完整的对象数据进行更新。
+- partial_update()：处理 PATCH 请求，允许只提供部分字段数据进行更新。
+
+代码示例
+```py
+from rest_framework.generics import GenericAPIView
+from rest_framework.mixins import UpdateModelMixin
+from .models import UserModel
+from .serializers import UserModelSerializer
+
+class UserUpdateView(UpdateModelMixin, GenericAPIView):
+    queryset = UserModel.objects.all()
+    serializer_class = UserModelSerializer
+    lookup_field = 'pk'
+
+    # 定义PUT请求的处理方法，调用UpdateModelMixin的update()方法更新用户信息
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
+    # 定义PATCH请求的处理方法，调用UpdateModelMixin的partial_update()方法部分更新用户信息
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
+
+```
+
+
+以下是UpdateModelMixin扩展类中的update和partial_update方法的源代码
+```py
+class UpdateModelMixin:
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        # 获取单个对象
+        instance = self.get_object()
+        # 获取序列化器实例，传入对象和请求数据，partial 表示是否部分更新
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        # 验证数据是否有效，若无效则抛出异常
+        serializer.is_valid(raise_exception=True)
+        # 调用 perform_update 方法更新实例
+        self.perform_update(serializer)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            # If 'prefetch_related' has been applied to a queryset, we need to
+            # forcibly invalidate the prefetch cache on the instance.
+            # 如果对查询集应用了 'prefetch_related'，需要强制使实例上的预取缓存无效
+            instance._prefetched_objects_cache = {}
+
+        return Response(serializer.data)
+
+    def perform_update(self, serializer):
+        # 实际执行更新操作，保存序列化器实例
+        serializer.save()
+
+    def partial_update(self, request, *args, **kwargs):
+        kwargs['partial'] = True
+        return self.update(request, *args, **kwargs)
+
+```
+
+##### DestroyModelMixin扩展类
+
+提供 destroy() 方法，用于处理 DELETE 请求，删除对象。
+
+```py
+from rest_framework.generics import GenericAPIView
+from rest_framework.mixins import DestroyModelMixin
+from .models import UserModel
+from .serializers import UserModelSerializer
+
+class UserDestroyView(DestroyModelMixin, GenericAPIView):
+    queryset = UserModel.objects.all()
+    serializer_class = UserModelSerializer
+    lookup_field = 'pk'
+    
+    # 定义DELETE请求的处理方法，调用DestroyModelMixin的destroy()方法删除用户
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+
+```
+
+以下是DestroyModelMixin扩展类中的destroy方法的源代码
+```py
+class DestroyModelMixin:
+    def destroy(self, request, *args, **kwargs):
+        # 获取单个对象
+        instance = self.get_object()
+        # 调用 perform_destroy 方法删除实例
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def perform_destroy(self, instance):
+        # 实际执行删除操作
+        instance.delete()
+```
+
+
+### 视图集类ViewSet
+
+在 DRF 里，视图集类 `ViewSet` 是一种强大的视图组织方式，它把视图逻辑封装起来，让代码更加简洁、可复用，还能和路由系统配合，自动生成 URL 映射。视图集类`ViewSet` 结合了视图和路由的功能，让开发者能更高效地实现 CRUD 操作。
+
+> 视图集类的优势
+
+- **代码复用**：把常用的 CRUD 操作封装成方法，不同视图集可继承和复用这些方法。
+- **自动路由**：能和 DRF 的路由系统配合，自动生成 URL 映射，减少手动配置 URL 的工作量。
+- **逻辑清晰**：将相关的视图逻辑集中在一个类里，让代码结构更清晰，便于维护。
+
+DRF 提供了多种视图集类，下面介绍几种常用的。
+
+#### ViewSet
+
+ViewSet 是 DRF 提供的一个基础视图集类，它继承自 APIView 类，提供了 CRUD 操作的默认实现。
+
+开发者可以根据需要自定义视图集类，继承 ViewSet 类，并重写其中的方法，实现自定义的视图逻辑。通常结合 `@action` 装饰器定义自定义操作。
+
+代码示例
+```py
+from rest_framework.viewsets import ViewSet
+from rest_framework.response import Response
+from rest_framework import status
+from .models import UserModel
+from .serializers import UserModelSerializer
+
+# 自定义视图集类，继承ViewSet类
+class UserViewSet(ViewSet):
+    def list(self, request):
+        """获取用户列表"""
+        queryset = UserModel.objects.all()
+        serializer = UserModelSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def create(self, request):
+        """创建新用户"""
+        serializer = UserModelSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def retrieve(self, request, pk=None):
+        """获取单个用户详情"""
+        user = UserModel.objects.get(pk=pk)
+        serializer = UserModelSerializer(user)
+        return Response(serializer.data)
+
+    def update(self, request, pk=None):
+        """更新用户信息"""
+        user = UserModel.objects.get(pk=pk)
+        serializer = UserModelSerializer(user, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def destroy(self, request, pk=None):
+        """删除用户"""
+        user = UserModel.objects.get(pk=pk)
+        user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+```
+
+
+#### GenericViewSet
+
+GenericViewSet视图集类 继承自 GenericAPIView类。提供了查询集管理、序列化器管理等通用功能，常和 Mixin 扩展类搭配使用。
+
+代码示例
+```py
+from rest_framework.viewsets import GenericViewSet
+from rest_framework.mixins import (
+    ListModelMixin,
+    CreateModelMixin,
+    RetrieveModelMixin,
+    UpdateModelMixin,
+    DestroyModelMixin
+)
+from .models import UserModel
+from .serializers import UserModelSerializer
+
+# 自定义视图集类，继承GenericViewSet类和其他扩展类
+class UserGenericViewSet(ListModelMixin, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, GenericViewSet):
+    # 定义视图集的查询集，用于获取所有用户对象
+    queryset = UserModel.objects.all()
+    # 定义视图集的序列化器类，用于将查询集转换为 JSON 格式
+    serializer_class = UserModelSerializer
+    
+
+```
+
+#### ModelViewSet
+
+ModelViewSet 继承自 GenericViewSet，并集成了 ListModelMixin、CreateModelMixin、RetrieveModelMixin、UpdateModelMixin 和 DestroyModelMixin，能快速实现完整的 CRUD 操作。
+
+代码示例
+```py
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework.viewsets import ModelViewSet
+from .models import UserModel
+from .serializers import UserModelSerializer
+
+# 自定义视图集类，继承ModelViewSet类
+class UserModelViewSet(ModelViewSet):
+    # 定义视图集的查询集，用于获取所有用户对象
+    queryset = UserModel.objects.all()
+    # 定义视图集的序列化器类，用于将查询集转换为 JSON 格式
+    serializer_class = UserModelSerializer
+
+    # 自定义操作
+    @action(detail=True, methods=['post'])
+    def activate(self, request, pk=None):
+        """激活用户"""
+        user = self.get_object()
+        user.is_active = True
+        user.save()
+        serializer = self.get_serializer(user)
+        return Response(serializer.data)
+```
+
 
 ## DRF 路由（Routers）
 
