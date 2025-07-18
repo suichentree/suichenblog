@@ -1026,23 +1026,33 @@ class DestroyModelMixin:
 
 ### 视图集类ViewSet
 
-在 DRF 里，视图集类 `ViewSet` 是一种强大的视图组织方式，它把视图逻辑封装起来，让代码更加简洁、可复用，还能和路由系统配合，自动生成 URL 映射。视图集类`ViewSet` 结合了视图和路由的功能，让开发者能更高效地实现 CRUD 操作。
+在 DRF 中，视图集类（ViewSet）是一种面向资源的视图组织方式，通过将资源相关的 CRUD 操作封装为类方法（如 list、create、retrieve 等）。结合路由自动生成 URL 映射，显著提升 API 开发效率。它本质是对传统视图类（APIView/GenericAPIView）的高阶封装，更符合 RESTful 的设计理念。
 
-> 视图集类的优势
+> 视图集类ViewSet 与 传统视图类（APIView）的区别
 
-- **代码复用**：把常用的 CRUD 操作封装成方法，不同视图集可继承和复用这些方法。
-- **自动路由**：能和 DRF 的路由系统配合，自动生成 URL 映射，减少手动配置 URL 的工作量。
-- **逻辑清晰**：将相关的视图逻辑集中在一个类里，让代码结构更清晰，便于维护。
+通常情况下，传统视图类的方法名与 HTTP 动词（get/post/put/delete）强绑定。
+
+传统视图类中必须使用 HTTP 动词作为方法名（如 get 对应 GET 请求），且一个视图类最多只能处理 4 种标准 HTTP 方法（GET/POST/PUT/DELETE），即一个视图类最多对应 4 个接口( 4 个方法名)。若需要实现更多接口（如批量删除、用户激活等自定义方法），则必须新建另一个视图类，导致代码冗余且逻辑分散。
+
+而视图集类可以将同一资源的所有操作（标准 CRUD + 自定义操作）集中在一个类中，逻辑高度内聚，代码结构更清晰。例如，用户资源的所有操作（增删改查、激活、批量删除）均可在 UserViewSet 中实现，无需额外创建 UserActivateView、UserBatchDeleteView 等类。
+
+
+> 视图集类（ViewSet）的作用：
+
+- 视图集类中的方法名可以自定义，开发者可以根据需要定义不同的方法名。
+- 视图集类中的方法名可以通过路由进行动态映射。即在路由中使用 as_view() 方法时,可以设置字典参数从而将视图集类中的方法名动态映射到路由中的 URL 路径。
+- 通过 @action 装饰器，视图集类中可以添加任意数量的自定义方法。
 
 DRF 提供了多种视图集类，下面介绍几种常用的。
 
-#### ViewSet
+#### ViewSet 基础视图集类
 
 ViewSet 是 DRF 提供的一个基础视图集类，它继承自 APIView 类，提供了 CRUD 操作的默认实现。
 
 开发者可以根据需要自定义视图集类，继承 ViewSet 类，并重写其中的方法，实现自定义的视图逻辑。通常结合 `@action` 装饰器定义自定义操作。
 
 代码示例
+
 ```py
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
@@ -1086,10 +1096,14 @@ class UserViewSet(ViewSet):
         user = UserModel.objects.get(pk=pk)
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+# 对应的路由写法
+# urls.py
+  
+
 ```
 
-
-#### GenericViewSet
+#### GenericViewSet 通用视图集类
 
 GenericViewSet视图集类 继承自 GenericAPIView类。提供了查询集管理、序列化器管理等通用功能，常和 Mixin 扩展类搭配使用。
 
@@ -1112,11 +1126,10 @@ class UserGenericViewSet(ListModelMixin, CreateModelMixin, RetrieveModelMixin, U
     queryset = UserModel.objects.all()
     # 定义视图集的序列化器类，用于将查询集转换为 JSON 格式
     serializer_class = UserModelSerializer
-    
 
 ```
 
-#### ModelViewSet
+#### ModelViewSet 模型视图集类
 
 ModelViewSet 继承自 GenericViewSet，并集成了 ListModelMixin、CreateModelMixin、RetrieveModelMixin、UpdateModelMixin 和 DestroyModelMixin，能快速实现完整的 CRUD 操作。
 
@@ -1134,26 +1147,120 @@ class UserModelViewSet(ModelViewSet):
     queryset = UserModel.objects.all()
     # 定义视图集的序列化器类，用于将查询集转换为 JSON 格式
     serializer_class = UserModelSerializer
+    # .....
+    
+```
 
-    # 自定义操作
-    @action(detail=True, methods=['post'])
-    def activate(self, request, pk=None):
-        """激活用户"""
+#### @action装饰器
+
+| @action 装饰器的参数 | 作用说明 | 示例 | 
+|---------|-----------|-------| 
+| detail | 是否针对单个对象（True：需 pk；False：针对集合） | @action(detail=True) → URL 包含 <pk>（如 /users/<pk>/activate/） | 
+| methods | 允许的 HTTP 动词列表（默认 ['get']） | @action(methods=['post']) → 仅允许 POST 请求 | 
+| url_path | 自定义 URL 路径（默认使用方法名） | @action(url_path='activate-user') → URL 为 /users/activate-user/ | 
+| url_name | 路由别名（用于反向解析，默认使用方法名） | @action(url_name='user-activate') → reverse('user-activate') |
+
+代码示例
+```py
+# views.py
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework.viewsets import ModelViewSet
+from .models import UserModel
+from .serializers import UserModelSerializer
+
+class UserModelViewSet(ModelViewSet):
+    queryset = UserModel.objects.all()
+    serializer_class = UserModelSerializer
+
+    # 自定义操作：激活单个用户（detail=True，需 pk）
+    @action(
+        detail=True,          # 针对单个对象（需要 URL 中的 pk）
+        methods=['post'],     # 仅允许 POST 请求
+        url_path='activate',  # URL 路径为 /users/<pk>/activate/
+        url_name='activate'   # 路由别名为 'activate'
+    )
+    def activate_user(self, request, pk=None):
         user = self.get_object()
         user.is_active = True
         user.save()
         serializer = self.get_serializer(user)
         return Response(serializer.data)
+
+    # 自定义操作：批量删除用户（detail=False，针对集合）
+    @action(
+        detail=False,         # 针对集合（无需 pk）
+        methods=['delete'],   # 仅允许 DELETE 请求
+        url_path='batch-delete'  # URL 路径为 /users/batch-delete/
+    )
+    def batch_delete_users(self, request):
+        user_ids = request.data.get('ids', [])
+        UserModel.objects.filter(id__in=user_ids).delete()
+        return Response({"status": "success", "deleted_count": len(user_ids)})
+
 ```
+
 
 
 ## DRF 路由（Routers）
 
-### SimpleRouter与DefaultRouter的区别
+DRF 路由（Routers）是用于自动生成视图集类（ViewSet）对应 URL路由 映射的工具。DRF 会根据视图集类中的方法名（如 list、create）和自定义操作（@action 装饰器）自动生成符合 RESTful 规范的 URL路由。
+
+注意如果使用的是非视图集类，则不需要使用路由 Routers。
+
+DRF 提供了两种路由类：SimpleRouter类 和 DefaultRouter类。这两个类的使用方式差不多。
+
+> SimpleRouter类与DefaultRouter类的区别
+
+| 路由类 | 继承关系 | 核心功能 | 适用场景 | 
+|------|-----------|---------|-----------| 
+| SimpleRouter | BaseRouter | 生成基础 URL 映射（如 /users/、/users/<pk>/） | 简单 API 项目（无需根视图） | 
+| DefaultRouter | SimpleRouter | 继承 SimpleRouter 所有功能，额外生成 API 根视图（访问 / 时返回所有 API 链接） | 需清晰 API 的正式项目 |
 
 ### 路由注册（配合ViewSet自动生成URL）
 
+路由注册的核心步骤是：创建路由实例 → 注册视图集 → 将路由 URL 添加到项目配置。
+
+代码示例
+
+假设已定义视图集 UserModelViewSet（继承 ModelViewSet），则在项目的 urls.py 中配置路由
+
+```py
+# urls.py
+from django.urls import include, path
+from rest_framework.routers import DefaultRouter,SimpleRouter
+from .views import UserModelViewSet  # 导入视图集
+
+# 1. 创建路由实例（推荐使用 DefaultRouter）
+router = DefaultRouter()
+
+# 2. 注册视图集（参数：URL前缀、视图集、路由别名）
+router.register(
+    prefix=r'users',  # URL 前缀（生成 /users/、/users/<pk>/ 等路径）
+    viewset=UserModelViewSet,  # 关联的视图集
+    basename='user'  # 路由别名（用于反向解析，如 reverse('user-list')）
+)
+
+# 3. 将路由实例router 的 URL信息 添加到项目的 URL 配置中
+urlpatterns = [
+    path('', include(router.urls)),  # 所有路由由 router 管理
+    # 其他自定义 URL（如登录接口）...
+]
+```
+
+
+
+
+
 ### 自定义路由（添加额外操作）
+
+视图集类中通过 @action 装饰器修饰的自定义方法（如激活用户、批量删除），路由会自动生成对应的 URL。
+
+
+
+
+
+
 
 ## 六、认证与权限——API的安全防线
 
