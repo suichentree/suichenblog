@@ -1153,12 +1153,73 @@ class UserModelViewSet(ModelViewSet):
 
 #### @action装饰器
 
-| @action 装饰器的参数 | 作用说明 | 示例 | 
-|---------|-----------|-------| 
-| detail | 是否针对单个对象（True：需 pk；False：针对集合） | @action(detail=True) → URL 包含 <pk>（如 /users/<pk>/activate/） | 
-| methods | 允许的 HTTP 动词列表（默认 ['get']） | @action(methods=['post']) → 仅允许 POST 请求 | 
-| url_path | 自定义 URL 路径（默认使用方法名） | @action(url_path='activate-user') → URL 为 /users/activate-user/ | 
-| url_name | 路由别名（用于反向解析，默认使用方法名） | @action(url_name='user-activate') → reverse('user-activate') |
+在 DRF 的视图集类（ViewSet）中，`@action` 装饰器是一个非常实用的工具，它允许开发者在视图集类里添加自定义的 API 方法，让视图集类不仅能处理标准的 CRUD 方法，还能实现各种复杂的业务逻辑。下面详细介绍 `@action` 装饰器的使用方法、参数以及更多应用场景。
+
+
+> @action装饰器参数详解
+
+- **detail**：指定该自定义方法是针对单个对象还是对象集合。若为 `True`，表示操作针对单个对象，URL 中需要包含对象的主键（`pk`）；若为 `False`，表示操作针对对象集合，则 URL 中不包含主键。示例如下
+    ```python
+    @action(detail=True)  # URL 包含 <pk>，如 /users/<pk>/activate_user/
+    def activate_user(self, request, pk=None):
+        pass
+
+    @action(detail=False)  # URL 不包含 <pk>，如 /users/batch_delete_users/
+    def batch_delete_users(self, request):
+        pass
+    ```
+
+- **methods**：指定该自定义操作允许的 HTTP 动词列表，默认值为 `['get']`。示例如下
+    ```python
+    # 该方法对应的 URL 是 /users/create_custom_object/ ，并且仅允许 POST 请求
+    @action(methods=['post'])
+    def create_custom_object(self, request):
+        pass
+    ```
+
+- **url_path**：自定义该操作对应的 URL 路径，默认使用被装饰方法的名称。示例如下
+    ```python
+    @action(url_path='activate-user')  # URL 为 /users/activate-user/
+    def activate(self, request):
+        pass
+
+    @action(detail=True,url_path='activate-user')  # URL 为 /users/<pk>/activate-user/
+    def activate2(self, request,pk=None):
+        pass    
+    ```
+
+- **url_name**：为该操作的 URL 生成路由别名，用于反向解析，默认使用被装饰方法的名称。示例如下
+    ```python
+    @action(url_name='user-activate')  # 可使用 reverse('user-activate') 进行反向解析
+    def activate_user(self, request):
+        pass
+    ```
+
+- **serializer_class**：自定义该操作使用的序列化器类，默认使用视图集的`serializer_class`。示例如下
+    ```python
+    @action(serializer_class=CustomSerializer)  # 使用自定义的序列化器
+    def get_custom_data(self, request):
+        pass
+    ```
+
+- **permission_classes**：自定义该操作的权限类列表，默认使用视图集的 `permission_classes`。该参数会覆盖视图集的默认权限配置，仅对该自定义操作生效。示例如下
+    ```python
+    from rest_framework.permissions import IsAdminUser
+
+    @action(permission_classes=[IsAdminUser])  # 仅管理员可访问该操作
+    def admin_only_operation(self, request):
+        pass
+    ```
+
+- **throttle_classes**：自定义该操作的限流类列表，默认使用视图集的 `throttle_classes`。该参数会覆盖视图集的默认限流配置，仅对该自定义操作生效。示例如下
+    ```python
+    from rest_framework.throttling import AnonRateThrottle
+
+    @action(throttle_classes=[AnonRateThrottle])  # 对匿名用户限流
+    def anonymous_throttled_operation(self, request):
+        pass
+    ```
+
 
 代码示例
 ```py
@@ -1167,7 +1228,9 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from .models import UserModel
-from .serializers import UserModelSerializer
+from .serializers import UserModelSerializer, CustomSerializer
+from rest_framework.permissions import IsAdminUser
+from rest_framework.throttling import AnonRateThrottle
 
 class UserModelViewSet(ModelViewSet):
     queryset = UserModel.objects.all()
@@ -1178,7 +1241,8 @@ class UserModelViewSet(ModelViewSet):
         detail=True,          # 针对单个对象（需要 URL 中的 pk）
         methods=['post'],     # 仅允许 POST 请求
         url_path='activate',  # URL 路径为 /users/<pk>/activate/
-        url_name='activate'   # 路由别名为 'activate'
+        url_name='activate',  # 路由别名为 'activate'
+        permission_classes=[IsAdminUser]  # 仅管理员可操作
     )
     def activate_user(self, request, pk=None):
         user = self.get_object()
@@ -1191,15 +1255,38 @@ class UserModelViewSet(ModelViewSet):
     @action(
         detail=False,         # 针对集合（无需 pk）
         methods=['delete'],   # 仅允许 DELETE 请求
-        url_path='batch-delete'  # URL 路径为 /users/batch-delete/
+        url_path='batch-delete',  # URL 路径为 /users/batch-delete/
+        throttle_classes=[AnonRateThrottle]  # 对匿名用户限流
     )
     def batch_delete_users(self, request):
         user_ids = request.data.get('ids', [])
         UserModel.objects.filter(id__in=user_ids).delete()
         return Response({"status": "success", "deleted_count": len(user_ids)})
 
+    # 自定义操作：获取用户详细信息，使用自定义序列化器
+    @action(
+        detail=True,
+        methods=['get'],
+        serializer_class=CustomSerializer  # 使用自定义序列化器
+    )
+    def user_detail(self, request, pk=None):
+        user = self.get_object()
+        serializer = self.get_serializer(user)
+        return Response(serializer.data)
+
 ```
 
+
+注意事项
+1. URL 结构：
+    - 当 detail=True 时，URL 会包含对象的主键（pk），例如 /users/`<pk>`/custom-action/。
+    - 当 detail=False 时，URL 不会包含主键，例如 /users/custom-action/。
+2. 权限与限流：
+    - @action 装饰器中的 permission_classes 和 throttle_classes 参数会覆盖视图集的默认配置，仅对该自定义操作生效。
+3. 序列化器：
+    - 若指定了 serializer_class 参数，该自定义操作会使用指定的序列化器，否则使用视图集类中默认的 serializer_class。
+4. 反向解析：
+    - 通过 url_name 参数可以为自定义操作的 URL 生成别名，方便在代码中使用 reverse 函数进行反向解析。
 
 
 ## DRF 路由（Routers）
@@ -1221,10 +1308,11 @@ DRF 提供了两种路由类：SimpleRouter类 和 DefaultRouter类。这两个�
 
 路由注册的核心步骤是：创建路由实例 → 注册视图集 → 将路由 URL 添加到项目配置。
 
-代码示例
+实现步骤如下
+1. 在视图集中定义自定义方法：使用 `@action` 装饰器在视图集中添加自定义方法，通过该装饰器的参数配置操作的相关属性，如是否针对单个对象、允许的 HTTP 方法、自定义 URL 路径等。
+2.  配置路由：使用 DRF 提供的 `SimpleRouter` 或 `DefaultRouter` 进行路由注册，路由会自动根据视图集中的方法和 `@action` 装饰器生成对应的 URL 映射。
 
 假设已定义视图集 UserModelViewSet（继承 ModelViewSet），则在项目的 urls.py 中配置路由
-
 ```py
 # urls.py
 from django.urls import include, path
@@ -1248,54 +1336,3 @@ urlpatterns = [
 ]
 ```
 
-
-
-
-
-### 自定义路由（添加额外操作）
-
-视图集类中通过 @action 装饰器修饰的自定义方法（如激活用户、批量删除），路由会自动生成对应的 URL。
-
-
-
-
-
-
-
-## 六、认证与权限——API的安全防线
-
-### 6.1 内置认证方式（Session认证、Token认证、JWT认证）
-
-### 6.2 权限控制（IsAuthenticated、IsAdminUser、自定义权限类）
-
-### 6.3 视图级/全局级认证配置
-
-## 七、分页与过滤——优化API体验
-
-### 7.1 分页配置（PageNumberPagination、LimitOffsetPagination）
-
-### 7.2 过滤后端（Django Filter集成，自定义过滤逻辑）
-
-### 7.3 排序与搜索（结合DRF内置功能）
-
-## 八、API文档生成——提升协作效率
-
-### 8.1 集成Swagger/Redoc（使用drf-yasg插件）
-
-### 8.2 自动生成与手动补充文档（注解与字段描述）
-
-### 8.3 交互式测试（通过文档页面调试API）
-
-## 九、实战：开发一个完整的用户管理API
-
-### 9.1 需求分析（用户信息增删改查、分页、认证）
-
-### 9.2 步骤分解（模型→序列化器→视图→路由→测试）
-
-### 9.3 常见问题与解决方案（如跨域、性能优化）
-
-## 十、总结与扩展
-
-### 10.1 DRF的优势总结与适用场景
-
-### 10.2 进阶学习方向（自定义渲染器、解析器、第三方插件推荐）
