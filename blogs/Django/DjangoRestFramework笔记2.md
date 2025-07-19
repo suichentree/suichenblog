@@ -492,32 +492,506 @@ REST_FRAMEWORK = {
 }
 ```
 
+## DRF 过滤
+
+在开发 API 时，常常需要根据不同的条件对数据进行过滤，以返回符合特定要求的结果集。
+
+DRF 提供了一些内置的过滤方式，方便开发者根据实际需求进行数据筛选。
+- 查询参数过滤（Query Parameters）：通过在 URL 中添加查询参数来指定过滤条件。
+- 路径参数过滤（Path Parameters）：通过 URL 中的路径参数来指定过滤条件。
+- 自定义过滤类（Custom Filter Backends）：开发者可以自定义过滤类，根据业务需求进行实现。
+
+如果想要使用 DRF过滤，需要先安装 django-filter 库。然后再配置文件中注册django-filter 库
+
+```py
+# 下载并按照要求安装django-filter库
+pip install django-filter
+```
+
+```py
+# 注册django-filter库
+INSTALLED_APPS = [
+    # ...
+    'django_filters',
+]
+```
 
 
-### 7.1 分页配置（PageNumberPagination、LimitOffsetPagination）
+### DjangoFilterBackend 过滤类
 
-### 7.2 过滤后端（Django Filter集成，自定义过滤逻辑）
+DjangoFilterBackend 是 DRF 提供的一个强大的过滤类，用于处理复杂的查询参数过滤。
 
-### 7.3 排序与搜索（结合DRF内置功能）
+先在 settings.py 中配置
+```py
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ],
+}
+```
 
-## 八、API文档生成——提升协作效率
+在视图类中配置过滤类
+```py
+from django_filters.rest_framework import DjangoFilterBackend
+class MyModelViewSet(ModelViewSet):
+    # 其他代码...
+    # 配置自定义过滤类，根据指定字段进行过滤
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['field1', 'field2']
+    # 其他代码...
+```
 
-### 8.1 集成Swagger/Redoc（使用drf-yasg插件）
+### SearchFilter 过滤类
 
-### 8.2 自动生成与手动补充文档（注解与字段描述）
+SearchFilter 提供了简单的搜索功能，支持对多个字段进行模糊查询。
 
-### 8.3 交互式测试（通过文档页面调试API）
+先在 settings.py 中配置（可选，若已有全局配置可省略）
+```py
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': ['rest_framework.filters.SearchFilter']
+}
+```
 
-## 九、实战：开发一个完整的用户管理API
+在视图类中配置过滤类
+```py
+from django_filters.rest_framework import SearchFilter
+class MyModelViewSet(ModelViewSet):
+    # 其他代码...
+    # 配置自定义过滤类，根据指定字段进行过滤
+    filter_backends = [SearchFilter]
+    search_fields = ['field1', 'field2']
+    # 其他代码...
+```
 
-### 9.1 需求分析（用户信息增删改查、分页、认证）
 
-### 9.2 步骤分解（模型→序列化器→视图→路由→测试）
+### 自定义过滤类
 
-### 9.3 常见问题与解决方案（如跨域、性能优化）
+在实际开发中，内置的过滤类可能无法满足复杂的业务需求，这时可以自定义过滤类。自定义过滤类需要继承 BaseFilterBackend 类，并实现 filter_queryset 方法。
 
-## 十、总结与扩展
+然后就可以再视图集类中配置自定义过滤类
 
-### 10.1 DRF的优势总结与适用场景
+代码如下
+```py
+from rest_framework.filters import BaseFilterBackend
+class CustomFilterBackend(BaseFilterBackend):
+    # 实现 filter_queryset 方法
+    def filter_queryset(self, request, queryset, view):
+        # 可以根据请求参数进行过滤
+        # 例如：根据请求参数中的字段进行过滤
+        field1 = request.query_params.get('field1')
+        if field1:
+            queryset = queryset.filter(field1__icontains=field1)
+        return queryset
 
-### 10.2 进阶学习方向（自定义渲染器、解析器、第三方插件推荐）
+
+### 视图集类中配置自定义过滤类
+from .filters import CustomBookFilter
+from rest_framework.viewsets import ModelViewSet
+class BookViewSet(ModelViewSet):
+    # 其他代码。。。。
+    # 配置自定义过滤类
+    filter_backends = [CustomBookFilter]
+
+```
+
+
+## DRF 排序
+
+DRF 提供了`rest_framework.filters.OrderingFilter`过滤器类来快速指明数据按照指定字段进行排序。支持根据指定字段对结果进行升序或降序排列。
+
+DRF 会在请求的查询字符串参数中检查是否包含了ordering参数，如果包含了ordering参数，则按照ordering参数指明的排序字段对数据集进行排序。
+
+前端可以传递的ordering参数的可选字段值需要在ordering_fields中指明。
+
+
+先在 settings.py 中配置（可选，若已有全局配置可省略）
+```py
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': ['rest_framework.filters.OrderingFilter']
+}
+```
+
+在视图类中配置过滤类
+```py
+from django_filters.rest_framework import OrderingFilter
+class MyModelViewSet(ModelViewSet):
+    # 其他代码...
+    # 配置自定义过滤类，根据指定字段进行排序
+    filter_backends = [OrderingFilter]
+    ordering_fields = ['field1', 'field2']
+    ordering = ['field1'] # 默认按照字段filed1进行排序
+    # 其他代码...
+```
+
+
+## DRF 分页
+
+当数据量较大时，一次性返回所有数据会导致响应时间过长，影响用户体验，同时也会增加服务器的负担。
+
+DRF 提供了多个内部分页类，开发者从而根据业务需求，实现分页功能。
+
+> 分页的作用
+- **提升性能**：减少单次请求的数据量，降低服务器负载，加快响应速度。
+- **优化体验**：客户端可以根据需要逐步加载数据，提升用户体验。
+- **节省带宽**：避免传输大量不必要的数据，节省网络带宽。
+
+### 分页类的配置方式
+
+> 全局配置:会对所有视图生效，需要在 settings.py 中进行配置
+
+```py
+REST_FRAMEWORK = {
+'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+'PAGE_SIZE': 10
+}
+```
+
+> 视图中配置：置只对特定的视图生效，会覆盖全局配置。
+
+```py
+from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.viewsets import ModelViewSet
+
+class BookViewSet(ModelViewSet):
+    # 再该视图中配置分页类
+    pagination_class = LimitOffsetPagination
+```
+
+### PageNumberPagination 分页类
+
+`PageNumberPagination` 分页类是基于页码的分页方式，客户端通过指定页码和每页数据量来获取数据。
+
+1. 在 `settings.py` 中进行全局配置（可选）：
+```py
+REST_FRAMEWORK = {
+'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+'PAGE_SIZE': 10,  # 每页数据量
+}
+```
+
+2. 创建自定义分页类，继承 `PageNumberPagination`分页类。
+
+```py
+from rest_framework.pagination import PageNumberPagination
+class CustomPageNumberPagination(PageNumberPagination):
+    page_size = 20  # 自定义每页显示 20 条数据
+    page_size_query_param = 'page_size'  # 允许客户端通过该参数指定每页数据量
+    max_page_size = 100  # 限制客户端最大可指定的每页数据量
+```
+
+3. 在视图中使用（若全局配置不符合需求，可在视图中单独配置）：
+
+```py
+from .paginations import CustomPageNumberPagination
+from rest_framework.viewsets import ModelViewSet
+
+class BookViewSet(ModelViewSet):
+    # 其他代码....
+    # 配置分页类
+    pagination_class = CustomPageNumberPagination
+```
+
+### LimitOffsetPagination 分页类
+
+LimitOffsetPagination 是基于偏移量的分页方式，客户端通过指定返回数据的数量（limit）和起始偏移量（offset）来获取数据。
+
+1. 在 `settings.py` 中进行全局配置（可选）：
+```py
+REST_FRAMEWORK = {
+'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+'PAGE_SIZE': 10  # 默认每页显示 10 条数据
+}
+```
+
+2. 创建自定义分页类，继承 `LimitOffsetPagination`分页类。
+
+```py
+from rest_framework.pagination import LimitOffsetPagination
+class CustomLimitOffsetPagination(LimitOffsetPagination):
+    default_limit = 20  # 默认返回 20 条数据
+    max_limit = 100  # 限制客户端最大可指定的返回数据量
+```
+
+3. 在视图中使用（若全局配置不符合需求，可在视图中单独配置）：
+
+```py
+from .paginations import CustomLimitOffsetPagination
+from rest_framework.viewsets import ModelViewSet
+class BookViewSet(ModelViewSet):
+    # 其他代码....
+    # 配置分页类
+    pagination_class = CustomLimitOffsetPagination
+
+```
+
+### CursorPagination 分页类
+
+CursorPagination 是基于游标（cursor）的分页方式，适用于需要高效处理大量数据的场景，特别是数据会动态变化的情况。它不支持任意页码访问，只能按顺序前后翻页。
+
+1. 在 `settings.py` 中进行全局配置（可选）：
+```py
+REST_FRAMEWORK = {
+'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.CursorPagination',
+'PAGE_SIZE': 10  # 默认每页显示 10 条数据
+}
+```
+
+2. 创建自定义分页类，继承 `CursorPagination`分页类。
+
+```py
+from rest_framework.pagination import CursorPagination
+class CustomCursorPagination(CursorPagination):
+    page_size = 20  # 自定义每页显示 20 条数据
+    ordering = '-created_at'  # 根据创建时间倒序排序
+```
+
+3. 在视图中使用（若全局配置不符合需求，可在视图中单独配置）：
+
+```py
+from .paginations import CustomCursorPagination
+from rest_framework.viewsets import ModelViewSet
+class BookViewSet(ModelViewSet):
+    # 其他代码....
+    # 配置分页类
+    pagination_class = CustomCursorPagination
+
+```
+
+### 自定义分页类
+
+内置的分页类可能无法满足复杂的业务需求，这时可以自定义分页类。自定义分页类需要继承相应的分页基类，并根据需求重写相关属性和方法。
+
+1. 创建自定义分页类，继承某个内置分页类，并写相关属性和方法。
+```py
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.response import Response
+# 自定义分页类，继承PageNumberPagination分页类
+class CustomPageNumberPagination(PageNumberPagination):
+    # 设置相关属性
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+    # 重写相关方法
+    def get_paginated_response(self, data):
+        return Response({
+            'links': {
+                'next': self.get_next_link(),
+                'previous': self.get_previous_link()
+            },
+            'count': self.page.paginator.count,
+            'total_pages': self.page.paginator.num_pages,
+            'current_page': self.page.number,
+            'results': data
+        })
+```
+
+2. 将自定义分页类应用到视图中。
+```py
+from .pagination import CustomPageNumberPagination
+from rest_framework.viewsets import ModelViewSet
+class BookViewSet(ModelViewSet):
+    # 其他代码.....
+    pagination_class = CustomPageNumberPagination
+```
+
+## DRF 异常
+
+DRF 提供了一套完善的异常处理机制，能将异常转换为合适的 HTTP 响应返回给客户端，同时也支持开发者自定义异常处理逻辑，以满足不同业务场景的需求。
+
+
+DRF 也提供了几个内置的异常类型。
+
+### PermissionDenied 异常
+
+当用户没有足够的权限执行某个操作时抛出。
+
+```py
+from rest_framework.views import APIView
+from rest_framework.exceptions import PermissionDenied
+
+class AdminOnlyView(APIView):
+    def get(self, request):
+        raise PermissionDenied("只有管理员可以访问此接口")
+```
+
+### NotFound 异常
+
+当请求的资源不存在时抛出。
+
+```py
+from rest_framework.views import APIView
+from rest_framework.exceptions import NotFound
+
+class BookDetailView(APIView):
+    def get(self, request, pk):
+        raise NotFound("未找到对应的资源")
+```
+
+### AuthenticationFailed
+
+当认证过程失败时抛出。
+
+```py
+from rest_framework.authentication import BaseAuthentication
+from rest_framework.exceptions import AuthenticationFailed
+
+class CustomTokenAuthentication(BaseAuthentication):
+    def authenticate(self, request):
+        raise AuthenticationFailed("无效的 Token")
+```
+
+### 自定义异常函数
+
+在实际开发中，内置的异常处理可能无法满足业务需求，这时可以自定义异常处理函数。一般我们编写的异常处理函数，会写一个公共的目录下或者主应用目录下。直接创建一个`excepitions.py`
+
+实现步骤
+1. 定义异常处理函数，接收 exc（异常对象）和 context（上下文信息）作为参数，返回一个 Response 对象。
+2. 在 settings.py 中配置自定义异常处理函数。
+
+```py
+from rest_framework.views import exception_handler
+from rest_framework.response import Response
+from rest_framework import status
+
+def custom_exception_handler(exc, context):
+    # 先调用默认的异常处理函数
+    response = exception_handler(exc, context)
+
+    if response is not None:
+        if isinstance(exc, (ValidationError,)):
+            response.data = {
+                "code": 400,
+                "message": "数据验证失败",
+                "errors": response.data
+            }
+        elif isinstance(exc, (PermissionDenied,)):
+            response.data = {
+                "code": 403,
+                "message": "权限不足"
+            }
+        elif isinstance(exc, (NotFound,)):
+            response.data = {
+                "code": 404,
+                "message": "资源不存在"
+            }
+        elif isinstance(exc, (AuthenticationFailed,)):
+            response.data = {
+                "code": 401,
+                "message": "认证失败"
+            }
+        else:
+            response.data = {
+                "code": 500,
+                "message": "服务器内部错误"
+            }
+
+    return response
+```
+
+全局配置自定义异常函数
+
+```py
+REST_FRAMEWORK = {
+    'EXCEPTION_HANDLER': 'your_app.exceptions.custom_exception_handler'
+}
+```
+
+### 自定义异常类
+
+除了自定义异常处理函数，还可以自定义异常类，以满足特定业务场景的需求。
+
+```py
+from rest_framework.exceptions import APIException
+from rest_framework import status
+
+class CustomAPIException(APIException):
+    status_code = status.HTTP_429_TOO_MANY_REQUESTS
+    default_detail = '请求过于频繁，请稍后再试'
+    default_code = 'too_many_requests'
+
+    def __init__(self, detail=None, status_code=None):
+        if status_code is not None:
+            self.status_code = status_code
+        if detail is not None:
+            self.detail = detail
+        else:
+            self.detail = self.default_detail
+```
+
+
+在视图中使用自定义异常类
+```py
+from .exceptions import CustomAPIException
+from rest_framework.views import APIView
+
+class CustomExceptionView(APIView):
+    def get(self, request):
+        # 模拟请求过于频繁的场景
+        raise CustomAPIException()
+```
+
+
+## DRF API文档
+
+DRF 本身提供了一定的文档支持，同时也可以借助第三方插件生成更美观、交互性更强的 API 文档。下面将介绍几种常见的生成 API 文档的方式。
+
+### drf-yasg
+
+drf-yasg 是一个基于 DRF 框架的 API 文档生成插件，它提供了 Swagger 2.0 规范的支持，能够自动生成 API 文档。
+
+1. 安装插件
+```bash
+pip install drf-yasg
+```
+
+2. 注册drf-yasg到项目中
+
+```py
+# settings.py
+INSTALLED_APPS = [
+    # ...
+    'drf_yasg',
+]
+```
+
+3. 配置drf-yasg到项目中
+
+```py
+from django.urls import path, re_path
+from rest_framework import permissions
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+
+# get_schema_view类是drf-yasg插件提供的一个视图类，用于生成 API 文档。它接收一些参数，如 API 信息、公开性、权限类等，用于配置drf-yasg 生成的文档。
+schema_view = get_schema_view(
+   openapi.Info(
+      title="Your API Title",   # 文档标题
+      default_version='v1',     # 文档版本
+      description="Your API description",  # 文档描述
+      terms_of_service="https://www.example.com/terms/", # 站点 
+      contact=openapi.Contact(email="contact@example.com"), # 联系人
+      license=openapi.License(name="BSD License"), # 协议
+   ),
+   public=True, # 是否公开
+   permission_classes=(permissions.AllowAny,), # 权限
+)
+
+urlpatterns = [
+    # schema_view.with_ui是一个方法，用于将生成的文档与 UI 绑定。它接收两个参数：
+    # 第一个参数是 UI 类型，可选值为 'swagger' 或 'redoc'，分别对应 Swagger UI 和 Redoc UI。
+    # 第二个参数是缓存时间，单位为秒，用于设置文档的缓存时间。
+
+   # 这段代码将路由与drf-yasg插件生成的文档绑定。
+   path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+   path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+]
+
+```
+
+
+4. 访问drf-yasg生成的文档
+
+配置完成后，启动 Django 项目，访问以下 URL 即可查看 API 文档：
+- Swagger 文档：http://yourdomain.com/swagger/
+- Redoc 文档：http://yourdomain.com/redoc/
+

@@ -1541,8 +1541,6 @@ cache.get_timeout('my_key')
 
 ```
 
-
-
 ## Django 后台管理
 
 当我们创建好一个Django工程的时候，Django工程会默认自带一个后台管理应用admin，用于管理 Django 工程中的数据。
@@ -1687,6 +1685,118 @@ class MyModelAdmin(admin.ModelAdmin):
 
 2. 重启 Django 开发服务器，刷新后台管理页面，即可看到自定义的模型类。
 3. 可以根据需要自定义列表页显示的字段、搜索字段、筛选字段、只读字段等。
+
+
+## Django 后台管理美化 simpleui
+
+simpleui 是一个基于 Django 框架的后台管理系统美化插件。它能大幅提升 Django 原生 Admin 界面的视觉效果和用户体验。
+
+[simpleui 网址 https://newpanjing.github.io/simpleui_docs/config.html](https://newpanjing.github.io/simpleui_docs/config.html)
+
+注意事项：使用时要确保 django-simpleui 的版本与项目中 Django 的版本兼容，避免出现兼容性问题。
+
+1. 安装 simpleui 插件
+
+```py
+pip install simpleui
+```
+
+2. 注册 simpleui
+
+在 `INSTALLED_APPS` 列表里添加 simpleui，注意要将其放在 django.contrib.admin 之前
+
+```py
+# settings.py
+INSTALLED_APPS = [
+    'simpleui',
+    'django.contrib.admin',
+    # 其他应用...
+]
+```
+
+3. 自定义配置（可选）
+
+simpleui支持丰富的自定义配置项，可根据需求在 settings.py 中添加以下配置。
+
+```py
+# settings.py
+
+# 隐藏 Simple UI 右侧广告链接和使用分析
+SIMPLEUI_HOME_INFO = False
+SIMPLEUI_ANALYSIS = False
+
+# 自定义登录页背景图
+SIMPLEUI_LOGIN_PICTURE = 'https://xxx.xxx.xxx/xxx.jpg'
+
+# 自定义后台首页信息
+SIMPLEUI_HOME_PAGE = 'https://example.com/dashboard'
+SIMPLEUI_HOME_TITLE = '管理控制台'
+SIMPLEUI_HOME_ICON = 'fa fa-home'
+
+# 自定义主题
+SIMPLEUI_DEFAULT_THEME = 'e-red.css'
+
+# 自定义菜单
+SIMPLEUI_CONFIG = {
+    'system_keep': False,  # 不保留系统默认菜单
+    'menu_display': ['用户管理', '内容管理'],  # 显示指定菜单
+    'menus': [
+        {
+            'name': '用户管理',
+            'icon': 'fa fa-user',
+            'models': [
+                {
+                    'name': '用户列表',
+                    'url': 'auth/user/',
+                    'icon': 'fa fa-users'
+                },
+                {
+                    'name': '用户组',
+                    'url': 'auth/group/',
+                    'icon': 'fa fa-group'
+                }
+            ]
+        },
+        {
+            'name': '内容管理',
+            'icon': 'fa fa-file-text',
+            'models': [
+                {
+                    'name': '文章列表',
+                    'url': 'your_app/article/',
+                    'icon': 'fa fa-file'
+                }
+            ]
+        }
+    ]
+}
+
+```
+
+4. 配置路由 `urls.py`
+
+通常情况下，无需额外对 urls.py 进行配置，保持默认的 Admin 路由即可。
+
+```py
+from django.contrib import admin
+from django.urls import path
+urlpatterns = [
+    path('admin/', admin.site.urls),
+]
+```
+
+5. 运行数据库迁移并启动项目
+
+安装和配置完成后，需要运行数据库迁移命令，确保 Simple UI 正常工作。然后启动项目访问即可
+
+```bash
+# 运行数据库迁移
+python manage.py migrate
+# 启动项目
+python manage.py runserver
+```
+
+在浏览器中访问 `http://127.0.0.1:8000/admin/`，就能看到美化后的 Django 后台管理界面。
 
 
 ## Django 部署
