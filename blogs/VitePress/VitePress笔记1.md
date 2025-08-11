@@ -14,6 +14,8 @@ tags:
 
 ![vitepress_20250808113455763.png](../blog_img/vitepress_20250808113455763.png)
 
+目前最新的vitepress版本为 1.6.3
+
 VitePress 由 Vite 和 Vue 驱动的静态站点生成器（SSG框架）。它简单、强大、快速,可以快速将 Markdown 变成优雅的文档。
 
 [VitePress官网：https://vitepress.dev/zh/](https://vitepress.dev/zh/)
@@ -208,7 +210,7 @@ export default defineConfig({
     socialLinks: [
       { icon: 'github', link: 'https://github.com/vuejs/vitepress' },
     ],
-    //手机端深浅模式默认显示 Appearance,可自定义
+    //手机端深浅模式默认显示为Appearance,可修改
     darkModeSwitchLabel: '深浅模式', 
     //头部导航栏的本地搜索框
     search: { 
@@ -244,9 +246,16 @@ export default defineConfig({
 ```
 
 
-### 头部导航栏的主题配置
+### 头部导航栏配置
 
 先在vitepress项目的根目录中创建public目录。用来存放静态资源。
+
+头部导航栏的配置包含以下内容：
+1. 导航栏左边的logo和标题
+3. 导航栏的下拉菜单
+4. 导航栏的社交链接
+5. 导航栏的本地搜索框
+6. 导航栏的深浅模式切换按钮
 
 配置如下
 ```js
@@ -286,7 +295,212 @@ export default defineConfig({
 })
 ```
 
+如图所示
+![vitepress_20250811222716.png](../blog_img/vitepress_20250811222716.png)
 
+### 首页页脚
+
+```js
+import { defineConfig } from 'vitepress'
+export default defineConfig({
+  //主题相关配置
+  themeConfig: {
+    //主页的页脚
+    footer: { 
+      message: 'Released under the MIT License.', 
+      // 自动更新时间
+      copyright: `Copyright © 2017-${new Date().getFullYear()} present shuyx`, 
+      // 带有备案号的文本
+      // copyright: `Copyright © 2017-${new Date().getFullYear()} 备案号：<a href="https://beian.miit.gov.cn/" target="_blank">*****号</a>`, 
+    },
+  }
+})
+
+```
+
+如图所示
+![vitepress_20250811222929.png](../blog_img/vitepress_20250811222929.png)
+
+### 文章展示页面
+
+在vitepress中文章展示页面专门用于展示文章内容的。我们可以对文章展示页面进行配置。
+
+```js
+import { defineConfig } from 'vitepress'
+export default defineConfig({
+  //主题相关配置
+  themeConfig: {
+    //文章展示页面的右侧的大纲目录 
+    outline: { 
+      level: 'deep', // 显示2-6级标题
+      label: '当前页大纲目录' // 文字显示
+    },
+    //文章展示页面的底部的编辑链接，可跳转到指定网址进行在线编辑。
+    editLink: { 
+      pattern: 'https://github.com/vuejs/vitepress/edit/main/docs/:path', // 改成自己的仓库地址
+      text: '在线编辑'
+    },
+    //文章展示页面的底部的 Carbon 广告展示
+    carbonAds: { 
+      code: 'your-carbon-code', 
+      placement: 'your-carbon-placement', 
+    },
+  }
+})
+
+```
+
+![vitepress_20250811224659.png](../blog_img/vitepress_20250811224659.png)
+
+### 左边侧边栏
+
+除首页之外。其他页面都会显示左边侧边栏。类似快捷页面，但是配置比较麻烦。也可以使用插件自动生成侧边栏。
+
+```js
+import { defineConfig } from 'vitepress'
+export default defineConfig({
+  //主题相关配置
+  themeConfig: {
+    //侧边栏
+    sidebar: [
+      {
+        text: 'Examples',
+        items: [
+          { text: 'Markdown Examples', link: '/markdown-examples' },
+          { text: 'Runtime API Examples', link: '/api-examples' }
+        ]
+      }
+    ],
+  }
+})
+
+```
+
+如图
+![vitepress_20250811225004.png](../blog_img/vitepress_20250811225004.png)
+
+## Frontmatter
+
+Frontmatter可以看作markdown文件的元数据。它包含了markdown文件的一些信息。例如标题、描述、标签、分类等。
+
+Frontmatter实际就是md文件内容中最顶部的用`---`包含的内容。例如
+
+```yaml
+--- 
+lang: zh-CN
+title: VitePress
+titleTemplate: Vite 和 Vue 强力驱动的静态网站生成器
+description: 简单、强大、快速。满足你一直想要的现代SSG框架
+---
+```
+
+vitepress最终会将markdown文件渲染为html页面，并根据md文件的frontmatter配置来进行不同的渲染。
+
+
+### layout
+
+layout属性有三个选项值。
+1. home ：vitepress会将当前md文件作为首页渲染。一般都将根目录下的index.md文件作为首页。
+2. doc  ：vitepress会将当前md文件作为文档页渲染。
+3. page ：vitepress会将当前md文件作为无样式的文档页，自定义页面进行渲染
+
+```markdown
+layout: home
+# layout: doc
+# layout: page
+```
+
+
+### hero
+
+hero类似居中区域
+
+```md
+# hero区域的配置
+hero:
+  # 文本
+  name: "A11111"
+  text: "A22222"
+  tagline: My great project tagline
+  # 图片
+  image:
+    src: /logo.png
+    alt: logo.png
+  actions:
+    - theme: brand
+      text: Markdown Examples
+      link: /blogs/markdown-examples
+    - theme: alt
+      text: API Examples
+      link: /blogs/api-examples
+```
+
+如图所示
+![vitepress_20250811230932.png](../blog_img/vitepress_20250811230932.png)
+
+### features
+
+features类似居中偏下的区域，用于描述项目的一些功能特征。
+
+```md
+# features区域的配置
+features:
+  - icon: 📝
+    title: 好记性不如烂笔头
+    details: 只需使用 Markdown 记笔记,专注于您的内容即可。
+  - icon: ⚡️
+    title: 使用 Vue 进行定制
+    details: 直接在 Markdown 中使用 Vue 语法和组件，或使用 Vue 构建自定义主题
+  - icon: 🚀
+    title: 快速发布网站
+    details: 使用静态 HTML 进行快速初始加载，使用客户端路由进行快速加载后导航
+  - icon: 🛠️
+    title: 常用前端工具
+    details: 提供一系列的提高前端开发效果的工具网站...
+```
+
+如图所示
+![vitepress_20250811231108.png](../blog_img/vitepress_20250811231108.png)
+
+### 导航栏
+
+默认 true 开启，当开启时，该md文件渲染的页面会显示导航栏。可以选择关闭，但仅在当前md文件中不显示。
+
+```md
+---
+navbar: false
+---
+```
+
+### 侧边栏
+
+默认 true 开启，当开启时，该md文件渲染的页面会显示侧边栏。可以选择关闭，仅在当前文档不显示
+
+```md
+---
+sidebar: false
+---
+```
+
+### 大纲
+
+大纲默认在右侧，可以通过 aside 设置左侧或关闭，默认 true 开启。
+
+```md
+---
+aside: left
+---
+```
+
+### 页脚
+
+默认 true 开启，当开启时，该md文件渲染的页面会在最底部显示页脚。可以选择关闭，仅在当前文档不显示。
+
+```md
+---
+footer: false
+---
+```
 
 
 
