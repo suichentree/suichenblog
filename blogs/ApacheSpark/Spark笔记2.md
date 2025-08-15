@@ -1,5 +1,5 @@
 ---
-title: Spark笔记1
+title: Spark笔记2
 date: 2024-07-22
 sidebar: 'auto'
 categories: 
@@ -10,7 +10,7 @@ tags:
 
 [toc]
 
-# Spark笔记1
+# Spark笔记2
 
 当前使用Spark版本为： spark-3.5.1
 
